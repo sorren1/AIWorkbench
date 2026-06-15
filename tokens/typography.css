@@ -1,0 +1,52 @@
+/* ============================================================
+   Cleanroom — Typography
+   Sans (Hanken Grotesk) for UI/body, Mono (JetBrains Mono)
+   for data, metrics, labels, code. Tabular numerals everywhere
+   numbers matter.
+   ============================================================ */
+:root {
+  /* Families */
+  --font-sans: "Hanken Grotesk", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", "Menlo", monospace;
+
+  /* Weights */
+  --weight-regular:  400;
+  --weight-medium:   500;
+  --weight-semibold: 600;
+  --weight-bold:     700;
+
+  /* Type scale (1.250 major-third-ish, tuned) — px for predictability */
+  --text-2xs:  11px;
+  --text-xs:   12px;
+  --text-sm:   13px;
+  --text-base: 14px;   /* default UI/body size */
+  --text-md:   15px;
+  --text-lg:   17px;
+  --text-xl:   20px;
+  --text-2xl:  24px;
+  --text-3xl:  30px;
+  --text-4xl:  38px;
+  --text-5xl:  48px;
+  --text-6xl:  60px;
+  --text-7xl:  76px;
+
+  /* Line heights */
+  --leading-none:    1;
+  --leading-tight:   1.15;
+  --leading-snug:    1.3;
+  --leading-normal:  1.5;
+  --leading-relaxed: 1.65;
+
+  /* Letter spacing */
+  --tracking-tight:  -0.02em;
+  --tracking-snug:   -0.01em;
+  --tracking-normal: 0em;
+  --tracking-wide:   0.02em;
+  --tracking-caps:   0.08em;  /* uppercase mono labels */
+
+  /* Semantic roles */
+  --font-display:   var(--font-sans);
+  --font-body:      var(--font-sans);
+  --font-label:     var(--font-mono);  /* eyebrows, metric labels, badges */
+  --font-data:      var(--font-mono);  /* numbers, ids, code */
+}

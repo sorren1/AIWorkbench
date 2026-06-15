@@ -1,0 +1,318 @@
+/* ============================================================
+   AI Delivery Workbench — Synthetic fixture data (core)
+   CLEAN-ROOM: All data is fully synthetic and invented for this
+   interview prototype. It does not represent any real company's
+   backlog, repositories, schemas, customers, or internal work.
+   ============================================================ */
+window.WBData = window.WBData || {};
+
+WBData.meta = {
+  product: "AI Delivery Workbench",
+  disclaimer: "Clean-Room Interview Prototype — Synthetic Data Only",
+  aboutNote:
+    "This prototype performs no real Jira, GitHub, AI, Oracle, or MCP operations. All data and actions are simulated locally for interview demonstration purposes.",
+  version: "0.9.0-demo",
+  user: { name: "Jordan Vega", role: "Principal Software Engineer — AI", initials: "JV" },
+};
+
+/* ---- Stage definitions (the governed AI delivery workflow) ---- */
+WBData.stageDefs = [
+  { id: "seed",    name: "Seed",           icon: "circle-dot",   desc: "Issue selected from Jira and pinned into a clean run workspace." },
+  { id: "intake",  name: "Intake",         icon: "scroll-text",  desc: "AI normalizes the Jira issue into a structured intake record." },
+  { id: "spec",    name: "Spec",           icon: "file-text",    desc: "Deterministic specification with acceptance criteria and scope." },
+  { id: "plan",    name: "Plan",           icon: "list-checks",  desc: "Implementation plan: steps, sequencing, and risk notes." },
+  { id: "targets", name: "Change Targets", icon: "file-code",    desc: "Explicit file-level change targets across the stack." },
+  { id: "implement", name: "Implement",    icon: "git-branch",   desc: "AI drafts code on a feature branch — never on main." },
+  { id: "verify",  name: "Verify",         icon: "flask",        desc: "Simulated test + validation pass producing evidence." },
+  { id: "review",  name: "PR Review",      icon: "git-pull-request", desc: "Human review gate before the change is release-eligible." },
+];
+
+/* ---- Status vocab ---- */
+WBData.statusMap = {
+  done:   { label: "Completed",       tone: "safe",    icon: "check-circle" },
+  ready:  { label: "Ready",           tone: "accent",  icon: "circle" },
+  run:    { label: "Running",         tone: "accent",  icon: "loader" },
+  fail:   { label: "Failed",          tone: "danger",  icon: "x-circle" },
+  stale:  { label: "Stale",           tone: "warn",    icon: "ban" },
+  review: { label: "Review Required", tone: "warn",    icon: "alert-triangle" },
+  none:   { label: "Not Started",     tone: "neutral", icon: "circle-dashed" },
+};
+
+WBData.riskMap = {
+  Low:    { tone: "safe",   icon: "shield-check" },
+  Medium: { tone: "warn",   icon: "shield-alert" },
+  High:   { tone: "danger", icon: "alert-triangle" },
+};
+
+WBData.lifecycleTone = {
+  "Backlog": "neutral",
+  "Intake": "neutral",
+  "Spec": "accent",
+  "Planning": "accent",
+  "Implementation": "accent",
+  "Verification": "accent",
+  "Review Ready": "warn",
+  "Blocked": "danger",
+};
+
+/* ---- Work queue issues (synthetic finance-software themes) ---- */
+/* stage status codes per stage: done|ready|run|fail|stale|review|none  */
+WBData.issues = [
+  {
+    key: "FIN-1042", title: "ERP Report Refresh Observability",
+    domain: "ERP Reporting", surface: "Full Stack", lifecycle: "Verification",
+    risk: "Medium", branch: "feature/FIN-1042-refresh-observability",
+    pr: 271, prStatus: "Open", lastRun: "14m ago", artifacts: 6,
+    assignee: "A. Reyes", reviewer: "M. Donovan", tester: "P. Shah",
+    s: ["done","done","done","done","done","done","run","none"],
+    next: { label: "View running verify", target: "issue" },
+    flags: { hasPR: true },
+  },
+  {
+    key: "FIN-1077", title: "Forecast Assumption Change Audit",
+    domain: "FP&A", surface: "C#/.NET", lifecycle: "Review Ready",
+    risk: "Low", branch: "feature/FIN-1077-assumption-audit",
+    pr: 268, prStatus: "Ready for review", lastRun: "2h ago", artifacts: 7,
+    assignee: "A. Reyes", reviewer: "L. Okafor", tester: "P. Shah",
+    s: ["done","done","done","done","done","done","done","review"],
+    next: { label: "Open human review", target: "github" },
+    flags: { hasPR: true, needsReview: true },
+  },
+  {
+    key: "FIN-1113", title: "Connector Schema Drift Detection",
+    domain: "Data Connectivity", surface: "Oracle", lifecycle: "Implementation",
+    risk: "High", branch: "feature/FIN-1113-schema-drift",
+    pr: null, prStatus: "—", lastRun: "38m ago", artifacts: 4,
+    assignee: "S. Nakamura", reviewer: "M. Donovan", tester: "—",
+    s: ["done","done","done","done","done","fail","none","none"],
+    next: { label: "Retry implement", target: "issue" },
+    flags: { failedVerification: true },
+  },
+  {
+    key: "FIN-1150", title: "AI Variance Commentary Draft",
+    domain: "FP&A", surface: "Full Stack", lifecycle: "Implementation",
+    risk: "Medium", branch: "feature/FIN-1150-ai-variance-commentary",
+    pr: 284, prStatus: "Draft", lastRun: "6m ago", artifacts: 7,
+    assignee: "Jordan Vega", reviewer: "M. Donovan", tester: "P. Shah",
+    s: ["done","done","done","done","done","done","ready","none"],
+    next: { label: "Run Verify", target: "issue" },
+    flags: { hasPR: true, primary: true },
+  },
+  {
+    key: "FIN-1198", title: "Report Distribution Permission Review",
+    domain: "Distribution", surface: "Angular", lifecycle: "Planning",
+    risk: "Medium", branch: "feature/FIN-1198-distribution-permissions",
+    pr: null, prStatus: "—", lastRun: "1h ago", artifacts: 5,
+    assignee: "D. Whitfield", reviewer: "L. Okafor", tester: "—",
+    s: ["done","done","done","done","done","stale","stale","none"],
+    next: { label: "Re-run Implement", target: "issue" },
+    flags: { staleDownstream: true },
+  },
+  {
+    key: "FIN-1234", title: "Close Checklist Evidence Pack",
+    domain: "Close / Consolidation", surface: "Full Stack", lifecycle: "Spec",
+    risk: "Low", branch: "feature/FIN-1234-close-evidence-pack",
+    pr: null, prStatus: "—", lastRun: "3h ago", artifacts: 2,
+    assignee: "S. Nakamura", reviewer: "—", tester: "—",
+    s: ["done","done","ready","none","none","none","none","none"],
+    next: { label: "Generate Spec", target: "issue" },
+    flags: {},
+  },
+  {
+    key: "FIN-1260", title: "Excel Add-In Connection Health Panel",
+    domain: "Data Connectivity", surface: "Angular", lifecycle: "Planning",
+    risk: "Low", branch: "feature/FIN-1260-connection-health",
+    pr: null, prStatus: "—", lastRun: "just now", artifacts: 3,
+    assignee: "D. Whitfield", reviewer: "—", tester: "—",
+    s: ["done","done","done","run","none","none","none","none"],
+    next: { label: "View running plan", target: "issue" },
+    flags: {},
+  },
+  {
+    key: "FIN-1301", title: "Scenario Comparison Export Validation",
+    domain: "FP&A", surface: "Full Stack", lifecycle: "Verification",
+    risk: "High", branch: "feature/FIN-1301-scenario-export",
+    pr: 279, prStatus: "Open", lastRun: "22m ago", artifacts: 6,
+    assignee: "A. Reyes", reviewer: "M. Donovan", tester: "P. Shah",
+    s: ["done","done","done","done","done","done","fail","none"],
+    next: { label: "Inspect verify failure", target: "validation" },
+    flags: { hasPR: true, failedVerification: true },
+  },
+  {
+    key: "FIN-1345", title: "AI Data Quality Exception Summary",
+    domain: "Data Quality", surface: "AI", lifecycle: "Intake",
+    risk: "Medium", branch: "feature/FIN-1345-dq-exception-summary",
+    pr: null, prStatus: "—", lastRun: "5h ago", artifacts: 1,
+    assignee: "S. Nakamura", reviewer: "—", tester: "—",
+    s: ["done","ready","none","none","none","none","none","none"],
+    next: { label: "Run Intake", target: "issue" },
+    flags: {},
+  },
+  {
+    key: "FIN-1402", title: "Intercompany Elimination Rule Preview",
+    domain: "Close / Consolidation", surface: "Oracle", lifecycle: "Backlog",
+    risk: "Low", branch: "—",
+    pr: null, prStatus: "—", lastRun: "—", artifacts: 0,
+    assignee: "—", reviewer: "—", tester: "—",
+    s: ["done","none","none","none","none","none","none","none"],
+    next: { label: "Run Intake", target: "issue" },
+    flags: {},
+  },
+];
+
+/* ---- Surfaces a change can touch ---- */
+WBData.surfaces = ["Angular", "C#/.NET", "Oracle", "Full Stack", "AI"];
+WBData.surfaceIcon = {
+  "Angular": "box", "C#/.NET": "cpu", "Oracle": "database",
+  "Full Stack": "layout-grid", "AI": "sparkles",
+};
+
+/* ---- Settings fixtures ---- */
+WBData.settings = {
+  jira: {
+    baseUrl: "https://jira.example.com",
+    projectKey: "FIN",
+    queryMode: "Assigned to me",
+    jql: "project = FIN AND status != Done ORDER BY priority DESC",
+    status: "Simulated",
+  },
+  github: {
+    org: "example-finance-software",
+    repos: [
+      { name: "frontend-angular-app", role: "Angular / TypeScript UI", default: "main" },
+      { name: "finance-dotnet-api", role: "C# / .NET service layer", default: "main" },
+      { name: "oracle-reporting-scripts", role: "Oracle SQL — views & packages", default: "main" },
+    ],
+    branchPattern: "feature/{issueKey}-{slug}",
+    prTarget: "main",
+    status: "Simulated",
+  },
+  ai: {
+    primary: "Claude",
+    secondary: "Codex",
+    design: "Claude",
+    maxRun: "15 min",
+    humanApprovalBeforePR: true,
+    autoMerge: false,
+    autoDeploy: false,
+  },
+  stack: {
+    Frontend: "Angular / TypeScript",
+    Backend: "C# / .NET",
+    Database: "Oracle",
+    "Source Control": "GitHub",
+    "Issue Tracking": "Jira",
+    "Review Container": "Pull Request",
+  },
+  governance: [
+    { id: "g1", label: "Require human review before PR creation", on: true },
+    { id: "g2", label: "Require changed-file review", on: true },
+    { id: "g3", label: "Require artifact review", on: true },
+    { id: "g4", label: "Require QA evidence", on: true },
+    { id: "g5", label: "Mark downstream stages stale after redo", on: true },
+    { id: "g6", label: "Block secrets in generated output", on: true },
+    { id: "g7", label: "Preserve prompt provenance", on: true },
+    { id: "g8", label: "Preserve reviewer decisions", on: true },
+    { id: "g9", label: "Disable real external writes in demo mode", on: true, locked: true },
+    { id: "g10", label: "Require final validation before merge readiness", on: true },
+  ],
+};
+
+/* ---- MCP context servers ---- */
+WBData.mcpServers = [
+  {
+    name: "Jira Context MCP", icon: "scroll-text", status: "Simulated",
+    purpose: "Exposes the selected issue, comments, and acceptance criteria as structured context.",
+    boundary: "Single project (FIN), assigned issues only. No write-back to Jira.",
+    allowed: ["read_issue", "read_comments", "read_acceptance_criteria"],
+    disallowed: ["transition_issue", "post_comment", "edit_fields"],
+  },
+  {
+    name: "GitHub Repo Context MCP", icon: "git-branch", status: "Simulated",
+    purpose: "Provides repository tree, file contents, and branch/PR state for grounding.",
+    boundary: "Mapped repos only. Read-only file access; branch/PR via control plane.",
+    allowed: ["read_tree", "read_file", "read_pr_status"],
+    disallowed: ["force_push", "merge_pr", "delete_branch"],
+  },
+  {
+    name: "Documentation MCP", icon: "file-text", status: "Simulated",
+    purpose: "Serves engineering standards, ADRs, and component guidelines as retrievable context.",
+    boundary: "Curated docs corpus. No external web fetch.",
+    allowed: ["search_docs", "read_doc"],
+    disallowed: ["edit_doc", "publish_doc"],
+  },
+  {
+    name: "Oracle Schema Context MCP", icon: "database", status: "Simulated",
+    purpose: "Surfaces synthetic table, view, and package signatures for grounded SQL targets.",
+    boundary: "Metadata only — object signatures and column types. No data rows, no DML.",
+    allowed: ["describe_object", "list_dependencies"],
+    disallowed: ["execute_query", "read_rows", "run_ddl"],
+  },
+  {
+    name: "Business Rules Memory MCP", icon: "shield", status: "Simulated",
+    purpose: "Holds durable domain rules (e.g. variance thresholds, elimination logic) as memory.",
+    boundary: "Approved rules only. Versioned and human-curated.",
+    allowed: ["read_rule", "list_rules"],
+    disallowed: ["write_rule", "auto_learn"],
+  },
+  {
+    name: "Prior Decisions / Evidence MCP", icon: "clipboard-check", status: "Simulated",
+    purpose: "Recalls prior review decisions and validation evidence for traceability.",
+    boundary: "Append-only evidence log. Immutable history.",
+    allowed: ["read_decision", "read_evidence"],
+    disallowed: ["delete_record", "rewrite_history"],
+  },
+];
+
+/* ---- Architecture planes ---- */
+WBData.architecture = {
+  planes: [
+    {
+      id: "control", name: "Control Plane", icon: "layout-grid", tone: "accent",
+      tagline: "Where humans steer and the system stays accountable.",
+      items: [
+        "Jira queue and issue detail", "Settings & integration config", "Artifact browser",
+        "Run metadata & history", "GitHub PR state", "Review gates",
+        "Audit trail", "Lifecycle state model",
+      ],
+    },
+    {
+      id: "exec", name: "Execution Plane", icon: "cpu", tone: "secure",
+      tagline: "Isolated, ephemeral work — never touching production.",
+      items: [
+        "Clean workspace", "Repo clone", "Branch checkout", "Prompt execution",
+        "Artifact generation", "Code generation", "Test execution",
+        "Commit / push", "Run logs",
+      ],
+    },
+    {
+      id: "context", name: "Context / MCP Plane", icon: "network", tone: "safe",
+      tagline: "Grounded, bounded context — not an open data firehose.",
+      items: [
+        "Jira context server", "GitHub / repo context server", "Documentation context server",
+        "Business rules memory server", "Oracle schema context server",
+        "Prior decisions / evidence memory server",
+      ],
+    },
+    {
+      id: "validation", name: "Validation Plane", icon: "flask", tone: "warn",
+      tagline: "Evidence and approval that travel with the change.",
+      items: [
+        "QA evidence", "Environment readiness", "Test notes",
+        "Approval state", "Release readiness", "Validation history",
+      ],
+    },
+  ],
+  productionNote:
+    "In production, each plane would require identity, authorization, secrets management, audit persistence, execution isolation, integration-specific error handling, and clear rollback / retry behavior.",
+  principalTopics: [
+    "Control plane vs execution plane separation",
+    "Deterministic, reviewable artifacts",
+    "Human review gates",
+    "MCP / context boundaries",
+    "Prompt provenance",
+    "GitHub PR traceability",
+    "Validation evidence",
+    "Enterprise production hardening",
+  ],
+};

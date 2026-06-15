@@ -1,0 +1,129 @@
+/* ============================================================
+   Cleanroom — Semantic Color Aliases
+   Map the raw ramps to roles. Light is the default (:root);
+   dark mode activates via [data-theme="dark"].
+   Always reference these in components, never raw ramps.
+   ============================================================ */
+:root {
+  /* Surfaces */
+  --bg-canvas:      var(--slate-50);    /* app/page background */
+  --bg-surface:     var(--white);       /* cards, panels, sheets */
+  --bg-surface-2:   var(--slate-50);    /* nested surface / subtle fill */
+  --bg-inset:       var(--slate-75);    /* wells, code blocks, inputs */
+  --bg-hover:       rgba(15, 19, 27, 0.04);
+  --bg-active:      rgba(15, 19, 27, 0.07);
+  --bg-overlay:     rgba(9, 12, 18, 0.45); /* modal scrim */
+
+  /* Borders / hairlines */
+  --border-subtle:  var(--slate-100);
+  --border-default: #D7DDE6;
+  --border-strong:  #C0C8D4;
+  --border-accent:  var(--azure-600);
+
+  /* Text */
+  --text-primary:   var(--slate-900);
+  --text-secondary: var(--slate-500);
+  --text-tertiary:  var(--slate-400);
+  --text-disabled:  var(--slate-300);
+  --text-inverse:   var(--white);
+  --text-link:      var(--azure-700);
+
+  /* Accent (primary action) */
+  --accent:         var(--azure-600);
+  --accent-hover:   var(--azure-700);
+  --accent-active:  var(--azure-800);
+  --accent-soft:    var(--azure-50);
+  --accent-soft-border: var(--azure-100);
+  --accent-text:    var(--azure-700);
+  --on-accent:      var(--white);
+
+  /* Semantic — Verified / Safe */
+  --safe:           var(--green-600);
+  --safe-soft:      var(--green-50);
+  --safe-soft-border: var(--green-100);
+  --safe-text:      var(--green-700);
+
+  /* Semantic — Caution */
+  --warn:           var(--amber-600);
+  --warn-soft:      var(--amber-50);
+  --warn-soft-border: var(--amber-100);
+  --warn-text:      var(--amber-700);
+
+  /* Semantic — Denied / Error */
+  --danger:         var(--red-600);
+  --danger-soft:    var(--red-50);
+  --danger-soft-border: var(--red-100);
+  --danger-text:    var(--red-700);
+
+  /* Semantic — Encrypted / Secure */
+  --secure:         var(--violet-600);
+  --secure-soft:    var(--violet-50);
+
+  /* Focus ring */
+  --ring:           rgba(14, 111, 230, 0.45);
+  --ring-offset:    var(--bg-surface);
+
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  /* Surfaces */
+  --bg-canvas:      var(--slate-950);
+  --bg-surface:     var(--slate-900);
+  --bg-surface-2:   var(--slate-850);
+  --bg-inset:       #0B0F17;
+  --bg-hover:       rgba(255, 255, 255, 0.05);
+  --bg-active:      rgba(255, 255, 255, 0.09);
+  --bg-overlay:     rgba(5, 7, 11, 0.6);
+
+  /* Borders */
+  --border-subtle:  #1E2532;
+  --border-default: var(--slate-800);
+  --border-strong:  var(--slate-700);
+  --border-accent:  var(--azure-500);
+
+  /* Text */
+  --text-primary:   var(--slate-100);
+  --text-secondary: var(--slate-300);
+  --text-tertiary:  var(--slate-400);
+  --text-disabled:  var(--slate-600);
+  --text-inverse:   var(--slate-950);
+  --text-link:      var(--azure-400);
+
+  /* Accent */
+  --accent:         var(--azure-500);
+  --accent-hover:   var(--azure-400);
+  --accent-active:  var(--azure-300);
+  --accent-soft:    rgba(38, 132, 255, 0.14);
+  --accent-soft-border: rgba(38, 132, 255, 0.28);
+  --accent-text:    var(--azure-300);
+  --on-accent:      #051023;
+
+  /* Semantic — Safe */
+  --safe:           var(--green-500);
+  --safe-soft:      rgba(22, 168, 121, 0.14);
+  --safe-soft-border: rgba(22, 168, 121, 0.30);
+  --safe-text:      var(--green-300);
+
+  /* Semantic — Caution */
+  --warn:           var(--amber-500);
+  --warn-soft:      rgba(224, 163, 58, 0.14);
+  --warn-soft-border: rgba(224, 163, 58, 0.30);
+  --warn-text:      var(--amber-500);
+
+  /* Semantic — Danger */
+  --danger:         var(--red-500);
+  --danger-soft:    rgba(229, 72, 77, 0.14);
+  --danger-soft-border: rgba(229, 72, 77, 0.30);
+  --danger-text:    #F08A8D;
+
+  /* Secure */
+  --secure:         var(--violet-500);
+  --secure-soft:    rgba(110, 86, 207, 0.16);
+
+  /* Focus ring */
+  --ring:           rgba(38, 132, 255, 0.55);
+  --ring-offset:    var(--bg-surface);
+
+  color-scheme: dark;
+}

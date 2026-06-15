@@ -1,0 +1,25 @@
+/* ============================================================
+   Cleanroom — Motion
+   Quick, precise, no bounce. Functional easing. Respect
+   reduced-motion at the component level.
+   ============================================================ */
+:root {
+  /* Durations */
+  --dur-instant: 80ms; /* @kind other */
+  --dur-fast:    140ms; /* @kind other */
+  --dur-base:    200ms; /* @kind other */
+  --dur-slow:    320ms; /* @kind other */
+  --dur-slower:  480ms; /* @kind other */
+
+  /* Easing — controlled, clinical */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1); /* @kind other */    /* most UI transitions */
+  --ease-out:      cubic-bezier(0.16, 1, 0.3, 1); /* @kind other */ /* enter */
+  --ease-in:       cubic-bezier(0.5, 0, 0.75, 0); /* @kind other */ /* exit */
+  --ease-linear:   linear; /* @kind other */
+
+  /* Common composed transitions */
+  --transition-colors: color var(--dur-fast) var(--ease-standard),
+                       background-color var(--dur-fast) var(--ease-standard),
+                       border-color var(--dur-fast) var(--ease-standard); /* @kind other */
+  --transition-transform: transform var(--dur-fast) var(--ease-standard); /* @kind other */
+}
