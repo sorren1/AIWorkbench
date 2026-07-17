@@ -267,22 +267,34 @@ body {
 .wb-persona-selector {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   color: var(--text-tertiary);
-  font-size: 11px;
-  font-weight: var(--weight-semibold);
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
   white-space: nowrap;
 }
 
 .wb-persona-selector select {
-  max-width: 176px;
+  max-width: 190px;
   min-height: 32px;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-md);
-  padding: 4px 26px 4px 8px;
+  padding: 4px 28px 4px 10px;
   color: var(--text-primary);
-  background: var(--bg-surface-2);
-  font: inherit;
+  background: var(--bg-surface);
+  font-family: var(--font-sans);
+  font-size: 12.5px;
+  font-weight: var(--weight-medium);
+  letter-spacing: normal;
+  text-transform: none;
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%235C6678' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 15 5 5 5-5'/%3E%3Cpath d='m7 9 5-5 5 5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  cursor: pointer;
 }
 
 .wb-persona-selector select:focus-visible {
@@ -353,6 +365,10 @@ body {
   border-left: 3px solid var(--accent);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
+}
+
+.wb-walkthrough .eyebrow {
+  color: var(--accent-text);
 }
 
 .wb-walkthrough:focus {
@@ -1467,16 +1483,18 @@ textarea.wb-input {
 }
 .wb-context-summary > div {
   min-width: 0;
-  padding: 8px;
+  padding: 9px 10px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-sm);
-  background: var(--bg-hover);
+  background: var(--bg-surface-2);
 }
 .wb-context-summary dt {
   color: var(--text-tertiary);
-  font-size: 10.5px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: var(--weight-medium);
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: var(--tracking-caps);
 }
 .wb-context-summary dd {
   margin: 4px 0 0;
@@ -2150,14 +2168,29 @@ textarea.wb-input {
 .wb-control-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px 16px;
+  gap: 8px;
   font-size: 12px;
 }
 
 .wb-control-links a {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 11px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  background: var(--bg-surface);
   color: var(--accent-text);
-  font-weight: var(--weight-semibold);
-  text-underline-offset: 3px;
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+  white-space: nowrap;
+  transition: var(--transition-colors);
+}
+
+.wb-control-links a:hover {
+  border-color: var(--border-strong);
+  background: var(--bg-hover);
+  text-decoration: none;
 }
 
 .wb-control-panel {
@@ -2179,13 +2212,16 @@ textarea.wb-input {
 }
 
 .wb-control-results {
-  padding: 10px 12px;
-  border-bottom: 1px solid var(--border-subtle);
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border-default);
+  background: var(--bg-surface-2);
   color: var(--text-tertiary);
-  font-size: 11px;
-  font-weight: var(--weight-semibold);
-  letter-spacing: 0.04em;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
 .wb-control-resource-list {
@@ -2199,7 +2235,7 @@ textarea.wb-input {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 12px;
+  padding: 11px 14px;
   border: 0;
   border-bottom: 1px solid var(--border-subtle);
   border-left: 3px solid transparent;
@@ -2207,10 +2243,17 @@ textarea.wb-input {
   background: transparent;
   font: inherit;
   text-align: left;
+  cursor: pointer;
+  transition: var(--transition-colors);
 }
 
 .wb-control-resource:hover {
   background: var(--bg-hover);
+}
+
+.wb-control-resource:focus-visible {
+  outline: 3px solid var(--ring);
+  outline-offset: -3px;
 }
 
 .wb-control-resource.is-selected {
@@ -2218,10 +2261,24 @@ textarea.wb-input {
   background: var(--accent-soft);
 }
 
+.wb-control-resource.is-selected strong {
+  color: var(--accent-text);
+}
+
 .wb-control-resource > span:first-child {
   min-width: 0;
   display: grid;
-  gap: 4px;
+  gap: 3px;
+}
+
+.wb-control-resource strong {
+  font-size: 13px;
+  font-weight: var(--weight-semibold);
+}
+
+.wb-control-resource small {
+  font-size: 11px;
+  color: var(--text-tertiary);
 }
 
 .wb-control-resource strong,
@@ -2244,9 +2301,12 @@ textarea.wb-input {
   align-items: flex-start;
 }
 
-.wb-control-detail-head h2 {
+.wb-control-detail-head h2,
+.wb-card-body .wb-flex h2 {
   margin: 0;
-  font-size: 18px;
+  font-size: 17px;
+  font-weight: var(--weight-bold);
+  letter-spacing: -0.01em;
 }
 
 .wb-control-provenance {
@@ -2263,22 +2323,23 @@ textarea.wb-input {
 .wb-control-provenance > div {
   min-width: 0;
   padding: 10px 12px;
-  background: var(--bg-inset);
+  background: var(--bg-surface-2);
 }
 
 .wb-control-provenance dt {
   color: var(--text-tertiary);
+  font-family: var(--font-mono);
   font-size: 10px;
-  font-weight: var(--weight-semibold);
-  letter-spacing: 0.05em;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-caps);
   text-transform: uppercase;
 }
 
 .wb-control-provenance dd {
-  margin: 4px 0 0;
+  margin: 5px 0 0;
   overflow: hidden;
   color: var(--text-secondary);
-  font-size: 11px;
+  font-size: 11.5px;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2291,15 +2352,20 @@ textarea.wb-input {
 
 .wb-control-detail-grid section {
   min-width: 0;
-  padding: 12px;
+  padding: 12px 14px;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  background: var(--bg-inset);
+  background: var(--bg-surface-2);
 }
 
 .wb-control-detail-grid h3 {
-  margin: 0 0 8px;
-  font-size: 12px;
+  margin: 0 0 9px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
 }
 
 .wb-control-list {
@@ -2323,37 +2389,52 @@ textarea.wb-input {
 }
 
 .wb-control-policy-strip span {
-  padding: 5px 8px;
-  border: 1px solid var(--border-default);
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 9px;
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-pill);
   color: var(--text-secondary);
   background: var(--bg-inset);
   font-family: var(--font-mono);
-  font-size: 10px;
+  font-size: 11px;
+  line-height: 1.5;
 }
 
 .wb-control-schema {
   min-width: 0;
   border: 1px solid var(--border-subtle);
   border-radius: var(--radius-md);
-  background: var(--bg-inset);
+  background: var(--bg-surface);
 }
 
 .wb-control-schema summary {
-  padding: 10px 12px;
+  padding: 9px 12px;
   cursor: pointer;
   color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: var(--weight-semibold);
+  background: var(--bg-surface-2);
+  border-radius: var(--radius-md);
+  font-family: var(--font-mono);
+  font-size: 11.5px;
+  transition: var(--transition-colors);
+}
+
+.wb-control-schema summary:hover {
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.wb-control-schema[open] summary {
+  border-bottom: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
 }
 
 .wb-control-schema .wb-code {
   max-height: 280px;
   margin: 0;
   border: 0;
-  border-top: 1px solid var(--border-subtle);
   border-radius: 0 0 var(--radius-md) var(--radius-md);
-  font-size: 10.5px;
+  font-size: 11.5px;
 }
 
 @media (max-width: 1120px) {
@@ -2364,4 +2445,39 @@ textarea.wb-input {
   .wb-control-resource-list {
     max-height: 320px;
   }
+}
+
+/* ---------- Cleanroom alignment pass (new screens) ---------- */
+.wb-page-sub {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-top: 4px;
+  max-width: 70ch;
+}
+select.wb-input {
+  appearance: none;
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='15' height='15' viewBox='0 0 24 24' fill='none' stroke='%235C6678' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m7 15 5 5 5-5'/%3E%3Cpath d='m7 9 5-5 5 5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  cursor: pointer;
+}
+.wb-card-body section > h3,
+.wb-approval-diff h3 {
+  margin: 0 0 9px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  font-weight: var(--weight-medium);
+  letter-spacing: var(--tracking-caps);
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+}
+.wb-approval-diff h3 {
+  margin: 0;
+}
+.wb-control-empty {
+  color: var(--text-tertiary);
+}
+pre.wb-code {
+  padding: 12px 14px;
 }

@@ -69,7 +69,7 @@ export function RunTraceScreen() {
   const { actions } = useApp();
   if (!recordedRunTrace) {
     return (
-      <div>
+      <div className="wb-page">
         <div className="wb-page-head">
           <div>
             <p className="eyebrow">Recorded local evidence</p>
@@ -99,7 +99,7 @@ export function RunTraceScreen() {
   };
 
   return (
-    <div>
+    <div className="wb-page">
       <div className="wb-page-head">
         <div>
           <p className="eyebrow">Recorded real local execution | synthetic toy repository</p>
