@@ -5,11 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="A clean-room case study for a governed, local AI-assisted delivery workflow."
+      content="AI Delivery Workbench — A governed, human-in-the-loop control plane for AI-assisted software delivery."
     />
     <link rel="icon" href="./assets/logo-mark.svg" type="image/svg+xml" />
     <link rel="stylesheet" href="./src/case-study/site.css" />
-    <title>AI Delivery Workbench — Case Study</title>
+    <title>AI Delivery Workbench — Governed AI-assisted delivery</title>
   </head>
   <body class="site-body">
     <header class="site-header">
@@ -17,49 +17,255 @@
         <img src="./assets/logo-mark.svg" width="32" height="32" alt="" />
         <span>AI Delivery Workbench</span>
       </a>
-      <a class="site-demo-link" href="./demo/"
-        >Open interactive demo <span aria-hidden="true">→</span></a
-      >
+      <nav class="site-nav" aria-label="Case study">
+        <a href="#architecture">Architecture</a>
+        <a href="#boundaries">Boundaries</a>
+        <a class="site-demo-link" href="./demo/">Open interactive demo</a>
+      </nav>
     </header>
+
     <main>
       <section class="site-hero" aria-labelledby="case-study-title">
-        <p class="eyebrow">Clean-room public prototype</p>
-        <h1 id="case-study-title">Governed AI delivery, made inspectable.</h1>
+        <p class="eyebrow">Independent engineering case study</p>
+        <h1 id="case-study-title">AI Delivery Workbench</h1>
+        <p class="site-subtitle">
+          A governed, human-in-the-loop control plane for AI-assisted software delivery.
+        </p>
         <p class="site-lede">
-          A static case-study shell and a local React workbench showing how issue context,
-          deterministic artifacts, pull-request review, and validation evidence can stay connected.
+          The case study examines authorization, bounded context, review gates, workflow state, and
+          evidence around an eight-stage coding-agent delivery loop.
         </p>
         <div class="site-actions">
-          <a class="site-primary-action" href="./demo/">Explore the workbench</a>
+          <a class="site-primary-action" href="./demo/">Explore the interactive workbench</a>
+          <a class="site-secondary-action" href="#architecture">Read the engineering approach</a>
         </div>
       </section>
-      <section class="site-grid" aria-label="Prototype boundaries">
-        <article class="site-card">
-          <p class="eyebrow">Functional locally</p>
-          <h2>Interactive workflow state</h2>
+
+      <aside class="site-provenance-note" aria-label="Prototype provenance">
+        <strong>Independent portfolio prototype.</strong> All code, copy, fixtures, workflows, and
+        visuals in this project were created from scratch using synthetic data. No employer or
+        client code, prompts, schemas, screenshots, repositories, internal documentation, or
+        confidential information were used. External Jira, GitHub, AI, database, and MCP-style
+        operations are simulated; the interactive UI and local workflow state machine are
+        functional.
+      </aside>
+
+      <section class="site-section" aria-labelledby="problem-title">
+        <div class="site-section-heading">
+          <p class="eyebrow">Engineering thesis</p>
+          <h2 id="problem-title">Generation is the easy part. Control is the product.</h2>
           <p>
-            Navigation, filters, themes, stage transitions, review decisions, and evidence state run
-            in the browser.
+            A credible coding-agent system must explain what was authorized, which context was
+            selected, where tools may act, when a human must decide, and which evidence supports the
+            result.
           </p>
-        </article>
-        <article class="site-card">
-          <p class="eyebrow">Simulated</p>
-          <h2>External operations</h2>
+        </div>
+        <div class="site-grid site-grid--five">
+          <article class="site-card">
+            <p class="site-card-index">01</p>
+            <h3>Authorization</h3>
+            <p>Stage-scoped capabilities and lifecycle gates should define what may run.</p>
+          </article>
+          <article class="site-card">
+            <p class="site-card-index">02</p>
+            <h3>Context</h3>
+            <p>
+              Explicit manifests can make provenance, freshness, exclusions, and digests reviewable.
+            </p>
+          </article>
+          <article class="site-card">
+            <p class="site-card-index">03</p>
+            <h3>Tool boundaries</h3>
+            <p>Read, bounded-write, and privileged operations require distinct policy treatment.</p>
+          </article>
+          <article class="site-card">
+            <p class="site-card-index">04</p>
+            <h3>Human approval</h3>
+            <p>Risky actions should stop at an explicit human decision point.</p>
+          </article>
+          <article class="site-card">
+            <p class="site-card-index">05</p>
+            <h3>Evidence</h3>
+            <p>
+              Artifacts, review state, validation, budgets, and trace data should travel with the
+              change.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="site-section site-section--inset" aria-labelledby="workflow-title">
+        <div class="site-section-heading">
+          <p class="eyebrow">Inspectable workflow</p>
+          <h2 id="workflow-title">Eight stages, one governed chain of custody.</h2>
+        </div>
+        <ol class="site-workflow">
+          <li><span>01</span><strong>Seed</strong><small>Pin issue and revision</small></li>
+          <li><span>02</span><strong>Intake</strong><small>Normalize bounded context</small></li>
+          <li><span>03</span><strong>Spec</strong><small>Define acceptance criteria</small></li>
+          <li><span>04</span><strong>Plan</strong><small>Sequence work and risk</small></li>
+          <li><span>05</span><strong>Targets</strong><small>Declare change surface</small></li>
+          <li><span>06</span><strong>Implement</strong><small>Draft on a branch</small></li>
+          <li><span>07</span><strong>Verify</strong><small>Attach validation evidence</small></li>
+          <li><span>08</span><strong>Review</strong><small>Require a human decision</small></li>
+        </ol>
+      </section>
+
+      <section id="architecture" class="site-section" aria-labelledby="architecture-title">
+        <div class="site-section-heading site-section-heading--split">
+          <div>
+            <p class="eyebrow">Architecture</p>
+            <h2 id="architecture-title">Separate steering from execution.</h2>
+          </div>
           <p>
-            Jira, GitHub, AI, Oracle, MCP, deployment, test execution, and provider calls are
-            synthetic fixtures only.
+            Four responsibility planes keep local product behavior, simulated adapters, and future
+            production infrastructure conceptually distinct.
           </p>
-        </article>
-        <article class="site-card">
-          <p class="eyebrow">Deliberate boundary</p>
-          <h2>Static and inspectable</h2>
+        </div>
+        <div class="site-grid site-grid--four">
+          <article class="site-card site-card--accent">
+            <h3>Control plane</h3>
+            <p>Workflow state, registry policy, approvals, budgets, and audit references.</p>
+          </article>
+          <article class="site-card">
+            <h3>Execution plane</h3>
+            <p>Isolated workspaces, stage runtimes, model adapters, and bounded tool calls.</p>
+          </article>
+          <article class="site-card">
+            <h3>Context plane</h3>
+            <p>Issue, repository, documentation, schema, and prior-decision context packs.</p>
+          </article>
+          <article class="site-card">
+            <h3>Validation plane</h3>
+            <p>Acceptance coverage, review decisions, evidence envelopes, and release gates.</p>
+          </article>
+        </div>
+        <div class="site-reference-stack">
+          <p class="eyebrow">Illustrative adapter set</p>
           <p>
-            No backend, credentials, analytics, runtime CDNs, or external network requests are
-            required for ordinary use.
+            Jira, GitHub, Angular, .NET, and Oracle provide one technically specific reference stack
+            behind vendor-neutral issue, repository, UI, service, and database boundaries. They are
+            synthetic configuration examples, not a prescribed environment.
           </p>
-        </article>
+        </div>
+      </section>
+
+      <section
+        id="boundaries"
+        class="site-section site-section--inset"
+        aria-labelledby="boundary-title"
+      >
+        <div class="site-section-heading">
+          <p class="eyebrow">Evidence boundary</p>
+          <h2 id="boundary-title">Know what works and what is represented.</h2>
+        </div>
+        <div class="site-boundary-grid">
+          <article class="site-boundary-card">
+            <p class="site-kicker site-kicker--functional">Functional in this repository</p>
+            <h3>Browser-local product behavior</h3>
+            <ul>
+              <li>Strictly typed reducer and state transitions</li>
+              <li>Navigation, filters, themes, review decisions, and validation state</li>
+              <li>Deterministic artifact and evidence rendering</li>
+              <li>Static production build with no runtime service dependency</li>
+            </ul>
+          </article>
+          <article class="site-boundary-card">
+            <p class="site-kicker site-kicker--simulated">Synthetic demo fixtures</p>
+            <h3>External-system behavior</h3>
+            <ul>
+              <li>
+                Personas, issues, repositories, branches, pull requests, checks, logs, and metrics
+              </li>
+              <li>
+                Jira, GitHub, model, database, MCP-style, test, review, and deployment operations
+              </li>
+              <li>
+                Enterprise identity, shared audit durability, credentials, and production execution
+              </li>
+            </ul>
+          </article>
+        </div>
+      </section>
+
+      <section class="site-section" aria-labelledby="tradeoffs-title">
+        <div class="site-section-heading">
+          <p class="eyebrow">Deliberate tradeoffs</p>
+          <h2 id="tradeoffs-title">Small enough to inspect. Explicit about what comes next.</h2>
+        </div>
+        <div class="site-grid site-grid--four">
+          <article class="site-card">
+            <h3>Static by design</h3>
+            <p>
+              A Vite multi-page build keeps hosting simple and the public narrative readable without
+              JavaScript.
+            </p>
+          </article>
+          <article class="site-card">
+            <h3>Deterministic by design</h3>
+            <p>
+              Fixtures make state transitions reproducible, but do not stand in for integration or
+              model reliability.
+            </p>
+          </article>
+          <article class="site-card">
+            <h3>Focused by design</h3>
+            <p>
+              The registry and policy model govern delivery-stage agents rather than becoming a
+              generic agent catalog.
+            </p>
+          </article>
+          <article class="site-card">
+            <h3>Production boundary</h3>
+            <p>
+              Identity, secrets, isolated execution, durable storage, telemetry collection, and
+              provider adapters remain future infrastructure.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="site-section" aria-labelledby="context-title">
+        <div class="site-context-card">
+          <p class="eyebrow">Professional context — separate from this prototype</p>
+          <h2 id="context-title">Related experience, independently implemented here.</h2>
+          <p>
+            In professional work, I built a related governed AI-assisted delivery platform that
+            supported approximately 50 production stories through human-reviewed pull requests. This
+            public prototype is a separate implementation and contains none of that system’s code or
+            data.
+          </p>
+        </div>
+      </section>
+
+      <section class="site-section" aria-labelledby="clean-room-title">
+        <div class="site-clean-room-panel">
+          <div>
+            <p class="eyebrow">About / clean-room boundary</p>
+            <h2 id="clean-room-title">Independent by design.</h2>
+          </div>
+          <div class="site-clean-room-copy">
+            <p>
+              Independent portfolio prototype. All code, copy, fixtures, workflows, and visuals in
+              this project were created from scratch using synthetic data. No employer or client
+              code, prompts, schemas, screenshots, repositories, internal documentation, or
+              confidential information were used. External Jira, GitHub, AI, database, and MCP-style
+              operations are simulated; the interactive UI and local workflow state machine are
+              functional.
+            </p>
+            <p>
+              Public design influences and independent-development decisions are documented in the
+              repository. The demo intentionally favors inspectable local mechanics over unsupported
+              claims of production infrastructure.
+            </p>
+          </div>
+        </div>
       </section>
     </main>
-    <footer class="site-footer">Synthetic data only · no real systems are contacted</footer>
+
+    <footer class="site-footer">
+      <span>AI Delivery Workbench</span>
+      <span>Independent portfolio prototype · synthetic demo data</span>
+    </footer>
   </body>
 </html>

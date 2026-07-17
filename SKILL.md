@@ -4,7 +4,7 @@ description: Use this skill to generate well-branded interfaces and assets for t
 user-invocable: true
 ---
 
-Read the `readme.md` file within this skill, and explore the other available files.
+Read the `README.md` file within this skill, and explore the other available files.
 
 If creating visual artifacts (slides, mocks, throwaway prototypes, etc), copy assets out and create
 static HTML files for the user to view. If working on production code, you can copy assets and read
@@ -30,6 +30,6 @@ code, depending on the need.
 
 ## Clean-room rule
 
-All example content is synthetic and inspired only by public-domain enterprise finance-software
-themes. Do not introduce real company branding, code, data, schemas, repository names, or customer
-names.
+All example content is synthetic and uses independently created enterprise software themes. Do not
+introduce organization-specific branding, non-public code, data, schemas, repository names, or
+identifying details.

@@ -80,7 +80,7 @@ For the static public release, IndexedDB provides browser-local persistence acro
 
 Each stage assembles a deterministic context-pack manifest from synthetic resources. The manifest records revisions/digests, origin, retrieval and modification times, maximum age/freshness, trust classification, inclusion reasons, explicit exclusion reasons, and redactions. Canonical JSON is hashed with browser Web Crypto SHA-256. The digest is linked to the approval request, trace, and evidence.
 
-Resource bodies and prompts are not recorded in telemetry by default. No feature accepts employer/client context or private files in the public release.
+Resource bodies and prompts are not recorded in telemetry by default. No feature accepts non-public organization context or private files in the public release.
 
 ### Runtime/model and credential policy
 

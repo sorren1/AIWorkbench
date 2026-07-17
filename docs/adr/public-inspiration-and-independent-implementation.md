@@ -8,7 +8,7 @@
 
 Public documentation for AWS Labs Loom discusses enterprise-agent concerns that overlap with this portfolio thesis: registry lifecycle, scoped authorization, persona-based tool access, human approval, model routing, usage tracking, and traces. Open standards such as OpenTelemetry, Model Context Protocol, and CycloneDX define useful interoperability concepts.
 
-The repository must remain an original clean-room public project. Loom source code, components, copy, project schemas, screenshots, and AWS-specific product UI must not be copied. Employer/client code, prompts, schemas, screenshots, names, repository identifiers, internal terms, and confidential implementation details remain prohibited regardless of whether a public reference is also consulted.
+The repository must remain an original clean-room public project. Loom source code, components, copy, project schemas, screenshots, and AWS-specific product UI must not be copied. Non-public code, prompts, schemas, screenshots, names, repository identifiers, internal terms, and confidential implementation details from another system or organization remain prohibited regardless of whether a public reference is also consulted.
 
 ## Decision
 
@@ -36,7 +36,7 @@ Maintain `docs/design-influences.md` as a provenance register. Every material in
 - Recreating Loom's catalog or cloud deployment topology under different names.
 - Importing third-party project schemas into the workbench domain model when no wire-compatibility requirement exists.
 - Presenting a public reference as an endorsement, partnership, dependency, or evidence of this prototype's production capability.
-- Using employer/client or other confidential materials as a shortcut, even if similar concepts appear publicly.
+- Using confidential or otherwise non-public third-party material as a shortcut, even if similar concepts appear publicly.
 
 ### Implementation controls
 
@@ -79,6 +79,6 @@ Before a control-plane phase commit:
 - Are simulated identity, model, tool, credential, and external-system behaviors labeled adjacent to the interaction?
 - Does `docs/design-influences.md` cover every material public influence?
 - Does the diff contain any third-party screenshot, icon, copied schema, project copy, or AWS-specific product UI?
-- Does the diff contain any employer/client identifier or confidential material?
+- Does the diff contain an organization-specific identifier or confidential material?
 
 If either of the final two checks finds material, stop the phase and remove it before continuing.

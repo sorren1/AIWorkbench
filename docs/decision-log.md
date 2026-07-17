@@ -109,7 +109,7 @@ The local policy and evidence mechanics may be functional. Identity, provider ca
 
 ### Context
 
-Public documentation for AWS Labs Loom describes useful enterprise-agent control concepts. OpenTelemetry, Model Context Protocol, and CycloneDX provide relevant vendor-neutral interoperability concepts. The repository must remain original and must not adopt Loom implementation source, copy, schemas, screenshots, components, or AWS-specific product UI. The existing clean-room boundary against employer/client material remains unchanged.
+Public documentation for AWS Labs Loom describes useful enterprise-agent control concepts. OpenTelemetry, Model Context Protocol, and CycloneDX provide relevant vendor-neutral interoperability concepts. The repository must remain original and must not adopt Loom implementation source, copy, schemas, screenshots, components, or AWS-specific product UI. The existing clean-room boundary against non-public third-party material remains unchanged.
 
 ### Decision
 
@@ -120,3 +120,29 @@ Use public project documentation and standards only to identify high-level probl
 - Reviewers can audit provenance and understand where industry conventions end and original design begins.
 - Public references are context, not endorsements, dependencies, or evidence that this project implements their deployment architecture.
 - Any future reference that materially affects design must be added to the influence register before related implementation lands.
+
+## ADR-005 — Separate public positioning into three evidence categories
+
+- Status: Accepted
+- Date: 2026-07-16
+
+### Context
+
+The production foundation preserved useful workflow specificity but inherited one-off submission framing, an author-like fixture persona, and production-shaped fixture values. A durable public case study needs to lead with its engineering thesis while making provenance easy to inspect and impossible to confuse with prototype outcomes.
+
+### Decision
+
+Use the product name `AI Delivery Workbench` and the subtitle “A governed, human-in-the-loop control plane for AI-assisted software delivery.” Organize public claims into exactly three categories:
+
+1. functional behavior that can be run in this repository;
+2. deterministic synthetic demo fixtures;
+3. the single approved professional-context statement, visually and semantically separated from prototype evidence.
+
+Keep a concise persistent prototype badge, one detailed About/clean-room explanation, and repository-level provenance documentation. Label personas and production-shaped records at the persistent-shell or section level rather than repeating defensive prose on every component. Treat Jira, GitHub, Angular, .NET, and Oracle as one illustrative adapter set behind vendor-neutral boundaries.
+
+### Consequences
+
+- The homepage can sell the authorization, context, approval, and evidence thesis before explaining limitations.
+- Metrics cannot move between categories: synthetic test counts are not repository measurements, and professional outcomes are not prototype outcomes.
+- New fixtures require synthetic context; new functional claims require runnable evidence; new professional claims are prohibited unless the operating rules change explicitly.
+- The public copy remains concise while the detailed development boundary stays auditable in `docs/clean-room-and-provenance.md` and `docs/semantic-distance-review.md`.

@@ -5,7 +5,7 @@ import type { CSSProperties, ReactNode } from "react";
    Consistent 24-grid stroke glyphs (stroke 1.75, round caps),
    tuned to the clean/technical Cleanroom aesthetic. Authored
    in-house (no external icon CDN) so the prototype is fully
-   offline and screen-shareable.
+   offline and portable.
    Usage: <Icon name="git-pull-request" size={18} />
    ============================================================ */
 const ICONS = {

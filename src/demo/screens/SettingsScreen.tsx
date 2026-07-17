@@ -57,7 +57,7 @@ export function SettingsScreen() {
     { id: "github", label: "GitHub", icon: "git-branch" },
     { id: "ai", label: "AI Provider", icon: "sparkles" },
     { id: "mcp", label: "MCP Servers", icon: "network" },
-    { id: "stack", label: "Target Stack", icon: "cpu" },
+    { id: "stack", label: "Reference Stack", icon: "cpu" },
     { id: "gov", label: "Governance", icon: "shield-check" },
   ];
   const guardrails: { label: string; on: boolean; sub: string }[] = [
@@ -83,15 +83,16 @@ export function SettingsScreen() {
           </div>
           <div className="wb-page-title">Settings</div>
           <div className="wb-page-desc">
-            How the workbench adapts to Jira, GitHub, Angular, .NET, Oracle, and MCP context.
-            Everything here is simulated — no real connections, credentials, or external writes.
+            Vendor-neutral adapter boundaries shown through one illustrative Jira, GitHub, Angular,
+            .NET, Oracle, and MCP-style reference stack. Every identifier, configuration value,
+            connection result, duration, and count is a synthetic fixture.
           </div>
         </div>
       </div>
 
       <Banner tone="warn" title="Demo mode" icon="lock">
-        All integrations are simulated. Connection tests, syncs, and validations return canned
-        results. No real external systems are contacted.
+        All adapters are simulated. Connection tests, syncs, and validations return deterministic
+        synthetic fixtures. No credentials are accepted and no external systems are contacted.
       </Banner>
 
       <div className="wb-mt-16">
@@ -121,18 +122,20 @@ export function SettingsScreen() {
                 <Btn
                   variant="primary"
                   icon="link"
-                  onClick={() => toast("Connection OK", "Jira responded in 142ms (simulated).")}
+                  onClick={() =>
+                    toast("Simulated connection result", "Synthetic duration fixture: 142ms.")
+                  }
                 >
-                  Test connection
+                  Test connection (simulated)
                 </Btn>
                 <Btn
                   variant="secondary"
                   icon="refresh-cw"
                   onClick={() =>
-                    toast("Issues synced", "10 issues pulled from project FIN (simulated).")
+                    toast("Synthetic sync result", "10 synthetic issues loaded from project FIN.")
                   }
                 >
-                  Sync issues
+                  Sync issues (simulated)
                 </Btn>
               </div>
             </div>
@@ -179,19 +182,22 @@ export function SettingsScreen() {
                   variant="primary"
                   icon="link"
                   onClick={() =>
-                    toast("Connection OK", "Authenticated to example-finance-software (simulated).")
+                    toast(
+                      "Simulated connection result",
+                      "Synthetic organization fixture: synthetic-delivery-lab.",
+                    )
                   }
                 >
-                  Test connection
+                  Test connection (simulated)
                 </Btn>
                 <Btn
                   variant="secondary"
                   icon="refresh-cw"
                   onClick={() =>
-                    toast("Repositories refreshed", "3 repositories mapped (simulated).")
+                    toast("Synthetic refresh result", "3 synthetic repositories mapped.")
                   }
                 >
-                  Refresh repositories
+                  Refresh repositories (simulated)
                 </Btn>
                 <Btn
                   variant="secondary"
@@ -199,7 +205,7 @@ export function SettingsScreen() {
                   onClick={() =>
                     toast(
                       "Branch pattern valid",
-                      "feature/{issueKey}-{slug} → feature/FIN-1150-ai-variance-commentary",
+                      "Synthetic branch fixture: feature/FIN-1150-ai-variance-commentary.",
                     )
                   }
                 >
@@ -330,8 +336,8 @@ export function SettingsScreen() {
           <Card style={{ maxWidth: 620 }}>
             <CardHead
               icon="cpu"
-              title="Target stack profile"
-              sub="What the AI is grounded to build against"
+              title="Illustrative reference stack"
+              sub="One synthetic adapter profile, not a prescribed environment"
             />
             <div className="wb-card-body wb-card-body--tight">
               {Object.entries(S.stack).map(([k, v], i, arr) => (

@@ -102,12 +102,12 @@ export function WorkQueue() {
       <div className="wb-page-head">
         <div>
           <div className="eyebrow wb-mb-8">
-            <Icon name="layout-grid" size={13} /> Cockpit
+            <Icon name="layout-grid" size={13} /> Synthetic delivery cockpit
           </div>
           <div className="wb-page-title">Work Queue</div>
           <div className="wb-page-desc">
-            Every governed AI delivery run in one place — what needs attention, what stage it is in,
-            and the next best action. Click any issue to open its command center.
+            A deterministic queue for exploring governed delivery state. Every issue, persona,
+            branch, status, timestamp, and count below is a synthetic demo fixture.
           </div>
         </div>
         <div className="wb-spacer" />
@@ -122,7 +122,7 @@ export function WorkQueue() {
             )
           }
         >
-          Sync Jira
+          Sync Jira (simulated)
         </Btn>
       </div>
 
@@ -131,27 +131,27 @@ export function WorkQueue() {
           label="Active runs"
           icon="workflow"
           value={totals.all}
-          meta="across 7 finance domains"
+          meta="synthetic fixture count"
         />
         <StatTile
           label="Needs human review"
           icon="alert-triangle"
           value={totals.review}
-          meta={totals.review ? "awaiting reviewer gate" : "all clear"}
+          meta={totals.review ? "synthetic reviewer gate" : "synthetic fixture: none"}
           metaTone={totals.review ? "warn" : "safe"}
         />
         <StatTile
           label="Failed verification"
           icon="x-circle"
           value={totals.failed}
-          meta={totals.failed ? "blocked — fixes required" : "none"}
+          meta={totals.failed ? "synthetic failures" : "synthetic fixture: none"}
           metaTone={totals.failed ? "danger" : "safe"}
         />
         <StatTile
           label="Stale downstream"
           icon="ban"
           value={totals.stale}
-          meta={totals.stale ? "re-run required after redo" : "none"}
+          meta={totals.stale ? "synthetic stale state" : "synthetic fixture: none"}
           metaTone={totals.stale ? "warn" : "safe"}
         />
       </div>

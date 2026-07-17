@@ -7,7 +7,7 @@ Last reviewed: 2026-07-16
 
 This register records public material that informed the portfolio plan so the boundary between industry concepts and this repository's original implementation remains inspectable.
 
-For AWS Labs Loom, review was limited to the public project README and public AWS Open Source Blog description. Loom implementation source files, components, schemas, screenshots, copy, and AWS-specific product UI were not used. For standards, only public specifications and documentation were consulted. No employer/client material was consulted, and the existing prohibition on previous-employer code, prompts, schemas, screenshots, names, or confidential implementation details remains in force.
+For AWS Labs Loom, review was limited to the public project README and public AWS Open Source Blog description. Loom implementation source files, components, schemas, screenshots, copy, and AWS-specific product UI were not used. For standards, only public specifications and documentation were consulted. No non-public organization material was consulted; code, prompts, schemas, screenshots, names, or confidential implementation details from other systems remain prohibited.
 
 The repository may reuse standard-defined wire names only where needed for interoperability. Its product copy, domain types, fixtures, policy reason codes, information architecture, and visual design will be written independently.
 

@@ -18,16 +18,19 @@ import type { IconName } from "../../shared/Icon";
 /* ============================================================
    AI Delivery Workbench — Synthetic fixture data (core)
    CLEAN-ROOM: All data is fully synthetic and invented for this
-   interview prototype. It does not represent any real company's
-   backlog, repositories, schemas, customers, or internal work.
+   independent portfolio prototype. It does not represent a real
+   organization, backlog, repository, schema, customer, or internal work.
    ============================================================ */
 export const meta: Meta = {
   product: "AI Delivery Workbench",
-  disclaimer: "Clean-Room Interview Prototype — Synthetic Data Only",
+  subtitle: "A governed, human-in-the-loop control plane for AI-assisted software delivery.",
+  disclaimer: "Independent portfolio prototype · Synthetic fixtures",
   aboutNote:
-    "This prototype performs no real Jira, GitHub, AI, Oracle, or MCP operations. All data and actions are simulated locally for interview demonstration purposes.",
-  version: "0.9.0-demo",
-  user: { name: "Jordan Vega", role: "Principal Software Engineer — AI", initials: "JV" },
+    "Independent portfolio prototype. All code, copy, fixtures, workflows, and visuals in this project were created from scratch using synthetic data. No employer or client code, prompts, schemas, screenshots, repositories, internal documentation, or confidential information were used. External Jira, GitHub, AI, database, and MCP-style operations are simulated; the interactive UI and local workflow state machine are functional.",
+  professionalContext:
+    "In professional work, I built a related governed AI-assisted delivery platform that supported approximately 50 production stories through human-reviewed pull requests. This public prototype is a separate implementation and contains none of that system’s code or data.",
+  version: "1.0.0-portfolio",
+  user: { name: "Alex Morgan", role: "Synthetic demo persona", initials: "AM" },
 };
 
 /* ---- Stage definitions (the governed AI delivery workflow) ---- */
@@ -110,7 +113,7 @@ export const lifecycleTone: Record<Lifecycle, Tone> = {
   Blocked: "danger",
 };
 
-/* ---- Work queue issues (synthetic finance-software themes) ---- */
+/* ---- Work queue issues (synthetic enterprise reporting themes) ---- */
 /* stage status codes per stage: done|ready|run|fail|stale|review|none  */
 export const issues: Issue[] = [
   {
@@ -125,9 +128,9 @@ export const issues: Issue[] = [
     prStatus: "Open",
     lastRun: "14m ago",
     artifacts: 6,
-    assignee: "A. Reyes",
-    reviewer: "M. Donovan",
-    tester: "P. Shah",
+    assignee: "Synthetic engineer A",
+    reviewer: "Synthetic reviewer A",
+    tester: "Synthetic tester A",
     s: ["done", "done", "done", "done", "done", "done", "run", "none"],
     next: { label: "View running verify", target: "issue" },
     flags: { hasPR: true },
@@ -144,9 +147,9 @@ export const issues: Issue[] = [
     prStatus: "Ready for review",
     lastRun: "2h ago",
     artifacts: 7,
-    assignee: "A. Reyes",
-    reviewer: "L. Okafor",
-    tester: "P. Shah",
+    assignee: "Synthetic engineer A",
+    reviewer: "Synthetic reviewer B",
+    tester: "Synthetic tester A",
     s: ["done", "done", "done", "done", "done", "done", "done", "review"],
     next: { label: "Open human review", target: "github" },
     flags: { hasPR: true, needsReview: true },
@@ -163,8 +166,8 @@ export const issues: Issue[] = [
     prStatus: "—",
     lastRun: "38m ago",
     artifacts: 4,
-    assignee: "S. Nakamura",
-    reviewer: "M. Donovan",
+    assignee: "Synthetic engineer B",
+    reviewer: "Synthetic reviewer A",
     tester: "—",
     s: ["done", "done", "done", "done", "done", "fail", "none", "none"],
     next: { label: "Retry implement", target: "issue" },
@@ -182,9 +185,9 @@ export const issues: Issue[] = [
     prStatus: "Draft",
     lastRun: "6m ago",
     artifacts: 7,
-    assignee: "Jordan Vega",
-    reviewer: "M. Donovan",
-    tester: "P. Shah",
+    assignee: "Alex Morgan",
+    reviewer: "Synthetic reviewer A",
+    tester: "Synthetic tester A",
     s: ["done", "done", "done", "done", "done", "done", "ready", "none"],
     next: { label: "Run Verify", target: "issue" },
     flags: { hasPR: true, primary: true },
@@ -201,8 +204,8 @@ export const issues: Issue[] = [
     prStatus: "—",
     lastRun: "1h ago",
     artifacts: 5,
-    assignee: "D. Whitfield",
-    reviewer: "L. Okafor",
+    assignee: "Synthetic engineer C",
+    reviewer: "Synthetic reviewer B",
     tester: "—",
     s: ["done", "done", "done", "done", "done", "stale", "stale", "none"],
     next: { label: "Re-run Implement", target: "issue" },
@@ -220,7 +223,7 @@ export const issues: Issue[] = [
     prStatus: "—",
     lastRun: "3h ago",
     artifacts: 2,
-    assignee: "S. Nakamura",
+    assignee: "Synthetic engineer B",
     reviewer: "—",
     tester: "—",
     s: ["done", "done", "ready", "none", "none", "none", "none", "none"],
@@ -239,7 +242,7 @@ export const issues: Issue[] = [
     prStatus: "—",
     lastRun: "just now",
     artifacts: 3,
-    assignee: "D. Whitfield",
+    assignee: "Synthetic engineer C",
     reviewer: "—",
     tester: "—",
     s: ["done", "done", "done", "run", "none", "none", "none", "none"],
@@ -258,9 +261,9 @@ export const issues: Issue[] = [
     prStatus: "Open",
     lastRun: "22m ago",
     artifacts: 6,
-    assignee: "A. Reyes",
-    reviewer: "M. Donovan",
-    tester: "P. Shah",
+    assignee: "Synthetic engineer A",
+    reviewer: "Synthetic reviewer A",
+    tester: "Synthetic tester A",
     s: ["done", "done", "done", "done", "done", "done", "fail", "none"],
     next: { label: "Inspect verify failure", target: "validation" },
     flags: { hasPR: true, failedVerification: true },
@@ -277,7 +280,7 @@ export const issues: Issue[] = [
     prStatus: "—",
     lastRun: "5h ago",
     artifacts: 1,
-    assignee: "S. Nakamura",
+    assignee: "Synthetic engineer B",
     reviewer: "—",
     tester: "—",
     s: ["done", "ready", "none", "none", "none", "none", "none", "none"],
@@ -318,27 +321,31 @@ export const surfaceIcon: Record<Surface, IconName> = {
 /* ---- Settings fixtures ---- */
 export const settings: WorkbenchSettings = {
   jira: {
-    baseUrl: "https://jira.example.com",
+    baseUrl: "https://issues.demo.invalid",
     projectKey: "FIN",
     queryMode: "Assigned to me",
     jql: "project = FIN AND status != Done ORDER BY priority DESC",
     status: "Simulated",
   },
   github: {
-    org: "example-finance-software",
+    org: "synthetic-delivery-lab",
     repos: [
-      { name: "frontend-angular-app", role: "Angular / TypeScript UI", default: "main" },
-      { name: "finance-dotnet-api", role: "C# / .NET service layer", default: "main" },
-      { name: "oracle-reporting-scripts", role: "Oracle SQL — views & packages", default: "main" },
+      {
+        name: "demo-angular-ui",
+        role: "Illustrative Angular / TypeScript adapter",
+        default: "main",
+      },
+      { name: "demo-dotnet-service", role: "Illustrative C# / .NET adapter", default: "main" },
+      { name: "demo-oracle-schema", role: "Illustrative Oracle SQL adapter", default: "main" },
     ],
     branchPattern: "feature/{issueKey}-{slug}",
     prTarget: "main",
     status: "Simulated",
   },
   ai: {
-    primary: "Claude",
-    secondary: "Codex",
-    design: "Claude",
+    primary: "Provider A (simulated)",
+    secondary: "Provider B (simulated)",
+    design: "Provider A (simulated)",
     maxRun: "15 min",
     humanApprovalBeforePR: true,
     autoMerge: false,
@@ -373,7 +380,7 @@ export const mcpServers: McpServer[] = [
     icon: "scroll-text",
     status: "Simulated",
     purpose: "Exposes the selected issue, comments, and acceptance criteria as structured context.",
-    boundary: "Single project (FIN), assigned issues only. No write-back to Jira.",
+    boundary: "Single synthetic project (FIN), assigned issues only. No write-back to Jira.",
     allowed: ["read_issue", "read_comments", "read_acceptance_criteria"],
     disallowed: ["transition_issue", "post_comment", "edit_fields"],
   },
@@ -418,7 +425,7 @@ export const mcpServers: McpServer[] = [
     icon: "clipboard-check",
     status: "Simulated",
     purpose: "Recalls prior review decisions and validation evidence for traceability.",
-    boundary: "Append-only evidence log. Immutable history.",
+    boundary: "Synthetic append-only evidence fixture. Browser-local and resettable.",
     allowed: ["read_decision", "read_evidence"],
     disallowed: ["delete_record", "rewrite_history"],
   },
@@ -495,7 +502,7 @@ export const architecture: Architecture = {
   ],
   productionNote:
     "In production, each plane would require identity, authorization, secrets management, audit persistence, execution isolation, integration-specific error handling, and clear rollback / retry behavior.",
-  principalTopics: [
+  reviewTopics: [
     "Control plane vs execution plane separation",
     "Deterministic, reviewable artifacts",
     "Human review gates",

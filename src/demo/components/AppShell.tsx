@@ -89,7 +89,7 @@ export function Sidebar() {
         <BrandMark />
         <div>
           <div className="wb-brand-name">AI Delivery Workbench</div>
-          <div className="wb-brand-sub">Governed AI SDLC</div>
+          <div className="wb-brand-sub">Human-in-the-loop control plane</div>
         </div>
       </div>
       <nav className="wb-nav cr-scroll">
@@ -174,17 +174,27 @@ export function Header({
         <IconBtn
           icon={theme === "dark" ? "info" : "info"}
           size="sm"
-          title="About this prototype"
+          title="About AI Delivery Workbench"
           onClick={() =>
             actions.openModal({
-              title: "About this prototype",
+              title: "About AI Delivery Workbench",
               icon: "shield-check",
               body: (
                 <div className="wb-stack-sm">
-                  <p>{meta.aboutNote}</p>
+                  <p className="wb-strong">{meta.subtitle}</p>
+                  <div className="wb-divider" />
+                  <div>
+                    <div className="eyebrow wb-mb-8">Clean-room boundary</div>
+                    <p className="wb-text-sm wb-secondary">{meta.aboutNote}</p>
+                  </div>
+                  <div className="wb-divider" />
+                  <div>
+                    <div className="eyebrow wb-mb-8">Professional context · separate evidence</div>
+                    <p className="wb-text-sm wb-secondary">{meta.professionalContext}</p>
+                  </div>
                   <p className="wb-text-sm wb-muted">
-                    Clean-room build · no previous-employer code, data, prompts, schemas, or
-                    branding · synthetic finance-software themes only.
+                    Every persona, issue, repository, branch, pull request, check, log, and metric
+                    shown in the workbench is a synthetic demo fixture.
                   </p>
                 </div>
               ),
@@ -279,7 +289,8 @@ export function DrawerHost() {
         </div>
         <div className="wb-drawer-body cr-scroll">
           <Banner tone="neutral" icon="info">
-            Logs are simulated for this interview prototype. No real execution occurred.
+            Synthetic log fixture for the interactive portfolio prototype. No external execution
+            occurred.
           </Banner>
           <div className="wb-code wb-mt-12" style={{ border: "1px solid var(--border-subtle)" }}>
             <div className="wb-code-body" style={{ whiteSpace: "pre-wrap" }}>

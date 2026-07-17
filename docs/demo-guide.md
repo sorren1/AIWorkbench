@@ -1,18 +1,28 @@
-# Interactive demo guide
+# Interactive portfolio prototype guide
 
-The AI Delivery Workbench demonstrates a governed, AI-assisted delivery flow using fictional local data. It is a clean-room public prototype, not a connection to a real delivery platform.
+AI Delivery Workbench is a governed, human-in-the-loop control plane for AI-assisted software delivery. The interactive route demonstrates its workflow and evidence model through deterministic synthetic fixtures.
 
-## What is functional
+## Evidence boundary
 
-- local navigation across the seven primary screens;
+Functional locally:
+
+- navigation across the seven primary screens;
 - work-queue search and filters;
 - light and dark themes;
 - reducer-backed stage transitions, stale cascades, review state, and validation state;
-- local artifact selection, simulated review decisions, drawers, modals, and toasts.
+- local artifact selection, review decisions, drawers, modals, and toasts.
 
-## What is simulated
+Synthetic fixtures:
 
-Jira sync, GitHub and pull-request operations, AI generation, Oracle access, MCP tools, test execution, deployment, external review, credential handling, and provider calls are deterministic fixtures. Buttons that represent those operations change local demo state only.
+- every persona, issue, repository, branch, pull request, check, log, duration, test result, and metric;
+- Jira sync, GitHub and pull-request operations, AI generation, database access, MCP-style tools, test execution, deployment, external review, credentials, and provider calls;
+- all apparent connection, authentication, notification, persistence, and environment-readiness results.
+
+External-system controls change browser-local demo state only. They do not contact a provider or perform a network write.
+
+## Illustrative reference stack
+
+Jira, GitHub, Angular, .NET, and Oracle are one technically specific adapter set behind vendor-neutral issue, repository, UI, service, and database boundaries. The configuration is synthetic and does not describe a prescribed or organization-specific environment.
 
 ## Run
 
@@ -32,12 +42,12 @@ npm run preview
 
 ## Suggested walkthrough
 
-1. **Work Queue** — inspect active items and filter for review, verification failure, or stale downstream work.
-2. **Issue Detail** — follow the ordered Seed → Intake → Spec → Plan → Change Targets → Implement → Verify → PR Review stages. Running a stage is a local simulation.
-3. **Artifacts** — inspect the deterministic synthetic outputs and record a local review decision.
-4. **GitHub / PR** — inspect expected and unexpected files, required checks, and the human-review gate. No real pull request is read or written.
-5. **Validation Evidence** — update fictional scenarios and tester notes, then inspect the local decision state.
-6. **Architecture** — review the control, execution, context, and validation plane boundaries.
-7. **Settings** — inspect the explicitly simulated Jira, GitHub, AI, MCP, stack, and governance configuration.
+1. **Work Queue** — inspect synthetic queue counts and filter for review, verification failure, or stale downstream work.
+2. **Issue Detail** — follow the ordered Seed → Intake → Spec → Plan → Change Targets → Implement → Verify → PR Review stages. Stage actions update the functional local state machine with synthetic results.
+3. **Artifacts** — inspect deterministic synthetic outputs and record a local review decision.
+4. **GitHub / PR** — inspect synthetic files, checks, and reviewer state around the human-review gate.
+5. **Validation Evidence** — update synthetic scenarios and tester notes, then inspect the browser-local decision state.
+6. **Architecture** — review the control, execution, context, and validation responsibility boundaries.
+7. **Settings** — inspect the simulated adapters, illustrative reference stack, and governance configuration.
 
-All people, repositories, issue records, artifacts, checks, and evidence shown in the demo are synthetic.
+Use the persistent prototype badge for the concise boundary and the About panel for full provenance and the separately labeled professional context.

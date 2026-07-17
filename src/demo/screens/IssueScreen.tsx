@@ -84,7 +84,7 @@ const STAGE_PROGRESS: Record<StageId, StageProgress> = {
     label: "Mark Review Ready",
     lifecycle: "Review Ready",
     next: null,
-    msg: "Human review gate opened.",
+    msg: "Local human-review gate state is ready.",
   },
 };
 
@@ -433,6 +433,7 @@ export function IssueDetail() {
               <span className="wb-row-key" style={{ fontSize: 14 }}>
                 {issue.key}
               </span>
+              <Badge tone="neutral">Synthetic issue fixture</Badge>
               <LifecycleBadge value={issue.lifecycle} />
               <RiskBadge risk={issue.risk} />
             </div>
@@ -452,7 +453,7 @@ export function IssueDetail() {
               icon="git-pull-request"
               onClick={() => actions.navigate("github", issue.key)}
             >
-              {issue.pr ? "PR #" + issue.pr : "PR readiness"}
+              {issue.pr ? "Synthetic PR #" + issue.pr : "Synthetic PR readiness"}
             </Btn>
             {primary && (
               <Btn variant="primary" icon={primary.icon} onClick={primary.run}>

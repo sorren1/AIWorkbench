@@ -307,8 +307,8 @@ function ArtifactsHead({ issue }: { readonly issue: Issue }) {
         </div>
         <div className="wb-page-title">Artifacts</div>
         <div className="wb-page-desc">
-          Every stage emits a deterministic artifact — this is how AI output becomes reviewable,
-          traceable, and auditable instead of an opaque suggestion.
+          Deterministic synthetic artifacts show how AI output can become reviewable and traceable
+          instead of remaining an opaque suggestion. Review decisions update local state only.
         </div>
       </div>
       <div className="wb-spacer" />

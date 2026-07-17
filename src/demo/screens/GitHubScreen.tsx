@@ -43,7 +43,7 @@ export function GitHubScreen() {
     actions.toast(
       "success",
       "Mock PR created",
-      "PR #284 opened on " + issue.branch + " (simulated).",
+      "Synthetic PR #284 recorded on " + issue.branch + " in local state.",
     );
   };
   const refresh = () =>
@@ -62,7 +62,7 @@ export function GitHubScreen() {
     actions.toast(
       "warn",
       "Changes requested",
-      "Reviewer decision recorded — author notified (simulated).",
+      "Synthetic reviewer decision and notification state recorded locally.",
     );
   };
   const approveForValidation = () => {
@@ -159,7 +159,7 @@ export function GitHubScreen() {
                 <div style={{ minWidth: 0 }}>
                   <div className="wb-flex" style={{ gap: 10 }}>
                     <span className="wb-row-key" style={{ fontSize: 14 }}>
-                      PR #{base.number}
+                      Synthetic PR #{base.number}
                     </span>
                     <Badge
                       tone={
@@ -200,7 +200,7 @@ export function GitHubScreen() {
               <hr className="wb-divider" />
               <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
                 <Btn size="sm" variant="secondary" icon="refresh-cw" onClick={refresh}>
-                  Refresh PR status
+                  Refresh PR status (simulated)
                 </Btn>
                 <Btn
                   size="sm"
@@ -224,10 +224,10 @@ export function GitHubScreen() {
           <Card>
             <CardHead
               icon="sparkles"
-              title="AI-generated PR summary"
+              title="Synthetic AI-generated PR summary"
               actions={
                 <Badge tone="accent" icon="sparkles">
-                  Draft
+                  Synthetic draft
                 </Badge>
               }
             />
@@ -335,7 +335,7 @@ export function GitHubScreen() {
           <Card>
             <CardHead
               icon="list-checks"
-              title="Required checks"
+              title="Synthetic required checks"
               actions={
                 <Badge tone={checksOpen === 0 ? "safe" : "warn"}>
                   {base.checks.filter((c) => c.status === "pass").length}/{base.checks.length} green
@@ -382,7 +382,7 @@ export function GitHubScreen() {
         {/* Right */}
         <div className="wb-stack">
           <Card>
-            <CardHead icon="git-merge" title="Merge readiness" />
+            <CardHead icon="git-merge" title="Synthetic merge readiness" />
             <div className="wb-card-body">
               <div
                 className={"wb-banner wb-banner--" + (mergeReady ? "safe" : "warn")}
@@ -503,8 +503,9 @@ function GitHubHead({ issue }: { readonly issue: Issue }) {
         </div>
         <div className="wb-page-title">GitHub / PR readiness</div>
         <div className="wb-page-desc">
-          AI-assisted changes flow through an ordinary pull request — diff review, required checks,
-          and a human gate — so acceleration never bypasses control.
+          A synthetic repository, branch, pull request, author, commit history, check suite, and
+          reviewer state demonstrate how AI-assisted changes stay inside ordinary engineering
+          controls. All actions update local state only.
         </div>
       </div>
       <div className="wb-spacer" />

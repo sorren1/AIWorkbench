@@ -113,14 +113,18 @@ export function ValidationScreen() {
       notes: [
         ...(ov.notes || []),
         {
-          author: issue.tester !== "—" ? issue.tester : "P. Shah",
+          author: issue.tester !== "—" ? issue.tester : "Synthetic tester A",
           time: "just now",
           text: noteText.trim(),
         },
       ],
     });
     setNoteText("");
-    actions.toast("success", "Tester note added", "Appended to the immutable evidence log.");
+    actions.toast(
+      "success",
+      "Synthetic tester note added",
+      "Appended to the browser-local evidence fixture.",
+    );
   };
 
   return (
@@ -132,8 +136,9 @@ export function ValidationScreen() {
           </div>
           <div className="wb-page-title">Validation Evidence</div>
           <div className="wb-page-desc">
-            Evidence and approval travel with the change — acceptance coverage, test scenarios, data
-            assumptions, and a final human validation decision that stays attached for audit.
+            Synthetic acceptance coverage, test scenarios, data assumptions, tester personas, and
+            metrics demonstrate how evidence and a final human decision can travel with a change.
+            Decisions update browser-local state only.
           </div>
         </div>
         <div className="wb-spacer" />

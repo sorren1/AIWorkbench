@@ -152,7 +152,7 @@ Every policy result records actor, persona, resource, action, decision, reason c
 - Record source identifier, resource type, content revision/digest, origin/provenance, retrieval time, source modification time when known, maximum age, freshness status, trust classification, inclusion reason, and applied redactions.
 - Record explicit exclusions with stable reason codes, including denied source, stale source, out-of-scope path, sensitive material, and duplicate content.
 - Canonicalize the manifest and calculate a SHA-256 digest in the browser. Link the digest to the run, approval request, trace, and generated evidence.
-- Capture metadata and digests by default, not prompt or resource bodies. The demo contains synthetic data only and never imports employer/client material.
+- Capture metadata and digests by default, not prompt or resource bodies. The demo contains synthetic data only and never imports non-public organization material.
 
 ### 7. OpenTelemetry-compatible traces and local waterfall
 
@@ -249,7 +249,7 @@ Acceptance criteria:
 
 - Root case study explains the problem, design principles, architecture, workflow, control-plane thesis, functional demo boundary, tradeoffs, and future production requirements.
 - The approved professional-context claim appears at most where useful, verbatim, in a clearly separated “Professional context” section; no other experience or outcome claims are introduced.
-- The named-company sentence at baseline `workbench/README.md:28` and all interview/target-company language are removed.
+- The audience-specific organization sentence at baseline `workbench/README.md:28` and all submission-specific language are removed.
 - Synthetic people, personas, policies, approvals, traces, and fixtures are explicitly identified as fictional demo data; no text implies real users or customers.
 - Functional local behavior and simulated external operations are explained in both README and UI copy.
 - Standard public files exist as appropriate: `README.md`, `LICENSE`, `SECURITY.md`, `CONTRIBUTING.md`, and attribution notices.
@@ -257,7 +257,7 @@ Acceptance criteria:
 - Add useful metadata: descriptive title, meta description, canonical strategy, favicon, Open Graph/Twitter cards, and static-host-safe `robots.txt`/sitemap if a canonical public URL is known. Do not invent a URL.
 - Content/privacy scans and production build pass.
 
-Suggested commit: `docs: publish the public case study narrative`
+Commit: `docs: reposition workbench as an independent portfolio project`
 
 ### Phase 3 — Semantic interaction and accessibility
 
@@ -354,7 +354,7 @@ Scope: final content/design QA followed by the only authorized publication step.
 
 Acceptance criteria:
 
-- Copy, screenshots, diagrams, metadata, attributions, and repository navigation are coherent and free of employer/target-company identifiers.
+- Copy, screenshots, diagrams, metadata, attributions, and repository navigation are coherent and free of organization- or opportunity-specific identifiers.
 - Case-study proof points describe design and implementation evidence, not invented adoption or business outcomes.
 - Control-plane screens remain visibly connected to the coding-agent workflow and contain none of the explicit initial-release exclusions.
 - Production build, full check suite, link check, performance/accessibility audit, content/privacy scan, and cross-browser smoke checks pass.
@@ -369,7 +369,7 @@ Suggested commit: `release: publish portfolio case study`
 | Current path                           | Target path                                                                       | Action and reason                                                                                                                         |
 | -------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `readme.md`                            | `README.md`                                                                       | Rewrite as the public repository entry point; use conventional casing.                                                                    |
-| `workbench/README.md`                  | `docs/demo-guide.md` plus `README.md`                                             | Preserve useful walkthrough/limitations, remove interview and named-company language.                                                     |
+| `workbench/README.md`                  | `docs/demo-guide.md` plus `README.md`                                             | Preserve useful walkthrough/limitations; remove submission- and audience-specific language.                                               |
 | `workbench/AI Delivery Workbench.html` | `demo/index.html`                                                                 | Replace CDN/Babel script chain with a normal build entry.                                                                                 |
 | `workbench/app.jsx`                    | `src/demo/App.tsx`, `src/demo/main.tsx`                                           | Split mount from typed app composition.                                                                                                   |
 | `workbench/store.jsx`                  | `src/demo/state/`                                                                 | Separate typed state, reducer, actions, and selectors; add transition tests.                                                              |

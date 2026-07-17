@@ -13,14 +13,16 @@ describe("workbench application", () => {
     );
 
     expect(
-      screen.getByText("Every governed AI delivery run in one place", { exact: false }),
+      screen.getByText("A deterministic queue for exploring governed delivery state", {
+        exact: false,
+      }),
     ).toBeVisible();
 
     fireEvent.click(screen.getByText("Issue Detail", { selector: ".wb-nav-item span" }));
     expect(screen.getByText("AI delivery workflow")).toBeVisible();
 
     fireEvent.click(screen.getByText("GitHub / PR", { selector: ".wb-nav-item span" }));
-    expect(screen.getByText("AI-generated PR summary")).toBeVisible();
+    expect(screen.getByText("Synthetic AI-generated PR summary")).toBeVisible();
 
     fireEvent.click(screen.getByText("Validation Evidence", { selector: ".wb-nav-item span" }));
     expect(screen.getByText("Acceptance criteria coverage")).toBeVisible();

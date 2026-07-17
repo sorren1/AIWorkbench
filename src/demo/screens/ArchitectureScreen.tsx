@@ -73,7 +73,7 @@ export function ArchitectureScreen() {
       <div className="wb-page-head">
         <div>
           <div className="eyebrow wb-mb-8">
-            <Icon name="network" size={13} /> How I'd productionize it
+            <Icon name="network" size={13} /> Production design boundary
           </div>
           <div className="wb-page-title">Architecture</div>
           <div className="wb-page-desc">
@@ -156,10 +156,10 @@ export function ArchitectureScreen() {
           {arch.productionNote}
         </Banner>
         <Card>
-          <CardHead icon="cpu" title="Principal-level discussion" />
+          <CardHead icon="cpu" title="Engineering review topics" />
           <div className="wb-card-body">
             <div className="wb-flex wb-wrap" style={{ gap: 7 }}>
-              {arch.principalTopics.map((t) => (
+              {arch.reviewTopics.map((t) => (
                 <span
                   key={t}
                   className="wb-badge wb-badge--neutral"
@@ -175,9 +175,9 @@ export function ArchitectureScreen() {
 
       <div className="wb-mt-16" />
       <Banner tone="neutral" icon="shield">
-        Clean-room note: this architecture is illustrative and synthetic. It uses no
-        previous-employer systems, code, or internal designs — only public-domain enterprise
-        finance-software concepts.
+        Independent portfolio architecture. The planes and reference stack are original,
+        illustrative designs; external identity, execution, persistence, and integration
+        infrastructure are not implemented by this static demo.
       </Banner>
     </div>
   );

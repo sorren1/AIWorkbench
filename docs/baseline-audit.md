@@ -7,12 +7,12 @@ Worktree at audit start: clean on `main`
 
 ## Executive findings
 
-The prototype has a distinctive, coherent visual system and a broad deterministic demo flow, but it is not yet a maintainable public project. It is a source-ordered browser app with no package manifest, lockfile, compiler, production bundle, tests, or CI. React development builds and Babel execute from CDNs in the browser. The only entry point is a nested, space-containing interview-demo HTML file.
+The prototype has a distinctive, coherent visual system and a broad deterministic demo flow, but it is not yet a maintainable public project. It is a source-ordered browser app with no package manifest, lockfile, compiler, production bundle, tests, or CI. React development builds and Babel execute from CDNs in the browser. The only entry point is a nested, space-containing submission-specific HTML file.
 
 The highest-risk public-project gaps are:
 
 1. The expected preservation tag `original-prototype-v0.9.0` does not exist. `git show-ref --tags` returned no tags. The original commit remains in Git history, but the named safety reference must be created at `13d01bb` before legacy deletion.
-2. `workbench/README.md:28` names a target company explicitly. Interview- and target-role-specific wording appears throughout the repository.
+2. `workbench/README.md:28` contains an audience-specific organization reference. Submission- and role-specific wording appears throughout the repository.
 3. Most custom navigation and selection controls are mouse-only `div`/`tr` elements. Modal and drawer overlays have no dialog or focus behavior.
 4. There are no responsive rules. At a 390 px browser viewport the fixed sidebar consumes 248 px, the main region begins at x=248, the header is only 142 px wide, and the document becomes 741 px wide.
 5. Many simulated states are presented with production-like facts (“tests passed,” “authenticated,” “immutable,” PR opened, environment ready) whose local-only nature is not always adjacent to the claim.
@@ -24,7 +24,7 @@ The highest-risk public-project gaps are:
 
 | Area               | Files                                                                                                    | Finding                                                                                                                 |
 | ------------------ | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| Root documentation | `readme.md`, `SKILL.md`, `workbench/README.md`                                                           | Design-system/interview framing rather than a public case study. `readme.md` uses nonstandard casing.                   |
+| Root documentation | `readme.md`, `SKILL.md`, `workbench/README.md`                                                           | Design-system/submission framing rather than a public case study. `readme.md` uses nonstandard casing.                  |
 | Entry point        | `workbench/AI Delivery Workbench.html`                                                                   | Loads CSS, fixture scripts, 12 JSX scripts in order, and an inline Babel script.                                        |
 | Workbench source   | `workbench/app.jsx`, `store.jsx`, `shell.jsx`, `primitives.jsx`, seven `screen-*.jsx` files, `icons.jsx` | Component-structured React, but no imports/exports; every module relies on ambient globals and script order.            |
 | Fixtures/content   | `workbench/data.js`, `workbench/content.js`                                                              | Ten synthetic issues, eight workflow stages, settings/MCP/architecture fixtures, artifact/PR/validation/log generators. |
@@ -133,27 +133,27 @@ The global header disclosure (`data.js:11-13`, `shell.jsx:109-112`) and Settings
 
 ## Branding, privacy, and disclosure text
 
-### Target-company identifier
+### Organization-specific identifier
 
-- `workbench/README.md:28`: an explicit “Uses no [named company] internal information” sentence. This is the target-company sentence called out in the task and must be removed without reproducing the name elsewhere.
+- `workbench/README.md:28`: an explicit audience-specific organization sentence. It must be removed without reproducing the identifier elsewhere.
 
-No other employer, client, recruiter, prospective-employer, or target-company name was found by the case-insensitive repository scan. Synthetic product/provider names (Jira, GitHub, Angular, .NET, Oracle, Claude, Codex, MCP) describe the demo’s mocked technical context, not employers, but must remain explicitly simulated where appropriate.
+No other organization- or opportunity-specific name was found by the case-insensitive repository scan. Synthetic product/provider names (Jira, GitHub, Angular, .NET, Oracle, Claude, Codex, MCP) describe mocked technical context and must remain explicitly simulated where appropriate.
 
-### Interview- and target-role-specific language
+### Submission- and role-specific language
 
-- `readme.md:3-9`: calls the project a clean-room interview prototype and explains the brief.
-- `workbench/README.md:3-7`, `13-14`, `50-71`, `75-91`: repeated interview-prototype, candidate-role, screen-share, and demo-script framing.
-- `workbench/AI Delivery Workbench.html:6`: interview-prototype page title.
-- `workbench/data.js:3-5`, `11-15`: interview disclosure and synthetic persona/role.
-- `workbench/content.js:156`: “for interview demonstration only.”
-- `workbench/shell.jsx:122`, `177`: previous-employer/interview wording.
-- `workbench/screen-architecture.jsx:45`, `78`, `91`: first-person productionization, “Principal-level discussion,” and previous-employer wording.
+- `readme.md:3-9`: calls the project a one-off submission prototype and explains the brief.
+- `workbench/README.md:3-7`, `13-14`, `50-71`, `75-91`: repeated submission, role-specific, presentation-oriented, and demo-script framing.
+- `workbench/AI Delivery Workbench.html:6`: submission-specific page title.
+- `workbench/data.js:3-5`, `11-15`: submission disclosure and synthetic persona/role.
+- `workbench/content.js:156`: one-off demonstration wording.
+- `workbench/shell.jsx:122`, `177`: organization-assurance and submission wording.
+- `workbench/screen-architecture.jsx:45`, `78`, `91`: first-person productionization, role-level discussion, and organization-assurance wording.
 
-The clean-room assurances should be rewritten as neutral public-project provenance. The synthetic persona “Jordan Vega” and all abbreviated team members must be clearly presented as fictional fixtures, not users or colleagues (`data.js:15`, `60-161`; `content.js:327-435`).
+The clean-room assurances should be rewritten as neutral public-project provenance. The author-like synthetic persona and all abbreviated team members must be clearly presented as fictional fixtures, not users or colleagues (`data.js:15`, `60-161`; `content.js:327-435`).
 
 ### Professional claims
 
-No approved “approximately 50 production stories” claim exists in the baseline. No adoption, revenue, award, or real-user claim was found. The public rewrite must not infer any. If the approved claim is added, it must be verbatim and visually separated from prototype capabilities.
+No approved professional outcome claim exists in the baseline. No adoption, revenue, award, or real-user claim was found. The public rewrite must not infer any. If the approved claim is added, it must be verbatim and visually separated from prototype capabilities.
 
 ## Accessibility audit
 
@@ -224,7 +224,7 @@ Manual 390×844 verification measured `innerWidth=390`, `documentElement.scrollW
 ### SEO and public presentation
 
 - No root landing page.
-- The only title is “AI Delivery Workbench — Clean-Room Interview Prototype” (`workbench/AI Delivery Workbench.html:6`).
+- The only title uses submission-specific prototype framing (`workbench/AI Delivery Workbench.html:6`).
 - No meta description, canonical, favicon, Open Graph, Twitter card, structured data, robots file, or sitemap.
 - No static case-study prose is available at `/`; all workbench content depends on JavaScript and remote CDNs.
 - No social preview asset or screenshot provenance/alt-text strategy.

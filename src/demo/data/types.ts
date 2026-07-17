@@ -22,8 +22,10 @@ export type Lifecycle =
 
 export type Meta = {
   product: string;
+  subtitle: string;
   disclaimer: string;
   aboutNote: string;
+  professionalContext: string;
   version: string;
   user: { name: string; role: string; initials: string };
 };
@@ -119,7 +121,7 @@ export type ArchitecturePlane = {
 export type Architecture = {
   planes: ArchitecturePlane[];
   productionNote: string;
-  principalTopics: string[];
+  reviewTopics: string[];
 };
 
 export type GeneratedStage = StageDefinition & {

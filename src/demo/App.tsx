@@ -49,7 +49,9 @@ function Footer() {
         }}
       >
         <Icon name="shield-check" size={14} />
-        <span>{meta.aboutNote}</span>
+        <span>
+          Independent portfolio prototype · synthetic fixtures · local workflow state is functional
+        </span>
         <span className="wb-spacer" style={{ marginLeft: "auto" }} />
         <span className="wb-mono">
           {meta.product} · v{meta.version}

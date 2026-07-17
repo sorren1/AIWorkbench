@@ -180,7 +180,7 @@ and reporting period, surfaced in the Angular reporting UI and served by the
 - Feature flag \`fpa.aiVarianceCommentary\` defaults **off**; view + package are
   additive and independently revertible.
 
-> Synthetic plan — for interview demonstration only.`,
+> Synthetic plan — for interactive portfolio demonstration only.`,
   },
   "change-targets.json": {
     type: "JSON",
@@ -446,7 +446,7 @@ export function prFor(issue: Issue): PullRequestData {
       status: "Draft",
       branch: issue.branch,
       target: "main",
-      author: "Jordan Vega",
+      author: "Alex Morgan · Synthetic demo persona",
       created: "Jun 10 · 10:04",
       commits: 6,
       files: PR_FILES_1150,
@@ -472,8 +472,8 @@ export function prFor(issue: Issue): PullRequestData {
         { name: "Human review required", status: "required", detail: "reviewer gate not yet met" },
       ],
       reviewers: [
-        { name: "M. Donovan", role: "Reviewer", state: "pending" },
-        { name: "L. Okafor", role: "Backend", state: "pending" },
+        { name: "Synthetic reviewer A", role: "Reviewer", state: "pending" },
+        { name: "Synthetic reviewer B", role: "Service adapter", state: "pending" },
       ],
       checklist: [
         { label: "Changed files match change-targets.json", done: false },
@@ -617,12 +617,12 @@ export function validationFor(issue: Issue): ValidationData {
       security: "Passed",
       testerNotes: [
         {
-          author: "P. Shah",
+          author: "Synthetic tester A",
           time: "Jun 10 · 11:20",
           text: "Approval gate solid in both paths. Verified publish is blocked without explicit approve.",
         },
         {
-          author: "P. Shah",
+          author: "Synthetic tester A",
           time: "Jun 10 · 11:34",
           text: "Edit-persistence (AC4 / VC-04) still under test — re-checking buffer on re-open.",
         },
@@ -695,6 +695,6 @@ export function logsFor(issue: Issue, stageId: StageId): string[] {
   } else {
     lines.push("[" + stageId + "] not started");
   }
-  lines.push("[audit] run appended to evidence log (immutable, simulated)");
+  lines.push("[audit] synthetic run appended to the browser-local evidence fixture");
   return lines;
 }
