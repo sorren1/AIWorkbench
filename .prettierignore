@@ -2,3 +2,4 @@ dist/
 node_modules/
 private/
 guidelines/
+.env.example

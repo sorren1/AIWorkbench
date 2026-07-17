@@ -40,6 +40,7 @@ class FixtureSandboxProvider implements SandboxProvider {
 
   inspect(): Promise<SandboxAvailability> {
     return Promise.resolve({
+      provider: "LOCAL_DOCKER",
       available: true,
       dockerClientVersion: "29.5.3-test",
       dockerServerVersion: "29.5.3-test",

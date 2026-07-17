@@ -313,3 +313,28 @@ The static site validates the checked-in successful pack at build time and rende
 - The patch, commands, repository, issue, and targets remain owned, deterministic, synthetic, and narrow.
 - Docker is an optional local dependency for generating a real pack; schema/hash validation and unit tests do not require Docker.
 - The slice does not prove safe multi-tenant untrusted-code execution, hosted sandbox reliability, container image trust, or production identity/secrets/operations.
+
+## ADR-013 — Add E2B as an explicit optional sandbox adapter
+
+- Status: Accepted with live-validation blocker
+- Date: 2026-07-17
+- Detailed record: [`docs/sandbox-security-model.md`](sandbox-security-model.md)
+
+### Context
+
+The local Docker slice proves the controller, allow-list, deterministic patch, validation, and evidence path, but it does not demonstrate provider portability. A cloud adapter is useful only if it preserves the static website boundary, accepts no visitor-controlled repository or command, uploads no private material, reports provider-specific controls honestly, and cannot silently accumulate cost after interruption.
+
+### Decision
+
+Keep `LocalDockerSandboxProvider` as the default and add `E2BSandboxProvider` behind the same typed contract. Select E2B only with `--provider e2b`, use the pinned official `e2b` 2.34.0 SDK, and let the SDK read `E2B_API_KEY` from the process environment. Pass an explicit manifest containing only the synthetic toy-repository snapshot and approved generated artifacts.
+
+Request `allowInternetAccess: false`, deny-all outbound rules, no public traffic, secure control traffic, and a two-minute `onTimeout: kill` lifecycle. Refuse to label an execution network-restricted unless E2B reports internet disabled and a fixed outbound probe is blocked. Normalize both providers into evidence schema v2 while retaining discriminated provider metadata. For E2B, report provider-observed CPU/memory and explicitly leave process, tmpfs, root-filesystem, non-root, and Linux-capability controls unclaimed.
+
+Kill each sandbox in `finally`, verify inactivity, use a static kill fallback, and discover tagged running/paused orphans during final cleanup. Keep a credential-gated live integration test separate from fake contract tests.
+
+### Consequences
+
+- Docker usage and the public static site require no E2B account.
+- No key was available in this revision; E2B is **implemented but not live-validated**, and no E2B evidence is checked in.
+- A future successful live run may add provider evidence only after network denial, bounded uploads, remote-tree equality, command results, and cleanup all verify.
+- E2B service, account, SDK, template, billing, and isolation remain external trust dependencies; this adapter is not a production-readiness claim.

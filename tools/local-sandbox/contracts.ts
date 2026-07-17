@@ -1,3 +1,5 @@
+export type SandboxProviderKind = "LOCAL_DOCKER" | "E2B";
+
 export type SandboxCommandId = "tool-versions" | "pre-test" | "build" | "test";
 
 export type SandboxLimits = {
@@ -11,6 +13,13 @@ export type SandboxLimits = {
 export type SandboxCommand = {
   readonly id: SandboxCommandId;
   readonly argv: readonly [string, ...string[]];
+};
+
+export type SandboxUpload = {
+  readonly path: string;
+  readonly content: string;
+  readonly sha256: string;
+  readonly classification: "SYNTHETIC_TOY_REPOSITORY" | "APPROVED_GENERATED_ARTIFACT";
 };
 
 export type SandboxCommandReceipt = {
@@ -32,11 +41,12 @@ export type SandboxExecutionRequest = {
   readonly runId: string;
   readonly phase: "before-patch" | "after-patch";
   readonly workspaceRoot: string;
+  readonly uploads: readonly SandboxUpload[];
   readonly commands: readonly SandboxCommand[];
   readonly limits: SandboxLimits;
 };
 
-export type SandboxExecutionResult = {
+export type LocalDockerExecutionResult = {
   readonly provider: "LOCAL_DOCKER";
   readonly image: string;
   readonly imageDigest: string;
@@ -48,7 +58,40 @@ export type SandboxExecutionResult = {
   readonly cleanupAttempts: readonly string[];
 };
 
-export type SandboxAvailability = {
+export type E2BExecutionResult = {
+  readonly provider: "E2B";
+  readonly image: string;
+  readonly imageDigest: null;
+  readonly networkMode: "deny-all-verified";
+  readonly user: string;
+  readonly readOnlyRootFilesystem: null;
+  readonly noNewPrivileges: null;
+  readonly commands: readonly SandboxCommandReceipt[];
+  readonly cleanupAttempts: readonly string[];
+  readonly providerMetadata: {
+    readonly sdkVersion: string;
+    readonly sandboxId: string;
+    readonly templateId: string;
+    readonly envdVersion: string;
+    readonly cpuCount: number;
+    readonly memoryMb: number;
+    readonly sandboxTimeoutMs: number;
+    readonly lifecycleOnTimeout: "kill";
+    readonly allowInternetAccess: false;
+    readonly networkVerification: "OUTBOUND_PROBE_BLOCKED";
+    readonly uploadedFileCount: number;
+    readonly uploadedBytes: number;
+    readonly uploadedTreeDigest: string;
+    readonly remoteTreeDigest: string;
+    readonly remoteChangedFiles: readonly string[];
+    readonly cleanupVerified: true;
+  };
+};
+
+export type SandboxExecutionResult = LocalDockerExecutionResult | E2BExecutionResult;
+
+export type LocalDockerAvailability = {
+  readonly provider: "LOCAL_DOCKER";
   readonly available: boolean;
   readonly dockerClientVersion: string | null;
   readonly dockerServerVersion: string | null;
@@ -57,12 +100,24 @@ export type SandboxAvailability = {
   readonly detail: string;
 };
 
+export type E2BAvailability = {
+  readonly provider: "E2B";
+  readonly available: boolean;
+  readonly sdkVersion: string;
+  readonly template: string;
+  readonly apiKeyConfigured: boolean;
+  readonly detail: string;
+};
+
+export type SandboxAvailability = LocalDockerAvailability | E2BAvailability;
+
 /**
- * Executes repository-owned commands in an isolated local runtime. Implementations
- * receive a controller-created workspace and never accept arbitrary visitor input.
+ * Executes repository-owned commands in an isolated runtime. Implementations
+ * receive a controller-created workspace and an explicit synthetic upload
+ * manifest; they never accept arbitrary visitor input.
  */
 export type SandboxProvider = {
-  readonly kind: "LOCAL_DOCKER";
+  readonly kind: SandboxProviderKind;
   inspect(): Promise<SandboxAvailability>;
   prepare(): Promise<SandboxAvailability>;
   execute(request: SandboxExecutionRequest): Promise<SandboxExecutionResult>;

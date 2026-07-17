@@ -11,10 +11,16 @@ import { buildContextPack } from "../../src/demo/context/runtime";
 import { registrySnapshot } from "../../src/demo/control-plane/registry/generated";
 import { sha256Hex } from "../../src/demo/control-plane/registry/canonical";
 import { initializeToyRepository } from "../toy-repo-mcp/workspace";
-import type { SandboxExecutionResult, SandboxLimits, SandboxProvider } from "./contracts";
+import type {
+  SandboxAvailability,
+  SandboxExecutionResult,
+  SandboxLimits,
+  SandboxProvider,
+  SandboxUpload,
+} from "./contracts";
 import {
   createEvidenceDigest,
-  sandboxEvidenceSchema,
+  sandboxEvidenceV2Schema,
   validateEvidencePack,
   writeEvidencePack,
   type SandboxEvidencePack,
@@ -28,6 +34,7 @@ import {
 } from "./security";
 
 const execFileAsync = promisify(execFile);
+const EVIDENCE_OUTPUT_LIMIT_BYTES = 2 * 1024 * 1024;
 const DEFAULT_LIMITS: SandboxLimits = {
   cpuCount: 0.5,
   memoryMb: 256,
@@ -164,20 +171,168 @@ async function treeDigest(
   return sha256Hex(files.map(({ path, sha256 }) => ({ path, sha256 })));
 }
 
+function sandboxUploads(
+  files: readonly { readonly path: string; readonly sha256: string; readonly content: string }[],
+  artifacts: readonly ReturnType<typeof artifact>[],
+): readonly SandboxUpload[] {
+  return [
+    ...files.map((file) => ({
+      path: `workspace/${file.path}`,
+      content: file.content,
+      sha256: file.sha256,
+      classification: "SYNTHETIC_TOY_REPOSITORY" as const,
+    })),
+    ...artifacts.map((item) => ({
+      path: item.path,
+      content: item.content,
+      sha256: item.sha256,
+      classification: "APPROVED_GENERATED_ARTIFACT" as const,
+    })),
+  ].sort((left, right) => left.path.localeCompare(right.path));
+}
+
+function providerTools(
+  availability: SandboxAvailability,
+  prePatchExecution: SandboxExecutionResult,
+  postPatchExecution: SandboxExecutionResult,
+  containerNodeVersion: string,
+  containerNpmVersion: string,
+  hostGitVersion: string,
+): SandboxEvidencePack["tools"] {
+  if (availability.provider === "LOCAL_DOCKER") {
+    if (
+      !availability.dockerClientVersion ||
+      !availability.dockerServerVersion ||
+      !availability.imageDigest ||
+      prePatchExecution.provider !== "LOCAL_DOCKER" ||
+      postPatchExecution.provider !== "LOCAL_DOCKER"
+    ) {
+      throw new Error("Local Docker availability and execution metadata are incomplete.");
+    }
+    return {
+      provider: "LOCAL_DOCKER",
+      dockerClientVersion: availability.dockerClientVersion,
+      dockerServerVersion: availability.dockerServerVersion,
+      image: availability.image,
+      imageDigest: availability.imageDigest,
+      containerNodeVersion,
+      containerNpmVersion,
+      hostGitVersion,
+    };
+  }
+  if (prePatchExecution.provider !== "E2B" || postPatchExecution.provider !== "E2B") {
+    throw new Error("E2B availability and execution metadata are inconsistent.");
+  }
+  const executions = [prePatchExecution, postPatchExecution];
+  return {
+    provider: "E2B",
+    sdkVersion: availability.sdkVersion,
+    template: availability.template,
+    templateIds: [...new Set(executions.map((item) => item.providerMetadata.templateId))].sort(),
+    envdVersions: [...new Set(executions.map((item) => item.providerMetadata.envdVersion))].sort(),
+    sandboxIds: executions.map((item) => item.providerMetadata.sandboxId).sort(),
+    sandboxTimeoutMs: Math.max(...executions.map((item) => item.providerMetadata.sandboxTimeoutMs)),
+    allowInternetAccess: false,
+    networkVerification: "OUTBOUND_PROBE_BLOCKED",
+    containerNodeVersion,
+    containerNpmVersion,
+    hostGitVersion,
+  };
+}
+
+function evidenceExecution(
+  execution: SandboxExecutionResult,
+): SandboxEvidencePack["prePatchExecution"] {
+  const commands = execution.commands.map((command) => ({
+    ...command,
+    argv: [...command.argv],
+  }));
+  if (execution.provider === "LOCAL_DOCKER") {
+    return { ...execution, commands, cleanupAttempts: [...execution.cleanupAttempts] };
+  }
+  return {
+    ...execution,
+    commands,
+    cleanupAttempts: [...execution.cleanupAttempts],
+    providerMetadata: {
+      ...execution.providerMetadata,
+      remoteChangedFiles: [...execution.providerMetadata.remoteChangedFiles],
+    },
+  };
+}
+
+function evidenceBoundary(
+  prePatchExecution: SandboxExecutionResult,
+  postPatchExecution: SandboxExecutionResult,
+): SandboxEvidencePack["boundary"] {
+  const common = {
+    invocation: "EXPLICIT_LOCAL_DEVELOPER_COMMAND" as const,
+    websiteExecutesCode: false as const,
+    visitorInputAccepted: false as const,
+    patchSource: "REPOSITORY_OWNED_DETERMINISTIC_FIXTURE" as const,
+    networkDuringExecution: false as const,
+    workspaceDisposable: true as const,
+  };
+  if (
+    prePatchExecution.provider === "LOCAL_DOCKER" &&
+    postPatchExecution.provider === "LOCAL_DOCKER"
+  ) {
+    return {
+      ...common,
+      limits: {
+        commandTimeoutMs: DEFAULT_LIMITS.timeoutMs,
+        outputLimitBytes: EVIDENCE_OUTPUT_LIMIT_BYTES,
+        provider: {
+          kind: "LOCAL_DOCKER",
+          cpuCount: DEFAULT_LIMITS.cpuCount,
+          memoryMb: DEFAULT_LIMITS.memoryMb,
+          processLimit: DEFAULT_LIMITS.processLimit,
+          tmpfsMb: DEFAULT_LIMITS.tmpfsMb,
+          basis: "DOCKER_RUN_FLAGS",
+        },
+      },
+    };
+  }
+  if (prePatchExecution.provider === "E2B" && postPatchExecution.provider === "E2B") {
+    return {
+      ...common,
+      limits: {
+        commandTimeoutMs: DEFAULT_LIMITS.timeoutMs,
+        outputLimitBytes: EVIDENCE_OUTPUT_LIMIT_BYTES,
+        provider: {
+          kind: "E2B",
+          cpuCount: Math.min(
+            prePatchExecution.providerMetadata.cpuCount,
+            postPatchExecution.providerMetadata.cpuCount,
+          ),
+          memoryMb: Math.min(
+            prePatchExecution.providerMetadata.memoryMb,
+            postPatchExecution.providerMetadata.memoryMb,
+          ),
+          processLimit: null,
+          tmpfsMb: null,
+          sandboxTimeoutMs: Math.min(
+            prePatchExecution.providerMetadata.sandboxTimeoutMs,
+            postPatchExecution.providerMetadata.sandboxTimeoutMs,
+          ),
+          basis: "E2B_SANDBOX_INFO_AND_LIFECYCLE",
+          limitation:
+            "The provider reports sandbox CPU and memory. This implementation does not configure or claim an E2B process limit, tmpfs limit, or read-only root filesystem.",
+        },
+      },
+    };
+  }
+  throw new Error("Sandbox execution providers changed during one run.");
+}
+
 export async function runSandboxSlice(options: RunSandboxOptions): Promise<SandboxEvidencePack> {
   const scenario = options.scenario ?? "successful-validation";
   const run = createRunIdentity(options.fixedRun);
   if (!/^sandbox-[a-z0-9-]+$/.test(run.id)) throw new Error("Internal sandbox run ID is invalid.");
   const provenance = await projectProvenance(options.projectRoot);
   const availability = await options.provider.prepare();
-  if (
-    !availability.available ||
-    !availability.imageDigest ||
-    !availability.dockerClientVersion ||
-    !availability.dockerServerVersion
-  ) {
-    throw new Error(`Local Docker sandbox unavailable: ${availability.detail}`);
-  }
+  if (!availability.available || availability.provider !== options.provider.kind)
+    throw new Error(`${options.provider.kind} sandbox unavailable: ${availability.detail}`);
 
   const toyRoot = resolve(options.projectRoot, "examples/toy-repo");
   await assertNoSymlinks(toyRoot);
@@ -219,7 +374,7 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
       createdAt: run.createdAt,
     });
     const spec = `# Deterministic specification\n\nIssue: ${issue.id} — ${issue.summary}\n\n${issue.acceptanceCriteria.map((criterion) => `- ${criterion}`).join("\n")}\n`;
-    const plan = `# Deterministic plan\n\n1. Run the checked-in synthetic tests and record the expected failure.\n2. Replace one exact source fragment in \`${changeTargets.paths[0]}\`.\n3. Reject any changed path outside the approved target.\n4. Run the fixed build and test commands in network-disabled containers.\n`;
+    const plan = `# Deterministic plan\n\n1. Run the checked-in synthetic tests and record the expected failure.\n2. Replace one exact source fragment in \`${changeTargets.paths[0]}\`.\n3. Reject any changed path outside the approved target.\n4. Run the fixed build and test commands in a provider-isolated sandbox with verified outbound denial.\n`;
     const targets = `${JSON.stringify({ ...changeTargets, source: "approved/change-targets.json", digest: await sha256Hex(changeTargets) }, null, 2)}\n`;
     const context = `${JSON.stringify(contextPack, null, 2)}\n`;
     artifacts = [
@@ -237,6 +392,7 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
       runId: run.id,
       phase: "before-patch",
       workspaceRoot: repositoryRoot,
+      uploads: sandboxUploads(repositoryBefore, artifacts),
       limits: DEFAULT_LIMITS,
       commands: [
         { id: "tool-versions", argv: ["sh", "-c", "node --version && npm --version"] },
@@ -265,6 +421,7 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
       runId: run.id,
       phase: "after-patch",
       workspaceRoot: repositoryRoot,
+      uploads: sandboxUploads(repositoryAfter, artifacts),
       limits: DEFAULT_LIMITS,
       commands: [
         { id: "build", argv: ["npm", "run", "build", "--silent"] },
@@ -303,10 +460,10 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
   const replacement =
     scenario === "successful-validation" ? SUCCESSFUL_REPLACEMENT : FAILED_REPLACEMENT;
   const packWithoutDigest: Omit<SandboxEvidencePack, "evidenceDigest"> = {
-    schemaVersion: 1,
-    classification: "RECORDED_REAL_LOCAL_SANDBOX_EVIDENCE",
+    schemaVersion: 2,
+    classification: "RECORDED_REAL_SANDBOX_EVIDENCE",
     disclosure:
-      "Recorded evidence from an explicitly invoked local command against repository-owned synthetic fixtures. The static public website does not execute code, accept patches, start containers, or expose this runner as a service.",
+      "Recorded evidence from an explicitly invoked developer command against repository-owned synthetic fixtures. The static public website does not execute code, accept patches, start sandboxes, or expose this runner as a service.",
     run: {
       id: run.id,
       scenario,
@@ -317,15 +474,7 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
       sourceTreeDigest: provenance.sourceTreeDigest,
       status: finalStatus,
     },
-    boundary: {
-      invocation: "EXPLICIT_LOCAL_DEVELOPER_COMMAND",
-      websiteExecutesCode: false,
-      visitorInputAccepted: false,
-      patchSource: "REPOSITORY_OWNED_DETERMINISTIC_FIXTURE",
-      networkDuringExecution: false,
-      workspaceDisposable: true,
-      limits: DEFAULT_LIMITS,
-    },
+    boundary: evidenceBoundary(prePatchExecution, postPatchExecution),
     inputs: {
       toyRepositoryPath: "examples/toy-repo",
       issue: {
@@ -353,14 +502,7 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
       treeDigest: await treeDigest(repositoryBefore),
       files: [...repositoryBefore],
     },
-    prePatchExecution: {
-      ...prePatchExecution,
-      commands: [...prePatchExecution.commands].map((command) => ({
-        ...command,
-        argv: [...command.argv],
-      })),
-      cleanupAttempts: [...prePatchExecution.cleanupAttempts],
-    },
+    prePatchExecution: evidenceExecution(prePatchExecution),
     change: {
       path: "src/report.js",
       expectedTextSha256: sha256Bytes(EXPECTED_SOURCE),
@@ -370,23 +512,15 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
       unifiedDiffSha256: sha256Bytes(unifiedDiff),
     },
     repositoryAfter: { treeDigest: await treeDigest(repositoryAfter), files: [...repositoryAfter] },
-    postPatchExecution: {
-      ...postPatchExecution,
-      commands: [...postPatchExecution.commands].map((command) => ({
-        ...command,
-        argv: [...command.argv],
-      })),
-      cleanupAttempts: [...postPatchExecution.cleanupAttempts],
-    },
-    tools: {
-      dockerClientVersion: availability.dockerClientVersion,
-      dockerServerVersion: availability.dockerServerVersion,
-      image: availability.image,
-      imageDigest: availability.imageDigest,
+    postPatchExecution: evidenceExecution(postPatchExecution),
+    tools: providerTools(
+      availability,
+      prePatchExecution,
+      postPatchExecution,
       containerNodeVersion,
       containerNpmVersion,
-      hostGitVersion: provenance.hostGitVersion,
-    },
+      provenance.hostGitVersion,
+    ),
     cleanup: {
       providerCleanupAttempted: true,
       temporaryWorkspaceRemoved,
@@ -397,7 +531,7 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
       ],
     },
   };
-  const pack = sandboxEvidenceSchema.parse({
+  const pack = sandboxEvidenceV2Schema.parse({
     ...packWithoutDigest,
     evidenceDigest: await createEvidenceDigest(packWithoutDigest),
   });

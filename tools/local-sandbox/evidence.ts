@@ -23,7 +23,7 @@ const commandReceiptSchema = z.object({
   outputTruncated: z.boolean(),
 });
 
-const executionSchema = z.object({
+const localDockerExecutionSchema = z.object({
   provider: z.literal("LOCAL_DOCKER"),
   image: z.string().min(1),
   imageDigest: z.string().regex(/^node@sha256:[a-f0-9]{64}$/),
@@ -33,6 +33,36 @@ const executionSchema = z.object({
   noNewPrivileges: z.literal(true),
   commands: z.array(commandReceiptSchema).min(1),
   cleanupAttempts: z.array(z.string()),
+});
+
+const e2bExecutionSchema = z.object({
+  provider: z.literal("E2B"),
+  image: z.string().min(1),
+  imageDigest: z.null(),
+  networkMode: z.literal("deny-all-verified"),
+  user: z.string().min(1),
+  readOnlyRootFilesystem: z.null(),
+  noNewPrivileges: z.null(),
+  commands: z.array(commandReceiptSchema).min(1),
+  cleanupAttempts: z.array(z.string()),
+  providerMetadata: z.object({
+    sdkVersion: z.string().min(1),
+    sandboxId: z.string().min(1),
+    templateId: z.string().min(1),
+    envdVersion: z.string().min(1),
+    cpuCount: z.number().positive(),
+    memoryMb: z.number().int().positive(),
+    sandboxTimeoutMs: z.number().int().positive(),
+    lifecycleOnTimeout: z.literal("kill"),
+    allowInternetAccess: z.literal(false),
+    networkVerification: z.literal("OUTBOUND_PROBE_BLOCKED"),
+    uploadedFileCount: z.number().int().positive(),
+    uploadedBytes: z.number().int().positive(),
+    uploadedTreeDigest: hashSchema,
+    remoteTreeDigest: hashSchema,
+    remoteChangedFiles: z.array(z.string()).length(0),
+    cleanupVerified: z.literal(true),
+  }),
 });
 
 const fileSnapshotSchema = z.object({
@@ -49,7 +79,7 @@ const evidenceArtifactSchema = z.object({
   content: z.string(),
 });
 
-export const sandboxEvidenceSchema = z.object({
+const legacySandboxEvidenceSchema = z.object({
   schemaVersion: z.literal(1),
   classification: z.literal("RECORDED_REAL_LOCAL_SANDBOX_EVIDENCE"),
   disclosure: z.string().min(1),
@@ -102,7 +132,7 @@ export const sandboxEvidenceSchema = z.object({
   }),
   artifacts: z.array(evidenceArtifactSchema).length(4),
   repositoryBefore: z.object({ treeDigest: hashSchema, files: z.array(fileSnapshotSchema).min(1) }),
-  prePatchExecution: executionSchema,
+  prePatchExecution: localDockerExecutionSchema,
   change: z.object({
     path: z.string().min(1),
     expectedTextSha256: hashSchema,
@@ -122,7 +152,7 @@ export const sandboxEvidenceSchema = z.object({
     unifiedDiffSha256: hashSchema,
   }),
   repositoryAfter: z.object({ treeDigest: hashSchema, files: z.array(fileSnapshotSchema).min(1) }),
-  postPatchExecution: executionSchema,
+  postPatchExecution: localDockerExecutionSchema,
   tools: z.object({
     dockerClientVersion: z.string().min(1),
     dockerServerVersion: z.string().min(1),
@@ -140,7 +170,79 @@ export const sandboxEvidenceSchema = z.object({
   evidenceDigest: hashSchema,
 });
 
-export type SandboxEvidencePack = z.infer<typeof sandboxEvidenceSchema>;
+const localDockerToolsSchema = z.object({
+  provider: z.literal("LOCAL_DOCKER"),
+  dockerClientVersion: z.string().min(1),
+  dockerServerVersion: z.string().min(1),
+  image: z.string().min(1),
+  imageDigest: z.string().regex(/^node@sha256:[a-f0-9]{64}$/),
+  containerNodeVersion: z.string().min(1),
+  containerNpmVersion: z.string().min(1),
+  hostGitVersion: z.string().min(1),
+});
+
+const e2bToolsSchema = z.object({
+  provider: z.literal("E2B"),
+  sdkVersion: z.string().min(1),
+  template: z.string().min(1),
+  templateIds: z.array(z.string().min(1)).min(1),
+  envdVersions: z.array(z.string().min(1)).min(1),
+  sandboxIds: z.array(z.string().min(1)).min(1),
+  sandboxTimeoutMs: z.number().int().positive(),
+  allowInternetAccess: z.literal(false),
+  networkVerification: z.literal("OUTBOUND_PROBE_BLOCKED"),
+  containerNodeVersion: z.string().min(1),
+  containerNpmVersion: z.string().min(1),
+  hostGitVersion: z.string().min(1),
+});
+
+export const sandboxEvidenceV2Schema = legacySandboxEvidenceSchema.extend({
+  schemaVersion: z.literal(2),
+  classification: z.literal("RECORDED_REAL_SANDBOX_EVIDENCE"),
+  boundary: z.object({
+    invocation: z.literal("EXPLICIT_LOCAL_DEVELOPER_COMMAND"),
+    websiteExecutesCode: z.literal(false),
+    visitorInputAccepted: z.literal(false),
+    patchSource: z.literal("REPOSITORY_OWNED_DETERMINISTIC_FIXTURE"),
+    networkDuringExecution: z.literal(false),
+    workspaceDisposable: z.literal(true),
+    limits: z.object({
+      commandTimeoutMs: z.number().int().positive(),
+      outputLimitBytes: z.number().int().positive(),
+      provider: z.discriminatedUnion("kind", [
+        z.object({
+          kind: z.literal("LOCAL_DOCKER"),
+          cpuCount: z.number().positive(),
+          memoryMb: z.number().int().positive(),
+          processLimit: z.number().int().positive(),
+          tmpfsMb: z.number().int().positive(),
+          basis: z.literal("DOCKER_RUN_FLAGS"),
+        }),
+        z.object({
+          kind: z.literal("E2B"),
+          cpuCount: z.number().positive(),
+          memoryMb: z.number().int().positive(),
+          processLimit: z.null(),
+          tmpfsMb: z.null(),
+          sandboxTimeoutMs: z.number().int().positive(),
+          basis: z.literal("E2B_SANDBOX_INFO_AND_LIFECYCLE"),
+          limitation: z.string().min(1),
+        }),
+      ]),
+    }),
+  }),
+  prePatchExecution: z.union([localDockerExecutionSchema, e2bExecutionSchema]),
+  postPatchExecution: z.union([localDockerExecutionSchema, e2bExecutionSchema]),
+  tools: z.discriminatedUnion("provider", [localDockerToolsSchema, e2bToolsSchema]),
+});
+
+export const sandboxEvidenceSchema = z.union([
+  legacySandboxEvidenceSchema,
+  sandboxEvidenceV2Schema,
+]);
+
+export type SandboxEvidencePack = z.infer<typeof sandboxEvidenceV2Schema>;
+export type ValidatedSandboxEvidencePack = z.infer<typeof sandboxEvidenceSchema>;
 
 export const evidenceIndexSchema = z.object({
   schemaVersion: z.literal(1),
@@ -156,7 +258,7 @@ export const evidenceIndexSchema = z.object({
 export type EvidenceIndex = z.infer<typeof evidenceIndexSchema>;
 
 function evidenceDigestInput(
-  pack: SandboxEvidencePack | Omit<SandboxEvidencePack, "evidenceDigest">,
+  pack: ValidatedSandboxEvidencePack | Omit<SandboxEvidencePack, "evidenceDigest">,
 ): unknown {
   return Object.fromEntries(Object.entries(pack).filter(([key]) => key !== "evidenceDigest"));
 }
@@ -183,7 +285,7 @@ function verifyFileSnapshots(
 export async function validateEvidencePack(
   value: unknown,
 ): Promise<
-  | { readonly valid: true; readonly value: SandboxEvidencePack }
+  | { readonly valid: true; readonly value: ValidatedSandboxEvidencePack }
   | { readonly valid: false; readonly errors: readonly string[] }
 > {
   const parsed = sandboxEvidenceSchema.safeParse(value);
@@ -241,12 +343,36 @@ export async function validateEvidencePack(
     errors.push(`Context pack invalid: ${contextValidation.errors.join("; ")}`);
   else if (contextValidation.value.packDigest !== pack.governance.contextPackDigest)
     errors.push("Context-pack digest binding mismatch.");
+  if (pack.schemaVersion === 2) {
+    if (
+      pack.prePatchExecution.provider !== pack.postPatchExecution.provider ||
+      pack.prePatchExecution.provider !== pack.tools.provider
+    ) {
+      errors.push("Sandbox provider binding mismatch.");
+    }
+    for (const execution of [pack.prePatchExecution, pack.postPatchExecution]) {
+      if (execution.provider === "E2B") {
+        if (
+          execution.providerMetadata.uploadedTreeDigest !==
+          execution.providerMetadata.remoteTreeDigest
+        ) {
+          errors.push(`E2B remote tree digest mismatch: ${execution.providerMetadata.sandboxId}`);
+        }
+        if (!execution.providerMetadata.cleanupVerified) {
+          errors.push(`E2B cleanup was not verified: ${execution.providerMetadata.sandboxId}`);
+        }
+      }
+    }
+  }
   if ((await sha256Hex(evidenceDigestInput(pack))) !== pack.evidenceDigest)
     errors.push("Evidence-pack digest mismatch.");
   return errors.length === 0 ? { valid: true, value: pack } : { valid: false, errors };
 }
 
-function commandLine(pack: SandboxEvidencePack, id: "pre-test" | "build" | "test"): string {
+function commandLine(
+  pack: ValidatedSandboxEvidencePack,
+  id: "pre-test" | "build" | "test",
+): string {
   const receipt = [...pack.prePatchExecution.commands, ...pack.postPatchExecution.commands].find(
     (candidate) => candidate.id === id,
   );
@@ -255,7 +381,28 @@ function commandLine(pack: SandboxEvidencePack, id: "pre-test" | "build" | "test
     : `${id}: missing`;
 }
 
-export function renderEvidenceMarkdown(pack: SandboxEvidencePack): string {
+function providerMarkdown(pack: ValidatedSandboxEvidencePack): string {
+  if (pack.schemaVersion === 1) {
+    return `- Provider: Local Docker\n- Runtime image: ${pack.tools.imageDigest}\n- Network during execution: disabled`;
+  }
+  if (pack.tools.provider === "LOCAL_DOCKER") {
+    return `- Provider: Local Docker\n- Runtime image: ${pack.tools.imageDigest}\n- Network during execution: disabled`;
+  }
+  return `- Provider: E2B\n- SDK: e2b ${pack.tools.sdkVersion}\n- Template: ${pack.tools.template}\n- Network configuration: allowInternetAccess=false\n- Network verification: outbound probe blocked\n- Sandbox TTL: ${pack.tools.sandboxTimeoutMs} ms with lifecycle on-timeout kill`;
+}
+
+function limitsMarkdown(pack: ValidatedSandboxEvidencePack): string {
+  if (pack.schemaVersion === 1) {
+    return `${pack.boundary.limits.cpuCount} CPU, ${pack.boundary.limits.memoryMb} MiB memory, ${pack.boundary.limits.processLimit} processes, ${pack.boundary.limits.timeoutMs} ms per command`;
+  }
+  const limits = pack.boundary.limits;
+  if (limits.provider.kind === "LOCAL_DOCKER") {
+    return `${limits.provider.cpuCount} CPU, ${limits.provider.memoryMb} MiB memory, ${limits.provider.processLimit} processes, ${limits.commandTimeoutMs} ms per command (Docker flags)`;
+  }
+  return `${limits.provider.cpuCount} CPU and ${limits.provider.memoryMb} MiB reported by E2B, ${limits.commandTimeoutMs} ms per command; process and tmpfs limits are not configured`;
+}
+
+export function renderEvidenceMarkdown(pack: ValidatedSandboxEvidencePack): string {
   return `# Recorded real sandbox run
 
 - Classification: ${pack.classification}
@@ -265,10 +412,9 @@ export function renderEvidenceMarkdown(pack: SandboxEvidencePack): string {
 - Source working tree: ${pack.run.sourceWorkingTree}
 - Evidence digest: ${pack.evidenceDigest}
 - Context-pack digest: ${pack.governance.contextPackDigest}
-- Docker image: ${pack.tools.imageDigest}
-- Network during execution: disabled
+${providerMarkdown(pack)}
 - Container user: ${pack.postPatchExecution.user}
-- Limits: ${pack.boundary.limits.cpuCount} CPU, ${pack.boundary.limits.memoryMb} MiB memory, ${pack.boundary.limits.processLimit} processes, ${pack.boundary.limits.timeoutMs} ms per command
+- Limits: ${limitsMarkdown(pack)}
 
 ## Result
 
@@ -330,7 +476,7 @@ export async function writeEvidencePack(
 }
 
 export async function readLatestValidatedEvidence(projectRoot: string): Promise<{
-  readonly pack: SandboxEvidencePack;
+  readonly pack: ValidatedSandboxEvidencePack;
   readonly index: EvidenceIndex;
   readonly json: string;
   readonly markdown: string;
@@ -365,22 +511,22 @@ export async function readLatestValidatedEvidence(projectRoot: string): Promise<
 
 export async function validateGeneratedEvidence(
   projectRoot: string,
-): Promise<SandboxEvidencePack | null> {
+): Promise<ValidatedSandboxEvidencePack | null> {
   const latest = await readLatestValidatedEvidence(projectRoot);
   if (!latest) return null;
   return latest.pack;
 }
 
 export async function validateAllGeneratedEvidence(projectRoot: string): Promise<{
-  readonly latest: SandboxEvidencePack;
-  readonly packs: readonly SandboxEvidencePack[];
+  readonly latest: ValidatedSandboxEvidencePack;
+  readonly packs: readonly ValidatedSandboxEvidencePack[];
 }> {
   const generatedRoot = resolve(projectRoot, "evidence/generated");
   const names = (await readdir(generatedRoot))
     .filter((name) => /^sandbox-run-[a-z0-9-]+\.json$/.test(name))
     .sort();
   if (names.length === 0) throw new Error("No generated sandbox evidence packs were found.");
-  const packs: SandboxEvidencePack[] = [];
+  const packs: ValidatedSandboxEvidencePack[] = [];
   for (const name of names) {
     const raw = await readFile(resolve(generatedRoot, name), "utf8");
     const validation = await validateEvidencePack(JSON.parse(raw));
@@ -400,6 +546,6 @@ export async function validateAllGeneratedEvidence(projectRoot: string): Promise
   return { latest, packs };
 }
 
-export function canonicalEvidenceJson(pack: SandboxEvidencePack): string {
+export function canonicalEvidenceJson(pack: ValidatedSandboxEvidencePack): string {
   return canonicalJson(pack);
 }

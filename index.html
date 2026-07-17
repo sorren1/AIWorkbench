@@ -339,6 +339,21 @@
                 </td>
               </tr>
               <tr>
+                <th scope="row">Optional E2B cloud-sandbox provider</th>
+                <td>
+                  <span class="site-status site-status--planned"
+                    >Implemented but not live-validated</span
+                  >
+                </td>
+                <td>
+                  The same fixture-only provider contract supports explicit
+                  <code>--provider e2b</code> selection, bounded uploads, deny-all egress
+                  configuration plus a required outbound-denial probe, evidence normalization, and
+                  cleanup safeguards. No E2B credential or successful E2B run was available for this
+                  checked-in revision, so the recorded evidence below remains Docker-backed.
+                </td>
+              </tr>
+              <tr>
                 <th scope="row">Scoped authorization and durable local approvals</th>
                 <td><span class="site-status site-status--functional">Functional locally</span></td>
                 <td>
@@ -365,7 +380,7 @@
                 <td>No provider credentials, writes, or live data calls exist.</td>
               </tr>
               <tr>
-                <th scope="row">Test logs and hosted sandbox execution</th>
+                <th scope="row">Anonymous or browser-invoked hosted sandbox execution</th>
                 <td><span class="site-status site-status--simulated">Simulated</span></td>
                 <td>
                   Workbench logs remain deterministic fixtures and no hosted or browser-accessible

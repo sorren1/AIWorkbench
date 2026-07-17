@@ -1,6 +1,8 @@
-# Isolated local sandbox walkthrough
+# Isolated sandbox walkthrough
 
 This walkthrough runs only the original synthetic fixture in `examples/toy-repo`. It never reads another repository and accepts no patch or command input.
+
+Local Docker remains the default and requires no cloud account. The optional E2B provider is **implemented but not live-validated** in this revision because no `E2B_API_KEY` was available; no E2B evidence is checked in.
 
 ## Prerequisites
 
@@ -44,6 +46,7 @@ The last line is JSON. Dynamic IDs, digests, and durations will differ, but a su
 ```json
 {
   "runId": "sandbox-<generated>",
+  "provider": "LOCAL_DOCKER",
   "status": "SUCCEEDED",
   "sourceCommit": "<40-hex commit>",
   "changedFiles": ["src/report.js"],
@@ -65,6 +68,33 @@ Expected result:
 ```json
 {"status":"VALID","packCount":<number>,"runId":"sandbox-<generated>","evidenceDigest":"<64-hex SHA-256>"}
 ```
+
+## Optional E2B provider
+
+The project pins the official `e2b` JavaScript SDK 2.34.0. E2B is never selected implicitly. Set the documented key in the current process environment and pass the explicit provider flag:
+
+```powershell
+$env:E2B_API_KEY = "<your untracked key>"
+npm run demo:sandbox -- --provider e2b
+```
+
+The equivalent convenience command is:
+
+```powershell
+npm run demo:sandbox:e2b
+```
+
+Do not put the credential in source, evidence, command output, or a tracked file. `.env.example` contains only the empty key name. The provider uploads only the copied synthetic repository files and approved generated artifacts. It requests deny-all outbound access and refuses an isolation claim unless E2B reports the setting and a fixed outbound HTTPS probe is blocked. Each phase receives a fresh sandbox with a two-minute `onTimeout: kill` lifecycle; instance cleanup, tagged-orphan cleanup, and inactive-state verification run before evidence can pass.
+
+Run the opt-in live integration test with the same environment variable:
+
+```powershell
+npm run test:e2b:live
+```
+
+Without `E2B_API_KEY`, the live test is reported as skipped and the E2B CLI exits before creating a sandbox. Fake contract tests still run in the normal suite. This revision did not have the key, so neither the live command nor its network and cleanup controls are claimed as observed.
+
+E2B reports sandbox CPU and memory, but this implementation does not configure or claim E2B process/tmpfs limits, a read-only root filesystem, a non-root identity, or Docker-style capability controls. The outbound restriction applies inside the sandbox; local SDK calls to the E2B control plane still require network access.
 
 ## Honest failure path
 
@@ -88,10 +118,10 @@ PowerShell exposes the non-zero result in `$LASTEXITCODE`; POSIX shells expose i
 ## Focused security and evidence tests
 
 ```bash
-npm test -- --run tests/local-sandbox.test.ts
+npm test -- --run tests/local-sandbox.test.ts tests/e2b-sandbox.test.ts
 ```
 
-The suite covers exact allow-list enforcement, traversal rejection, symlink escape rejection, unexpected files, process timeout, deterministic output normalization, cleanup, successful evidence, failed-test evidence, and evidence tamper detection. The test suite uses a typed fixture provider and does not require Docker; the checked-in recorded run is the Docker-backed integration evidence.
+The suites cover exact allow-list enforcement, traversal rejection, symlink escape rejection, unexpected files, process timeout, deterministic output normalization, cleanup, successful evidence, failed-test evidence, evidence tamper detection, explicit E2B selection, bounded E2B uploads, network-verification gating, normalized provider metadata, and orphan cleanup. Fake provider tests require neither Docker nor E2B; the checked-in recorded run remains Docker-backed integration evidence.
 
 ## Public rendering
 
@@ -102,6 +132,6 @@ npm run build
 npm run preview
 ```
 
-Open `/` and find **Recorded real sandbox run**. Vite validates the checked-in pack during the build, statically renders its summary, and emits the JSON/Markdown as read-only assets. The page performs no execution and makes no request to Docker or localhost.
+Open `/` and find **Recorded real sandbox run**. Vite validates the checked-in pack during the build, statically renders its summary, and emits the JSON/Markdown as read-only assets. The page performs no execution and makes no request to Docker, E2B, or localhost. Until a real successful E2B pack exists, E2B appears only as **implemented but not live-validated** and the displayed recorded run remains Docker-backed.
 
 See [sandbox security model](sandbox-security-model.md) for trust boundaries and residual risks.

@@ -1,3 +1,4 @@
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
@@ -36,6 +37,9 @@ describe("static site metadata", () => {
     expect(rendered?.html).toContain("visitor's browser does not execute code");
     expect(rendered?.html).toContain("src/report.js");
     expect(rendered?.jsonName).toMatch(/^sandbox-run-.+\.json$/);
+    const caseStudy = readFileSync(resolve(import.meta.dirname, "../index.html"), "utf8");
+    expect(caseStudy).toContain("Implemented but not live-validated");
+    expect(caseStudy).toContain("recorded evidence below remains Docker-backed");
   });
 
   it("omits canonical-dependent metadata rather than inventing a deployment URL", () => {

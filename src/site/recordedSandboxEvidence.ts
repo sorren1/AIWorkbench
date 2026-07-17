@@ -1,4 +1,7 @@
-import { readLatestValidatedEvidence } from "../../tools/local-sandbox/evidence";
+import {
+  readLatestValidatedEvidence,
+  type ValidatedSandboxEvidencePack,
+} from "../../tools/local-sandbox/evidence";
 
 export type RecordedSandboxEvidenceRender = {
   readonly html: string;
@@ -19,6 +22,25 @@ function escapeHtml(value: string): string {
 function exitLabel(exitCode: number | null, timedOut: boolean): string {
   if (timedOut) return "Timed out";
   return exitCode === 0 ? "Passed · exit 0" : `Failed · exit ${exitCode ?? "unavailable"}`;
+}
+
+function runtimeLabel(pack: ValidatedSandboxEvidencePack): string {
+  if (pack.schemaVersion === 1) return pack.tools.imageDigest;
+  if (pack.tools.provider === "LOCAL_DOCKER") {
+    return pack.tools.imageDigest;
+  }
+  return `E2B ${pack.tools.template} · SDK ${pack.tools.sdkVersion}`;
+}
+
+function boundaryLabel(pack: ValidatedSandboxEvidencePack): string {
+  if (pack.schemaVersion === 1) {
+    return `${pack.boundary.limits.cpuCount} CPU · ${pack.boundary.limits.memoryMb} MiB · ${pack.boundary.limits.processLimit} processes · network none`;
+  }
+  const limits = pack.boundary.limits;
+  if (limits.provider.kind === "LOCAL_DOCKER") {
+    return `${limits.provider.cpuCount} CPU · ${limits.provider.memoryMb} MiB · ${limits.provider.processLimit} processes · network none`;
+  }
+  return `${limits.provider.cpuCount} CPU · ${limits.provider.memoryMb} MiB reported by E2B · ${limits.commandTimeoutMs} ms command timeout · outbound probe blocked`;
 }
 
 export async function renderRecordedSandboxEvidence(
@@ -51,10 +73,10 @@ export async function renderRecordedSandboxEvidence(
     <dl class="site-evidence-facts">
       <div><dt>Source commit</dt><dd><code>${escapeHtml(pack.run.sourceCommit.slice(0, 12))}</code> · working tree ${escapeHtml(pack.run.sourceWorkingTree.toLowerCase())}</dd></div>
       <div><dt>Changed path</dt><dd><code>${escapeHtml(pack.change.path)}</code> · only approved target</dd></div>
-      <div><dt>Execution boundary</dt><dd>${pack.boundary.limits.cpuCount} CPU · ${pack.boundary.limits.memoryMb} MiB · ${pack.boundary.limits.processLimit} processes · network none</dd></div>
+      <div><dt>Execution boundary</dt><dd>${escapeHtml(boundaryLabel(pack))}</dd></div>
       <div><dt>Evidence digest</dt><dd><code>${escapeHtml(pack.evidenceDigest)}</code></dd></div>
       <div><dt>Context-pack digest</dt><dd><code>${escapeHtml(pack.governance.contextPackDigest)}</code></dd></div>
-      <div><dt>Container image</dt><dd><code>${escapeHtml(pack.tools.imageDigest)}</code></dd></div>
+      <div><dt>Sandbox runtime</dt><dd><code>${escapeHtml(runtimeLabel(pack))}</code></dd></div>
     </dl>
     <div class="site-table-wrap" tabindex="0" role="region" aria-label="Recorded sandbox command results">
       <table class="site-matrix site-recorded-run__commands">

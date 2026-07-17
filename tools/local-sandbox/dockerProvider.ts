@@ -1,11 +1,11 @@
 import { sha256Bytes } from "./security";
 import { normalizeCapturedOutput, runProcess } from "./process";
 import type {
-  SandboxAvailability,
   SandboxCommandReceipt,
   SandboxExecutionRequest,
   SandboxExecutionResult,
   SandboxProvider,
+  LocalDockerAvailability,
 } from "./contracts";
 
 const DEFAULT_IMAGE = "node:22.18.0-alpine";
@@ -23,7 +23,7 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
 
   constructor(private readonly image = DEFAULT_IMAGE) {}
 
-  async inspect(): Promise<SandboxAvailability> {
+  async inspect(): Promise<LocalDockerAvailability> {
     const version = await runProcess({
       executable: "docker",
       args: ["version", "--format", "{{.Client.Version}}|{{.Server.Version}}"],
@@ -31,6 +31,7 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
     });
     if (version.exitCode !== 0) {
       return {
+        provider: "LOCAL_DOCKER",
         available: false,
         dockerClientVersion: null,
         dockerServerVersion: null,
@@ -47,6 +48,7 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
     });
     const imageDigest = image.exitCode === 0 ? normalizeCapturedOutput(image.stdout) : null;
     return {
+      provider: "LOCAL_DOCKER",
       available: imageDigest !== null && imageDigest.length > 0,
       dockerClientVersion: client,
       dockerServerVersion: server,
@@ -59,7 +61,7 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
     };
   }
 
-  async prepare(): Promise<SandboxAvailability> {
+  async prepare(): Promise<LocalDockerAvailability> {
     const current = await this.inspect();
     if (current.available || current.dockerClientVersion === null) return current;
     const pull = await runProcess({
