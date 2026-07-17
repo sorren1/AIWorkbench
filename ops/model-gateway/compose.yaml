@@ -1,0 +1,49 @@
+name: ai-delivery-workbench-model-gateway
+
+services:
+  database:
+    image: postgres:17.6-alpine@sha256:ef257d85f76e48da1c64832459b59fcaba1a4dac97bf5d7450c77753542eee94
+    environment:
+      POSTGRES_DB: litellm
+      POSTGRES_USER: litellm
+      POSTGRES_PASSWORD: ${LITELLM_DB_PASSWORD:?Set LITELLM_DB_PASSWORD in the local .env file}
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U litellm -d litellm"]
+      interval: 5s
+      timeout: 3s
+      retries: 12
+    networks: [gateway-internal]
+    volumes:
+      - gateway-database:/var/lib/postgresql/data
+    restart: "no"
+
+  gateway:
+    image: ghcr.io/berriai/litellm-database:v1.92.0@sha256:64d3547e0b131bf4638342e52c12bc46d6f1d9b8498e4b731ff31be5ab316ea9
+    command: ["--config", "/app/config.yaml", "--port", "4000", "--num_workers", "1"]
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgresql://litellm:${LITELLM_DB_PASSWORD}@database:5432/litellm
+      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?Set LITELLM_MASTER_KEY in the local .env file}
+      LITELLM_SALT_KEY: ${LITELLM_SALT_KEY:?Set LITELLM_SALT_KEY in the local .env file}
+      MODEL_GATEWAY_UPSTREAM_API_KEY: ${MODEL_GATEWAY_UPSTREAM_API_KEY:?Set an upstream key in the local .env file}
+      MODEL_GATEWAY_UPSTREAM_BASE_URL: ${MODEL_GATEWAY_UPSTREAM_BASE_URL:-}
+      MODEL_GATEWAY_PRIMARY_MODEL: ${MODEL_GATEWAY_PRIMARY_MODEL:?Set a LiteLLM provider/model identifier}
+      MODEL_GATEWAY_FALLBACK_MODEL: ${MODEL_GATEWAY_FALLBACK_MODEL:?Set a fallback provider/model identifier}
+      MODEL_GATEWAY_REVIEW_MODEL: ${MODEL_GATEWAY_REVIEW_MODEL:?Set a distinct review provider/model identifier}
+    ports:
+      - "127.0.0.1:4000:4000"
+    networks: [gateway-internal, provider-egress]
+    volumes:
+      - ./litellm-config.yaml:/app/config.yaml:ro
+    restart: "no"
+    stop_grace_period: 15s
+
+networks:
+  gateway-internal:
+    internal: true
+  provider-egress: {}
+
+volumes:
+  gateway-database: {}

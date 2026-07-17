@@ -56,6 +56,15 @@ npm run sandbox:evidence:validate
 npm run trace:generate
 npm run trace:check
 npm run test:e2b:live
+npm run demo:model-gateway
+npm run model-gateway:up
+npm run demo:model-gateway:live
+npm run demo:model-gateway:cleanup
+npm run model-gateway:evidence:validate
+npm run model-gateway:generate
+npm run model-gateway:check
+npm run test:model-gateway:live
+npm run security:check
 npm run demo:approval:start -- --scenario approval-required
 npm run demo:approve -- --request <request-id> --as synthetic-code-reviewer --reason "..."
 npm run demo:resume -- --run <run-id>

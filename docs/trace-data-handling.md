@@ -24,6 +24,7 @@ Trace attributes may contain only bounded operational metadata:
 Do not place any of the following in spans, events, trace resources, status descriptions, or exporter diagnostics:
 
 - prompts, arbitrary user history, or model response bodies;
+- LiteLLM master keys, upstream provider credentials, scoped virtual-key values, authorization headers, or raw gateway response headers;
 - source code, unified diffs, file bodies, tool arguments, stdout, or stderr;
 - API keys, access tokens, cookies, authorization headers, credentials, environment values, or private endpoints;
 - personal data or private organization content; or

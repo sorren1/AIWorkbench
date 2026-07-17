@@ -10,6 +10,7 @@ import type {
 } from "../control-plane/registry/contracts";
 import { REGISTRY_STATUSES } from "../control-plane/registry/contracts";
 import { registrySnapshot } from "../control-plane/registry/generated";
+import { modelGatewayStatus } from "../model-gateway/generated";
 import { downloadTextFile } from "../utils/browserActions";
 import { useApp } from "../state/store";
 import { Icon } from "../../shared/Icon";
@@ -200,7 +201,9 @@ function ModelDetail({ policy }: { readonly policy: ModelPolicy }) {
         <DetailList
           items={[
             `Category: ${policy.providerCategory}`,
-            `Identifier: ${policy.modelIdentifier}`,
+            `Preferred model: ${policy.preferredModelId}`,
+            `Providers: ${policy.allowedProviderIds.join(", ")}`,
+            `Allowed models: ${policy.allowedModelIds.join(", ")}`,
             `Reasoning: ${policy.reasoningProfile}`,
             `Temperature: ${policy.temperature ?? "adapter default"}`,
           ]}
@@ -210,10 +213,18 @@ function ModelDetail({ policy }: { readonly policy: ModelPolicy }) {
         <h3>Limits and fallback</h3>
         <DetailList
           items={[
-            `Maximum tokens: ${policy.maximumTokens}`,
-            `Estimated cost ceiling: $${policy.costCeilingUsd}`,
-            `Fallback: ${policy.fallbackChain.join(" → ")}`,
-            `Live execution: ${policy.liveExecutionEnabled ? "enabled" : "disabled"}`,
+            `Maximum tokens: ${policy.maximumInputTokens} in / ${policy.maximumOutputTokens} out`,
+            `Cost ceiling: $${policy.maximumCostUsd}`,
+            `Timeout: ${policy.maximumLatencyMs}ms`,
+            `Fallback: ${policy.fallbackOrder.length > 0 ? policy.fallbackOrder.join(" → ") : "none"}`,
+            `Execution: ${policy.executionMode}`,
+            `Stages: ${policy.allowedStages.join(", ")}`,
+            `Tasks: ${policy.allowedTasks.join(", ")}`,
+            policy.independentReview.required
+              ? `Independent review required: ${policy.independentReview.modelId ?? "invalid policy"}`
+              : policy.independentReview.modelId
+                ? `Independent review configured, not exercised: ${policy.independentReview.modelId}`
+                : "Independent review not configured",
           ]}
         />
       </section>
@@ -350,12 +361,25 @@ export function ControlPlaneScreen() {
         repository; the public browser never starts that process.
       </Banner>
 
+      <div className="wb-mt-12">
+        <Banner
+          tone={modelGatewayStatus.liveValidated ? "safe" : "warn"}
+          title={modelGatewayStatus.label}
+          icon="sparkles"
+        >
+          {modelGatewayStatus.disclosure} The default demo remains offline and deterministic; only
+          an explicit local CLI profile can reach the loopback gateway. Scoped credential aliases,
+          routing policy, budgets, cleanup, and model-call traces never include key values.
+        </Banner>
+      </div>
+
       <div className="wb-control-links wb-mt-12" aria-label="Generated public registry evidence">
         <a href="../capabilities/agents/index.json">Capability-card index</a>
         <a href="../capabilities/context/records.json">Context-record registry</a>
         <a href="../capabilities/context/packs.json">Representative context packs</a>
         <a href="../capabilities/mcp/discovery.json">Local MCP discovery snapshot</a>
         <a href="../capabilities/mcp/invocation-evidence.json">Local MCP invocation evidence</a>
+        <a href="../capabilities/model-gateway/status.json">Model-gateway status</a>
         <a href="../capabilities/schemas/approval-policy.schema.json">Approval policy schema</a>
       </div>
 

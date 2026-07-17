@@ -125,7 +125,7 @@ export type DeliverySpanName = NormalizedTraceArtifact["spans"][number]["name"];
 export type SafeSpanAttributes = Readonly<Record<string, AttributeValue | undefined>>;
 
 const SENSITIVE_VALUE =
-  /(?:E2B_API_KEY\s*=|-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk|e2b)_[a-z0-9_-]{12,}|bearer\s+[a-z0-9._-]{12,})/i;
+  /(?:(?:E2B_API_KEY|LITELLM_MASTER_KEY|MODEL_GATEWAY_UPSTREAM_API_KEY)\s*=|-----BEGIN [A-Z ]*PRIVATE KEY-----|\b(?:sk|e2b)[_-][a-z0-9_-]{12,}|bearer\s+[a-z0-9._-]{12,})/i;
 
 function safeValue(value: AttributeValue): AttributeValue {
   if (typeof value === "string") {

@@ -20,11 +20,11 @@ The focused control-plane direction extends that workflow with typed domain seam
 
 Every visible value belongs to one category:
 
-- **Functional in this repository:** navigation and shareable deep links, filters, versioned theme and authorization preferences, deterministic scenario loading and reset, the guided tour, reducer-backed workflow transitions, stale-state propagation, scoped synthetic persona decisions, a durable browser-local approval inbox, hash-bound CLI pause/resume, artifact copy/download, architecture and validation-evidence exports, schema-validated/hash-versioned registry selection, generated capability cards, the bounded local toy-repository MCP slice, the explicit local Docker validation slice, OpenTelemetry-compatible local trace export, execution-budget enforcement, evidence verification, and the static production build. The optional E2B provider is implemented behind the same contract but was not live-validated in this revision because no key was available.
+- **Functional in this repository:** navigation and shareable deep links, filters, versioned theme and authorization preferences, deterministic scenario loading and reset, the guided tour, reducer-backed workflow transitions, stale-state propagation, scoped synthetic persona decisions, a durable browser-local approval inbox, hash-bound CLI pause/resume, artifact copy/download, architecture and validation-evidence exports, schema-validated/hash-versioned registry selection, generated capability cards, the bounded local toy-repository MCP slice, the explicit local Docker validation slice, OpenTelemetry-compatible local trace export, execution-budget enforcement, evidence verification, the deterministic offline model-gateway contract, and the static production build. The optional E2B and LiteLLM live-provider paths are implemented but were not live-validated in this revision because no credential was available.
 - **Synthetic demo fixture:** every persona, issue, repository, branch, pull request, check, log, duration, test result, metric, external integration result, and provider response shown in the workbench.
 - **Professional context:** the single statement in the separate section below. It is not evidence about the public prototype.
 
-External Jira, GitHub, AI/model, database, enterprise MCP, deployment, anonymous hosted test-execution, and review operations are simulated. The repository-owned MCP fixture and sandbox validation slice are functional only when explicitly run against a disposable toy repository; the public browser never connects to Docker or E2B and cannot start either provider.
+External Jira, GitHub, AI/model, database, enterprise MCP, deployment, anonymous hosted test-execution, and review operations are simulated in the public browser. The repository-owned MCP fixture, sandbox validation slice, and offline gateway contract are functional only when explicitly run with local developer commands. The browser never connects to Docker, E2B, LiteLLM, or a model provider.
 
 ## Architecture
 
@@ -92,6 +92,14 @@ npm run test:e2b:live
 
 No key was available for this revision, so E2B is **implemented but not live-validated** and no E2B evidence is checked in. `.env.example` contains the key name only. Docker remains the default and requires no E2B account.
 
+Exercise the provider-neutral gateway contract without a provider:
+
+```powershell
+npm run demo:model-gateway -- --run-id offline-verification
+```
+
+The default adapter is deterministic and offline. An optional digest-pinned LiteLLM/PostgreSQL profile can vend a per-agent/per-run virtual key, enforce allowed aliases and spend, trace explicit fallbacks, and block the key before evidence finalization. It requires an explicit local profile and environment credentials; the browser has no gateway client. No credential was available for this revision, so the truthful status is `gateway implemented; live provider path not validated`. See the [gateway architecture](docs/model-gateway-and-routing.md), [local runbook](docs/local-model-gateway-runbook.md), and [ADR](docs/adr/local-model-gateway.md).
+
 Exercise the separate durable local approval protocol with:
 
 ```bash
@@ -120,6 +128,8 @@ src/demo/data/                     deterministic synthetic fixtures and content
 src/demo/control-plane/            typed control-plane domain seams
 examples/toy-repo/                  disposable synthetic repository, issue, targets, and tests
 tools/local-sandbox/                providers, controls, budgets, tracing, runner, and evidence
+tools/model-gateway/                offline/live gateway contracts, routing, credentials, traces, and evidence
+ops/model-gateway/                  digest-pinned optional LiteLLM/PostgreSQL local profile
 tools/toy-repo-mcp/                 optional local stdio MCP server and trusted client
 evidence/generated/                 validated recorded local-run JSON, Markdown, and traces
 public/capabilities/                generated capability cards, schemas, and MCP evidence

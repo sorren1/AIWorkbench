@@ -1,0 +1,26 @@
+model_list:
+  - model_name: delivery-primary
+    litellm_params:
+      model: os.environ/MODEL_GATEWAY_PRIMARY_MODEL
+      api_key: os.environ/MODEL_GATEWAY_UPSTREAM_API_KEY
+      api_base: os.environ/MODEL_GATEWAY_UPSTREAM_BASE_URL
+  - model_name: delivery-fallback
+    litellm_params:
+      model: os.environ/MODEL_GATEWAY_FALLBACK_MODEL
+      api_key: os.environ/MODEL_GATEWAY_UPSTREAM_API_KEY
+      api_base: os.environ/MODEL_GATEWAY_UPSTREAM_BASE_URL
+  - model_name: delivery-review
+    litellm_params:
+      model: os.environ/MODEL_GATEWAY_REVIEW_MODEL
+      api_key: os.environ/MODEL_GATEWAY_UPSTREAM_API_KEY
+      api_base: os.environ/MODEL_GATEWAY_UPSTREAM_BASE_URL
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL
+  store_model_in_db: true
+  disable_spend_logs: false
+
+router_settings:
+  num_retries: 0
+  allowed_fails: 0

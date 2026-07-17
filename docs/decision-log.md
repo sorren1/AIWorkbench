@@ -361,3 +361,27 @@ Add content-hashed `ExecutionBudget` v1 enforcement for run/stage duration, tool
 - Trace attributes exclude prompt/source/output/argument bodies, credentials, secrets, personal data, and raw exception details.
 - The trace cannot contain the final evidence digest without a circular hash; the evidence manifest is the authoritative trace-to-evidence binding.
 - This release proves local trace/evidence mechanics and budget enforcement, not hosted telemetry reliability, distributed budget settlement, or model-provider accounting.
+
+## ADR-015 — Keep provider routing behind an explicit scoped local gateway
+
+- Status: Accepted
+- Date: 2026-07-17
+- Detailed record: [`docs/adr/local-model-gateway.md`](adr/local-model-gateway.md)
+
+### Context
+
+The registry can declare model/runtime policy and the local runtime can enforce budgets and emit traces, but direct provider SDK use would distribute reusable credentials and bypass a single routing/accounting boundary. The public site must remain static and the normal developer path must remain offline and deterministic.
+
+### Decision
+
+Add an original provider-neutral `ModelGateway` contract with a deterministic offline adapter and an explicit loopback LiteLLM `1.92.0` adapter. Keep preferred/allowed models, fallback order, stage/task scope, token/cost/latency ceilings, and independent-review requirements in the versioned workbench registry. Use LiteLLM virtual keys only as local enforcement credentials: reconcile a deterministic per-agent/per-run alias, restrict models and spend, retain the raw key only in gitignored local recovery state, block it in `finally`, and provide an interrupted-run cleanup command.
+
+The browser imports sanitized generated status only. A live catalog and validated claim may be published only from a schema/hash-validated local evidence pack whose credential was revoked. No successful live credential/run was available for this decision, so the public label remains `gateway implemented; live provider path not validated`.
+
+### Consequences
+
+- The deterministic sandbox and public demo gain no model dependency and make no gateway request.
+- The optional local profile requires Docker, PostgreSQL, a master key, and an upstream provider credential.
+- Provider egress and provider retention terms remain residual risks and are not described as network-isolated execution.
+- Model calls, fallback, usage, cost basis, budget outcomes, and safe credential alias metadata become traceable without prompt/response/key capture.
+- A configured second model is not called consensus or review evidence unless a distinct invocation appears in the trace.

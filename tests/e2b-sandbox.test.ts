@@ -169,9 +169,10 @@ describe("optional E2B sandbox provider contract", () => {
       sdkVersion: e2bProviderSdkVersion,
     });
     await expect(provider.execute(minimalRequest())).rejects.toThrow("requires E2B_API_KEY");
-    await expect(readFile(resolve(projectRoot, ".env.example"), "utf8")).resolves.toBe(
-      "E2B_API_KEY=\n",
-    );
+    const envExample = await readFile(resolve(projectRoot, ".env.example"), "utf8");
+    const declarations = envExample.trimEnd().split("\n");
+    expect(declarations).toContain("E2B_API_KEY=");
+    expect(declarations.every((line) => /^[A-Z][A-Z0-9_]*=$/.test(line))).toBe(true);
   });
 
   it("uploads only approved roots, verifies outbound denial, captures output, and kills finally", async () => {

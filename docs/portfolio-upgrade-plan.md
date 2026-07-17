@@ -184,10 +184,12 @@ Every policy result records actor, persona, resource, action, decision, reason c
 
 ### 9. Optional provider-neutral model gateway contract
 
-- Define a small gateway interface around provider-neutral model aliases, allowed runtime classes, request limits, fallback restrictions, and usage receipts.
-- Bind each approved agent version to a credential-reference identifier scoped to that agent and capability. No credential value enters the browser bundle, fixtures, local storage, logs, or repository.
-- Make local routing/policy evaluation functional and the model response deterministic. Label the displayed gateway exchange and credential binding as simulated architecture.
-- Keep real provider adapters opt-in and out of the public static build. Any future gateway must run behind authenticated infrastructure, use server-side secret storage, and issue short-lived/scoped credentials.
+- Define a small gateway interface around provider-neutral model aliases, allowed runtime classes, request limits, fallback restrictions, and usage receipts. Complete with deterministic offline and optional LiteLLM-local adapters.
+- Bind each approved agent version to a credential alias scoped to project, agent, run, allowed models, spend, and lifetime. No credential value enters the browser bundle, fixtures, local storage, normal logs, traces, evidence, or repository. Complete for the local profile through gitignored recovery leases.
+- Keep local routing/policy evaluation functional and the default response deterministic. Select the real adapter only through an explicit live profile; no model dependency enters the deterministic sandbox.
+- Pin the local gateway and database images, bind the API to loopback, reconcile an existing alias before replacement, block the key in `finally`, and retain failed cleanup state for an explicit retry command.
+- Cache only a sanitized live catalog and publish it only after evidence/trace validation. Provider/model IDs, usage, latency, fallback, budget outcomes, and credential alias may be recorded; prompts, responses, and key values may not.
+- Keep the public static build client-free and credential-free. A future hosted gateway would require authenticated infrastructure, server-side secret storage, durable distributed budgets, and a separate authorization decision.
 - Do not expose a live anonymous model or agent endpoint.
 
 ### 10. Supply-chain evidence
@@ -330,7 +332,7 @@ Suggested commit: `feat: add the governed stage-agent registry`
 
 ### Phase 6 — Approval, context, runtime, budgets, and trace evidence
 
-Status: Scoped authorization, durable approval, deterministic governed context packs, real local execution budgets, and OpenTelemetry-compatible recorded traces are complete. A live model gateway remains deferred.
+Status: Scoped authorization, durable approval, deterministic governed context packs, real local execution budgets, OpenTelemetry-compatible recorded traces, and the optional scoped local model-gateway implementation are complete. The live provider path remains unvalidated because no credential was available.
 
 Scope: make a governed run explainable end to end without introducing a live external integration.
 
@@ -339,7 +341,7 @@ Acceptance criteria:
 - Risky tool requests create durable browser-local approval envelopes and append-only state transitions; reload, expiry, separation of duties, CLI single-use execution, and reset are tested. Browser approval export/import remains intentionally deferred.
 - The approval UI says that storage and identity are local/simulated and does not imply tamper resistance or shared enterprise durability.
 - Context-pack manifests record inclusions, exclusions, provenance, freshness, deterministic selection rules, measured-versus-estimated size labels, and a SHA-256 digest; browser and sandbox tampering/invalidation tests pass. Complete.
-- The provider-neutral gateway contract enforces agent/model/runtime/credential-reference scope locally while all provider execution remains simulated and no secret-entry UI or live endpoint exists.
+- The provider-neutral gateway contract enforces approved stage/task/model/runtime/budget scope; the deterministic adapter is offline, the LiteLLM adapter is explicit and loopback-only, virtual keys are reconciled/revoked, and no secret-entry UI or public endpoint exists. Complete; live provider validation remains credential-gated.
 - Budget preflight and iteration enforcement cover optional tokens/cost, tool calls, repair attempts, stage time, and run time; every displayed quantity carries its measurement basis. Complete for the real local vertical slice.
 - Traces link run, stage, agent, context, approval, tool, sandbox, validation, budget, and evidence operations. The deterministic no-model run truthfully emits no `model.call`. Complete as local normalized OpenTelemetry-compatible JSON; OTLP transport remains deferred.
 - The accessible waterfall and tabular fallback expose trace hierarchy, duration, status, and evidence links without capturing sensitive content by default.

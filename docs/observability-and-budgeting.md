@@ -27,6 +27,8 @@ delivery.run
 
 `model.call` is part of the versioned trace contract but is absent from the deterministic vertical slice because no model is used. The accounting receipt therefore reports exactly zero model calls, tokens, and cost with the `EXACT_ZERO_NO_MODEL` basis.
 
+The optional local model-gateway path uses the same pinned OpenTelemetry packages and safe `delivery.*` attribute policy in a separate `ai-delivery-workbench.model-gateway` trace artifact. Its explicit live profile emits one `model.call` span per real attempt, including a failed preferred attempt before a declared fallback. It records provider/model IDs, latency, provider-reported or estimated usage/cost basis, output digest, budget events, and a non-secret credential alias. Prompt/response bodies and key values remain excluded. No live gateway trace is checked in until a credential-backed run and revocation both validate.
+
 Every run and stage span identifies the synthetic issue, stage, approved agent version/hash, context-pack digest, approval policy, budget policy, and sandbox provider. Tool spans identify the approved tool version/hash. Validation spans use a safe command category such as `build` or `test`; raw arguments, source, output, and environment values are excluded.
 
 ## Local exporter and evidence binding

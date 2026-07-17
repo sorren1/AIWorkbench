@@ -20,6 +20,15 @@
     "mcp:evidence:check": "tsx scripts/generate-mcp-evidence.ts --check",
     "trace:generate": "tsx scripts/generate-recorded-trace.ts",
     "trace:check": "tsx scripts/generate-recorded-trace.ts --check",
+    "model-gateway:generate": "tsx scripts/generate-model-gateway-status.ts",
+    "model-gateway:check": "tsx scripts/generate-model-gateway-status.ts --check",
+    "model-gateway:evidence:validate": "tsx tools/model-gateway/cli.ts validate",
+    "security:check": "tsx scripts/check-secret-leaks.ts",
+    "model-gateway:up": "docker compose -f ops/model-gateway/compose.yaml up -d --wait",
+    "model-gateway:down": "docker compose -f ops/model-gateway/compose.yaml down",
+    "demo:model-gateway": "tsx tools/model-gateway/cli.ts run",
+    "demo:model-gateway:live": "tsx tools/model-gateway/cli.ts run --profile live",
+    "demo:model-gateway:cleanup": "tsx tools/model-gateway/cli.ts cleanup --profile live",
     "demo:sandbox": "tsx tools/local-sandbox/cli.ts run",
     "demo:sandbox:e2b": "tsx tools/local-sandbox/cli.ts run --provider e2b",
     "demo:sandbox:failure": "tsx tools/local-sandbox/cli.ts run --failed-validation",
@@ -30,9 +39,10 @@
     "demo:resume": "tsx tools/demo-sandbox/cli.ts resume",
     "test": "vitest run",
     "test:e2b:live": "vitest run tests/e2b-sandbox.live.test.ts",
+    "test:model-gateway:live": "vitest run tests/model-gateway.live.test.ts",
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/e2e/accessibility.spec.ts",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm run registry:check && npm run mcp:evidence:check && npm run sandbox:evidence:validate && npm run trace:check && npm run test && npm run build && npm run test:e2e"
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run registry:check && npm run mcp:evidence:check && npm run sandbox:evidence:validate && npm run trace:check && npm run model-gateway:check && npm run model-gateway:evidence:validate && npm run test && npm run build && npm run security:check && npm run test:e2e"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.29.0",

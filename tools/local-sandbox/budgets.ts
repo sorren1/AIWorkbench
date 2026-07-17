@@ -163,6 +163,7 @@ export class ExecutionBudgetTracker {
 
   private status(observed: number, limit: number | null): BudgetStatus {
     if (limit === null) return "WITHIN";
+    if (limit === 0) return observed > 0 ? "EXCEEDED" : "WITHIN";
     if (observed > limit) return "EXCEEDED";
     if (observed >= limit * this.policy.approachingThresholdRatio) return "APPROACHING";
     return "WITHIN";

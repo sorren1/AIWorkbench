@@ -16,7 +16,9 @@ export const REGISTRY_STATUSES = [
 export type RegistryStatus = (typeof REGISTRY_STATUSES)[number];
 export type ToolRiskLevel = "READ_ONLY" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 export type IdempotencySemantics = "IDEMPOTENT" | "IDEMPOTENT_WITH_KEY" | "NOT_IDEMPOTENT";
-export type ProviderCategory = "PROVIDER_NEUTRAL_SIMULATED" | "LOCAL_DETERMINISTIC";
+export type ProviderCategory =
+  "PROVIDER_NEUTRAL_SIMULATED" | "LOCAL_DETERMINISTIC" | "OPENAI_COMPATIBLE_LOCAL_GATEWAY";
+export type ModelTask = "ARTIFACT_DRAFT" | "CODE_CHANGE" | "INDEPENDENT_REVIEW";
 export type ApprovalMode = "ALLOW" | "NOTIFY" | "REQUIRE_APPROVAL" | "DENY";
 
 export type ApprovalMetadata = {
@@ -109,13 +111,23 @@ export type ModelPolicy = {
   readonly description: string;
   readonly status: RegistryStatus;
   readonly providerCategory: ProviderCategory;
-  readonly modelIdentifier: string;
+  readonly preferredModelId: string;
+  readonly allowedProviderIds: readonly string[];
+  readonly allowedModelIds: readonly string[];
+  readonly fallbackOrder: readonly string[];
   readonly reasoningProfile: "LOW" | "BALANCED" | "HIGH";
   readonly temperature: number | null;
-  readonly fallbackChain: readonly string[];
-  readonly maximumTokens: number;
-  readonly costCeilingUsd: number;
-  readonly liveExecutionEnabled: false;
+  readonly maximumInputTokens: number;
+  readonly maximumOutputTokens: number;
+  readonly maximumCostUsd: number;
+  readonly maximumLatencyMs: number;
+  readonly allowedStages: readonly Exclude<StageId, "seed">[];
+  readonly allowedTasks: readonly ModelTask[];
+  readonly independentReview: {
+    readonly required: boolean;
+    readonly modelId: string | null;
+  };
+  readonly executionMode: "OFFLINE_ONLY" | "EXPLICIT_LOCAL_PROFILE";
   readonly sourceCommit: string;
   readonly contentHash: string;
   readonly createdAt: string;
@@ -194,7 +206,7 @@ export type RegistryResourceSource =
   AgentCardSource | ToolDescriptorSource | ModelPolicySource | MemoryPolicySource;
 
 export type RegistrySnapshot = {
-  readonly schemaVersion: 3;
+  readonly schemaVersion: 4;
   readonly generatedAt: string;
   readonly classification: "SYNTHETIC_PUBLIC_PORTFOLIO_FIXTURE";
   readonly agents: readonly AgentCard[];

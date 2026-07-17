@@ -82,7 +82,7 @@ function withContextHash(source: ContextRecordSource): ContextRecord {
 }
 
 const snapshot: RegistrySnapshot = {
-  schemaVersion: 3,
+  schemaVersion: 4,
   generatedAt: registryGeneratedAt,
   classification: "SYNTHETIC_PUBLIC_PORTFOLIO_FIXTURE",
   agents: agentCardSources.map(withHash).filter((item) => item.kind === "AgentCard"),

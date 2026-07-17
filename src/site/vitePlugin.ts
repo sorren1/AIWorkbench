@@ -3,6 +3,8 @@ import { resolve } from "node:path";
 
 import type { Plugin } from "vite";
 
+import { modelGatewayStatus } from "../demo/model-gateway/generated";
+import type { ModelGatewayPublicStatus } from "../demo/model-gateway/status";
 import { siteConfig, type SiteConfig } from "./config";
 import {
   renderRecordedSandboxEvidence,
@@ -117,6 +119,21 @@ function replaceExcerpts(html: string, root: string): string {
   );
 }
 
+function renderModelGatewayStatus(): string {
+  const status: ModelGatewayPublicStatus = modelGatewayStatus;
+  const statusClass = status.liveValidated
+    ? "site-status site-status--functional"
+    : "site-status site-status--planned";
+  const evidence = status.liveValidated
+    ? `A sanitized recorded catalog and local run are bound to source commit ${escapeHtml(status.sourceCommit?.slice(0, 12) ?? "unknown")}.`
+    : "No live provider credential or successful live run was available for this revision.";
+  return `<tr>
+    <th scope="row">Optional scoped local model gateway</th>
+    <td><span class="${statusClass}">${escapeHtml(status.label)}</span></td>
+    <td>A typed offline adapter and an explicit LiteLLM local profile enforce model allow lists, scoped virtual credentials, fallback order, token/cost/time budgets, model-call traces, and cleanup. ${evidence} The static site never calls the gateway.</td>
+  </tr>`;
+}
+
 export function portfolioSitePlugin(root: string): Plugin {
   let recordedEvidence: RecordedSandboxEvidenceRender | null = null;
   return {
@@ -171,7 +188,8 @@ export function portfolioSitePlugin(root: string): Plugin {
         const page = PAGE_METADATA[kind];
         let withMetadata = html
           .replace("<!-- site:generated-head -->", renderMetadataTags(siteConfig, page))
-          .replace("<!-- site:structured-data -->", renderStructuredData(siteConfig, kind, page));
+          .replace("<!-- site:structured-data -->", renderStructuredData(siteConfig, kind, page))
+          .replace("<!-- site:model-gateway-status -->", renderModelGatewayStatus());
         if (withMetadata.includes("<!-- site:recorded-sandbox-evidence -->")) {
           recordedEvidence = await renderRecordedSandboxEvidence(root);
           withMetadata = withMetadata.replace(

@@ -1,7 +1,7 @@
 # Public design influences
 
 Status: active provenance record
-Last reviewed: 2026-07-16
+Last reviewed: 2026-07-17
 
 ## Purpose and clean-room method
 
@@ -42,6 +42,14 @@ The repository may reuse standard-defined wire names only where needed for inter
 - **Independently implemented here:** CI generation and retention of a CycloneDX JSON SBOM plus a small workbench evidence envelope that links the generated artifact, digest, tool version, source revision, status, and findings summary.
 - **Deliberately not adopted:** a full software-composition-analysis platform, vulnerability database, hosted BOM service, AI/ML BOM claims, or a custom reimplementation of the CycloneDX schema.
 - **Copy confirmation:** no CycloneDX implementation source or UI assets were copied. The official schema will be consumed by pinned tooling rather than copied into product source; the evidence presentation is original.
+
+## LiteLLM Proxy
+
+- **Public project or standard consulted:** [LiteLLM Proxy documentation](https://docs.litellm.ai/docs/simple_proxy), [virtual-key documentation](https://docs.litellm.ai/docs/proxy/virtual_keys), [model-management documentation](https://docs.litellm.ai/docs/proxy/model_management), and [fallback/reliability documentation](https://docs.litellm.ai/docs/proxy/reliability).
+- **High-level concept considered:** an OpenAI-compatible local gateway can centralize provider aliases, virtual-key model/spend limits, catalog normalization, and routing visibility so individual agent runs do not receive an administrator or upstream provider credential.
+- **Independently implemented here:** the `ModelGateway` contract, versioned workbench model policy, deterministic credential alias, local lease/reconciliation/cleanup protocol, explicit fallback controller, budget linkage, sanitized evidence schema, OpenTelemetry span model, CLI, static status generation, and workbench UI were written specifically for this repository.
+- **Deliberately not adopted:** LiteLLM source code, SDK internals, example code, UI, copy, database schema, broad administrative dashboard, hosted service, automatic fallback policy, production high-availability topology, or a browser-facing proxy. LiteLLM runs unmodified from a pinned public container image behind a loopback-only local profile.
+- **Copy confirmation:** no LiteLLM source code or UI assets were copied. Publicly documented HTTP fields are used only at the adapter boundary; all repository contracts, controls, copy, fixtures, evidence, and visuals were independently authored.
 
 ## Maintenance rule
 

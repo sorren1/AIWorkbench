@@ -14,6 +14,9 @@ test("control-plane deep link exposes searchable versioned registry details", as
   await expect(page.getByRole("heading", { level: 1, name: "Control Plane" })).toBeVisible();
   await expect(page.getByText("Functional local registry · no remote agents")).toBeVisible();
   await expect(page.getByRole("heading", { level: 2, name: "Intake Agent" })).toBeVisible();
+  await expect(
+    page.getByText("gateway implemented; live provider path not validated", { exact: true }),
+  ).toBeVisible();
   await page.reload();
   await expect(page.getByRole("heading", { level: 1, name: "Control Plane" })).toBeVisible();
 
@@ -33,7 +36,7 @@ test("control-plane deep link exposes searchable versioned registry details", as
   await page.getByLabel("Search this registry view").fill("");
   await page.getByLabel("Lifecycle status").selectOption("DRAFT");
   await expect(page.getByRole("heading", { level: 2, name: "Experimental draft" })).toBeVisible();
-  await expect(page.getByText("Live execution: disabled")).toBeVisible();
+  await expect(page.getByText("Execution: OFFLINE_ONLY")).toBeVisible();
 });
 
 test("registry and selected capability records download as deterministic JSON", async ({
@@ -47,7 +50,7 @@ test("registry and selected capability records download as deterministic JSON", 
   const registry: unknown = JSON.parse(await downloadedText(registryDownload));
   expect(registry).toEqual(
     expect.objectContaining({
-      schemaVersion: 3,
+      schemaVersion: 4,
       classification: "SYNTHETIC_PUBLIC_PORTFOLIO_FIXTURE",
     }),
   );
@@ -66,6 +69,10 @@ test("generated capability cards and local MCP evidence are public static files"
     ["/capabilities/agents/agent.implementation.json", { kind: "AgentCard" }],
     ["/capabilities/mcp/discovery.json", { schemaVersion: 1 }],
     ["/capabilities/mcp/invocation-evidence.json", { schemaVersion: 1 }],
+    [
+      "/capabilities/model-gateway/status.json",
+      { label: "gateway implemented; live provider path not validated", liveValidated: false },
+    ],
     ["/capabilities/policies/policy.write.approved-targets.json", { kind: "ApprovalPolicy" }],
     [
       "/capabilities/schemas/approval-policy.schema.json",
@@ -85,4 +92,22 @@ test("generated capability cards and local MCP evidence are public static files"
     expect(Array.isArray(body), path).toBe(true);
     if (Array.isArray(body)) expect(body.length, path).toBeGreaterThan(0);
   }
+});
+
+test("public and demo pages expose only recorded gateway status and never call a live gateway", async ({
+  page,
+}) => {
+  const gatewayRequests: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().includes(":4000")) gatewayRequests.push(request.url());
+  });
+  await page.goto("/");
+  await expect(
+    page.getByText("gateway implemented; live provider path not validated"),
+  ).toBeVisible();
+  await page.goto("/demo/?screen=control-plane");
+  await expect(
+    page.getByText("gateway implemented; live provider path not validated", { exact: true }),
+  ).toBeVisible();
+  expect(gatewayRequests).toEqual([]);
 });

@@ -11,13 +11,20 @@
     "description",
     "status",
     "providerCategory",
-    "modelIdentifier",
+    "preferredModelId",
+    "allowedProviderIds",
+    "allowedModelIds",
+    "fallbackOrder",
     "reasoningProfile",
     "temperature",
-    "fallbackChain",
-    "maximumTokens",
-    "costCeilingUsd",
-    "liveExecutionEnabled",
+    "maximumInputTokens",
+    "maximumOutputTokens",
+    "maximumCostUsd",
+    "maximumLatencyMs",
+    "allowedStages",
+    "allowedTasks",
+    "independentReview",
+    "executionMode",
     "sourceCommit",
     "contentHash",
     "createdAt",
@@ -30,16 +37,53 @@
     "version": { "$ref": "common.schema.json#/$defs/semanticVersion" },
     "description": { "type": "string", "minLength": 1 },
     "status": { "$ref": "common.schema.json#/$defs/status" },
-    "providerCategory": { "enum": ["PROVIDER_NEUTRAL_SIMULATED", "LOCAL_DETERMINISTIC"] },
-    "modelIdentifier": { "type": "string", "minLength": 1 },
+    "providerCategory": {
+      "enum": [
+        "PROVIDER_NEUTRAL_SIMULATED",
+        "LOCAL_DETERMINISTIC",
+        "OPENAI_COMPATIBLE_LOCAL_GATEWAY"
+      ]
+    },
+    "preferredModelId": { "type": "string", "minLength": 1 },
+    "allowedProviderIds": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
+    "allowedModelIds": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
+    "fallbackOrder": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
     "reasoningProfile": { "enum": ["LOW", "BALANCED", "HIGH"] },
     "temperature": {
       "oneOf": [{ "type": "number", "minimum": 0, "maximum": 2 }, { "type": "null" }]
     },
-    "fallbackChain": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
-    "maximumTokens": { "type": "integer", "minimum": 1 },
-    "costCeilingUsd": { "type": "number", "minimum": 0 },
-    "liveExecutionEnabled": { "const": false },
+    "maximumInputTokens": { "type": "integer", "minimum": 1 },
+    "maximumOutputTokens": { "type": "integer", "minimum": 1 },
+    "maximumCostUsd": { "type": "number", "minimum": 0 },
+    "maximumLatencyMs": { "type": "integer", "minimum": 1 },
+    "allowedStages": {
+      "type": "array",
+      "items": {
+        "enum": ["intake", "spec", "plan", "targets", "implement", "verify", "review"]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "allowedTasks": {
+      "type": "array",
+      "items": { "enum": ["ARTIFACT_DRAFT", "CODE_CHANGE", "INDEPENDENT_REVIEW"] },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "independentReview": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["required", "modelId"],
+      "properties": {
+        "required": { "type": "boolean" },
+        "modelId": { "oneOf": [{ "type": "string", "minLength": 1 }, { "type": "null" }] }
+      }
+    },
+    "executionMode": { "enum": ["OFFLINE_ONLY", "EXPLICIT_LOCAL_PROFILE"] },
     "sourceCommit": { "$ref": "common.schema.json#/$defs/sourceCommit" },
     "contentHash": { "$ref": "common.schema.json#/$defs/contentHash" },
     "createdAt": { "$ref": "common.schema.json#/$defs/timestamp" },
