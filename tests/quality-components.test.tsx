@@ -31,7 +31,7 @@ describe("quality-system component integration", () => {
 
   it("selects and reviews an artifact while retaining the synthetic disclosure", async () => {
     renderWorkbench("/demo/?screen=artifacts&issue=FIN-1150&artifact=spec.md");
-    expect(screen.getByText("Demo mode · Synthetic data · No external writes")).toBeVisible();
+    expect(screen.getAllByText("Demo mode · Synthetic data · No external writes")).toHaveLength(2);
     const targets = await screen.findByRole("button", { name: /change-targets\.json/ });
     fireEvent.click(targets);
     expect(targets).toHaveAttribute("aria-pressed", "true");

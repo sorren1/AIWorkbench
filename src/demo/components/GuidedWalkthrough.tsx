@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 
 import type { Route } from "../data/types";
 import { useApp } from "../state/store";
@@ -84,9 +84,16 @@ const STEPS: readonly WalkthroughStep[] = [
   },
 ];
 
-export function GuidedWalkthrough({ onClose }: { readonly onClose: () => void }) {
+export function GuidedWalkthrough({
+  stepIndex,
+  onStepChange,
+  onClose,
+}: {
+  readonly stepIndex: number;
+  readonly onStepChange: (stepIndex: number) => void;
+  readonly onClose: () => void;
+}) {
   const { actions } = useApp();
-  const [stepIndex, setStepIndex] = useState(0);
   const regionRef = useRef<HTMLElement>(null);
   const step = STEPS[stepIndex];
 
@@ -105,7 +112,7 @@ export function GuidedWalkthrough({ onClose }: { readonly onClose: () => void })
   if (!step) return null;
 
   const openStep = () => actions.navigate(step.route, step.issueKey);
-  const previous = () => setStepIndex((current) => Math.max(0, current - 1));
+  const previous = () => onStepChange(Math.max(0, stepIndex - 1));
   const next = () => {
     if (stepIndex === STEPS.length - 1) {
       onClose();
@@ -113,7 +120,7 @@ export function GuidedWalkthrough({ onClose }: { readonly onClose: () => void })
     }
     const nextIndex = stepIndex + 1;
     const nextStep = STEPS[nextIndex];
-    setStepIndex(nextIndex);
+    onStepChange(nextIndex);
     if (nextStep) actions.navigate(nextStep.route, nextStep.issueKey);
   };
 

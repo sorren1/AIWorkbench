@@ -64,11 +64,16 @@ Install browser engines once before the complete gate:
 npx playwright install chromium firefox webkit
 ```
 
-Generate the representative public screenshot from the built application:
+Generate or verify the seven public case-study/demo captures and social image:
 
 ```bash
 npm run screenshots:generate
+npm run screenshots:check
 ```
+
+The generator uses the production preview, reduced motion, pinned Chromium, repository-owned
+fixtures, and the authored SVG social-card source. The check decodes the committed images and fails
+on material pixel drift while allowing only a documented one-value browser antialias tolerance.
 
 Run the fixed failing-before/passing-after Docker slice and validate its evidence:
 

@@ -91,19 +91,19 @@ export function ArchitectureScreen() {
       <div className="wb-page-head">
         <div>
           <div className="eyebrow wb-mb-8">
-            <Icon name="network" size={13} /> Production design boundary
+            <Icon name="network" size={13} /> Proposed production design
           </div>
           <h1 className="wb-page-title">Architecture</h1>
           <div className="wb-page-desc">
-            A governed AI delivery system separates planes of responsibility so acceleration never
-            erodes control. Suggestion, implementation, review, and release stay distinct — with
-            deterministic artifacts and human gates between them.
+            The proposed production design separates planes of responsibility so suggestion,
+            implementation, review, and release stay distinct, with deterministic artifacts and
+            human gates between them.
           </div>
         </div>
         <div className="wb-spacer" />
         <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
           <Badge tone="safe" icon="check">
-            Functional locally
+            Local exports functional
           </Badge>
           <Btn
             size="sm"

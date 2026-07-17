@@ -211,7 +211,7 @@ export function Header({
 
       <div className="wb-header-actions">
         <IconBtn
-          icon={theme === "dark" ? "info" : "info"}
+          icon="info"
           size="sm"
           title="About AI Delivery Workbench"
           onClick={() =>

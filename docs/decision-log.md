@@ -491,3 +491,18 @@ Retain the Vite multi-page static artifact, local-only assets, configuration-dri
 ### Decision
 
 Do not silently select a permissive license. State that no reuse license has been granted, retain third-party upstream terms, and require an explicit owner decision plus documentation/security updates before changing the boundary.
+
+## ADR-024 — Make public evidence boundaries and review assets deterministic
+
+- Status: Accepted
+- Date: 2026-07-17
+
+### Decision
+
+State the functional-versus-simulated boundary in the case-study hero, preserve the guided-tour step in validated URL state so an interrupted walkthrough can resume, and generate every public screenshot plus the social card from repository-owned production HTML, SVG, CSS, and fixtures. Decode and compare image pixels in the release gate, allowing at most 32 one-value channel differences for browser antialias noise while rejecting larger visual drift.
+
+### Consequences
+
+- The first viewport answers what is functional and what is simulated without relying on a visitor opening the demo.
+- Walkthrough progress is shareable but contains only a bounded step number; closing the guide removes its URL state and no workflow approval is persisted.
+- Public visual evidence can be reproduced from the built application and fails validation when checked-in assets materially drift without turning browser antialias noise into a false release failure.

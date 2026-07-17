@@ -127,3 +127,20 @@ test("the complete guided walkthrough advances using only the keyboard", async (
   await expect(walkthrough).toBeHidden();
   await expect(page.getByRole("heading", { level: 1, name: "Run Trace" })).toBeVisible();
 });
+
+test("the guided walkthrough resumes its URL-bound step after interruption", async ({ page }) => {
+  await page.goto("/demo/?walkthrough=1&tourStep=5");
+  const progress = page.getByRole("progressbar", { name: "Walkthrough progress" });
+  await expect(progress).toHaveAttribute("aria-valuenow", "5");
+  await expect(
+    page.getByRole("heading", { level: 2, name: "Keep the human review gate authoritative" }),
+  ).toBeVisible();
+
+  await page.reload();
+  await expect(progress).toHaveAttribute("aria-valuenow", "5");
+
+  await page.getByRole("button", { name: "Next" }).click();
+  await expect(page).toHaveURL(/tourStep=6/);
+  await page.getByRole("button", { name: "Close guided walkthrough" }).click();
+  await expect(page).not.toHaveURL(/(?:walkthrough|tourStep)=/);
+});

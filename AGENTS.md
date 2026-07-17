@@ -50,6 +50,8 @@ npx playwright install chromium firefox webkit
 npm run test:a11y
 npm run test:e2e
 npm run test:visual
+npm run screenshots:generate
+npm run screenshots:check
 npm run build
 npm run check
 npm run check:all

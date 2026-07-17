@@ -108,10 +108,22 @@ function Footer() {
   );
 }
 
-function updateWalkthroughQuery(open: boolean): void {
+const WALKTHROUGH_STEP_COUNT = 8;
+
+function walkthroughStepFromQuery(): number {
+  const value = Number.parseInt(new URLSearchParams(window.location.search).get("tourStep") ?? "1");
+  return Number.isInteger(value) && value >= 1 && value <= WALKTHROUGH_STEP_COUNT ? value - 1 : 0;
+}
+
+function updateWalkthroughQuery(open: boolean, stepIndex = 0): void {
   const url = new URL(window.location.href);
-  if (open) url.searchParams.set("walkthrough", "1");
-  else url.searchParams.delete("walkthrough");
+  if (open) {
+    url.searchParams.set("walkthrough", "1");
+    url.searchParams.set("tourStep", String(stepIndex + 1));
+  } else {
+    url.searchParams.delete("walkthrough");
+    url.searchParams.delete("tourStep");
+  }
   url.searchParams.delete("tour");
   window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
 }
@@ -174,13 +186,15 @@ export function App() {
     const params = new URLSearchParams(window.location.search);
     return params.get("walkthrough") === "1" || params.get("tour") === "1";
   });
+  const [walkthroughStep, setWalkthroughStep] = useState(walkthroughStepFromQuery);
   const [walkthroughSession, setWalkthroughSession] = useState(0);
   const walkthroughReturnFocus = useRef<HTMLElement | null>(null);
   const applicationShellRef = useRef<HTMLDivElement>(null);
   const openWalkthrough = useCallback(() => {
     walkthroughReturnFocus.current =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
-    updateWalkthroughQuery(true);
+    setWalkthroughStep(0);
+    updateWalkthroughQuery(true, 0);
     actions.navigate("queue", "FIN-1150");
     setWalkthroughSession((session) => session + 1);
     setWalkthroughOpen(true);
@@ -192,6 +206,10 @@ export function App() {
     queueMicrotask(() => {
       if (returnTarget?.isConnected) returnTarget.focus();
     });
+  }, []);
+  const changeWalkthroughStep = useCallback((stepIndex: number) => {
+    setWalkthroughStep(stepIndex);
+    updateWalkthroughQuery(true, stepIndex);
   }, []);
   const applyScenario = useCallback(
     (scenarioId: DemoScenarioId) => {
@@ -238,6 +256,7 @@ export function App() {
         <BrandMark />
         <p className="eyebrow">Desktop-optimized interactive prototype</p>
         <h1 id="narrow-overview-title">AI Delivery Workbench</h1>
+        <p className="wb-narrow-boundary">Demo mode · Synthetic data · No external writes</p>
         <p>
           This narrow-screen view avoids forcing a desktop control plane into an unusable canvas.
           The full workbench is available on wider screens; the case study remains fully responsive.
@@ -267,7 +286,12 @@ export function App() {
               onRequestReset={resetDemo}
             />
             {walkthroughOpen && (
-              <GuidedWalkthrough key={walkthroughSession} onClose={closeWalkthrough} />
+              <GuidedWalkthrough
+                key={walkthroughSession}
+                stepIndex={walkthroughStep}
+                onStepChange={changeWalkthroughStep}
+                onClose={closeWalkthrough}
+              />
             )}
             <Screen />
             <Footer />

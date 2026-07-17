@@ -1,19 +1,24 @@
 import { expect, test } from "./fixtures";
 
-const caseStudyWidths = [320, 375, 768, 1024, 1440] as const;
+const publicWidths = [320, 375, 768, 1024, 1280, 1440] as const;
+const publicPages = [
+  { path: "/", heading: "AI Delivery Workbench" },
+  { path: "/writing/governing-ai-assisted-delivery/", heading: "Governing AI-assisted delivery" },
+  { path: "/404.html", heading: "This page is outside the expected change surface." },
+] as const;
 
-for (const width of caseStudyWidths) {
-  test(`case study has no page-level horizontal overflow at ${width}px`, async ({ page }) => {
+for (const width of publicWidths) {
+  test(`public pages have no horizontal overflow at ${width}px`, async ({ page }) => {
     await page.setViewportSize({ width, height: 900 });
-    await page.goto("/");
-    await expect(
-      page.getByRole("heading", { level: 1, name: "AI Delivery Workbench" }),
-    ).toBeVisible();
-    const dimensions = await page.evaluate(() => ({
-      clientWidth: document.documentElement.clientWidth,
-      scrollWidth: document.documentElement.scrollWidth,
-    }));
-    expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
+    for (const publicPage of publicPages) {
+      await page.goto(publicPage.path);
+      await expect(page.getByRole("heading", { level: 1, name: publicPage.heading })).toBeVisible();
+      const dimensions = await page.evaluate(() => ({
+        clientWidth: document.documentElement.clientWidth,
+        scrollWidth: document.documentElement.scrollWidth,
+      }));
+      expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
+    }
   });
 }
 
@@ -48,4 +53,28 @@ test("demo remains contained at 1024px and uses the narrow overview at a 200% zo
     page.getByRole("heading", { level: 1, name: "AI Delivery Workbench" }),
   ).toBeVisible();
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(640);
+});
+
+test("authored motion respects the operating-system reduction preference", async ({ browser }) => {
+  const context = await browser.newContext({ reducedMotion: "reduce" });
+  const page = await context.newPage();
+  await page.goto("/demo/?walkthrough=1");
+
+  expect(await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches)).toBe(
+    true,
+  );
+  expect(
+    await page.locator(".wb-walkthrough").evaluate((surface) =>
+      Array.from(surface.querySelectorAll<HTMLElement>("*"))
+        .map((element) => getComputedStyle(element).transitionDuration)
+        .every((duration) =>
+          duration
+            .split(",")
+            .map((value) => Number.parseFloat(value))
+            .every((seconds) => seconds <= 0.00001),
+        ),
+    ),
+  ).toBe(true);
+
+  await context.close();
 });

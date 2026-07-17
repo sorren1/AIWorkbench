@@ -32,6 +32,7 @@
     "dependency:audit": "npm audit --audit-level=high",
     "links:check": "tsx scripts/check-links.ts && tsx scripts/check-document-links.ts",
     "screenshots:generate": "npm run build && tsx scripts/generate-public-screenshots.ts",
+    "screenshots:check": "npm run build && tsx scripts/generate-public-screenshots.ts --check",
     "performance:budgets": "tsx scripts/check-performance-budgets.ts",
     "performance:budgets:record": "tsx scripts/check-performance-budgets.ts --record",
     "performance:audit": "tsx scripts/run-lighthouse.ts",
@@ -55,7 +56,7 @@
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/e2e/accessibility.spec.ts",
     "test:visual": "playwright test --project=visual",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm run registry:check && npm run mcp:evidence:check && npm run sandbox:evidence:validate && npm run trace:check && npm run model-gateway:check && npm run model-gateway:evidence:validate && npm run test:coverage && npm run build && npm run links:check && npm run performance:budgets && npm run security:check && npm run security:supply-chain",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run registry:check && npm run mcp:evidence:check && npm run sandbox:evidence:validate && npm run trace:check && npm run model-gateway:check && npm run model-gateway:evidence:validate && npm run test:coverage && npm run build && tsx scripts/generate-public-screenshots.ts --check && npm run links:check && npm run performance:budgets && npm run security:check && npm run security:supply-chain",
     "check:all": "npm run check && npm run test:e2e && npm run performance:audit"
   },
   "dependencies": {
@@ -80,6 +81,7 @@
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
     "@types/node": "22.18.13",
+    "@types/pngjs": "6.0.5",
     "@types/react": "18.3.31",
     "@types/react-dom": "18.3.7",
     "@vitejs/plugin-react": "6.0.3",
@@ -88,6 +90,7 @@
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "17.7.0",
     "jsdom": "29.1.1",
+    "pngjs": "7.0.0",
     "prettier": "3.9.5",
     "tsx": "4.23.1",
     "typescript": "5.9.3",

@@ -47,6 +47,8 @@ The supported runtime is Node.js 22 LTS; `.nvmrc` pins the verified local versio
 | `npm run test:e2e`                        | Run browser, axe, security, and responsive checks in three engines.  |
 | `npm run test:a11y`                       | Run the focused axe suite on public and principal demo surfaces.     |
 | `npm run test:visual`                     | Capture controlled principal-screen screenshots for human review.    |
+| `npm run screenshots:generate`            | Regenerate public route captures and the social image.               |
+| `npm run screenshots:check`               | Verify decoded public pixels within the antialias tolerance.         |
 | `npm run check`                           | Run deterministic source, evidence, build, and supply-chain checks.  |
 | `npm run check:all`                       | Run the complete release gate, including browsers and Lighthouse.    |
 

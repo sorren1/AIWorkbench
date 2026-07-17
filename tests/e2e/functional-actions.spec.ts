@@ -206,7 +206,9 @@ test("versioned local preferences persist and the disclosure keeps writes unambi
   page,
 }) => {
   await page.goto("/demo/");
-  await expect(page.getByText("Demo mode · Synthetic data · No external writes")).toBeVisible();
+  await expect(page.locator(".wb-disclaimer")).toHaveText(
+    "Demo mode · Synthetic data · No external writes",
+  );
   await page.getByRole("button", { name: "Switch to dark" }).click();
   await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");

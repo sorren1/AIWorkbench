@@ -48,7 +48,7 @@ npm run build
 npm run preview
 ```
 
-Open `/demo/?walkthrough=1` to start the in-app 5–8 minute walkthrough. The same guide is available from the `Guided tour` button in the global demo controls. It uses semantic buttons, announces progress, moves between the existing reducer-backed screens, closes with Escape, and can be restarted without reloading.
+Open `/demo/?walkthrough=1` to start the in-app 5–8 minute walkthrough. The same guide is available from the `Guided tour` button in the global demo controls. It uses semantic buttons, announces progress, moves between the existing reducer-backed screens, closes with Escape, and can be restarted without reloading. The current step is encoded as a validated `tourStep` number in the URL, so an interrupted walkthrough resumes after refresh; closing the guide removes both walkthrough parameters.
 
 Deep links use validated public fixture identifiers. For example:
 

@@ -375,6 +375,15 @@ export function GitHubScreen() {
               }
             />
             <div className="wb-card-body wb-card-body--tight">
+              {base.unexpected === 0 && (
+                <div style={{ padding: "12px 16px" }}>
+                  <Banner tone="neutral" icon="shield">
+                    The approved change-targets artifact is the path allow-list. Every changed file
+                    is compared with it; an outside path remains visible and blocks approval until a
+                    person resolves the scope difference.
+                  </Banner>
+                </div>
+              )}
               {base.unexpected > 0 && (
                 <div style={{ padding: "12px 16px" }}>
                   <Banner tone="warn" title="Unexpected change detected">

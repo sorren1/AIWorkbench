@@ -71,6 +71,8 @@ describe("static site metadata", () => {
     const tags = renderMetadataTags(configured, PAGE_METADATA.article);
     expect(tags).toContain('rel="canonical"');
     expect(tags).toContain('property="og:image"');
+    expect(tags).toContain("assets/social-card.png");
+    expect(tags).toContain('property="og:image:type" content="image/png"');
     expect(createRobotsTxt(configured)).toContain(
       "Sitemap: https://portfolio.example/projects/workbench/sitemap.xml",
     );

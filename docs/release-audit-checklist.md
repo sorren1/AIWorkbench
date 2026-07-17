@@ -7,7 +7,8 @@ Complete this checklist against the candidate commit before publication or taggi
 - [ ] `git status --short` is clean and the candidate commit is recorded.
 - [ ] `npm ci` used the committed lockfile and supported Node version.
 - [ ] `npm run check:all` completed with exit code zero.
-- [ ] `npm run screenshots:generate` reproduced the representative README image from the production preview.
+- [ ] `npm run screenshots:generate` reproduced all seven public captures and the social image from the production preview.
+- [ ] `npm run screenshots:check` verified decoded image pixels within the documented antialias tolerance.
 - [ ] Static and tracked-document links/fragments passed `npm run links:check`.
 - [ ] Production build contains no unplanned external request, credential, or CSP violation.
 

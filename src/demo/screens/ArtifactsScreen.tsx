@@ -359,8 +359,8 @@ function ArtifactsHead({ issue }: { readonly issue: Issue }) {
         </div>
         <h1 className="wb-page-title">Artifacts</h1>
         <div className="wb-page-desc">
-          Deterministic synthetic artifacts show how AI output can become reviewable and traceable
-          instead of remaining an opaque suggestion. Review decisions update local state only.
+          Each deterministic synthetic artifact exposes its source stage, review state, provenance,
+          and bound context-pack digest. Review decisions update local state only.
         </div>
       </div>
       <div className="wb-spacer" />

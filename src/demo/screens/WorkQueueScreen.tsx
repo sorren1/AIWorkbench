@@ -132,7 +132,7 @@ export function WorkQueue() {
 
       <div className="wb-grid wb-grid-4 wb-mb-16">
         <StatTile
-          label="Active runs"
+          label="Tracked issues"
           icon="workflow"
           value={totals.all}
           meta="synthetic fixture count"

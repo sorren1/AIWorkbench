@@ -477,6 +477,18 @@ body {
     line-height: var(--leading-relaxed);
   }
 
+  .wb-narrow-overview .wb-narrow-boundary {
+    margin: 0 0 12px;
+    padding: 7px 10px;
+    color: var(--warn-text);
+    background: var(--warn-soft);
+    border: 1px solid var(--warn-soft-border);
+    border-radius: var(--radius-pill);
+    font: 11px / var(--leading-normal) var(--font-mono);
+    letter-spacing: var(--tracking-wide);
+    text-transform: uppercase;
+  }
+
   .wb-narrow-overview ul {
     margin: 24px 0;
     padding-left: 20px;

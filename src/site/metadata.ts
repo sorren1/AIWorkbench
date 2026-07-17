@@ -58,7 +58,7 @@ export function absoluteSiteUrl(config: SiteConfig, path: string): string | null
 
 export function renderMetadataTags(config: SiteConfig, page: PageMetadata): string {
   const pageUrl = absoluteSiteUrl(config, page.path);
-  const socialImageUrl = absoluteSiteUrl(config, "/assets/social-card.svg");
+  const socialImageUrl = absoluteSiteUrl(config, "/assets/social-card.png");
   const tags = [
     `<meta property="og:site_name" content="AI Delivery Workbench" />`,
     `<meta property="og:type" content="${page.type}" />`,
@@ -75,6 +75,7 @@ export function renderMetadataTags(config: SiteConfig, page: PageMetadata): stri
   }
   if (socialImageUrl) {
     tags.push(`<meta property="og:image" content="${escapeAttribute(socialImageUrl)}" />`);
+    tags.push(`<meta property="og:image:type" content="image/png" />`);
     tags.push(`<meta property="og:image:width" content="1200" />`);
     tags.push(`<meta property="og:image:height" content="630" />`);
     tags.push(
