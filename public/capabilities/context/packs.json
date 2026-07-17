@@ -10,7 +10,7 @@
     "memoryPolicy": {
       "id": "memory.policy.issue-bounded",
       "version": "2.0.0",
-      "contentHash": "e3b53163c16795b332819826d25a714f5791bb5e2b3a40d1c616a0f42dcfd8ce"
+      "contentHash": "0b00b8ddbaf1cc2641c4d2f9eff1e8bd63b631394e4927678369d60a7d2c09e1"
     },
     "selection": {
       "strategy": "DETERMINISTIC_RULES",
@@ -61,7 +61,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://issues/FIN-1150",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -97,7 +97,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "issue:fin-1150", "fp-a"],
-          "contentHash": "fa65e89e8c53be2c2f8c027d4140810c8d02810ae8c723ee8bcd42cf81711111"
+          "contentHash": "6c41bd45ee34e61afe3e707116d5e6f7bfebaec60c5868329b3507e9e1d6cea6"
         },
         "freshness": {
           "recordId": "context.issue.fin-1150",
@@ -125,7 +125,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/adr/agent-control-plane-scope.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -156,7 +156,7 @@
               "reference": "repo://docs/adr/agent-control-plane-scope.md"
             }
           ],
-          "contentHash": "f40965166f5fd4b45875f7d4e3da61663d30e3f5c45b9d734122599024420cf7"
+          "contentHash": "f70c462014d82988404cb040049255d2c2283bd675a231770f4e2b91756def61"
         },
         "freshness": {
           "recordId": "context.architecture.delivery-planes",
@@ -230,7 +230,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/authorization-and-separation-of-duties.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["intake", "spec", "plan", "targets", "implement", "verify", "review"],
@@ -255,7 +255,7 @@
           "freshnessPolicy": { "mode": "NEVER_EXPIRES" },
           "state": "ACTIVE",
           "tags": ["domain", "governance", "review"],
-          "contentHash": "6f7345d5c5d288c6b337edb10c3af02c9b3c6162855708926188c72e94ffc7a4"
+          "contentHash": "8d81a6630c95fe9d858b56097592485a5c50118e79e5d0c17ec8b18ff075426a"
         },
         "freshness": {
           "recordId": "context.domain.human-approval",
@@ -281,7 +281,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://toy-repository",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -295,7 +295,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "engineering", "testing"],
-          "contentHash": "5bb015e2704fa57f72c5a1698b773900c38f6611f863c55e40b37d78b533b03f"
+          "contentHash": "5dfe1a9227ac331d52e3018ac5b743942d6abc59b9d743623bcd88fd73d87b89"
         },
         "freshness": {
           "recordId": "context.issue.synthetic-toy-repository",
@@ -321,7 +321,7 @@
             "type": "REPOSITORY",
             "classification": "PUBLIC",
             "reference": "repo://AGENTS.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -346,7 +346,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["engineering", "testing", "review"],
-          "contentHash": "1fabd6ca3e327326dcc4663d5fe8ceede3fa26bb8d0627c3e30358f3f4b48610"
+          "contentHash": "8aedfe2b22c2c0355c45bb4975a92473b177b6f79d7ecedfccb7a348428a5372"
         },
         "freshness": {
           "recordId": "context.engineering.semantic-controls",
@@ -904,7 +904,7 @@
     },
     "truncation": { "occurred": false, "excludedRecordIds": [], "reason": null },
     "createdAt": "2026-07-17T18:00:00.000Z",
-    "packDigest": "b59a4fb1d094d7828109a02bdae2f1707576285ea79910e1688421ddf8185fa7"
+    "packDigest": "8e12cd3ec6ec89d50835ed545539ce45e3e5270e9a0f5aae75ab52451b643320"
   },
   {
     "schemaVersion": 1,
@@ -915,12 +915,12 @@
     "agentCard": {
       "id": "agent.intake",
       "version": "1.0.0",
-      "contentHash": "c50efaa342bbd465294df709dbd01140910dc607c25b2388c786181e305896a9"
+      "contentHash": "a7753b06581036ea8d9e514a9c72744a8d6eeba9ea5de4eb2831796da3318837"
     },
     "memoryPolicy": {
       "id": "memory.policy.issue-bounded",
       "version": "2.0.0",
-      "contentHash": "e3b53163c16795b332819826d25a714f5791bb5e2b3a40d1c616a0f42dcfd8ce"
+      "contentHash": "0b00b8ddbaf1cc2641c4d2f9eff1e8bd63b631394e4927678369d60a7d2c09e1"
     },
     "selection": {
       "strategy": "DETERMINISTIC_RULES",
@@ -971,7 +971,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/authorization-and-separation-of-duties.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["intake", "spec", "plan", "targets", "implement", "verify", "review"],
@@ -996,7 +996,7 @@
           "freshnessPolicy": { "mode": "NEVER_EXPIRES" },
           "state": "ACTIVE",
           "tags": ["domain", "governance", "review"],
-          "contentHash": "6f7345d5c5d288c6b337edb10c3af02c9b3c6162855708926188c72e94ffc7a4"
+          "contentHash": "8d81a6630c95fe9d858b56097592485a5c50118e79e5d0c17ec8b18ff075426a"
         },
         "freshness": {
           "recordId": "context.domain.human-approval",
@@ -1022,7 +1022,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://issues/FIN-1150",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -1058,7 +1058,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "issue:fin-1150", "fp-a"],
-          "contentHash": "fa65e89e8c53be2c2f8c027d4140810c8d02810ae8c723ee8bcd42cf81711111"
+          "contentHash": "6c41bd45ee34e61afe3e707116d5e6f7bfebaec60c5868329b3507e9e1d6cea6"
         },
         "freshness": {
           "recordId": "context.issue.fin-1150",
@@ -1086,7 +1086,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/adr/agent-control-plane-scope.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -1117,7 +1117,7 @@
               "reference": "repo://docs/adr/agent-control-plane-scope.md"
             }
           ],
-          "contentHash": "f40965166f5fd4b45875f7d4e3da61663d30e3f5c45b9d734122599024420cf7"
+          "contentHash": "f70c462014d82988404cb040049255d2c2283bd675a231770f4e2b91756def61"
         },
         "freshness": {
           "recordId": "context.architecture.delivery-planes",
@@ -1191,7 +1191,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://toy-repository",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -1205,7 +1205,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "engineering", "testing"],
-          "contentHash": "5bb015e2704fa57f72c5a1698b773900c38f6611f863c55e40b37d78b533b03f"
+          "contentHash": "5dfe1a9227ac331d52e3018ac5b743942d6abc59b9d743623bcd88fd73d87b89"
         },
         "freshness": {
           "recordId": "context.issue.synthetic-toy-repository",
@@ -1231,7 +1231,7 @@
             "type": "REPOSITORY",
             "classification": "PUBLIC",
             "reference": "repo://AGENTS.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -1256,7 +1256,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["engineering", "testing", "review"],
-          "contentHash": "1fabd6ca3e327326dcc4663d5fe8ceede3fa26bb8d0627c3e30358f3f4b48610"
+          "contentHash": "8aedfe2b22c2c0355c45bb4975a92473b177b6f79d7ecedfccb7a348428a5372"
         },
         "freshness": {
           "recordId": "context.engineering.semantic-controls",
@@ -1814,7 +1814,7 @@
     },
     "truncation": { "occurred": false, "excludedRecordIds": [], "reason": null },
     "createdAt": "2026-07-17T18:00:00.000Z",
-    "packDigest": "40536616c88020de08297b569ad2584c0aaf0cc33d18046148976a0615729436"
+    "packDigest": "f318bd3360f42bb26a9e56f78cd23e0f62e5c36ab41ace8fff54e7aff3530f68"
   },
   {
     "schemaVersion": 1,
@@ -1825,12 +1825,12 @@
     "agentCard": {
       "id": "agent.specification",
       "version": "1.0.0",
-      "contentHash": "86ed6acc2b42f5fdb99e8ea26d755d10bac04e0c081443e581649a837ef47fd2"
+      "contentHash": "cf9946c24f6311120386c4ca24acae0150ba2e812c113adfca3b51073827f568"
     },
     "memoryPolicy": {
       "id": "memory.policy.issue-bounded",
       "version": "2.0.0",
-      "contentHash": "e3b53163c16795b332819826d25a714f5791bb5e2b3a40d1c616a0f42dcfd8ce"
+      "contentHash": "0b00b8ddbaf1cc2641c4d2f9eff1e8bd63b631394e4927678369d60a7d2c09e1"
     },
     "selection": {
       "strategy": "DETERMINISTIC_RULES",
@@ -1881,7 +1881,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/authorization-and-separation-of-duties.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["intake", "spec", "plan", "targets", "implement", "verify", "review"],
@@ -1906,7 +1906,7 @@
           "freshnessPolicy": { "mode": "NEVER_EXPIRES" },
           "state": "ACTIVE",
           "tags": ["domain", "governance", "review"],
-          "contentHash": "6f7345d5c5d288c6b337edb10c3af02c9b3c6162855708926188c72e94ffc7a4"
+          "contentHash": "8d81a6630c95fe9d858b56097592485a5c50118e79e5d0c17ec8b18ff075426a"
         },
         "freshness": {
           "recordId": "context.domain.human-approval",
@@ -1932,7 +1932,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://issues/FIN-1150",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -1968,7 +1968,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "issue:fin-1150", "fp-a"],
-          "contentHash": "fa65e89e8c53be2c2f8c027d4140810c8d02810ae8c723ee8bcd42cf81711111"
+          "contentHash": "6c41bd45ee34e61afe3e707116d5e6f7bfebaec60c5868329b3507e9e1d6cea6"
         },
         "freshness": {
           "recordId": "context.issue.fin-1150",
@@ -1994,7 +1994,7 @@
             "type": "REPOSITORY",
             "classification": "PUBLIC",
             "reference": "repo://AGENTS.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -2019,7 +2019,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["engineering", "testing", "review"],
-          "contentHash": "1fabd6ca3e327326dcc4663d5fe8ceede3fa26bb8d0627c3e30358f3f4b48610"
+          "contentHash": "8aedfe2b22c2c0355c45bb4975a92473b177b6f79d7ecedfccb7a348428a5372"
         },
         "freshness": {
           "recordId": "context.engineering.semantic-controls",
@@ -2086,7 +2086,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/adr/agent-control-plane-scope.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -2117,7 +2117,7 @@
               "reference": "repo://docs/adr/agent-control-plane-scope.md"
             }
           ],
-          "contentHash": "f40965166f5fd4b45875f7d4e3da61663d30e3f5c45b9d734122599024420cf7"
+          "contentHash": "f70c462014d82988404cb040049255d2c2283bd675a231770f4e2b91756def61"
         },
         "freshness": {
           "recordId": "context.architecture.delivery-planes",
@@ -2191,7 +2191,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://toy-repository",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -2205,7 +2205,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "engineering", "testing"],
-          "contentHash": "5bb015e2704fa57f72c5a1698b773900c38f6611f863c55e40b37d78b533b03f"
+          "contentHash": "5dfe1a9227ac331d52e3018ac5b743942d6abc59b9d743623bcd88fd73d87b89"
         },
         "freshness": {
           "recordId": "context.issue.synthetic-toy-repository",
@@ -2724,7 +2724,7 @@
     },
     "truncation": { "occurred": false, "excludedRecordIds": [], "reason": null },
     "createdAt": "2026-07-17T18:00:00.000Z",
-    "packDigest": "42774f5c69416be9ede76b937835f60fd1e5f5e7325983759d8505d0ab655247"
+    "packDigest": "ab9764087ddbb7b7ec0a8bb1ad35cf160e1c85006d8917330651527a97fec083"
   },
   {
     "schemaVersion": 1,
@@ -2735,12 +2735,12 @@
     "agentCard": {
       "id": "agent.planning",
       "version": "1.0.0",
-      "contentHash": "75a1cd76b61731653471c291de05a74b677e06914feb1d4d25a95ab0c7fb6ec0"
+      "contentHash": "b5752f84018982c0c7b9119b210a92da38aa2b033902d0ebfdbafd6c988109a1"
     },
     "memoryPolicy": {
       "id": "memory.policy.issue-bounded",
       "version": "2.0.0",
-      "contentHash": "e3b53163c16795b332819826d25a714f5791bb5e2b3a40d1c616a0f42dcfd8ce"
+      "contentHash": "0b00b8ddbaf1cc2641c4d2f9eff1e8bd63b631394e4927678369d60a7d2c09e1"
     },
     "selection": {
       "strategy": "DETERMINISTIC_RULES",
@@ -2791,7 +2791,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/adr/agent-control-plane-scope.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -2822,7 +2822,7 @@
               "reference": "repo://docs/adr/agent-control-plane-scope.md"
             }
           ],
-          "contentHash": "f40965166f5fd4b45875f7d4e3da61663d30e3f5c45b9d734122599024420cf7"
+          "contentHash": "f70c462014d82988404cb040049255d2c2283bd675a231770f4e2b91756def61"
         },
         "freshness": {
           "recordId": "context.architecture.delivery-planes",
@@ -2848,7 +2848,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://issues/FIN-1150",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -2884,7 +2884,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "issue:fin-1150", "fp-a"],
-          "contentHash": "fa65e89e8c53be2c2f8c027d4140810c8d02810ae8c723ee8bcd42cf81711111"
+          "contentHash": "6c41bd45ee34e61afe3e707116d5e6f7bfebaec60c5868329b3507e9e1d6cea6"
         },
         "freshness": {
           "recordId": "context.issue.fin-1150",
@@ -2910,7 +2910,7 @@
             "type": "REPOSITORY",
             "classification": "PUBLIC",
             "reference": "repo://AGENTS.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -2935,7 +2935,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["engineering", "testing", "review"],
-          "contentHash": "1fabd6ca3e327326dcc4663d5fe8ceede3fa26bb8d0627c3e30358f3f4b48610"
+          "contentHash": "8aedfe2b22c2c0355c45bb4975a92473b177b6f79d7ecedfccb7a348428a5372"
         },
         "freshness": {
           "recordId": "context.engineering.semantic-controls",
@@ -3050,7 +3050,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/authorization-and-separation-of-duties.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["intake", "spec", "plan", "targets", "implement", "verify", "review"],
@@ -3075,7 +3075,7 @@
           "freshnessPolicy": { "mode": "NEVER_EXPIRES" },
           "state": "ACTIVE",
           "tags": ["domain", "governance", "review"],
-          "contentHash": "6f7345d5c5d288c6b337edb10c3af02c9b3c6162855708926188c72e94ffc7a4"
+          "contentHash": "8d81a6630c95fe9d858b56097592485a5c50118e79e5d0c17ec8b18ff075426a"
         },
         "freshness": {
           "recordId": "context.domain.human-approval",
@@ -3101,7 +3101,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://toy-repository",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -3115,7 +3115,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "engineering", "testing"],
-          "contentHash": "5bb015e2704fa57f72c5a1698b773900c38f6611f863c55e40b37d78b533b03f"
+          "contentHash": "5dfe1a9227ac331d52e3018ac5b743942d6abc59b9d743623bcd88fd73d87b89"
         },
         "freshness": {
           "recordId": "context.issue.synthetic-toy-repository",
@@ -3634,7 +3634,7 @@
     },
     "truncation": { "occurred": false, "excludedRecordIds": [], "reason": null },
     "createdAt": "2026-07-17T18:00:00.000Z",
-    "packDigest": "6eb17776df0a0e5c3c2e8dfa6bc602de876f850a302ccac0a4b57f7f881f7545"
+    "packDigest": "4b84873aafe986e432ae289f8fc68b21451d85ff3069b884bd945516ffef0020"
   },
   {
     "schemaVersion": 1,
@@ -3645,12 +3645,12 @@
     "agentCard": {
       "id": "agent.change-target",
       "version": "1.0.0",
-      "contentHash": "594d109fd046fddd0aff97d2860b1a168c479802a7ec15b7227cf094dc981415"
+      "contentHash": "758e2ad1d402c6890ee798e0a0456a1b283259b91e66dd6244a1b910fd5af334"
     },
     "memoryPolicy": {
       "id": "memory.policy.issue-bounded",
       "version": "2.0.0",
-      "contentHash": "e3b53163c16795b332819826d25a714f5791bb5e2b3a40d1c616a0f42dcfd8ce"
+      "contentHash": "0b00b8ddbaf1cc2641c4d2f9eff1e8bd63b631394e4927678369d60a7d2c09e1"
     },
     "selection": {
       "strategy": "DETERMINISTIC_RULES",
@@ -3701,7 +3701,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/adr/agent-control-plane-scope.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -3732,7 +3732,7 @@
               "reference": "repo://docs/adr/agent-control-plane-scope.md"
             }
           ],
-          "contentHash": "f40965166f5fd4b45875f7d4e3da61663d30e3f5c45b9d734122599024420cf7"
+          "contentHash": "f70c462014d82988404cb040049255d2c2283bd675a231770f4e2b91756def61"
         },
         "freshness": {
           "recordId": "context.architecture.delivery-planes",
@@ -3758,7 +3758,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://issues/FIN-1150",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -3794,7 +3794,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "issue:fin-1150", "fp-a"],
-          "contentHash": "fa65e89e8c53be2c2f8c027d4140810c8d02810ae8c723ee8bcd42cf81711111"
+          "contentHash": "6c41bd45ee34e61afe3e707116d5e6f7bfebaec60c5868329b3507e9e1d6cea6"
         },
         "freshness": {
           "recordId": "context.issue.fin-1150",
@@ -3820,7 +3820,7 @@
             "type": "REPOSITORY",
             "classification": "PUBLIC",
             "reference": "repo://AGENTS.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -3845,7 +3845,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["engineering", "testing", "review"],
-          "contentHash": "1fabd6ca3e327326dcc4663d5fe8ceede3fa26bb8d0627c3e30358f3f4b48610"
+          "contentHash": "8aedfe2b22c2c0355c45bb4975a92473b177b6f79d7ecedfccb7a348428a5372"
         },
         "freshness": {
           "recordId": "context.engineering.semantic-controls",
@@ -3921,7 +3921,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/authorization-and-separation-of-duties.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["intake", "spec", "plan", "targets", "implement", "verify", "review"],
@@ -3946,7 +3946,7 @@
           "freshnessPolicy": { "mode": "NEVER_EXPIRES" },
           "state": "ACTIVE",
           "tags": ["domain", "governance", "review"],
-          "contentHash": "6f7345d5c5d288c6b337edb10c3af02c9b3c6162855708926188c72e94ffc7a4"
+          "contentHash": "8d81a6630c95fe9d858b56097592485a5c50118e79e5d0c17ec8b18ff075426a"
         },
         "freshness": {
           "recordId": "context.domain.human-approval",
@@ -3972,7 +3972,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://toy-repository",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -3986,7 +3986,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "engineering", "testing"],
-          "contentHash": "5bb015e2704fa57f72c5a1698b773900c38f6611f863c55e40b37d78b533b03f"
+          "contentHash": "5dfe1a9227ac331d52e3018ac5b743942d6abc59b9d743623bcd88fd73d87b89"
         },
         "freshness": {
           "recordId": "context.issue.synthetic-toy-repository",
@@ -4544,7 +4544,7 @@
     },
     "truncation": { "occurred": false, "excludedRecordIds": [], "reason": null },
     "createdAt": "2026-07-17T18:00:00.000Z",
-    "packDigest": "5b417bdee338cda00d0664174cc92fde69a23dc106b5456e4c79c0ab5e4441ff"
+    "packDigest": "aa9f799ea065af54dc0c6f4bf07e13c7b5a820bcb74fecfba509531ac2cccc59"
   },
   {
     "schemaVersion": 1,
@@ -4555,12 +4555,12 @@
     "agentCard": {
       "id": "agent.implementation",
       "version": "1.0.0",
-      "contentHash": "803bb2ce8708aa25a4f1b61236a5a37a56cf4cb739b6c4243ae8fde0ef49491f"
+      "contentHash": "c248ed534629d65dee4421396d154396905de97e9fd5a61acd36f33a69b8ccbf"
     },
     "memoryPolicy": {
       "id": "memory.policy.implementation-episodic",
       "version": "1.0.0",
-      "contentHash": "83a74e912bbbf0d6cd10a44e80ee01f605abc02139f35fb8d443adbb5ff41a88"
+      "contentHash": "beec97201c340301ac440857a942dc8513481582767de915c2dbf5b38d7b75ed"
     },
     "selection": {
       "strategy": "DETERMINISTIC_RULES",
@@ -4611,7 +4611,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/adr/agent-control-plane-scope.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -4642,7 +4642,7 @@
               "reference": "repo://docs/adr/agent-control-plane-scope.md"
             }
           ],
-          "contentHash": "f40965166f5fd4b45875f7d4e3da61663d30e3f5c45b9d734122599024420cf7"
+          "contentHash": "f70c462014d82988404cb040049255d2c2283bd675a231770f4e2b91756def61"
         },
         "freshness": {
           "recordId": "context.architecture.delivery-planes",
@@ -4668,7 +4668,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://toy-repository",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -4682,7 +4682,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "engineering", "testing"],
-          "contentHash": "5bb015e2704fa57f72c5a1698b773900c38f6611f863c55e40b37d78b533b03f"
+          "contentHash": "5dfe1a9227ac331d52e3018ac5b743942d6abc59b9d743623bcd88fd73d87b89"
         },
         "freshness": {
           "recordId": "context.issue.synthetic-toy-repository",
@@ -4708,7 +4708,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://issues/FIN-1150",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -4744,7 +4744,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "issue:fin-1150", "fp-a"],
-          "contentHash": "fa65e89e8c53be2c2f8c027d4140810c8d02810ae8c723ee8bcd42cf81711111"
+          "contentHash": "6c41bd45ee34e61afe3e707116d5e6f7bfebaec60c5868329b3507e9e1d6cea6"
         },
         "freshness": {
           "recordId": "context.issue.fin-1150",
@@ -4770,7 +4770,7 @@
             "type": "REPOSITORY",
             "classification": "PUBLIC",
             "reference": "repo://AGENTS.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -4795,7 +4795,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["engineering", "testing", "review"],
-          "contentHash": "1fabd6ca3e327326dcc4663d5fe8ceede3fa26bb8d0627c3e30358f3f4b48610"
+          "contentHash": "8aedfe2b22c2c0355c45bb4975a92473b177b6f79d7ecedfccb7a348428a5372"
         },
         "freshness": {
           "recordId": "context.engineering.semantic-controls",
@@ -4994,7 +4994,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/authorization-and-separation-of-duties.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["intake", "spec", "plan", "targets", "implement", "verify", "review"],
@@ -5019,7 +5019,7 @@
           "freshnessPolicy": { "mode": "NEVER_EXPIRES" },
           "state": "ACTIVE",
           "tags": ["domain", "governance", "review"],
-          "contentHash": "6f7345d5c5d288c6b337edb10c3af02c9b3c6162855708926188c72e94ffc7a4"
+          "contentHash": "8d81a6630c95fe9d858b56097592485a5c50118e79e5d0c17ec8b18ff075426a"
         },
         "freshness": {
           "recordId": "context.domain.human-approval",
@@ -5458,7 +5458,7 @@
       "reason": "Lower-priority eligible records were excluded before exceeding the configured byte/token budget."
     },
     "createdAt": "2026-07-17T18:00:00.000Z",
-    "packDigest": "1b0a9d2626bcdbbb62331cc23c81927ba64cbca40c0ffba43b5c19fbfc1218c2"
+    "packDigest": "9639c536aeba1afe7862c389f39b750c42c620d0063c63f1d0e6c82947d7e9b7"
   },
   {
     "schemaVersion": 1,
@@ -5469,12 +5469,12 @@
     "agentCard": {
       "id": "agent.verification",
       "version": "1.0.0",
-      "contentHash": "d0d7b03f7e2e191f9dc65f79f6490686a8c4e2bb27bdb883c7f251cccd979078"
+      "contentHash": "73e69bded166fad74514151fb839cc7566cf84eb7a83079dbebe1d39a3fb2a41"
     },
     "memoryPolicy": {
       "id": "memory.policy.issue-bounded",
       "version": "2.0.0",
-      "contentHash": "e3b53163c16795b332819826d25a714f5791bb5e2b3a40d1c616a0f42dcfd8ce"
+      "contentHash": "0b00b8ddbaf1cc2641c4d2f9eff1e8bd63b631394e4927678369d60a7d2c09e1"
     },
     "selection": {
       "strategy": "DETERMINISTIC_RULES",
@@ -5525,7 +5525,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://issues/FIN-1150",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -5561,7 +5561,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "issue:fin-1150", "fp-a"],
-          "contentHash": "fa65e89e8c53be2c2f8c027d4140810c8d02810ae8c723ee8bcd42cf81711111"
+          "contentHash": "6c41bd45ee34e61afe3e707116d5e6f7bfebaec60c5868329b3507e9e1d6cea6"
         },
         "freshness": {
           "recordId": "context.issue.fin-1150",
@@ -5587,7 +5587,7 @@
             "type": "REPOSITORY",
             "classification": "PUBLIC",
             "reference": "repo://AGENTS.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -5612,7 +5612,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["engineering", "testing", "review"],
-          "contentHash": "1fabd6ca3e327326dcc4663d5fe8ceede3fa26bb8d0627c3e30358f3f4b48610"
+          "contentHash": "8aedfe2b22c2c0355c45bb4975a92473b177b6f79d7ecedfccb7a348428a5372"
         },
         "freshness": {
           "recordId": "context.engineering.semantic-controls",
@@ -5679,7 +5679,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/adr/agent-control-plane-scope.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -5710,7 +5710,7 @@
               "reference": "repo://docs/adr/agent-control-plane-scope.md"
             }
           ],
-          "contentHash": "f40965166f5fd4b45875f7d4e3da61663d30e3f5c45b9d734122599024420cf7"
+          "contentHash": "f70c462014d82988404cb040049255d2c2283bd675a231770f4e2b91756def61"
         },
         "freshness": {
           "recordId": "context.architecture.delivery-planes",
@@ -5784,7 +5784,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/authorization-and-separation-of-duties.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["intake", "spec", "plan", "targets", "implement", "verify", "review"],
@@ -5809,7 +5809,7 @@
           "freshnessPolicy": { "mode": "NEVER_EXPIRES" },
           "state": "ACTIVE",
           "tags": ["domain", "governance", "review"],
-          "contentHash": "6f7345d5c5d288c6b337edb10c3af02c9b3c6162855708926188c72e94ffc7a4"
+          "contentHash": "8d81a6630c95fe9d858b56097592485a5c50118e79e5d0c17ec8b18ff075426a"
         },
         "freshness": {
           "recordId": "context.domain.human-approval",
@@ -5835,7 +5835,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://toy-repository",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -5849,7 +5849,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "engineering", "testing"],
-          "contentHash": "5bb015e2704fa57f72c5a1698b773900c38f6611f863c55e40b37d78b533b03f"
+          "contentHash": "5dfe1a9227ac331d52e3018ac5b743942d6abc59b9d743623bcd88fd73d87b89"
         },
         "freshness": {
           "recordId": "context.issue.synthetic-toy-repository",
@@ -6368,7 +6368,7 @@
     },
     "truncation": { "occurred": false, "excludedRecordIds": [], "reason": null },
     "createdAt": "2026-07-17T18:00:00.000Z",
-    "packDigest": "97e88d43e0ed40423e7ded680ee6d1cd5fc9b29f67d4925cfeedb6cb0bb6be38"
+    "packDigest": "968ed00121446839762a9e34156c9c24ec4591f08784edabd7848f59594df18d"
   },
   {
     "schemaVersion": 1,
@@ -6379,12 +6379,12 @@
     "agentCard": {
       "id": "agent.review-assistant",
       "version": "1.0.0",
-      "contentHash": "351e7edb83301a9975440820d13ae83b3cad69db9340b966f74ea8fddb5bf5e9"
+      "contentHash": "292f226f26ae1c7ab1e5249606c74ca9a9af949e11ab006cbbe6036135290dbd"
     },
     "memoryPolicy": {
       "id": "memory.policy.review-bounded",
       "version": "2.0.0",
-      "contentHash": "954e53a69a18a6a0dfd8888d328e78c1952da4e6974afd485ae6645b35166d1a"
+      "contentHash": "9c709f43ceed299a227189bd08a6eac33ca7d607f1a631f804bd23c608ef46ab"
     },
     "selection": {
       "strategy": "DETERMINISTIC_RULES",
@@ -6434,7 +6434,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/adr/agent-control-plane-scope.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -6465,7 +6465,7 @@
               "reference": "repo://docs/adr/agent-control-plane-scope.md"
             }
           ],
-          "contentHash": "f40965166f5fd4b45875f7d4e3da61663d30e3f5c45b9d734122599024420cf7"
+          "contentHash": "f70c462014d82988404cb040049255d2c2283bd675a231770f4e2b91756def61"
         },
         "freshness": {
           "recordId": "context.architecture.delivery-planes",
@@ -6491,7 +6491,7 @@
             "type": "DOCUMENTATION",
             "classification": "PUBLIC",
             "reference": "repo://docs/authorization-and-separation-of-duties.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["intake", "spec", "plan", "targets", "implement", "verify", "review"],
@@ -6516,7 +6516,7 @@
           "freshnessPolicy": { "mode": "NEVER_EXPIRES" },
           "state": "ACTIVE",
           "tags": ["domain", "governance", "review"],
-          "contentHash": "6f7345d5c5d288c6b337edb10c3af02c9b3c6162855708926188c72e94ffc7a4"
+          "contentHash": "8d81a6630c95fe9d858b56097592485a5c50118e79e5d0c17ec8b18ff075426a"
         },
         "freshness": {
           "recordId": "context.domain.human-approval",
@@ -6542,7 +6542,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://issues/FIN-1150",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -6578,7 +6578,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "issue:fin-1150", "fp-a"],
-          "contentHash": "fa65e89e8c53be2c2f8c027d4140810c8d02810ae8c723ee8bcd42cf81711111"
+          "contentHash": "6c41bd45ee34e61afe3e707116d5e6f7bfebaec60c5868329b3507e9e1d6cea6"
         },
         "freshness": {
           "recordId": "context.issue.fin-1150",
@@ -6654,7 +6654,7 @@
             "type": "ISSUE_FIXTURE",
             "classification": "SYNTHETIC",
             "reference": "fixture://toy-repository",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
             "sourceVersion": "fixture-v1"
           },
           "sensitivity": "SYNTHETIC",
@@ -6668,7 +6668,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["issue", "engineering", "testing"],
-          "contentHash": "5bb015e2704fa57f72c5a1698b773900c38f6611f863c55e40b37d78b533b03f"
+          "contentHash": "5dfe1a9227ac331d52e3018ac5b743942d6abc59b9d743623bcd88fd73d87b89"
         },
         "freshness": {
           "recordId": "context.issue.synthetic-toy-repository",
@@ -6694,7 +6694,7 @@
             "type": "REPOSITORY",
             "classification": "PUBLIC",
             "reference": "repo://AGENTS.md",
-            "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7"
+            "sourceCommit": "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b"
           },
           "sensitivity": "PUBLIC",
           "allowedStages": ["spec", "plan", "targets", "implement", "verify", "review"],
@@ -6719,7 +6719,7 @@
           "freshnessPolicy": { "mode": "TTL", "ttlSeconds": 604800 },
           "state": "ACTIVE",
           "tags": ["engineering", "testing", "review"],
-          "contentHash": "1fabd6ca3e327326dcc4663d5fe8ceede3fa26bb8d0627c3e30358f3f4b48610"
+          "contentHash": "8aedfe2b22c2c0355c45bb4975a92473b177b6f79d7ecedfccb7a348428a5372"
         },
         "freshness": {
           "recordId": "context.engineering.semantic-controls",
@@ -7277,6 +7277,6 @@
     },
     "truncation": { "occurred": false, "excludedRecordIds": [], "reason": null },
     "createdAt": "2026-07-17T18:00:00.000Z",
-    "packDigest": "8b7b9cb78252b9ca75f079ae27c736381c6946d308c464287f670b8c0b5e58d2"
+    "packDigest": "6e44882a6735ece51f265d89eaa93154d87647e6a44149896720d5d9eadad843"
   }
 ]

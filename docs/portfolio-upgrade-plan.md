@@ -1,7 +1,7 @@
 # Portfolio upgrade plan
 
 Status: approved implementation plan
-Baseline: commit `13d01bb` (`Initial commit`)
+Rewritten baseline: commit `bfc947c` (`Initial commit`)
 Prepared: 2026-07-16
 Expanded: 2026-07-16 to include the focused agent control plane
 
@@ -240,7 +240,7 @@ Scope: establish the build and migrate the existing prototype without intentiona
 
 Acceptance criteria:
 
-- Verify `original-prototype-v0.9.0` points to the original implementation. Because the tag is absent at baseline, create it at `13d01bb` before deleting legacy files and document that correction.
+- Verify `original-prototype-v0.9.0` points to the original implementation. The sanitized annotated tag resolves to rewritten commit `bfc947c`; the private pre-public bundle preserves the untouched graph outside the checkout.
 - Add `package.json`, a committed lockfile, strict TypeScript configurations, Vite MPA configuration, and reproducible scripts.
 - Create static root `index.html` and separate `demo/index.html` entries.
 - Migrate React, state, fixtures, and screens to `.ts`/`.tsx` modules with typed public boundaries.

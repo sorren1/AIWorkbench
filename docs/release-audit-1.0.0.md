@@ -1,7 +1,7 @@
 # Independent release audit — 1.0.0
 
 - Audit date: 2026-07-17
-- Audited base commit: `feeef8fa26f61880bcbafd312d9c8892f370b13f`
+- Audited base commit: `1075e69d2a54731ee3ebd1da7c9477372e4ca35a`
 - Release disposition: **local release approved after two reproducibility blockers were fixed; not deployed or pushed**
 
 ## Scope and method
@@ -23,7 +23,7 @@ No further release-blocking source, behavior, accessibility, evidence, security,
 | Check                           | Command or observation                                                                       | Result                                                                                                                                                                                 |
 | ------------------------------- | -------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Working tree before audit       | `git status --short`                                                                         | PASS — empty at audited base commit.                                                                                                                                                   |
-| Original tag identity           | `git rev-parse original-prototype-v0.9.0` and `git rev-parse original-prototype-v0.9.0^{}`   | PASS — annotated tag object `123c22ce9ee7e48f103d1c4470dcee73c734a994` resolves to commit `13d01bb75d5d20b0f7be11897512186ba5a321b0`.                                                  |
+| Original tag identity           | `git rev-parse original-prototype-v0.9.0` and `git rev-parse original-prototype-v0.9.0^{}`   | PASS — sanitized annotated tag object `b2aec04fb9a4759cb00f569a7ae66f201ac4aa88` resolves to rewritten commit `bfc947c9c86798e26ad91aa2124025292b51609d`.                              |
 | Original archive recovery       | `git archive --format=tar --output=<temporary file> original-prototype-v0.9.0` and `tar -tf` | PASS — 42 archive entries; the standalone prototype HTML and original `workbench/README.md` are present.                                                                               |
 | Existing release tag            | `git tag --list`                                                                             | PASS — only `original-prototype-v0.9.0` existed before this release; no prior `v1.0.0` was overwritten.                                                                                |
 | Clean checkout                  | `git clone --no-local --branch main D:\workbench <temporary directory>`                      | PASS — `node_modules/` and `dist/` were absent.                                                                                                                                        |

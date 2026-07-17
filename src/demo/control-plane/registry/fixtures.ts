@@ -7,8 +7,8 @@ import type {
   ToolDescriptorSource,
 } from "./contracts";
 
-const SOURCE_COMMIT = "7bc813df452e9ac255a087cfcaa4ae70474d4c42";
-const CONTEXT_SOURCE_COMMIT = "cd86f65ceb0bd1b668324e7d523d5a49568461c7";
+const SOURCE_COMMIT = "6ff396739f4f8afbf7af966e202a45a00eb0eeaa";
+const CONTEXT_SOURCE_COMMIT = "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b";
 const CREATED_AT = "2026-07-16T18:00:00.000Z";
 const APPROVAL = {
   approvedBy: "Synthetic control reviewer",

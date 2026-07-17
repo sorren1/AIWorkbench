@@ -13,7 +13,7 @@
   "maxRepairAttempts": 2,
   "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
   "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-  "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+  "sourceCommit": "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
   "createdAt": "2026-07-16T18:00:00.000Z",
   "updatedAt": "2026-07-16T18:00:00.000Z",
   "approval": {
@@ -30,5 +30,5 @@
   "skills": ["structured intake", "risk cue extraction"],
   "allowedToolIds": ["tool.issue.read"],
   "allowedWritePaths": ["artifacts/intake.json"],
-  "contentHash": "c50efaa342bbd465294df709dbd01140910dc607c25b2388c786181e305896a9"
+  "contentHash": "a7753b06581036ea8d9e514a9c72744a8d6eeba9ea5de4eb2831796da3318837"
 }

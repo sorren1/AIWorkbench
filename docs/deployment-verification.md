@@ -3,8 +3,8 @@
 - Status: Preview verified; GitHub automation blocked on account connection; Production deferred
 - Review date: 2026-07-17
 - Git branch: `codex/vercel-deployment`
-- Release baseline: `v1.0.0` at `bd4c8613bf0f1accce8a4ae5c703b5f659852b30`
-- Deployment configuration commit: `e469ff03d473be0cfbd4a15d612aba44a7fc5294`
+- Release baseline: `v1.0.0` at `cf42eee54649812b91b04c9494b4dc7a0d935ea5`
+- Deployment configuration commit: `7e833645cdabb652e8102532a0a3016b3255d030`
 - Source repository: <https://github.com/sorren1/AIWorkbench>
 - Preview URL: <https://ai-delivery-workbench-1828w6v09-workbench1.vercel.app>
 - Production URL: Not created. No custom domain has been selected or verified.
@@ -65,7 +65,7 @@ The Vercel project setting uses Node 22.x, matching the tracked Node 22 engine a
 
 | Check                                      | Result                           | Evidence                                                                                                                                                                                                                                                                        |
 | ------------------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Preview deployment of pushed commit        | PASS                             | Vercel deployment `dpl_6q5rfAAib27w7ga6c7TtMAvvAgpW` reached Ready from branch `codex/vercel-deployment` at commit `e469ff03d473be0cfbd4a15d612aba44a7fc5294`.                                                                                                                  |
+| Preview deployment of pushed commit        | PASS                             | Vercel deployment `dpl_6q5rfAAib27w7ga6c7TtMAvvAgpW` reached Ready from the pre-public branch history. Its rewritten configuration commit is `7e833645cdabb652e8102532a0a3016b3255d030`; the historical deployment itself predates the rewrite.                                 |
 | Automatic branch and pull-request previews | BLOCKED                          | `vercel git connect` returned HTTP 400 because the new Vercel account does not yet have a GitHub login connection. No claim of automatic Git previews is made until the owner connects GitHub and a subsequent branch push is observed.                                         |
 | Smoke and direct refresh                   | PASS                             | Hosted Playwright returned 200 for `/`, `/demo/`, and `/writing/governing-ai-assisted-delivery/`. The external browser opened the case study, guided-demo entry, and article directly.                                                                                          |
 | Custom 404 and status code                 | PASS                             | A nonexistent route returned HTTP 404 and the authored `Page not found` content in automation and the external browser.                                                                                                                                                         |

@@ -13,7 +13,7 @@
   "maxRepairAttempts": 2,
   "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
   "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-  "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+  "sourceCommit": "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
   "createdAt": "2026-07-16T18:00:00.000Z",
   "updatedAt": "2026-07-16T18:00:00.000Z",
   "approval": {
@@ -39,5 +39,5 @@
     "tool.evidence.write"
   ],
   "allowedWritePaths": ["browser-local://evidence/**"],
-  "contentHash": "d0d7b03f7e2e191f9dc65f79f6490686a8c4e2bb27bdb883c7f251cccd979078"
+  "contentHash": "73e69bded166fad74514151fb839cc7566cf84eb7a83079dbebe1d39a3fb2a41"
 }

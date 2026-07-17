@@ -13,7 +13,7 @@
   "maxRepairAttempts": 2,
   "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
   "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-  "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+  "sourceCommit": "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
   "createdAt": "2026-07-16T18:00:00.000Z",
   "updatedAt": "2026-07-16T18:00:00.000Z",
   "approval": {
@@ -30,5 +30,5 @@
   "skills": ["specification writing", "repository context lookup"],
   "allowedToolIds": ["tool.issue.read", "tool.repository.search", "tool.repository.file.read"],
   "allowedWritePaths": ["artifacts/spec.md"],
-  "contentHash": "86ed6acc2b42f5fdb99e8ea26d755d10bac04e0c081443e581649a837ef47fd2"
+  "contentHash": "cf9946c24f6311120386c4ca24acae0150ba2e812c113adfca3b51073827f568"
 }

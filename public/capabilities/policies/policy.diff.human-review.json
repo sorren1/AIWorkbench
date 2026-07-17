@@ -2,7 +2,7 @@
   "kind": "ApprovalPolicy",
   "enabled": true,
   "provenance": {
-    "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+    "sourceCommit": "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
     "independentlyAuthored": true,
     "createdAt": "2026-07-17T12:00:00.000Z"
   },
@@ -17,5 +17,5 @@
   "timeoutSeconds": 300,
   "forbidSelfApproval": false,
   "reasonRequired": false,
-  "contentHash": "42ab59b0c202003c6d942fd2e53cbe232d4bc96f713b8ee3f39fe18ad8c9eade"
+  "contentHash": "b89a982c592976441d44d30fe8d171d7dd3853b5ce30ae22f8bb25d4d7babcdb"
 }

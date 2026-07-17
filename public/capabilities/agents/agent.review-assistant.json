@@ -13,7 +13,7 @@
   "maxRepairAttempts": 0,
   "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
   "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-  "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+  "sourceCommit": "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
   "createdAt": "2026-07-16T18:00:00.000Z",
   "updatedAt": "2026-07-16T18:00:00.000Z",
   "approval": {
@@ -35,5 +35,5 @@
     "tool.workflow.release-readiness"
   ],
   "allowedWritePaths": ["browser-local://evidence/review-summary.json"],
-  "contentHash": "351e7edb83301a9975440820d13ae83b3cad69db9340b966f74ea8fddb5bf5e9"
+  "contentHash": "292f226f26ae1c7ab1e5249606c74ca9a9af949e11ab006cbbe6036135290dbd"
 }

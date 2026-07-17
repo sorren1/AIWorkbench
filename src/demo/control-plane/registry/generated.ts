@@ -32,7 +32,7 @@ export const registrySnapshot = {
         maxEstimatedUsd: 0.35,
         basis: "ESTIMATED",
       },
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -49,7 +49,7 @@ export const registrySnapshot = {
       skills: ["structured intake", "risk cue extraction"],
       allowedToolIds: ["tool.issue.read"],
       allowedWritePaths: ["artifacts/intake.json"],
-      contentHash: "c50efaa342bbd465294df709dbd01140910dc607c25b2388c786181e305896a9",
+      contentHash: "a7753b06581036ea8d9e514a9c72744a8d6eeba9ea5de4eb2831796da3318837",
     },
     {
       kind: "AgentCard",
@@ -77,7 +77,7 @@ export const registrySnapshot = {
         maxEstimatedUsd: 0.35,
         basis: "ESTIMATED",
       },
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -94,7 +94,7 @@ export const registrySnapshot = {
       skills: ["specification writing", "repository context lookup"],
       allowedToolIds: ["tool.issue.read", "tool.repository.search", "tool.repository.file.read"],
       allowedWritePaths: ["artifacts/spec.md"],
-      contentHash: "86ed6acc2b42f5fdb99e8ea26d755d10bac04e0c081443e581649a837ef47fd2",
+      contentHash: "cf9946c24f6311120386c4ca24acae0150ba2e812c113adfca3b51073827f568",
     },
     {
       kind: "AgentCard",
@@ -122,7 +122,7 @@ export const registrySnapshot = {
         maxEstimatedUsd: 0.35,
         basis: "ESTIMATED",
       },
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -139,7 +139,7 @@ export const registrySnapshot = {
       skills: ["change sequencing", "dependency inspection"],
       allowedToolIds: ["tool.issue.read", "tool.repository.search", "tool.repository.file.read"],
       allowedWritePaths: ["artifacts/plan.md"],
-      contentHash: "75a1cd76b61731653471c291de05a74b677e06914feb1d4d25a95ab0c7fb6ec0",
+      contentHash: "b5752f84018982c0c7b9119b210a92da38aa2b033902d0ebfdbafd6c988109a1",
     },
     {
       kind: "AgentCard",
@@ -167,7 +167,7 @@ export const registrySnapshot = {
         maxEstimatedUsd: 0.35,
         basis: "ESTIMATED",
       },
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -188,7 +188,7 @@ export const registrySnapshot = {
         "tool.repository.diff.inspect",
       ],
       allowedWritePaths: ["artifacts/change-targets.json"],
-      contentHash: "594d109fd046fddd0aff97d2860b1a168c479802a7ec15b7227cf094dc981415",
+      contentHash: "758e2ad1d402c6890ee798e0a0456a1b283259b91e66dd6244a1b910fd5af334",
     },
     {
       kind: "AgentCard",
@@ -220,7 +220,7 @@ export const registrySnapshot = {
         maxEstimatedUsd: 0.35,
         basis: "ESTIMATED",
       },
-      sourceCommit: "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+      sourceCommit: "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-17T18:00:00.000Z",
       approval: {
@@ -244,7 +244,7 @@ export const registrySnapshot = {
         "tool.evidence.write",
       ],
       allowedWritePaths: ["src/**", "browser-local://evidence/**"],
-      contentHash: "803bb2ce8708aa25a4f1b61236a5a37a56cf4cb739b6c4243ae8fde0ef49491f",
+      contentHash: "c248ed534629d65dee4421396d154396905de97e9fd5a61acd36f33a69b8ccbf",
     },
     {
       kind: "AgentCard",
@@ -275,7 +275,7 @@ export const registrySnapshot = {
         maxEstimatedUsd: 0.35,
         basis: "ESTIMATED",
       },
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -301,7 +301,7 @@ export const registrySnapshot = {
         "tool.evidence.write",
       ],
       allowedWritePaths: ["browser-local://evidence/**"],
-      contentHash: "d0d7b03f7e2e191f9dc65f79f6490686a8c4e2bb27bdb883c7f251cccd979078",
+      contentHash: "73e69bded166fad74514151fb839cc7566cf84eb7a83079dbebe1d39a3fb2a41",
     },
     {
       kind: "AgentCard",
@@ -329,7 +329,7 @@ export const registrySnapshot = {
         maxEstimatedUsd: 0.35,
         basis: "ESTIMATED",
       },
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -352,14 +352,14 @@ export const registrySnapshot = {
         "tool.workflow.release-readiness",
       ],
       allowedWritePaths: ["browser-local://evidence/review-summary.json"],
-      contentHash: "351e7edb83301a9975440820d13ae83b3cad69db9340b966f74ea8fddb5bf5e9",
+      contentHash: "292f226f26ae1c7ab1e5249606c74ca9a9af949e11ab006cbbe6036135290dbd",
     },
   ],
   tools: [
     {
       kind: "ToolDescriptor",
       status: "APPROVED",
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -409,12 +409,12 @@ export const registrySnapshot = {
         module: "src/demo/data/fixtures.ts",
         exportName: "issues",
       },
-      contentHash: "3f4cc2c9035961de138b993885695e39b4476fa91752f192ab2be60c958b36a0",
+      contentHash: "d9dadd9e9085e2899b40c518233adcac75ca21ab4b61d8f54d0c825f33d99766",
     },
     {
       kind: "ToolDescriptor",
       status: "APPROVED",
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -471,12 +471,12 @@ export const registrySnapshot = {
         module: "tools/toy-repo-mcp/server.ts",
         exportName: "registerRepositorySearch",
       },
-      contentHash: "58efc9182f4b592249e514de7242607bca8506c1c952ec7331956bbe81b66aee",
+      contentHash: "ee1a8ff4c18e4a9fd59fbebb95bd869db43c971414c7bb15426904ac761f9bd1",
     },
     {
       kind: "ToolDescriptor",
       status: "APPROVED",
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -532,12 +532,12 @@ export const registrySnapshot = {
         module: "tools/toy-repo-mcp/server.ts",
         exportName: "registerRepositoryFileRead",
       },
-      contentHash: "2256baff80d79b40ae1a095223ab73287aff9f95bb7400e93466e8cbee076c10",
+      contentHash: "27150dac6ce643d6184f80b4edebd3f20481b533608f64c2b19a074335609fb5",
     },
     {
       kind: "ToolDescriptor",
       status: "APPROVED",
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -600,12 +600,12 @@ export const registrySnapshot = {
         module: "tools/toy-repo-mcp/server.ts",
         exportName: "registerControlledPatch",
       },
-      contentHash: "080618e56b066abdf555440943c063e12f5a3c34697a37786aabdb9920de5917",
+      contentHash: "97fc9fad2a2281fd9c4198c572c38319adf203ee809cb114be7c9b3a57bce85a",
     },
     {
       kind: "ToolDescriptor",
       status: "APPROVED",
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -664,12 +664,12 @@ export const registrySnapshot = {
         module: "tools/toy-repo-mcp/server.ts",
         exportName: "registerSandboxValidation",
       },
-      contentHash: "00a4522ef228a795c1626caf1ecb2717de2e93f666a36e81cbe77a7bd9ddc664",
+      contentHash: "29ce03447de5816da5c1b0891fd67a873f3f4ef4ade3e5dfb7ca2d97319dd027",
     },
     {
       kind: "ToolDescriptor",
       status: "APPROVED",
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -722,12 +722,12 @@ export const registrySnapshot = {
         module: "tools/toy-repo-mcp/server.ts",
         exportName: "registerDiffInspection",
       },
-      contentHash: "620e4b73947a11e0f403368a9183fcea127a98cc26a22ed200b8e07ed8d8fe67",
+      contentHash: "7f65435a3f37798a2505415527ddaeacaabd7b5b53cd3a86e30e7ad08b2c6b35",
     },
     {
       kind: "ToolDescriptor",
       status: "APPROVED",
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -786,12 +786,12 @@ export const registrySnapshot = {
         module: "src/demo/exports/validation.ts",
         exportName: "createValidationEvidencePack",
       },
-      contentHash: "e1dbb9e11a1616f040f05c2ad379ac360010542e4c03968f860f980ef398964b",
+      contentHash: "0e948d5d96b3d75a3f1b5731bfffe5b3b0c3c825fa605798252cc3b777a570cf",
     },
     {
       kind: "ToolDescriptor",
       status: "APPROVED",
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -846,12 +846,12 @@ export const registrySnapshot = {
         module: "src/demo/screens/GitHubScreen.tsx",
         exportName: "GitHubScreen",
       },
-      contentHash: "08f802246c5c27e9f0f6de15d684b87a45c7451417b6f2eb529caa1c9230f346",
+      contentHash: "835b624e5cec443f0abff88cbbefd344297407df3113791d9680ca9b37bbba23",
     },
     {
       kind: "ToolDescriptor",
       status: "APPROVED",
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -909,7 +909,7 @@ export const registrySnapshot = {
         module: "src/demo/screens/GitHubScreen.tsx",
         exportName: "GitHubScreen",
       },
-      contentHash: "8df36b6209ab2cf66f928e538e03c329ae259de30a92562c4fff1f41dc69ad3e",
+      contentHash: "033feeb32f392464c092547ac079f46a27fc9529a30632744fa75206a483726d",
     },
   ],
   modelPolicies: [
@@ -939,7 +939,7 @@ export const registrySnapshot = {
         modelId: null,
       },
       executionMode: "OFFLINE_ONLY",
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-17T21:00:00.000Z",
       approval: {
@@ -948,7 +948,7 @@ export const registrySnapshot = {
         approvalPolicyId: "policy.registry.separation-of-duties",
         decisionRecordId: "decision.synthetic.registry-v1",
       },
-      contentHash: "a531488395a8440590fae4456153cf16a731c039811114d5e303cb470ba686c6",
+      contentHash: "87dd5179c1debd5545af91e5b606a5d281767d9b5fce68bdced08b775407c667",
     },
     {
       kind: "ModelPolicy",
@@ -976,7 +976,7 @@ export const registrySnapshot = {
         modelId: "delivery-review",
       },
       executionMode: "EXPLICIT_LOCAL_PROFILE",
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-17T21:00:00.000Z",
       updatedAt: "2026-07-17T21:00:00.000Z",
       approval: {
@@ -985,7 +985,7 @@ export const registrySnapshot = {
         approvalPolicyId: "policy.registry.separation-of-duties",
         decisionRecordId: "decision.synthetic.registry-v1",
       },
-      contentHash: "a8f527cfe889a51c3b473672a078ed78ec25759bd84785ed6b8e97b9e00a3f1f",
+      contentHash: "283e0a476aae298a2ca30f69dfa5ed7c6d6bbda39702599cb4c36e00b8b7b53e",
     },
     {
       kind: "ModelPolicy",
@@ -1012,10 +1012,10 @@ export const registrySnapshot = {
         modelId: null,
       },
       executionMode: "OFFLINE_ONLY",
-      sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
-      contentHash: "5916933a19b6b66ce1165311d80dabf2834855d63bd71da8ae268445a631d459",
+      contentHash: "c75aef5b91be4eb4a59e039762ae11854e57b80b2724cf0e776035d84d541522",
     },
   ],
   memoryPolicies: [
@@ -1052,7 +1052,7 @@ export const registrySnapshot = {
       priorRunEpisodicMemoryPermitted: false,
       retrievalMode: "DETERMINISTIC_RULES",
       selectionRuleVersion: "deterministic-context-v1",
-      sourceCommit: "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+      sourceCommit: "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -1061,7 +1061,7 @@ export const registrySnapshot = {
         approvalPolicyId: "policy.registry.separation-of-duties",
         decisionRecordId: "decision.synthetic.registry-v1",
       },
-      contentHash: "e3b53163c16795b332819826d25a714f5791bb5e2b3a40d1c616a0f42dcfd8ce",
+      contentHash: "0b00b8ddbaf1cc2641c4d2f9eff1e8bd63b631394e4927678369d60a7d2c09e1",
     },
     {
       kind: "MemoryPolicy",
@@ -1083,7 +1083,7 @@ export const registrySnapshot = {
       priorRunEpisodicMemoryPermitted: false,
       retrievalMode: "DETERMINISTIC_RULES",
       selectionRuleVersion: "deterministic-context-v1",
-      sourceCommit: "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+      sourceCommit: "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-16T18:00:00.000Z",
       approval: {
@@ -1092,7 +1092,7 @@ export const registrySnapshot = {
         approvalPolicyId: "policy.registry.separation-of-duties",
         decisionRecordId: "decision.synthetic.registry-v1",
       },
-      contentHash: "954e53a69a18a6a0dfd8888d328e78c1952da4e6974afd485ae6645b35166d1a",
+      contentHash: "9c709f43ceed299a227189bd08a6eac33ca7d607f1a631f804bd23c608ef46ab",
     },
     {
       kind: "MemoryPolicy",
@@ -1130,7 +1130,7 @@ export const registrySnapshot = {
       priorRunEpisodicMemoryPermitted: true,
       retrievalMode: "DETERMINISTIC_RULES",
       selectionRuleVersion: "deterministic-context-v1",
-      sourceCommit: "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
+      sourceCommit: "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b",
       createdAt: "2026-07-16T18:00:00.000Z",
       updatedAt: "2026-07-17T18:00:00.000Z",
       approval: {
@@ -1139,7 +1139,7 @@ export const registrySnapshot = {
         approvalPolicyId: "policy.registry.separation-of-duties",
         decisionRecordId: "decision.synthetic.registry-v1",
       },
-      contentHash: "83a74e912bbbf0d6cd10a44e80ee01f605abc02139f35fb8d443adbb5ff41a88",
+      contentHash: "beec97201c340301ac440857a942dc8513481582767de915c2dbf5b38d7b75ed",
     },
   ],
   approvalPolicies: [
@@ -1147,7 +1147,7 @@ export const registrySnapshot = {
       kind: "ApprovalPolicy",
       enabled: true,
       provenance: {
-        sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
         independentlyAuthored: true,
         createdAt: "2026-07-17T12:00:00.000Z",
       },
@@ -1165,13 +1165,13 @@ export const registrySnapshot = {
       timeoutSeconds: 300,
       forbidSelfApproval: false,
       reasonRequired: false,
-      contentHash: "e05592eecc4286b81ec554594287ce85cc5cde6ca98cc421afb277f1293dd7e9",
+      contentHash: "66b2b591e3571eed09837c498cbf4cf7a7d36237860c667ff084f8dea231a4f9",
     },
     {
       kind: "ApprovalPolicy",
       enabled: true,
       provenance: {
-        sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
         independentlyAuthored: true,
         createdAt: "2026-07-17T12:00:00.000Z",
       },
@@ -1194,13 +1194,13 @@ export const registrySnapshot = {
       decisionCacheTtlSeconds: 300,
       forbidSelfApproval: true,
       reasonRequired: true,
-      contentHash: "13a8f43b51b4f036ba44d60a3f3239e6048dfe37565221048ee710c594c47bf4",
+      contentHash: "34c35b0ede6ee6b446f56a8e2f577f437b8b8dfcfa91cc99137b40f9053e9764",
     },
     {
       kind: "ApprovalPolicy",
       enabled: true,
       provenance: {
-        sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
         independentlyAuthored: true,
         createdAt: "2026-07-17T12:00:00.000Z",
       },
@@ -1220,13 +1220,13 @@ export const registrySnapshot = {
       timeoutSeconds: 300,
       forbidSelfApproval: true,
       reasonRequired: true,
-      contentHash: "02e215efb53deeece217af55fa0ca98f5e1064c45dde64cade0fe3981cc79ade",
+      contentHash: "74dc75f72316c813005f56a3a4616b770e2150c2d3b1244dcba2ff0660fa84c0",
     },
     {
       kind: "ApprovalPolicy",
       enabled: true,
       provenance: {
-        sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
         independentlyAuthored: true,
         createdAt: "2026-07-17T12:00:00.000Z",
       },
@@ -1244,13 +1244,13 @@ export const registrySnapshot = {
       timeoutSeconds: 300,
       forbidSelfApproval: true,
       reasonRequired: true,
-      contentHash: "01b5225d7a524f680c9746f2a9d7d4250ce020c54d181f59814cc4ff1715e874",
+      contentHash: "e4b3c5c0d8e65ae6db836142ad1fa3e8e0f0598b00a6a3e1cf9a5a24ffad7e09",
     },
     {
       kind: "ApprovalPolicy",
       enabled: true,
       provenance: {
-        sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
         independentlyAuthored: true,
         createdAt: "2026-07-17T12:00:00.000Z",
       },
@@ -1269,13 +1269,13 @@ export const registrySnapshot = {
       timeoutSeconds: 600,
       forbidSelfApproval: false,
       reasonRequired: false,
-      contentHash: "fd233975c9ce1fe5fbee11b564a579c0fda8d8decfe891767320e9205895c0c4",
+      contentHash: "1787230b8281304bd6a7539b5c5a2f8b2cf09e439a7e043bb3bf7a998dbcf250",
     },
     {
       kind: "ApprovalPolicy",
       enabled: true,
       provenance: {
-        sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
         independentlyAuthored: true,
         createdAt: "2026-07-17T12:00:00.000Z",
       },
@@ -1293,13 +1293,13 @@ export const registrySnapshot = {
       timeoutSeconds: 300,
       forbidSelfApproval: true,
       reasonRequired: true,
-      contentHash: "4ce6f22514a5de6bca1ca21af4e97cd726044732da934f9916b0d713e7c84af1",
+      contentHash: "ab2453c0414f6762ca368a15d4aec40064cc5b5bf45947af6f26d6ef150a171e",
     },
     {
       kind: "ApprovalPolicy",
       enabled: true,
       provenance: {
-        sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
         independentlyAuthored: true,
         createdAt: "2026-07-17T12:00:00.000Z",
       },
@@ -1317,13 +1317,13 @@ export const registrySnapshot = {
       timeoutSeconds: 300,
       forbidSelfApproval: false,
       reasonRequired: false,
-      contentHash: "3c005415c4347d3fb59e236683990a27d90242af55010f97d7f8f94482e3ff2b",
+      contentHash: "6157587ce10f12af2a1f5ea76821bafa2451e44295fa4cb898e2b674a30f2377",
     },
     {
       kind: "ApprovalPolicy",
       enabled: true,
       provenance: {
-        sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
         independentlyAuthored: true,
         createdAt: "2026-07-17T12:00:00.000Z",
       },
@@ -1340,13 +1340,13 @@ export const registrySnapshot = {
       timeoutSeconds: 300,
       forbidSelfApproval: false,
       reasonRequired: false,
-      contentHash: "42ab59b0c202003c6d942fd2e53cbe232d4bc96f713b8ee3f39fe18ad8c9eade",
+      contentHash: "b89a982c592976441d44d30fe8d171d7dd3853b5ce30ae22f8bb25d4d7babcdb",
     },
     {
       kind: "ApprovalPolicy",
       enabled: true,
       provenance: {
-        sourceCommit: "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        sourceCommit: "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
         independentlyAuthored: true,
         createdAt: "2026-07-17T12:00:00.000Z",
       },
@@ -1365,7 +1365,7 @@ export const registrySnapshot = {
       decisionCacheTtlSeconds: 600,
       forbidSelfApproval: true,
       reasonRequired: true,
-      contentHash: "dc20f0aa8bdd0ee88d624d8a9d695f2bc993dce14138cf5a8480ba32a42706cb",
+      contentHash: "a1c5c3bd3532f5b349d2917adf409bd8cba0c176060fc3fb53af0a5f5da87117",
     },
   ],
 } as const satisfies RegistrySnapshot;

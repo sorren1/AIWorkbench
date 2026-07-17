@@ -2,7 +2,7 @@
 
 Audit date: 2026-07-16
 Repository root: `D:\workbench`
-Baseline commit: `13d01bb` (`Initial commit`)
+Rewritten baseline commit: `bfc947c` (`Initial commit`)
 Worktree at audit start: clean on `main`
 
 ## Executive findings
@@ -11,7 +11,7 @@ The prototype has a distinctive, coherent visual system and a broad deterministi
 
 The highest-risk public-project gaps are:
 
-1. The expected preservation tag `original-prototype-v0.9.0` does not exist. `git show-ref --tags` returned no tags. The original commit remains in Git history, but the named safety reference must be created at `13d01bb` before legacy deletion.
+1. The expected preservation tag `original-prototype-v0.9.0` did not exist during the baseline audit. The sanitized annotated tag now preserves the rewritten original commit at `bfc947c`.
 2. `workbench/README.md:28` contains an audience-specific organization reference. Submission- and role-specific wording appears throughout the repository.
 3. Most custom navigation and selection controls are mouse-only `div`/`tr` elements. Modal and drawer overlays have no dialog or focus behavior.
 4. There are no responsive rules. At a 390 px browser viewport the fixed sidebar consumes 248 px, the main region begins at x=248, the header is only 142 px wide, and the document becomes 741 px wide.

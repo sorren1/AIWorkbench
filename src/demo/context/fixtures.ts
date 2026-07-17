@@ -1,7 +1,7 @@
 import type { ContextRecordSource } from "./contracts";
 import { issues } from "../data/fixtures";
 
-const SOURCE_COMMIT = "cd86f65ceb0bd1b668324e7d523d5a49568461c7";
+const SOURCE_COMMIT = "e376b223fcffaa667156f6a92c0f6dc98c6b0c9b";
 const CREATED_AT = "2026-07-15T12:00:00.000Z";
 const UPDATED_AT = "2026-07-17T00:00:00.000Z";
 const IMPLEMENTATION_PERSONAS = [

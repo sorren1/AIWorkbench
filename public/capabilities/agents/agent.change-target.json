@@ -13,7 +13,7 @@
   "maxRepairAttempts": 2,
   "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
   "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-  "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+  "sourceCommit": "6ff396739f4f8afbf7af966e202a45a00eb0eeaa",
   "createdAt": "2026-07-16T18:00:00.000Z",
   "updatedAt": "2026-07-16T18:00:00.000Z",
   "approval": {
@@ -34,5 +34,5 @@
     "tool.repository.diff.inspect"
   ],
   "allowedWritePaths": ["artifacts/change-targets.json"],
-  "contentHash": "594d109fd046fddd0aff97d2860b1a168c479802a7ec15b7227cf094dc981415"
+  "contentHash": "758e2ad1d402c6890ee798e0a0456a1b283259b91e66dd6244a1b910fd5af334"
 }
