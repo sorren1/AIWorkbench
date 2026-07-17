@@ -150,7 +150,8 @@ describe("repository-owned local MCP slice", () => {
     const patchArguments = {
       path: "src/report.js",
       expected: "return `Variance: ${actual - budget}`;",
-      replacement: "return `Variance: ${actual - budget}`; // approved synthetic patch",
+      replacement:
+        'const difference = actual - budget;\n  const direction = difference >= 0 ? "over" : "under";\n  return `Variance: ${Math.abs(difference)} ${direction}`;',
     };
     const session = await startToyMcpSession({
       toyRepositoryRoot: disposable.root,

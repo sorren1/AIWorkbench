@@ -50,7 +50,9 @@ npm run test:a11y
 npm run test:e2e
 npm run build
 npm run check
-npm run demo:sandbox -- --scenario approval-required
+npm run demo:sandbox
+npm run sandbox:evidence:validate
+npm run demo:approval:start -- --scenario approval-required
 npm run demo:approve -- --request <request-id> --as synthetic-code-reviewer --reason "..."
 npm run demo:resume -- --run <run-id>
 ```

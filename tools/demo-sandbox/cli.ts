@@ -28,7 +28,7 @@ import { startToyMcpSession } from "../toy-repo-mcp/client";
 import { initializeToyRepository } from "../toy-repo-mcp/workspace";
 
 const projectRoot = resolve(import.meta.dirname, "../..");
-const fixtureRoot = resolve(projectRoot, "fixtures/toy-repository");
+const fixtureRoot = resolve(projectRoot, "examples/toy-repo");
 const DEFAULT_RUN_ROOT = resolve(projectRoot, ".workbench/runs");
 
 const runRecordSchema = z.object({
@@ -145,7 +145,8 @@ async function startRun(): Promise<void> {
   const actionArguments = {
     path: "src/report.js",
     expected: "return `Variance: ${actual - budget}`;",
-    replacement: "return `Variance: ${actual - budget}`; // approved synthetic CLI patch",
+    replacement:
+      'const difference = actual - budget;\n  const direction = difference >= 0 ? "over" : "under";\n  return `Variance: ${Math.abs(difference)} ${direction}`;',
   };
   const approvedChangeTargets = ["src/**"];
   const changeTargetDigest = await sha256Hex(approvedChangeTargets);

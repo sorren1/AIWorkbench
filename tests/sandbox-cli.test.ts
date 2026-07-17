@@ -181,8 +181,8 @@ describe("durable local sandbox approval CLI", () => {
     const runPath = resolve(runRoot, "run.test.stale/run.json");
     const originalRun = await readFile(runPath, "utf8");
     const mutatedRun = originalRun.replace(
-      "return `Variance: ${actual - budget}`; // approved synthetic CLI patch",
-      "mutated after approval",
+      '"replacement": "',
+      '"replacement": "mutated after approval: ',
     );
     expect(mutatedRun).not.toBe(originalRun);
     await writeFile(runPath, mutatedRun, "utf8");

@@ -1,3 +1,5 @@
+import { resolve } from "node:path";
+
 import { describe, expect, it } from "vitest";
 
 import type { SiteConfig } from "../src/site/config";
@@ -9,6 +11,7 @@ import {
   renderMetadataTags,
   renderStructuredData,
 } from "../src/site/metadata";
+import { renderRecordedSandboxEvidence } from "../src/site/recordedSandboxEvidence";
 
 const unconfigured: SiteConfig = {
   authorName: null,
@@ -27,6 +30,14 @@ const configured: SiteConfig = {
 };
 
 describe("static site metadata", () => {
+  it("renders only validated checked-in sandbox evidence at build time", async () => {
+    const rendered = await renderRecordedSandboxEvidence(resolve(import.meta.dirname, ".."));
+    expect(rendered?.html).toContain("Failing before, passing after one allow-listed patch.");
+    expect(rendered?.html).toContain("visitor's browser does not execute code");
+    expect(rendered?.html).toContain("src/report.js");
+    expect(rendered?.jsonName).toMatch(/^sandbox-run-.+\.json$/);
+  });
+
   it("omits canonical-dependent metadata rather than inventing a deployment URL", () => {
     const tags = renderMetadataTags(unconfigured, PAGE_METADATA["case-study"]);
     expect(tags).not.toContain('rel="canonical"');

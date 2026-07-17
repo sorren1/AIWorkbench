@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 1,
+  "latest": {
+    "json": "sandbox-run-20260717t072948-7b8f3aaa.json",
+    "markdown": "sandbox-run-20260717t072948-7b8f3aaa.md",
+    "evidenceDigest": "cc366bd84d9a33cef7ccfc2b1fd5410ed5383364a3638126daf8b9d1f35659f6",
+    "sourceCommit": "48d911c3e376231c7a7df36c105461ff70fc7f15",
+    "status": "SUCCEEDED"
+  }
+}

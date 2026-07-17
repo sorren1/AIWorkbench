@@ -566,6 +566,102 @@ html {
   background: var(--bg-inset);
 }
 
+.site-status--expected-failure {
+  color: var(--warn);
+  background: var(--warn-soft);
+}
+
+.site-recorded-run {
+  padding: clamp(24px, 4vw, 38px);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-top: 3px solid var(--safe);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+}
+
+.site-recorded-run__summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.site-recorded-run__summary h3 {
+  margin: 8px 0 10px;
+  font-size: clamp(23px, 3vw, 32px);
+  line-height: var(--leading-tight);
+}
+
+.site-recorded-run__summary p:last-child {
+  max-width: 760px;
+  margin: 0;
+  color: var(--text-secondary);
+  line-height: var(--leading-relaxed);
+}
+
+.site-evidence-facts {
+  margin: 28px 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  overflow: hidden;
+  background: var(--border-subtle);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.site-evidence-facts > div {
+  min-width: 0;
+  padding: 16px 18px;
+  background: var(--bg-canvas);
+}
+
+.site-evidence-facts dt {
+  color: var(--text-tertiary);
+  font: var(--text-xs) / 1 var(--font-mono);
+  letter-spacing: var(--tracking-wide);
+  text-transform: uppercase;
+}
+
+.site-evidence-facts dd {
+  margin: 8px 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+  line-height: var(--leading-relaxed);
+}
+
+.site-evidence-facts code {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  overflow-wrap: anywhere;
+}
+
+.site-recorded-run__commands {
+  min-width: 640px;
+}
+
+.site-recorded-run__diff {
+  margin-top: 20px;
+}
+
+.site-recorded-run__diff summary {
+  width: fit-content;
+  cursor: pointer;
+  font-weight: var(--weight-semibold);
+}
+
+.site-recorded-run__diff pre {
+  max-height: 360px;
+  margin: 16px 0 0;
+  padding: 17px;
+  overflow: auto;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  font: 12px / 1.55 var(--font-mono);
+}
+
 .site-code-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -917,6 +1013,10 @@ html {
     flex-direction: column;
   }
 
+  .site-evidence-facts {
+    grid-template-columns: 1fr;
+  }
+
   .site-workflow {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -970,6 +1070,10 @@ html {
 
   .site-actions {
     align-items: stretch;
+    flex-direction: column;
+  }
+
+  .site-recorded-run__summary {
     flex-direction: column;
   }
 

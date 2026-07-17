@@ -330,6 +330,15 @@
                 </td>
               </tr>
               <tr>
+                <th scope="row">Explicit local Docker validation slice</th>
+                <td><span class="site-status site-status--functional">Functional locally</span></td>
+                <td>
+                  A developer command applies one deterministic allow-listed patch to a temporary
+                  synthetic repository, runs fixed build/tests with container networking disabled,
+                  and emits validated recorded evidence. The public site cannot invoke it.
+                </td>
+              </tr>
+              <tr>
                 <th scope="row">Scoped authorization and durable local approvals</th>
                 <td><span class="site-status site-status--functional">Functional locally</span></td>
                 <td>
@@ -358,7 +367,10 @@
               <tr>
                 <th scope="row">Test logs and hosted sandbox execution</th>
                 <td><span class="site-status site-status--simulated">Simulated</span></td>
-                <td>Logs are deterministic fixtures; no hosted sandbox is claimed.</td>
+                <td>
+                  Workbench logs remain deterministic fixtures and no hosted or browser-accessible
+                  sandbox is claimed.
+                </td>
               </tr>
               <tr>
                 <th scope="row">Copy, download, export, confirmed reset, and state deep links</th>
@@ -373,7 +385,26 @@
         </div>
       </section>
 
-      <section class="site-section site-section--inset" aria-labelledby="implementation-title">
+      <section
+        id="recorded-sandbox"
+        class="site-section site-section--inset"
+        aria-labelledby="recorded-sandbox-title"
+      >
+        <div class="site-section-heading site-section-heading--split">
+          <div>
+            <p class="eyebrow">Controlled execution evidence</p>
+            <h2 id="recorded-sandbox-title">Recorded real sandbox run</h2>
+          </div>
+          <p>
+            One narrow local vertical slice proves allow-listed file modification, network-disabled
+            container validation, measured command receipts, cleanup, and hash-verifiable evidence
+            without exposing execution to public visitors.
+          </p>
+        </div>
+        <!-- site:recorded-sandbox-evidence -->
+      </section>
+
+      <section class="site-section" aria-labelledby="implementation-title">
         <div class="site-section-heading site-section-heading--split">
           <div>
             <p class="eyebrow">Selected implementation details</p>

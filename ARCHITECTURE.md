@@ -5,11 +5,11 @@ AI Delivery Workbench is a static portfolio case study plus a separate React dem
 ## Delivery planes
 
 - **Control Plane** — workflow state, versioned stage agents and tools, lifecycle, policy decisions, human gates, budgets, and evidence references.
-- **Execution Plane** — simulated delivery-stage runs plus one optional bounded local MCP process operating on a disposable synthetic repository.
+- **Execution Plane** — simulated delivery-stage runs, one optional bounded local MCP process, and one explicit developer-invoked Docker validation slice operating only on a disposable synthetic repository.
 - **Context Plane** — synthetic issue, artifact, and toy-repository inputs with explicit source and memory boundaries.
 - **Validation Plane** — changed-file inspection, acceptance evidence, local test evidence, review decisions, and release gates.
 
-The browser application never contacts Jira, GitHub, an AI provider, a database, or an MCP server. The optional MCP process is started only by repository commands and is not part of ordinary static website browsing.
+The browser application never contacts Jira, GitHub, an AI provider, a database, an MCP server, Docker, or localhost. Local MCP and Docker processes are started only by explicit repository commands and are not part of ordinary static website browsing.
 
 ## Versioned agent and tool registry
 
@@ -53,5 +53,7 @@ The static website reads only sanitized generated snapshots. It never opens stdi
 ## Static delivery boundary
 
 Vite builds the root case study, technical article, demo entry, and 404 page as static assets. Root case-study content remains authored HTML and readable without React. React loads only for `/demo/`. Public capability JSON and MCP evidence are generated before commit and checked for drift during `npm run check`.
+
+The local Docker slice applies one deterministic host-side patch to an exact allow-listed path in a temporary copy, then runs fixed build/test commands in fresh network-disabled, non-root, read-only containers with CPU, memory, process, and timeout limits. It records hashes, diff, output, durations, tool/image versions, cleanup, registry/context references, and final status. Vite validates and renders only the latest checked-in successful evidence; it cannot invoke the runner. See `docs/sandbox-security-model.md`.
 
 See `docs/agent-and-tool-registry.md`, `docs/authorization-and-separation-of-duties.md`, `docs/human-approval-protocol.md`, and `docs/threat-model.md` for contract, lifecycle, transport, threat, and claim details.

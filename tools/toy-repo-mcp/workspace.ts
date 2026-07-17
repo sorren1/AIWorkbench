@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
-const fixtureRoot = resolve(import.meta.dirname, "../../fixtures/toy-repository");
+const fixtureRoot = resolve(import.meta.dirname, "../../examples/toy-repo");
 
 export type DisposableToyRepository = {
   readonly root: string;
@@ -14,6 +14,7 @@ export type DisposableToyRepository = {
 
 export async function initializeToyRepository(root: string): Promise<void> {
   await execFileAsync("git", ["init", "--quiet"], { cwd: root });
+  await execFileAsync("git", ["config", "core.autocrlf", "false"], { cwd: root });
   await execFileAsync("git", ["config", "user.name", "Synthetic Fixture"], { cwd: root });
   await execFileAsync("git", ["config", "user.email", "fixture@example.invalid"], { cwd: root });
   await execFileAsync("git", ["add", "."], { cwd: root });

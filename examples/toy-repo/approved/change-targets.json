@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "classification": "SYNTHETIC_PUBLIC_FIXTURE",
+  "issueId": "TOY-101",
+  "status": "APPROVED",
+  "paths": ["src/report.js"],
+  "excludedPaths": ["package.json", "test/**", ".git/**"],
+  "approval": {
+    "kind": "CHECKED_IN_SYNTHETIC_REVIEW_FIXTURE",
+    "reviewer": "Synthetic code reviewer",
+    "reason": "The deterministic change is limited to the report formatter."
+  }
+}

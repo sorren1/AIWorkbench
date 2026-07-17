@@ -288,3 +288,28 @@ Bind artifacts, approvals, local MCP stage manifests, and sandbox evidence to th
 - Prior failures/fixes are available only under the Implementation Agent's explicit episodic policy.
 - Estimates are not presented as measured provider token usage.
 - The repository proves deterministic context governance, not semantic search, autonomous learning, external memory ingestion, or production data isolation.
+
+## ADR-012 — Keep real validation local, fixture-only, and recorded
+
+- Status: Accepted
+- Date: 2026-07-17
+- Detailed records: [`docs/sandbox-security-model.md`](sandbox-security-model.md), [`docs/vertical-slice-walkthrough.md`](vertical-slice-walkthrough.md)
+
+### Context
+
+The browser demo models test and provider activity but cannot safely prove actual file modification or isolated validation. Exposing anonymous execution would require an authenticated, abuse-resistant worker platform and would violate the static public boundary. The existing local MCP slice proves protocol and authorization mechanics but runs its fixed validation directly on the host.
+
+### Decision
+
+Add one separate, explicitly invoked local Docker vertical slice operating only on `examples/toy-repo`. The CLI accepts no repository, patch, or command input. A trusted controller copies the fixture, loads its synthetic issue and approved exact change target, materializes deterministic artifacts/context, requires a failing pre-patch test, applies one exact allow-listed host-side replacement, verifies the final Git/file boundary, and runs fixed build/tests in ephemeral network-disabled containers.
+
+Use a typed `SandboxProvider` with the local Docker implementation as the default. Containers run non-root with read-only filesystems/mounts, dropped capabilities, no-new-privileges, and CPU/memory/PID/time/output limits. Cleanup always runs in `finally`. Emit versioned, canonical-hash-bound JSON plus Markdown evidence; failed validation exits non-zero and cannot become the public `latest` pointer.
+
+The static site validates the checked-in successful pack at build time and renders a recorded summary plus read-only evidence assets. It has no execution path. Record both source commit and working-tree state/tree digest because an evidence file cannot contain the hash of the commit that contains itself.
+
+### Consequences
+
+- Reviewers can reproduce and verify one real failing-before/passing-after path independently of model quality.
+- The patch, commands, repository, issue, and targets remain owned, deterministic, synthetic, and narrow.
+- Docker is an optional local dependency for generating a real pack; schema/hash validation and unit tests do not require Docker.
+- The slice does not prove safe multi-tenant untrusted-code execution, hosted sandbox reliability, container image trust, or production identity/secrets/operations.

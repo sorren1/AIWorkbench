@@ -20,7 +20,7 @@
       "initiatingActor": "synthetic-implementer",
       "policyDecisionId": "decision.run.generated.mcp-evidence.tool-repository-search",
       "contextPackDigest": "86a49a7c70f55c630f3bd7e06940f9ff1cea56300dc3e6d6ef540d5dc101cbaa",
-      "sanitizedResult": { "matchCount": 3 }
+      "sanitizedResult": { "matchCount": 5 }
     },
     {
       "toolId": "tool.repository.file.read",

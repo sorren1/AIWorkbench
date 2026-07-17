@@ -5,6 +5,10 @@ import type { Plugin } from "vite";
 
 import { siteConfig, type SiteConfig } from "./config";
 import {
+  renderRecordedSandboxEvidence,
+  type RecordedSandboxEvidenceRender,
+} from "./recordedSandboxEvidence";
+import {
   createRobotsTxt,
   createSitemapXml,
   PAGE_METADATA,
@@ -114,16 +118,25 @@ function replaceExcerpts(html: string, root: string): string {
 }
 
 export function portfolioSitePlugin(root: string): Plugin {
+  let recordedEvidence: RecordedSandboxEvidenceRender | null = null;
   return {
     name: "portfolio-site-generator",
     transformIndexHtml: {
       order: "pre",
-      handler(html) {
+      async handler(html) {
         const kind = pageKindFromHtml(html);
         const page = PAGE_METADATA[kind];
-        const withMetadata = html
+        let withMetadata = html
           .replace("<!-- site:generated-head -->", renderMetadataTags(siteConfig, page))
           .replace("<!-- site:structured-data -->", renderStructuredData(siteConfig, kind, page));
+        if (withMetadata.includes("<!-- site:recorded-sandbox-evidence -->")) {
+          recordedEvidence = await renderRecordedSandboxEvidence(root);
+          withMetadata = withMetadata.replace(
+            "<!-- site:recorded-sandbox-evidence -->",
+            recordedEvidence?.html ??
+              '<div class="site-recorded-run"><p>No validated recorded run is checked in. Run <code>npm run demo:sandbox</code> locally with Docker, then validate the emitted evidence before publication.</p></div>',
+          );
+        }
         return replaceConfigLinks(replaceExcerpts(withMetadata, root), siteConfig);
       },
     },
@@ -134,6 +147,18 @@ export function portfolioSitePlugin(root: string): Plugin {
         fileName: "sitemap.xml",
         source: createSitemapXml(siteConfig),
       });
+      if (recordedEvidence) {
+        this.emitFile({
+          type: "asset",
+          fileName: `recorded-evidence/${recordedEvidence.jsonName}`,
+          source: recordedEvidence.json,
+        });
+        this.emitFile({
+          type: "asset",
+          fileName: `recorded-evidence/${recordedEvidence.markdownName}`,
+          source: recordedEvidence.markdown,
+        });
+      }
     },
   };
 }

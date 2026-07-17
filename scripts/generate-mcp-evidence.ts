@@ -35,7 +35,8 @@ try {
   const patchArguments = {
     path: "src/report.js",
     expected: "return `Variance: ${actual - budget}`;",
-    replacement: "return `Variance: ${actual - budget}`; // controlled synthetic patch",
+    replacement:
+      'const difference = actual - budget;\n  const direction = difference >= 0 ? "over" : "under";\n  return `Variance: ${Math.abs(difference)} ${direction}`;',
   };
   const approvedChangeTargets = ["src/**"];
   const contextPackDigest = await sha256Hex({

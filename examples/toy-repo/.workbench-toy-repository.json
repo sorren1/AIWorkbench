@@ -1,5 +1,6 @@
 {
   "kind": "disposable-synthetic-toy-repository",
-  "version": 1,
+  "version": 2,
+  "classification": "SYNTHETIC_PUBLIC_FIXTURE",
   "networkAllowed": false
 }

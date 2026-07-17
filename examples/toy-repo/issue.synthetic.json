@@ -1,0 +1,11 @@
+{
+  "schemaVersion": 1,
+  "classification": "SYNTHETIC_PUBLIC_FIXTURE",
+  "id": "TOY-101",
+  "summary": "Describe whether a synthetic variance is over or under budget",
+  "description": "The report currently emits a signed number without a direction. Return an absolute value followed by 'over' or 'under' so the meaning is explicit.",
+  "acceptanceCriteria": [
+    "125 actual against 100 budget returns 'Variance: 25 over'.",
+    "75 actual against 100 budget returns 'Variance: 25 under'."
+  ]
+}

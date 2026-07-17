@@ -20,11 +20,11 @@ The focused control-plane direction extends that workflow with typed domain seam
 
 Every visible value belongs to one category:
 
-- **Functional in this repository:** navigation and shareable deep links, filters, versioned theme and authorization preferences, deterministic scenario loading and reset, the guided tour, reducer-backed workflow transitions, stale-state propagation, scoped synthetic persona decisions, a durable browser-local approval inbox, hash-bound CLI pause/resume, artifact copy/download, architecture and validation-evidence exports, schema-validated/hash-versioned registry selection, generated capability cards, the bounded local toy-repository MCP slice, and the static production build.
+- **Functional in this repository:** navigation and shareable deep links, filters, versioned theme and authorization preferences, deterministic scenario loading and reset, the guided tour, reducer-backed workflow transitions, stale-state propagation, scoped synthetic persona decisions, a durable browser-local approval inbox, hash-bound CLI pause/resume, artifact copy/download, architecture and validation-evidence exports, schema-validated/hash-versioned registry selection, generated capability cards, the bounded local toy-repository MCP slice, the explicit local Docker validation slice, evidence verification, and the static production build.
 - **Synthetic demo fixture:** every persona, issue, repository, branch, pull request, check, log, duration, test result, metric, external integration result, and provider response shown in the workbench.
 - **Professional context:** the single statement in the separate section below. It is not evidence about the public prototype.
 
-External Jira, GitHub, AI/model, database, enterprise MCP, deployment, test-execution, and review operations are simulated. The repository-owned MCP fixture is functional only when explicitly run against a disposable local toy repository; the public browser never connects to it.
+External Jira, GitHub, AI/model, database, enterprise MCP, deployment, hosted test-execution, and review operations are simulated. The repository-owned MCP fixture and Docker validation slice are functional only when explicitly run against a disposable local toy repository; the public browser never connects to or starts either process.
 
 ## Architecture
 
@@ -74,10 +74,19 @@ npm run mcp:evidence:generate
 
 The corresponding `registry:check` and `mcp:evidence:check` commands fail when committed generated evidence is stale. See [docs/agent-and-tool-registry.md](docs/agent-and-tool-registry.md) for the trust boundary and public JSON paths.
 
-Exercise the durable local approval protocol with:
+Run the fixed failing-before/passing-after Docker validation slice and validate its evidence with:
 
 ```bash
-npm run demo:sandbox -- --scenario approval-required
+npm run demo:sandbox
+npm run sandbox:evidence:validate
+```
+
+The command accepts no repository, patch, command, or visitor input. It operates only on `examples/toy-repo`, runs fixed checks in network-disabled constrained containers, cleans the temporary workspace, and emits synthetic/public JSON and Markdown evidence. See the [vertical-slice walkthrough](docs/vertical-slice-walkthrough.md) and [sandbox security model](docs/sandbox-security-model.md).
+
+Exercise the separate durable local approval protocol with:
+
+```bash
+npm run demo:approval:start -- --scenario approval-required
 npm run demo:approve -- --request <request-id> --as synthetic-code-reviewer --reason "Reviewed bounded synthetic diff"
 npm run demo:resume -- --run <run-id>
 ```
@@ -100,8 +109,10 @@ src/demo/screens/                  delivery workflow screens
 src/demo/state/                    typed reducer and local actions
 src/demo/data/                     deterministic synthetic fixtures and content
 src/demo/control-plane/            typed control-plane domain seams
-fixtures/toy-repository/            disposable synthetic repository source
+examples/toy-repo/                  disposable synthetic repository, issue, targets, and tests
+tools/local-sandbox/                typed Docker provider, file controls, runner, and evidence
 tools/toy-repo-mcp/                 optional local stdio MCP server and trusted client
+evidence/generated/                 validated recorded local-run JSON and Markdown
 public/capabilities/                generated capability cards, schemas, and MCP evidence
 src/shared/                        local SVG icon system
 src/styles/tokens/                 shared semantic design tokens
