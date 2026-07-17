@@ -1,5 +1,11 @@
 # Decision log
 
+## 2026-07-17 — Pause Dependabot version PRs during sanitized-history publication
+
+- **Decision:** Retain the npm and GitHub Actions Dependabot configuration but set both `open-pull-requests-limit` values to zero during publication.
+- **Why:** GitHub creates permanent pull refs for Dependabot PRs. Those bot-authored commits would make the exact noreply-identity acceptance gate fail even after the temporary branch was deleted.
+- **Follow-up:** Re-enabling version updates requires an explicit expansion of the allowed-identity policy and a new fresh-mirror audit. Dependency review, npm audit, Gitleaks, SBOM, image scanning, pinned-action review, and CodeQL remain active release gates.
+
 ## 2026-07-17 — Make public-history privacy and provenance reachability release gates
 
 - **Decision:** Add a deterministic history gate that requires the intended GitHub noreply identity for every reachable commit and annotated tag, rejects the retired organization token across all reachable refs, and verifies generated source-commit provenance resolves within the rewritten graph.

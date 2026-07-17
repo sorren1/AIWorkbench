@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-17T20:59:13.635Z",
+  "generatedAt": "2026-07-17T21:18:20.399Z",
   "source": {
-    "baseCommit": "4d27eee7eafb9135a8529877d262d3e13ac523da",
+    "baseCommit": "b8ae3464a03f1a10c412dc5ce14629fa577ce7d9",
     "revisionKind": "WORKTREE",
-    "treeDigest": "65cffbdf74a5816fe278620b8c9c1aec0031b7eb727b8da0bce146dd083339b5"
+    "treeDigest": "a852bf187009c79c441adf804c902b2e2259d8c89048d4b572a3b782b18c1bd5"
   },
   "controls": [
     {
@@ -152,17 +152,17 @@
     {
       "kind": "SBOM",
       "name": "sandbox-image.cdx.json",
-      "sha256": "16710ed175e86486859fb6ce71100dcf29ff845d78d12348bb0ce55a0a0492d0"
+      "sha256": "a6a9fdeb747552970f55bb67722818f56895b743d0e204f87c3c5b9665bf22c4"
     },
     {
       "kind": "SBOM",
       "name": "litellm-image.cdx.json",
-      "sha256": "82ffc8fbc94489fc5ac45b94816cfad356c5cb4d77e6a52eb029f24c82cea835"
+      "sha256": "2d792652765aff465eaa32b9bc20116506102b1ad76f5737d00e91f0d31a4c36"
     },
     {
       "kind": "SBOM",
       "name": "postgres-image.cdx.json",
-      "sha256": "c22b25461d6bcc626a49e34a8a2c87a384fca22fd84d15c5a6175779be850bdb"
+      "sha256": "ca12ec091293f00bb1ce667f7af208eca1628d6bc2295b93810f8afcb8e5d374"
     },
     {
       "kind": "PROVENANCE",
@@ -177,7 +177,7 @@
     {
       "kind": "INVENTORY",
       "name": "scanner-metadata.json",
-      "sha256": "27890ab2e64c98c19ab9834a2d822b70da8bb2d125fa349ac5fe970c77eb63a6"
+      "sha256": "d8a70ac2902553d4492ff2f9b7158029a9fd0a89cf233bffed512d67386e73b6"
     },
     {
       "kind": "INVENTORY",

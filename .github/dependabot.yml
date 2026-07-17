@@ -7,7 +7,8 @@ updates:
       day: monday
       time: "09:00"
       timezone: America/Chicago
-    open-pull-requests-limit: 5
+    # Keep version-update pull refs paused during the public-history publication audit.
+    open-pull-requests-limit: 0
     groups:
       development-tooling:
         dependency-type: development
@@ -16,4 +17,5 @@ updates:
     directory: /
     schedule:
       interval: monthly
-    open-pull-requests-limit: 3
+    # Keep version-update pull refs paused during the public-history publication audit.
+    open-pull-requests-limit: 0

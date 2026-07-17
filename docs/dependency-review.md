@@ -1,6 +1,8 @@
 # Dependency review process
 
-Dependencies are exact-versioned in `package.json` and resolved through the committed npm lockfile. Dependabot proposes weekly npm updates and monthly GitHub Actions updates. Automated proposals do not bypass review.
+Dependabot version-update pull requests are temporarily paused with `open-pull-requests-limit: 0` while the sanitized public graph is published and audited. This retains the checked-in ecosystem configuration without allowing GitHub to create permanent bot-authored pull refs that would invalidate the exact-identity history gate. Re-enabling version updates requires an explicit decision to broaden the permitted public-history identities, followed by a fresh all-ref audit.
+
+Dependencies are exact-versioned in `package.json` and resolved through the committed npm lockfile. When re-enabled, Dependabot is configured to propose weekly npm updates and monthly GitHub Actions updates. Automated proposals do not bypass review.
 
 For each dependency change:
 
