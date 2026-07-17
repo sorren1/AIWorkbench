@@ -22,23 +22,23 @@ The highest-risk public-project gaps are:
 
 ### Public/source material
 
-| Area | Files | Finding |
-|---|---|---|
-| Root documentation | `readme.md`, `SKILL.md`, `workbench/README.md` | Design-system/interview framing rather than a public case study. `readme.md` uses nonstandard casing. |
-| Entry point | `workbench/AI Delivery Workbench.html` | Loads CSS, fixture scripts, 12 JSX scripts in order, and an inline Babel script. |
-| Workbench source | `workbench/app.jsx`, `store.jsx`, `shell.jsx`, `primitives.jsx`, seven `screen-*.jsx` files, `icons.jsx` | Component-structured React, but no imports/exports; every module relies on ambient globals and script order. |
-| Fixtures/content | `workbench/data.js`, `workbench/content.js` | Ten synthetic issues, eight workflow stages, settings/MCP/architecture fixtures, artifact/PR/validation/log generators. |
-| Styling | `workbench/workbench.css`, `styles.css`, `tokens/*.css` | Coherent Cleanroom system; desktop-only application layout and extensive inline screen grids. |
-| Assets | `assets/logo-mark.svg`, `assets/logo-mark-mono.svg` | Small original local SVG marks. |
-| Design cards | `guidelines/*.card.html` | Four token specimen cards for colors, type, radius/elevation. Not linked from the runtime. |
+| Area               | Files                                                                                                    | Finding                                                                                                                 |
+| ------------------ | -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| Root documentation | `readme.md`, `SKILL.md`, `workbench/README.md`                                                           | Design-system/interview framing rather than a public case study. `readme.md` uses nonstandard casing.                   |
+| Entry point        | `workbench/AI Delivery Workbench.html`                                                                   | Loads CSS, fixture scripts, 12 JSX scripts in order, and an inline Babel script.                                        |
+| Workbench source   | `workbench/app.jsx`, `store.jsx`, `shell.jsx`, `primitives.jsx`, seven `screen-*.jsx` files, `icons.jsx` | Component-structured React, but no imports/exports; every module relies on ambient globals and script order.            |
+| Fixtures/content   | `workbench/data.js`, `workbench/content.js`                                                              | Ten synthetic issues, eight workflow stages, settings/MCP/architecture fixtures, artifact/PR/validation/log generators. |
+| Styling            | `workbench/workbench.css`, `styles.css`, `tokens/*.css`                                                  | Coherent Cleanroom system; desktop-only application layout and extensive inline screen grids.                           |
+| Assets             | `assets/logo-mark.svg`, `assets/logo-mark-mono.svg`                                                      | Small original local SVG marks.                                                                                         |
+| Design cards       | `guidelines/*.card.html`                                                                                 | Four token specimen cards for colors, type, radius/elevation. Not linked from the runtime.                              |
 
 ### Generated/tool-owned material
 
-| File | Size | Finding |
-|---|---:|---|
-| `_ds_bundle.js` | 211,787 bytes | Header identifies `@ds-bundle` format 3 and source hashes. It transpiles and duplicates all workbench sources but is not loaded by the app. |
-| `_ds_manifest.json` | 24,004 bytes | One-line generated design-system manifest with cards, token metadata, theme, and font records. |
-| `_adherence.oxlintrc.json` | 10,219 bytes | Generated lint/adherence configuration, but there is no installed runner or command. |
+| File                       |          Size | Finding                                                                                                                                     |
+| -------------------------- | ------------: | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| `_ds_bundle.js`            | 211,787 bytes | Header identifies `@ds-bundle` format 3 and source hashes. It transpiles and duplicates all workbench sources but is not loaded by the app. |
+| `_ds_manifest.json`        |  24,004 bytes | One-line generated design-system manifest with cards, token metadata, theme, and font records.                                              |
+| `_adherence.oxlintrc.json` |  10,219 bytes | Generated lint/adherence configuration, but there is no installed runner or command.                                                        |
 
 ### Missing project infrastructure
 

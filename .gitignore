@@ -53,6 +53,10 @@ venv/
 # Tooling artifacts
 .eslintcache
 .stylelintcache
+*.tsbuildinfo
+.vite/
+playwright-report/
+test-results/
 
 # Private local review notes (retain the tracked directory notice)
 private/*

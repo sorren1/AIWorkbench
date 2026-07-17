@@ -1,0 +1,61 @@
+/* ============================================================
+   Cleanroom — Color Ramps (base palette)
+   Cool slate neutrals + a single precise azure accent.
+   Semantic aliases live in semantic.css.
+   ============================================================ */
+:root {
+  /* --- Neutrals: cool slate (slightly blue-tinted ink) --- */
+  --slate-950: #090c12;
+  --slate-900: #0f131b;
+  --slate-850: #141925; /* added step for surface layering */
+  --slate-800: #1a2030;
+  --slate-700: #2a3242;
+  --slate-600: #3c465a;
+  --slate-500: #5c6678;
+  --slate-400: #828d9f;
+  --slate-300: #a9b3c2;
+  --slate-200: #cfd6e0;
+  --slate-100: #e6eaf0;
+  --slate-75: #eef1f6;
+  --slate-50: #f5f7fa;
+  --white: #ffffff;
+
+  /* --- Accent: clinical azure --- */
+  --azure-50: #ecf3fe;
+  --azure-100: #d6e6fd;
+  --azure-200: #aecdfb;
+  --azure-300: #7cabf8;
+  --azure-400: #4d8cf4;
+  --azure-500: #2684ff; /* bright accent (dark mode) */
+  --azure-600: #0e6fe6; /* primary accent (light mode) */
+  --azure-700: #0a57b8;
+  --azure-800: #0b488f;
+  --azure-900: #0c3a6f;
+
+  /* --- Verified / Safe: clean teal-green --- */
+  --green-50: #e8f7f0;
+  --green-100: #cceee0;
+  --green-300: #5fcba0;
+  --green-500: #16a879;
+  --green-600: #0e8a62;
+  --green-700: #0b6b4d;
+
+  /* --- Caution: amber --- */
+  --amber-50: #fcf3e2;
+  --amber-100: #f8e4bf;
+  --amber-500: #e0a33a;
+  --amber-600: #c2851f;
+  --amber-700: #97651a;
+
+  /* --- Denied / Blocked: red --- */
+  --red-50: #fcecec;
+  --red-100: #f8d2d2;
+  --red-500: #e5484d;
+  --red-600: #c9343a;
+  --red-700: #a12a2f;
+
+  /* --- Violet: reserved for "encrypted/secure" data accents --- */
+  --violet-50: #f1eefd;
+  --violet-500: #6e56cf;
+  --violet-600: #5b45b5;
+}

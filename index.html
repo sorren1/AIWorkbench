@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A clean-room case study for a governed, local AI-assisted delivery workflow."
+    />
+    <link rel="icon" href="./assets/logo-mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./src/case-study/site.css" />
+    <title>AI Delivery Workbench — Case Study</title>
+  </head>
+  <body class="site-body">
+    <header class="site-header">
+      <a class="site-brand" href="./" aria-label="AI Delivery Workbench home">
+        <img src="./assets/logo-mark.svg" width="32" height="32" alt="" />
+        <span>AI Delivery Workbench</span>
+      </a>
+      <a class="site-demo-link" href="./demo/"
+        >Open interactive demo <span aria-hidden="true">→</span></a
+      >
+    </header>
+    <main>
+      <section class="site-hero" aria-labelledby="case-study-title">
+        <p class="eyebrow">Clean-room public prototype</p>
+        <h1 id="case-study-title">Governed AI delivery, made inspectable.</h1>
+        <p class="site-lede">
+          A static case-study shell and a local React workbench showing how issue context,
+          deterministic artifacts, pull-request review, and validation evidence can stay connected.
+        </p>
+        <div class="site-actions">
+          <a class="site-primary-action" href="./demo/">Explore the workbench</a>
+        </div>
+      </section>
+      <section class="site-grid" aria-label="Prototype boundaries">
+        <article class="site-card">
+          <p class="eyebrow">Functional locally</p>
+          <h2>Interactive workflow state</h2>
+          <p>
+            Navigation, filters, themes, stage transitions, review decisions, and evidence state run
+            in the browser.
+          </p>
+        </article>
+        <article class="site-card">
+          <p class="eyebrow">Simulated</p>
+          <h2>External operations</h2>
+          <p>
+            Jira, GitHub, AI, Oracle, MCP, deployment, test execution, and provider calls are
+            synthetic fixtures only.
+          </p>
+        </article>
+        <article class="site-card">
+          <p class="eyebrow">Deliberate boundary</p>
+          <h2>Static and inspectable</h2>
+          <p>
+            No backend, credentials, analytics, runtime CDNs, or external network requests are
+            required for ordinary use.
+          </p>
+        </article>
+      </section>
+    </main>
+    <footer class="site-footer">Synthetic data only · no real systems are contacted</footer>
+  </body>
+</html>

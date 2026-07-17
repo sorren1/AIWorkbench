@@ -16,15 +16,15 @@ code, depending on the need.
 
 ## Quick reference
 
-- **Global CSS:** link `styles.css` (it `@import`s every token file). Tokens cover color (light +
+- **Global CSS:** import `src/styles/global.css` (it `@import`s every token file). Tokens cover color (light +
   dark via `[data-theme="dark"]`), type, spacing, radius, motion.
 - **Color:** cool slate neutrals + one azure accent (`--accent`). Status color is meaningful only
   (`--safe` verified, `--warn` caution, `--danger` denied, `--secure` encrypted). No gradients.
-- **Type:** Hanken Grotesk (UI/body) + JetBrains Mono (data, labels, code). Tabular numerals.
+- **Type:** native UI sans + native monospace stacks. Tabular numerals.
 - **Shape:** restrained radii (7px controls, 10px cards), crisp hairlines, low-spread cool shadows.
 - **Voice:** calm, precise, system-voice; sentence case; uppercase mono eyebrows; no emoji.
-- **Icons:** in-house stroke set in `workbench/icons.jsx` (24-grid, 1.75 stroke, round caps).
-- **Reference implementation:** `workbench/` is a full, component-structured, clickable prototype
+- **Icons:** in-house stroke set in `src/shared/Icon.tsx` (24-grid, 1.75 stroke, round caps).
+- **Reference implementation:** `src/demo/` is a full, component-structured, clickable prototype
   (sidebar shell, tables, badges, timeline, split-pane artifact viewer, drawers, modals, toasts)
   built entirely on these tokens — read it to see the patterns in use.
 

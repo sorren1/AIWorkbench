@@ -1,0 +1,7 @@
+/* ============================================================
+   Cleanroom — Font policy
+   The public build intentionally uses operating-system UI and
+   monospace fonts. No font binaries or runtime font requests are
+   required, so there is no separate font license to distribute.
+   Family tokens are defined once in typography.css.
+   ============================================================ */

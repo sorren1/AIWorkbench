@@ -127,13 +127,13 @@ Cards are concise control contracts, not marketing profiles. Tool metadata from 
 
 Use fictional, explicitly simulated personas to exercise a functional local authorization engine:
 
-| Persona | May do | May not do |
-|---|---|---|
-| Builder | Draft agent/tool versions and request runs | Approve own registry version or risky tool request |
-| Operator | Start an approved workflow and request a bounded tool action | Change policy or approve own request |
-| Control reviewer | Review agent versions, ordinary tool scopes, and runtime policy | Approve a version they authored |
-| Security reviewer | Approve privileged/external-write scopes and security exceptions | Edit the evidence for a decided request |
-| Auditor | Read registry history, approvals, traces, and evidence | Mutate control-plane state |
+| Persona           | May do                                                           | May not do                                         |
+| ----------------- | ---------------------------------------------------------------- | -------------------------------------------------- |
+| Builder           | Draft agent/tool versions and request runs                       | Approve own registry version or risky tool request |
+| Operator          | Start an approved workflow and request a bounded tool action     | Change policy or approve own request               |
+| Control reviewer  | Review agent versions, ordinary tool scopes, and runtime policy  | Approve a version they authored                    |
+| Security reviewer | Approve privileged/external-write scopes and security exceptions | Edit the evidence for a decided request            |
+| Auditor           | Read registry history, approvals, traces, and evidence           | Mutate control-plane state                         |
 
 Every policy result records actor, persona, resource, action, decision, reason code, applicable policy version, and time source. This demonstrates authorization logic; it is not real authentication or enterprise identity integration.
 
@@ -239,7 +239,7 @@ Acceptance criteria:
 - `npm ci`, lint, typecheck, unit smoke tests, and production build pass.
 - Built output serves successfully at `/` and `/demo/` with no browser console errors.
 
-Suggested commit: `build: establish typed static application shell`
+Commit: `refactor: migrate workbench to React and strict TypeScript`
 
 ### Phase 2 — Public narrative, disclosures, and repository identity
 
@@ -366,34 +366,34 @@ Suggested commit: `release: publish portfolio case study`
 
 ## File migration map
 
-| Current path | Target path | Action and reason |
-|---|---|---|
-| `readme.md` | `README.md` | Rewrite as the public repository entry point; use conventional casing. |
-| `workbench/README.md` | `docs/demo-guide.md` plus `README.md` | Preserve useful walkthrough/limitations, remove interview and named-company language. |
-| `workbench/AI Delivery Workbench.html` | `demo/index.html` | Replace CDN/Babel script chain with a normal build entry. |
-| `workbench/app.jsx` | `src/demo/App.tsx`, `src/demo/main.tsx` | Split mount from typed app composition. |
-| `workbench/store.jsx` | `src/demo/state/` | Separate typed state, reducer, actions, and selectors; add transition tests. |
-| `workbench/data.js` | `src/demo/data/fixtures.ts`, `src/demo/control-plane/registry/` | Type and sanitize synthetic fixtures; promote stage/tool policy into versioned local manifests; eliminate `window.WBData`. |
-| `workbench/content.js` | `src/demo/data/` and `src/demo/control-plane/evidence/` | Split deterministic generators by concern; keep simulated content separate from normalized evidence metadata. |
-| New control-plane domain | `src/demo/control-plane/` | Add original typed modules for registry, policy, approval journal, context manifests, budgets, gateway contract, telemetry, and evidence. |
-| New control-plane UI | `src/demo/screens/ControlPlaneScreen.tsx`, contextual run components | Keep registry/approval overview compact and attach context, budgets, traces, and evidence to the coding run. |
-| New interoperability fixtures | `tests/fixtures/telemetry/`, `tests/fixtures/evidence/` | Validate pinned OTLP export and normalized evidence without copying third-party schemas into product code. |
-| `workbench/primitives.jsx` | `src/demo/components/` | Replace custom clickable elements with semantic, accessible components. |
-| `workbench/icons.jsx` | `src/shared/Icon.tsx` | Keep the existing local SVG identity with typed icon names. |
-| `workbench/shell.jsx` | `src/demo/components/AppShell.tsx`, `Dialog.tsx`, `Drawer.tsx`, `ToastRegion.tsx` | Isolate landmarks and accessible overlays. |
-| `workbench/screen-*.jsx` | `src/demo/screens/*.tsx` | One typed module per existing screen. |
-| `workbench/workbench.css` | `src/demo/demo.css` plus component styles as needed | Preserve identity, remove brittle inline layout rules, add responsive states. |
-| `tokens/*.css` | `src/styles/tokens/*.css` | Retain the Cleanroom token system; audit unused and inaccessible values. |
-| `tokens/fonts.css` | `src/styles/tokens/fonts.css` or removal | Eliminate runtime Google Fonts; self-host only with documented license or use fallbacks. |
-| `styles.css` | `src/styles/global.css` | Keep reset/shared utilities as a normal build import. |
-| `assets/logo-mark*.svg` | `public/assets/` or `src/assets/` | Reuse the original mark; choose public vs imported based on usage. |
-| `guidelines/*.card.html` | `docs/design-system/` or delete | Retain only if converted into useful public documentation; otherwise rely on the original tag. |
-| `SKILL.md` | Delete or rewrite only if a maintained skill remains in scope | Current skill packaging is unrelated to the public runtime and overstates production use. |
-| `_ds_bundle.js` | Delete after tag verification | Generated 211,787-byte duplicate bundle; not a source backup. |
-| `_ds_manifest.json` | Delete after tag verification | Generated one-line design-system manifest; replace with maintainable docs if needed. |
-| `_adherence.oxlintrc.json` | Delete or replace with real lint config | Generated configuration has no installed runner or documented command. |
-| `.gitignore` | `.gitignore` | Keep; add Node/build/test artifacts and private-note rules as tooling lands. |
-| `private/README.md` | `private/README.md` | Keep tracked as the notice; ignore every other private note. |
+| Current path                           | Target path                                                                       | Action and reason                                                                                                                         |
+| -------------------------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `readme.md`                            | `README.md`                                                                       | Rewrite as the public repository entry point; use conventional casing.                                                                    |
+| `workbench/README.md`                  | `docs/demo-guide.md` plus `README.md`                                             | Preserve useful walkthrough/limitations, remove interview and named-company language.                                                     |
+| `workbench/AI Delivery Workbench.html` | `demo/index.html`                                                                 | Replace CDN/Babel script chain with a normal build entry.                                                                                 |
+| `workbench/app.jsx`                    | `src/demo/App.tsx`, `src/demo/main.tsx`                                           | Split mount from typed app composition.                                                                                                   |
+| `workbench/store.jsx`                  | `src/demo/state/`                                                                 | Separate typed state, reducer, actions, and selectors; add transition tests.                                                              |
+| `workbench/data.js`                    | `src/demo/data/fixtures.ts`, `src/demo/control-plane/registry/`                   | Type and sanitize synthetic fixtures; promote stage/tool policy into versioned local manifests; eliminate `window.WBData`.                |
+| `workbench/content.js`                 | `src/demo/data/` and `src/demo/control-plane/evidence/`                           | Split deterministic generators by concern; keep simulated content separate from normalized evidence metadata.                             |
+| New control-plane domain               | `src/demo/control-plane/`                                                         | Add original typed modules for registry, policy, approval journal, context manifests, budgets, gateway contract, telemetry, and evidence. |
+| New control-plane UI                   | `src/demo/screens/ControlPlaneScreen.tsx`, contextual run components              | Keep registry/approval overview compact and attach context, budgets, traces, and evidence to the coding run.                              |
+| New interoperability fixtures          | `tests/fixtures/telemetry/`, `tests/fixtures/evidence/`                           | Validate pinned OTLP export and normalized evidence without copying third-party schemas into product code.                                |
+| `workbench/primitives.jsx`             | `src/demo/components/`                                                            | Replace custom clickable elements with semantic, accessible components.                                                                   |
+| `workbench/icons.jsx`                  | `src/shared/Icon.tsx`                                                             | Keep the existing local SVG identity with typed icon names.                                                                               |
+| `workbench/shell.jsx`                  | `src/demo/components/AppShell.tsx`, `Dialog.tsx`, `Drawer.tsx`, `ToastRegion.tsx` | Isolate landmarks and accessible overlays.                                                                                                |
+| `workbench/screen-*.jsx`               | `src/demo/screens/*.tsx`                                                          | One typed module per existing screen.                                                                                                     |
+| `workbench/workbench.css`              | `src/demo/demo.css` plus component styles as needed                               | Preserve identity, remove brittle inline layout rules, add responsive states.                                                             |
+| `tokens/*.css`                         | `src/styles/tokens/*.css`                                                         | Retain the Cleanroom token system; audit unused and inaccessible values.                                                                  |
+| `tokens/fonts.css`                     | `src/styles/tokens/fonts.css` or removal                                          | Eliminate runtime Google Fonts; self-host only with documented license or use fallbacks.                                                  |
+| `styles.css`                           | `src/styles/global.css`                                                           | Keep reset/shared utilities as a normal build import.                                                                                     |
+| `assets/logo-mark*.svg`                | `public/assets/` or `src/assets/`                                                 | Reuse the original mark; choose public vs imported based on usage.                                                                        |
+| `guidelines/*.card.html`               | `docs/design-system/` or delete                                                   | Retain only if converted into useful public documentation; otherwise rely on the original tag.                                            |
+| `SKILL.md`                             | Delete or rewrite only if a maintained skill remains in scope                     | Current skill packaging is unrelated to the public runtime and overstates production use.                                                 |
+| `_ds_bundle.js`                        | Delete after tag verification                                                     | Generated 211,787-byte duplicate bundle; not a source backup.                                                                             |
+| `_ds_manifest.json`                    | Delete after tag verification                                                     | Generated one-line design-system manifest; replace with maintainable docs if needed.                                                      |
+| `_adherence.oxlintrc.json`             | Delete or replace with real lint config                                           | Generated configuration has no installed runner or documented command.                                                                    |
+| `.gitignore`                           | `.gitignore`                                                                      | Keep; add Node/build/test artifacts and private-note rules as tooling lands.                                                              |
+| `private/README.md`                    | `private/README.md`                                                               | Keep tracked as the notice; ignore every other private note.                                                                              |
 
 ## Cross-phase verification policy
 
