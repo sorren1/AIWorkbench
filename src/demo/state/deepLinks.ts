@@ -12,6 +12,7 @@ const ROUTES: readonly Route[] = [
   "validation",
   "approvals",
   "control-plane",
+  "trace",
   "architecture",
   "settings",
 ];

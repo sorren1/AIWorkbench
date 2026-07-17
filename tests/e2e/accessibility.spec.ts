@@ -45,6 +45,7 @@ test("principal workbench screens have no serious or critical axe violations", a
     "Validation Evidence",
     "Approval Inbox",
     "Control Plane",
+    "Run Trace",
     "Architecture",
     "Settings",
   ] as const;

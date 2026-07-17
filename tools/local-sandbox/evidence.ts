@@ -5,7 +5,20 @@ import { z } from "zod";
 
 import { canonicalJson, sha256Hex } from "../../src/demo/control-plane/registry/canonical";
 import { validateContextPack } from "../../src/demo/control-plane/registry/validation";
+import {
+  BUDGET_ACTIONS,
+  executionBudgetSchema,
+  type BudgetResult,
+  type RunAccounting,
+} from "./budgets";
 import { sha256Bytes } from "./security";
+import {
+  normalizedTraceArtifactSchema,
+  TRACE_FORMAT,
+  TRACE_SCHEMA_VERSION,
+  validateNormalizedTraceArtifact,
+  type NormalizedTraceArtifact,
+} from "./telemetry";
 
 const hashSchema = z.string().regex(/^[a-f0-9]{64}$/);
 const commandReceiptSchema = z.object({
@@ -236,15 +249,126 @@ export const sandboxEvidenceV2Schema = legacySandboxEvidenceSchema.extend({
   tools: z.discriminatedUnion("provider", [localDockerToolsSchema, e2bToolsSchema]),
 });
 
+const budgetDimensionSchema = z.enum([
+  "WALL_CLOCK_DURATION",
+  "STAGE_DURATION",
+  "TOOL_CALLS",
+  "REPAIR_ATTEMPTS",
+  "INPUT_TOKENS",
+  "OUTPUT_TOKENS",
+  "COST_USD",
+]);
+
+const budgetResultSchema: z.ZodType<BudgetResult> = z.object({
+  schemaVersion: z.literal(1),
+  policy: executionBudgetSchema,
+  outcome: z.enum(["WITHIN_BUDGET", "WARNING", "STOPPED"]),
+  stopReason: budgetDimensionSchema.nullable(),
+  dimensions: z.array(
+    z.object({
+      dimension: budgetDimensionSchema,
+      observed: z.number().nonnegative(),
+      limit: z.number().nonnegative().nullable(),
+      unit: z.enum(["MILLISECONDS", "COUNT", "TOKENS", "USD"]),
+      measurement: z.enum(["MEASURED", "EXACT", "ACTUAL_PROVIDER_REPORTED", "ESTIMATED"]),
+      status: z.enum(["WITHIN", "APPROACHING", "EXCEEDED"]),
+    }),
+  ),
+  events: z.array(
+    z.object({
+      type: z.enum(["APPROACHING", "EXCEEDED"]),
+      dimension: budgetDimensionSchema,
+      observed: z.number().nonnegative(),
+      limit: z.number().nonnegative(),
+      action: z.enum(BUDGET_ACTIONS),
+      elapsedMs: z.number().int().nonnegative(),
+    }),
+  ),
+});
+
+const usageMeasurementSchema = z.enum([
+  "ACTUAL_PROVIDER_REPORTED",
+  "ESTIMATED",
+  "EXACT_ZERO_NO_MODEL",
+]);
+
+const runAccountingSchema: z.ZodType<RunAccounting> = z.object({
+  schemaVersion: z.literal(1),
+  records: z.array(
+    z.object({
+      stage: z.literal("implement"),
+      modelPolicyId: z.string().min(1),
+      modelIdentifier: z.string().min(1),
+      inputTokens: z.number().int().nonnegative(),
+      outputTokens: z.number().int().nonnegative(),
+      costUsd: z.number().nonnegative(),
+      tokenMeasurement: usageMeasurementSchema,
+      costMeasurement: usageMeasurementSchema,
+      pricingSource: z.object({
+        id: z.string().min(1),
+        version: z.string().min(1),
+        effectiveAt: z.iso.datetime().nullable(),
+      }),
+    }),
+  ),
+  stages: z.array(
+    z.object({
+      stage: z.literal("implement"),
+      modelCalls: z.number().int().nonnegative(),
+      inputTokens: z.number().int().nonnegative(),
+      outputTokens: z.number().int().nonnegative(),
+      costUsd: z.number().nonnegative(),
+      tokenMeasurement: usageMeasurementSchema,
+      costMeasurement: usageMeasurementSchema,
+    }),
+  ),
+  total: z.object({
+    modelCalls: z.number().int().nonnegative(),
+    inputTokens: z.number().int().nonnegative(),
+    outputTokens: z.number().int().nonnegative(),
+    costUsd: z.number().nonnegative(),
+    tokenMeasurement: usageMeasurementSchema,
+    costMeasurement: usageMeasurementSchema,
+  }),
+});
+
+export const sandboxEvidenceV3Schema = sandboxEvidenceV2Schema.extend({
+  schemaVersion: z.literal(3),
+  governance: sandboxEvidenceV2Schema.shape.governance.extend({
+    approvalPolicy: z.object({ id: z.string(), version: z.string(), contentHash: hashSchema }),
+    executionBudget: executionBudgetSchema,
+  }),
+  observability: z.object({
+    trace: z.object({
+      schemaVersion: z.literal(TRACE_SCHEMA_VERSION),
+      format: z.literal(TRACE_FORMAT),
+      traceId: z.string().regex(/^[a-f0-9]{32}$/),
+      artifact: z.string().regex(/^sandbox-trace-[a-z0-9-]+\.json$/),
+      artifactSha256: hashSchema,
+      spanCount: z.number().int().positive(),
+    }),
+    budget: budgetResultSchema,
+    accounting: runAccountingSchema,
+    approval: z.object({
+      requestId: z.string().min(1),
+      policyId: z.string().min(1),
+      outcome: z.literal("PREAPPROVED_SYNTHETIC_FIXTURE"),
+      waitDurationMs: z.number().nonnegative(),
+      measurement: z.literal("MEASURED"),
+    }),
+  }),
+});
+
 export const sandboxEvidenceSchema = z.union([
   legacySandboxEvidenceSchema,
   sandboxEvidenceV2Schema,
+  sandboxEvidenceV3Schema,
 ]);
 
-export type SandboxEvidencePack = z.infer<typeof sandboxEvidenceV2Schema>;
+export type SandboxEvidencePack = z.infer<typeof sandboxEvidenceV3Schema>;
 export type ValidatedSandboxEvidencePack = z.infer<typeof sandboxEvidenceSchema>;
 
-export const evidenceIndexSchema = z.object({
+const legacyEvidenceIndexSchema = z.object({
   schemaVersion: z.literal(1),
   latest: z.object({
     json: z.string().regex(/^sandbox-run-[a-z0-9-]+\.json$/),
@@ -255,7 +379,108 @@ export const evidenceIndexSchema = z.object({
   }),
 });
 
+export const evidenceIndexSchema = z.union([
+  legacyEvidenceIndexSchema,
+  legacyEvidenceIndexSchema.extend({
+    schemaVersion: z.literal(2),
+    latest: legacyEvidenceIndexSchema.shape.latest.extend({
+      trace: z.string().regex(/^sandbox-trace-[a-z0-9-]+\.json$/),
+      traceId: z.string().regex(/^[a-f0-9]{32}$/),
+      traceArtifactSha256: hashSchema,
+    }),
+  }),
+]);
+
 export type EvidenceIndex = z.infer<typeof evidenceIndexSchema>;
+
+export const budgetStopEvidenceSchema = z.object({
+  schemaVersion: z.literal(1),
+  classification: z.literal("RECORDED_REAL_SANDBOX_BUDGET_STOP_EVIDENCE"),
+  run: z.object({
+    id: z.string().regex(/^sandbox-[a-z0-9-]+$/),
+    issueId: z.literal("TOY-101"),
+    stage: z.literal("implement"),
+    createdAt: z.iso.datetime(),
+    stoppedAt: z.iso.datetime(),
+    sourceCommit: z.string().regex(/^[a-f0-9]{40}$/),
+    sourceTreeDigest: hashSchema,
+    status: z.literal("FAILED"),
+  }),
+  governance: z.object({
+    agentCard: z.object({ id: z.string(), version: z.string(), contentHash: hashSchema }),
+    approvalPolicy: z.object({ id: z.string(), version: z.string(), contentHash: hashSchema }),
+    contextPackDigest: hashSchema,
+    executionBudget: executionBudgetSchema,
+  }),
+  stop: z.object({
+    dimension: budgetDimensionSchema,
+    action: z.enum(["STOP_STAGE", "STOP_RUN"]),
+    result: budgetResultSchema,
+  }),
+  trace: z.object({
+    traceId: z.string().regex(/^[a-f0-9]{32}$/),
+    artifact: z.string().regex(/^sandbox-trace-[a-z0-9-]+\.json$/),
+    artifactSha256: hashSchema,
+  }),
+  cleanup: z.object({
+    providerCleanupAttempted: z.literal(true),
+    temporaryWorkspaceRemoved: z.literal(true),
+    providerAttempts: z.array(z.string()),
+  }),
+  evidenceDigest: hashSchema,
+});
+
+export type BudgetStopEvidence = z.infer<typeof budgetStopEvidenceSchema>;
+
+export class BudgetStopEvidenceError extends Error {
+  constructor(
+    readonly evidence: BudgetStopEvidence,
+    readonly traceArtifact: NormalizedTraceArtifact,
+  ) {
+    super(
+      `Sandbox run stopped by ${evidence.stop.dimension} budget; failure evidence was finalized.`,
+    );
+    this.name = "BudgetStopEvidenceError";
+  }
+}
+
+export async function createBudgetStopEvidenceDigest(
+  pack: Omit<BudgetStopEvidence, "evidenceDigest">,
+): Promise<string> {
+  return sha256Hex(pack);
+}
+
+export async function writeBudgetStopEvidence(
+  projectRoot: string,
+  pack: BudgetStopEvidence,
+  traceArtifactJson: string,
+): Promise<{ readonly evidencePath: string; readonly tracePath: string }> {
+  const parsed = budgetStopEvidenceSchema.parse(pack);
+  const expectedDigest = await sha256Hex(
+    Object.fromEntries(Object.entries(parsed).filter(([key]) => key !== "evidenceDigest")),
+  );
+  if (expectedDigest !== parsed.evidenceDigest) {
+    throw new Error("Budget-stop evidence digest mismatch.");
+  }
+  if (sha256Bytes(traceArtifactJson) !== parsed.trace.artifactSha256) {
+    throw new Error("Budget-stop trace artifact hash mismatch.");
+  }
+  const traceValidation = validateNormalizedTraceArtifact(JSON.parse(traceArtifactJson));
+  if (!traceValidation.valid || traceValidation.value.traceId !== parsed.trace.traceId) {
+    throw new Error("Budget-stop trace artifact binding mismatch.");
+  }
+  const generatedRoot = resolve(projectRoot, "evidence/generated");
+  await mkdir(generatedRoot, { recursive: true });
+  const suffix = parsed.run.id.replace(/^sandbox-/, "");
+  const evidencePath = resolve(generatedRoot, `sandbox-budget-stop-${suffix}.json`);
+  const tracePath = resolve(generatedRoot, parsed.trace.artifact);
+  await writeFile(tracePath, traceArtifactJson, { encoding: "utf8", flag: "wx" });
+  await writeFile(evidencePath, `${JSON.stringify(parsed, null, 2)}\n`, {
+    encoding: "utf8",
+    flag: "wx",
+  });
+  return { evidencePath, tracePath };
+}
 
 function evidenceDigestInput(
   pack: ValidatedSandboxEvidencePack | Omit<SandboxEvidencePack, "evidenceDigest">,
@@ -284,6 +509,7 @@ function verifyFileSnapshots(
 
 export async function validateEvidencePack(
   value: unknown,
+  traceArtifactJson?: string,
 ): Promise<
   | { readonly valid: true; readonly value: ValidatedSandboxEvidencePack }
   | { readonly valid: false; readonly errors: readonly string[] }
@@ -343,7 +569,7 @@ export async function validateEvidencePack(
     errors.push(`Context pack invalid: ${contextValidation.errors.join("; ")}`);
   else if (contextValidation.value.packDigest !== pack.governance.contextPackDigest)
     errors.push("Context-pack digest binding mismatch.");
-  if (pack.schemaVersion === 2) {
+  if (pack.schemaVersion !== 1) {
     if (
       pack.prePatchExecution.provider !== pack.postPatchExecution.provider ||
       pack.prePatchExecution.provider !== pack.tools.provider
@@ -362,6 +588,77 @@ export async function validateEvidencePack(
           errors.push(`E2B cleanup was not verified: ${execution.providerMetadata.sandboxId}`);
         }
       }
+    }
+  }
+  if (pack.schemaVersion === 3) {
+    const budgetHashInput = Object.fromEntries(
+      Object.entries(pack.governance.executionBudget).filter(([key]) => key !== "contentHash"),
+    );
+    if (
+      sha256Bytes(canonicalJson(budgetHashInput)) !== pack.governance.executionBudget.contentHash
+    ) {
+      errors.push("Execution-budget policy hash mismatch.");
+    }
+    if (
+      pack.observability.budget.policy.contentHash !== pack.governance.executionBudget.contentHash
+    ) {
+      errors.push("Execution-budget evidence binding mismatch.");
+    }
+    if (pack.observability.approval.policyId !== pack.governance.approvalPolicy.id) {
+      errors.push("Approval-policy evidence binding mismatch.");
+    }
+    if (traceArtifactJson !== undefined) {
+      if (sha256Bytes(traceArtifactJson) !== pack.observability.trace.artifactSha256) {
+        errors.push("Trace artifact hash mismatch.");
+      } else {
+        const traceValidation = validateNormalizedTraceArtifact(JSON.parse(traceArtifactJson));
+        if (!traceValidation.valid) {
+          errors.push(`Trace artifact invalid: ${traceValidation.errors.join("; ")}`);
+        } else {
+          const traceArtifact = traceValidation.value;
+          if (traceArtifact.traceId !== pack.observability.trace.traceId) {
+            errors.push("Trace ID evidence binding mismatch.");
+          }
+          if (traceArtifact.spans.length !== pack.observability.trace.spanCount) {
+            errors.push("Trace span-count evidence binding mismatch.");
+          }
+          if (
+            traceArtifact.bindings.sourceCommit !== pack.run.sourceCommit ||
+            traceArtifact.bindings.sourceTreeDigest !== pack.run.sourceTreeDigest ||
+            traceArtifact.bindings.contextPackDigest !== pack.governance.contextPackDigest ||
+            traceArtifact.bindings.agentCardHash !== pack.governance.agentCard.contentHash ||
+            traceArtifact.bindings.approvalPolicyHash !==
+              pack.governance.approvalPolicy.contentHash ||
+            traceArtifact.bindings.budgetPolicyHash !== pack.governance.executionBudget.contentHash
+          ) {
+            errors.push("Trace governance or source binding mismatch.");
+          }
+        }
+      }
+    }
+    const accounting = pack.observability.accounting;
+    const inputTokens = accounting.records.reduce((total, item) => total + item.inputTokens, 0);
+    const outputTokens = accounting.records.reduce((total, item) => total + item.outputTokens, 0);
+    const costUsd = Number(
+      accounting.records.reduce((total, item) => total + item.costUsd, 0).toFixed(8),
+    );
+    if (
+      inputTokens !== accounting.total.inputTokens ||
+      outputTokens !== accounting.total.outputTokens ||
+      costUsd !== accounting.total.costUsd ||
+      accounting.records.length !== accounting.total.modelCalls
+    ) {
+      errors.push("Run accounting total mismatch.");
+    }
+    if (
+      accounting.total.modelCalls === 0 &&
+      (accounting.total.inputTokens !== 0 ||
+        accounting.total.outputTokens !== 0 ||
+        accounting.total.costUsd !== 0 ||
+        accounting.total.tokenMeasurement !== "EXACT_ZERO_NO_MODEL" ||
+        accounting.total.costMeasurement !== "EXACT_ZERO_NO_MODEL")
+    ) {
+      errors.push("Deterministic no-model accounting must report exact zero usage and cost.");
     }
   }
   if ((await sha256Hex(evidenceDigestInput(pack))) !== pack.evidenceDigest)
@@ -403,6 +700,10 @@ function limitsMarkdown(pack: ValidatedSandboxEvidencePack): string {
 }
 
 export function renderEvidenceMarkdown(pack: ValidatedSandboxEvidencePack): string {
+  const traceLines =
+    pack.schemaVersion === 3
+      ? `- Trace ID: ${pack.observability.trace.traceId}\n- Trace artifact: ${pack.observability.trace.artifact}\n- Trace artifact SHA-256: ${pack.observability.trace.artifactSha256}\n- Budget outcome: ${pack.observability.budget.outcome}\n- Tool calls: ${pack.observability.budget.dimensions.find((item) => item.dimension === "TOOL_CALLS")?.observed ?? 0}\n- Repair attempts: ${pack.observability.budget.dimensions.find((item) => item.dimension === "REPAIR_ATTEMPTS")?.observed ?? 0}\n- Model usage: ${pack.observability.accounting.total.modelCalls} calls, ${pack.observability.accounting.total.costUsd} USD (${pack.observability.accounting.total.costMeasurement})`
+      : "- Trace evidence: not available in this legacy pack";
   return `# Recorded real sandbox run
 
 - Classification: ${pack.classification}
@@ -412,6 +713,7 @@ export function renderEvidenceMarkdown(pack: ValidatedSandboxEvidencePack): stri
 - Source working tree: ${pack.run.sourceWorkingTree}
 - Evidence digest: ${pack.evidenceDigest}
 - Context-pack digest: ${pack.governance.contextPackDigest}
+${traceLines}
 ${providerMarkdown(pack)}
 - Container user: ${pack.postPatchExecution.user}
 - Limits: ${limitsMarkdown(pack)}
@@ -439,9 +741,11 @@ ${pack.disclosure}
 export async function writeEvidencePack(
   projectRoot: string,
   pack: SandboxEvidencePack,
+  traceArtifactJson: string,
 ): Promise<{
   readonly jsonPath: string;
   readonly markdownPath: string;
+  readonly tracePath: string;
   readonly indexPath: string;
 }> {
   const generatedRoot = resolve(projectRoot, "evidence/generated");
@@ -451,28 +755,43 @@ export async function writeEvidencePack(
   const markdownName = `sandbox-run-${suffix}.md`;
   const jsonPath = resolve(generatedRoot, jsonName);
   const markdownPath = resolve(generatedRoot, markdownName);
+  const tracePath = resolve(generatedRoot, pack.observability.trace.artifact);
   if (
     await access(jsonPath)
       .then(() => true)
       .catch(() => false)
   )
     throw new Error(`Evidence file already exists: ${jsonName}`);
+  const traceValidation = validateNormalizedTraceArtifact(JSON.parse(traceArtifactJson));
+  if (!traceValidation.valid) {
+    throw new Error(`Trace artifact is invalid: ${traceValidation.errors.join("; ")}`);
+  }
+  if (
+    traceValidation.value.traceId !== pack.observability.trace.traceId ||
+    sha256Bytes(traceArtifactJson) !== pack.observability.trace.artifactSha256
+  ) {
+    throw new Error("Trace artifact does not match the evidence manifest binding.");
+  }
+  await writeFile(tracePath, traceArtifactJson, { encoding: "utf8", flag: "wx" });
   await writeFile(jsonPath, `${JSON.stringify(pack, null, 2)}\n`, { encoding: "utf8", flag: "wx" });
   await writeFile(markdownPath, renderEvidenceMarkdown(pack), { encoding: "utf8", flag: "wx" });
   const index: EvidenceIndex = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     latest: {
       json: jsonName,
       markdown: markdownName,
       evidenceDigest: pack.evidenceDigest,
       sourceCommit: pack.run.sourceCommit,
       status: "SUCCEEDED",
+      trace: pack.observability.trace.artifact,
+      traceId: pack.observability.trace.traceId,
+      traceArtifactSha256: pack.observability.trace.artifactSha256,
     },
   };
   const indexPath = resolve(generatedRoot, "index.json");
   if (pack.run.status === "SUCCEEDED")
     await writeFile(indexPath, `${JSON.stringify(index, null, 2)}\n`, "utf8");
-  return { jsonPath, markdownPath, indexPath };
+  return { jsonPath, markdownPath, tracePath, indexPath };
 }
 
 export async function readLatestValidatedEvidence(projectRoot: string): Promise<{
@@ -480,6 +799,8 @@ export async function readLatestValidatedEvidence(projectRoot: string): Promise<
   readonly index: EvidenceIndex;
   readonly json: string;
   readonly markdown: string;
+  readonly trace: NormalizedTraceArtifact | null;
+  readonly traceJson: string | null;
 } | null> {
   const generatedRoot = resolve(projectRoot, "evidence/generated");
   const rawIndex = await readFile(resolve(generatedRoot, "index.json"), "utf8").catch(() => null);
@@ -493,7 +814,12 @@ export async function readLatestValidatedEvidence(projectRoot: string): Promise<
   }
   const json = await readFile(resolve(generatedRoot, index.latest.json), "utf8");
   const markdown = await readFile(resolve(generatedRoot, index.latest.markdown), "utf8");
-  const validation = await validateEvidencePack(JSON.parse(json));
+  const parsedPack: unknown = JSON.parse(json);
+  const traceJson =
+    index.schemaVersion === 2
+      ? await readFile(resolve(generatedRoot, index.latest.trace), "utf8")
+      : null;
+  const validation = await validateEvidencePack(parsedPack, traceJson ?? undefined);
   if (!validation.valid)
     throw new Error(`Recorded sandbox evidence failed validation: ${validation.errors.join("; ")}`);
   if (validation.value.run.status !== "SUCCEEDED")
@@ -506,7 +832,24 @@ export async function readLatestValidatedEvidence(projectRoot: string): Promise<
   }
   if (!markdown.includes(validation.value.evidenceDigest))
     throw new Error("Evidence Markdown is not bound to the JSON digest.");
-  return { pack: validation.value, index, json, markdown };
+  if (validation.value.schemaVersion === 3 && index.schemaVersion !== 2) {
+    throw new Error("Trace-enabled evidence requires a trace-enabled index.");
+  }
+  if (index.schemaVersion === 2) {
+    if (
+      basename(index.latest.trace) !== index.latest.trace ||
+      validation.value.schemaVersion !== 3 ||
+      validation.value.observability.trace.artifact !== index.latest.trace ||
+      validation.value.observability.trace.traceId !== index.latest.traceId ||
+      validation.value.observability.trace.artifactSha256 !== index.latest.traceArtifactSha256
+    ) {
+      throw new Error("Trace index binding mismatch.");
+    }
+  }
+  const traceArtifact = traceJson
+    ? normalizedTraceArtifactSchema.parse(JSON.parse(traceJson))
+    : null;
+  return { pack: validation.value, index, json, markdown, trace: traceArtifact, traceJson };
 }
 
 export async function validateGeneratedEvidence(
@@ -529,7 +872,13 @@ export async function validateAllGeneratedEvidence(projectRoot: string): Promise
   const packs: ValidatedSandboxEvidencePack[] = [];
   for (const name of names) {
     const raw = await readFile(resolve(generatedRoot, name), "utf8");
-    const validation = await validateEvidencePack(JSON.parse(raw));
+    const candidate: unknown = JSON.parse(raw);
+    const parsed = sandboxEvidenceSchema.safeParse(candidate);
+    const traceJson =
+      parsed.success && parsed.data.schemaVersion === 3
+        ? await readFile(resolve(generatedRoot, parsed.data.observability.trace.artifact), "utf8")
+        : undefined;
+    const validation = await validateEvidencePack(candidate, traceJson);
     if (!validation.valid)
       throw new Error(`${name} failed validation: ${validation.errors.join("; ")}`);
     const markdown = await readFile(resolve(generatedRoot, name.replace(/\.json$/, ".md")), "utf8");

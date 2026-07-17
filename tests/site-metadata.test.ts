@@ -37,6 +37,10 @@ describe("static site metadata", () => {
     expect(rendered?.html).toContain("visitor's browser does not execute code");
     expect(rendered?.html).toContain("src/report.js");
     expect(rendered?.jsonName).toMatch(/^sandbox-run-.+\.json$/);
+    expect(rendered?.traceName).toMatch(/^sandbox-trace-.+\.json$/);
+    expect(rendered?.trace).toContain('"delivery.run"');
+    expect(rendered?.html).toContain("Inspect accessible Run Trace");
+    expect(rendered?.html).toContain("exact zero no model");
     const caseStudy = readFileSync(resolve(import.meta.dirname, "../index.html"), "utf8");
     expect(caseStudy).toContain("Implemented but not live-validated");
     expect(caseStudy).toContain("recorded evidence below remains Docker-backed");

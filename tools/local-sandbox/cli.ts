@@ -64,6 +64,9 @@ async function run(): Promise<void> {
       testExitCode: pack.postPatchExecution.commands.find((command) => command.id === "test")
         ?.exitCode,
       evidenceDigest: pack.evidenceDigest,
+      traceId: pack.observability.trace.traceId,
+      traceArtifactSha256: pack.observability.trace.artifactSha256,
+      budgetOutcome: pack.observability.budget.outcome,
     })}\n`,
   );
   if (pack.run.status !== "SUCCEEDED") process.exitCode = 1;

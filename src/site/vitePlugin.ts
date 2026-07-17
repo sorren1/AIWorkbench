@@ -121,6 +121,49 @@ export function portfolioSitePlugin(root: string): Plugin {
   let recordedEvidence: RecordedSandboxEvidenceRender | null = null;
   return {
     name: "portfolio-site-generator",
+    configureServer(server) {
+      server.middlewares.use("/recorded-evidence", (request, response, next) => {
+        void renderRecordedSandboxEvidence(root)
+          .then((current) => {
+            if (!current) {
+              next();
+              return;
+            }
+            const requestedName = (request.url ?? "/").split("?", 1)[0]?.replace(/^\//, "");
+            const assets = [
+              {
+                name: current.jsonName,
+                body: current.json,
+                type: "application/json; charset=utf-8",
+              },
+              {
+                name: current.markdownName,
+                body: current.markdown,
+                type: "text/markdown; charset=utf-8",
+              },
+              ...(current.traceName && current.trace
+                ? [
+                    {
+                      name: current.traceName,
+                      body: current.trace,
+                      type: "application/json; charset=utf-8",
+                    },
+                  ]
+                : []),
+            ];
+            const asset = assets.find((candidate) => candidate.name === requestedName);
+            if (!asset) {
+              next();
+              return;
+            }
+            response.statusCode = 200;
+            response.setHeader("Content-Type", asset.type);
+            response.setHeader("Cache-Control", "no-store");
+            response.end(asset.body);
+          })
+          .catch(next);
+      });
+    },
     transformIndexHtml: {
       order: "pre",
       async handler(html) {
@@ -158,6 +201,13 @@ export function portfolioSitePlugin(root: string): Plugin {
           fileName: `recorded-evidence/${recordedEvidence.markdownName}`,
           source: recordedEvidence.markdown,
         });
+        if (recordedEvidence.traceName && recordedEvidence.trace) {
+          this.emitFile({
+            type: "asset",
+            fileName: `recorded-evidence/${recordedEvidence.traceName}`,
+            source: recordedEvidence.trace,
+          });
+        }
       }
     },
   };

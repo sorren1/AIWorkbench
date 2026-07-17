@@ -12,12 +12,15 @@ import type {
   SandboxExecutionResult,
   SandboxProvider,
 } from "../tools/local-sandbox/contracts";
+import { createExecutionBudget } from "../tools/local-sandbox/budgets";
 import {
+  BudgetStopEvidenceError,
   validateAllGeneratedEvidence,
   validateEvidencePack,
 } from "../tools/local-sandbox/evidence";
 import { normalizeCapturedOutput, runProcess } from "../tools/local-sandbox/process";
 import { runSandboxSlice } from "../tools/local-sandbox/runner";
+import type { TraceArtifactOutput } from "../tools/local-sandbox/telemetry";
 import {
   applyControlledReplacement,
   changedFiles,
@@ -197,6 +200,7 @@ describe("sandbox process and evidence behavior", () => {
 
   it("produces valid successful evidence and removes the temporary workspace", async () => {
     let workspace = "";
+    let trace: TraceArtifactOutput | undefined;
     const pack = await runSandboxSlice({
       projectRoot,
       provider: new FixtureSandboxProvider(0),
@@ -205,7 +209,11 @@ describe("sandbox process and evidence behavior", () => {
       onWorkspaceCreated: (path) => {
         workspace = path;
       },
+      onTraceCreated: (value) => {
+        trace = value;
+      },
     });
+    expect(pack.schemaVersion).toBe(3);
     expect(pack.run.status).toBe("SUCCEEDED");
     expect(pack.change.changedFiles.map((file) => file.path)).toEqual(["src/report.js"]);
     expect(
@@ -214,23 +222,117 @@ describe("sandbox process and evidence behavior", () => {
     expect(
       pack.postPatchExecution.commands.find((command) => command.id === "test")?.exitCode,
     ).toBe(0);
-    expect((await validateEvidencePack(pack)).valid).toBe(true);
+    expect(trace).toBeDefined();
+    if (!trace) throw new Error("Trace callback was not invoked.");
+    expect((await validateEvidencePack(pack, trace.json)).valid).toBe(true);
+    expect(trace.artifact.traceId).toBe(pack.observability.trace.traceId);
+    expect(trace.sha256).toBe(pack.observability.trace.artifactSha256);
+    expect(trace.artifact.bindings.contextPackDigest).toBe(pack.governance.contextPackDigest);
+    const root = trace.artifact.spans.find((span) => span.name === "delivery.run");
+    const stage = trace.artifact.spans.find((span) => span.name === "delivery.stage");
+    const agent = trace.artifact.spans.find((span) => span.name === "agent.invoke");
+    const approval = trace.artifact.spans.find((span) => span.name === "approval.wait");
+    expect(root?.parentSpanId).toBeNull();
+    expect(stage?.parentSpanId).toBe(root?.spanId);
+    expect(agent?.parentSpanId).toBe(stage?.spanId);
+    expect(approval?.parentSpanId).toBe(stage?.spanId);
+    expect(trace.artifact.summary.modelCallCount).toBe(0);
+    expect(pack.observability.accounting.total).toMatchObject({
+      modelCalls: 0,
+      inputTokens: 0,
+      outputTokens: 0,
+      costUsd: 0,
+      tokenMeasurement: "EXACT_ZERO_NO_MODEL",
+      costMeasurement: "EXACT_ZERO_NO_MODEL",
+    });
     await expect(access(workspace)).rejects.toThrow();
   });
 
   it("produces honest failed-test evidence", async () => {
+    let trace: TraceArtifactOutput | undefined;
     const pack = await runSandboxSlice({
       projectRoot,
       provider: new FixtureSandboxProvider(1),
       scenario: "failed-validation",
       writeEvidence: false,
       fixedRun: { id: "sandbox-test-failure", createdAt: "2026-07-17T16:00:00.000Z" },
+      onTraceCreated: (value) => {
+        trace = value;
+      },
     });
     expect(pack.run.status).toBe("FAILED");
     expect(
       pack.postPatchExecution.commands.find((command) => command.id === "test")?.exitCode,
     ).toBe(1);
     expect((await validateEvidencePack(pack)).valid).toBe(true);
+    expect(trace?.artifact.spans.some((span) => span.status === "ERROR")).toBe(true);
+  });
+
+  it("creates failed evidence and a trace event when a stop budget is exceeded", async () => {
+    let calls = 0;
+    let trace: TraceArtifactOutput | undefined;
+    const pack = await runSandboxSlice({
+      projectRoot,
+      provider: new FixtureSandboxProvider(0),
+      writeEvidence: false,
+      fixedRun: { id: "sandbox-test-budget-stop", createdAt: "2026-07-17T16:00:00.000Z" },
+      executionBudget: createExecutionBudget({
+        maximumWallClockDurationMs: 10,
+        maximumStageDurationMs: 10,
+        actionOnThreshold: "STOP_RUN",
+      }),
+      monotonicNow: () => {
+        calls += 1;
+        return calls >= 12 ? 20 : 0;
+      },
+      onTraceCreated: (value) => {
+        trace = value;
+      },
+    });
+    expect(pack.run.status).toBe("FAILED");
+    expect(pack.observability.budget).toMatchObject({
+      outcome: "STOPPED",
+      stopReason: "WALL_CLOCK_DURATION",
+    });
+    expect(
+      trace?.artifact.spans.some((span) =>
+        span.events.some((event) => event.name === "budget.exceeded"),
+      ),
+    ).toBe(true);
+  });
+
+  it("finalizes trace-bound failure evidence before a tool call beyond budget", async () => {
+    let caught: unknown;
+    try {
+      await runSandboxSlice({
+        projectRoot,
+        provider: new FixtureSandboxProvider(0),
+        writeEvidence: false,
+        fixedRun: {
+          id: "sandbox-test-budget-preflight",
+          createdAt: "2026-07-17T16:00:00.000Z",
+        },
+        executionBudget: createExecutionBudget({
+          maximumToolCalls: 0,
+          actionOnThreshold: "STOP_STAGE",
+        }),
+      });
+    } catch (error) {
+      caught = error;
+    }
+    expect(caught).toBeInstanceOf(BudgetStopEvidenceError);
+    if (!(caught instanceof BudgetStopEvidenceError)) return;
+    expect(caught.evidence).toMatchObject({
+      classification: "RECORDED_REAL_SANDBOX_BUDGET_STOP_EVIDENCE",
+      stop: { dimension: "TOOL_CALLS", action: "STOP_STAGE" },
+      run: { status: "FAILED" },
+    });
+    expect(caught.evidence.trace.traceId).toBe(caught.traceArtifact.traceId);
+    expect(
+      caught.traceArtifact.spans.some((span) =>
+        span.events.some((event) => event.name === "budget.exceeded"),
+      ),
+    ).toBe(true);
   });
 
   it("produces honest failed-build evidence", async () => {
@@ -265,7 +367,9 @@ describe("sandbox process and evidence behavior", () => {
 
   it("validates every checked-in real-run pack and the successful latest pointer", async () => {
     const evidence = await validateAllGeneratedEvidence(projectRoot);
-    expect(evidence.packs.map((pack) => pack.run.status).sort()).toEqual(["FAILED", "SUCCEEDED"]);
+    expect(evidence.packs.map((pack) => pack.run.status)).toEqual(
+      expect.arrayContaining(["FAILED", "SUCCEEDED"]),
+    );
     expect(evidence.latest.run.status).toBe("SUCCEEDED");
   });
 });

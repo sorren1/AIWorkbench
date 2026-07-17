@@ -53,6 +53,8 @@ npm run check
 npm run demo:sandbox
 npm run demo:sandbox:e2b
 npm run sandbox:evidence:validate
+npm run trace:generate
+npm run trace:check
 npm run test:e2b:live
 npm run demo:approval:start -- --scenario approval-required
 npm run demo:approve -- --request <request-id> --as synthetic-code-reviewer --reason "..."

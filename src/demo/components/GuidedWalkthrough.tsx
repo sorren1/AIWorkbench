@@ -74,6 +74,14 @@ const STEPS: readonly WalkthroughStep[] = [
     explain:
       "The focused control plane governs a coding-agent workflow without becoming a generic agent marketplace.",
   },
+  {
+    route: "trace",
+    title: "Inspect the recorded execution trace and budgets",
+    duration: "65 sec",
+    show: "Follow the nested waterfall, approval wait, tool calls, repair count, budget thresholds, and evidence hashes.",
+    explain:
+      "The browser renders validated checked-in telemetry; it never connects to a collector or executes the sandbox.",
+  },
 ];
 
 export function GuidedWalkthrough({ onClose }: { readonly onClose: () => void }) {

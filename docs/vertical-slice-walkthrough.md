@@ -39,7 +39,7 @@ The command:
 7. rejects any unexpected file or changed path;
 8. runs the fixed build and tests in fresh constrained, network-disabled containers;
 9. removes labeled containers and the temporary workspace in `finally`; and
-10. writes an immutable-style JSON pack and Markdown summary under `evidence/generated/`.
+10. writes immutable-style JSON, Markdown, and normalized OpenTelemetry-compatible trace evidence under `evidence/generated/`.
 
 The last line is JSON. Dynamic IDs, digests, and durations will differ, but a successful result has this shape:
 
@@ -53,11 +53,13 @@ The last line is JSON. Dynamic IDs, digests, and durations will differ, but a su
   "preTestExitCode": 1,
   "buildExitCode": 0,
   "testExitCode": 0,
-  "evidenceDigest": "<64-hex SHA-256>"
+  "evidenceDigest": "<64-hex SHA-256>",
+  "traceId": "<32-hex trace ID>",
+  "traceArtifactSha256": "<64-hex SHA-256>"
 }
 ```
 
-Validate the latest checked-in pack's schema, embedded hashes, tree digests, context-pack binding, canonical evidence digest, index binding, and Markdown binding:
+Validate the latest checked-in pack's schema, embedded hashes, tree digests, context-pack binding, trace hierarchy/hash/governance binding, canonical evidence digest, index binding, and Markdown binding:
 
 ```bash
 npm run sandbox:evidence:validate
@@ -121,7 +123,7 @@ PowerShell exposes the non-zero result in `$LASTEXITCODE`; POSIX shells expose i
 npm test -- --run tests/local-sandbox.test.ts tests/e2b-sandbox.test.ts
 ```
 
-The suites cover exact allow-list enforcement, traversal rejection, symlink escape rejection, unexpected files, process timeout, deterministic output normalization, cleanup, successful evidence, failed-test evidence, evidence tamper detection, explicit E2B selection, bounded E2B uploads, network-verification gating, normalized provider metadata, and orphan cleanup. Fake provider tests require neither Docker nor E2B; the checked-in recorded run remains Docker-backed integration evidence.
+The suites cover exact allow-list enforcement, traversal rejection, symlink escape rejection, unexpected files, process timeout, deterministic output normalization, cleanup, successful evidence, failed-test evidence, trace hierarchy/redaction/binding, budget warnings/stops, repair limits, exact-versus-estimated accounting, evidence tamper detection, explicit E2B selection, bounded E2B uploads, network-verification gating, normalized provider metadata, and orphan cleanup. Fake provider tests require neither Docker nor E2B; the checked-in recorded run remains Docker-backed integration evidence.
 
 ## Public rendering
 
@@ -132,6 +134,6 @@ npm run build
 npm run preview
 ```
 
-Open `/` and find **Recorded real sandbox run**. Vite validates the checked-in pack during the build, statically renders its summary, and emits the JSON/Markdown as read-only assets. The page performs no execution and makes no request to Docker, E2B, or localhost. Until a real successful E2B pack exists, E2B appears only as **implemented but not live-validated** and the displayed recorded run remains Docker-backed.
+Open `/` and find **Recorded real sandbox run**. Vite validates the checked-in pack and trace during the build, statically renders their summary, and emits JSON/Markdown/trace files as read-only assets. Open `/demo/?screen=trace` for the accessible waterfall and budget view. Neither page performs execution or connects to Docker, E2B, localhost, a collector, or a telemetry backend. Until a real successful E2B pack exists, E2B appears only as **implemented but not live-validated** and the displayed recorded run remains Docker-backed.
 
 See [sandbox security model](sandbox-security-model.md) for trust boundaries and residual risks.

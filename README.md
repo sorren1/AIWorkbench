@@ -20,7 +20,7 @@ The focused control-plane direction extends that workflow with typed domain seam
 
 Every visible value belongs to one category:
 
-- **Functional in this repository:** navigation and shareable deep links, filters, versioned theme and authorization preferences, deterministic scenario loading and reset, the guided tour, reducer-backed workflow transitions, stale-state propagation, scoped synthetic persona decisions, a durable browser-local approval inbox, hash-bound CLI pause/resume, artifact copy/download, architecture and validation-evidence exports, schema-validated/hash-versioned registry selection, generated capability cards, the bounded local toy-repository MCP slice, the explicit local Docker validation slice, evidence verification, and the static production build. The optional E2B provider is implemented behind the same contract but was not live-validated in this revision because no key was available.
+- **Functional in this repository:** navigation and shareable deep links, filters, versioned theme and authorization preferences, deterministic scenario loading and reset, the guided tour, reducer-backed workflow transitions, stale-state propagation, scoped synthetic persona decisions, a durable browser-local approval inbox, hash-bound CLI pause/resume, artifact copy/download, architecture and validation-evidence exports, schema-validated/hash-versioned registry selection, generated capability cards, the bounded local toy-repository MCP slice, the explicit local Docker validation slice, OpenTelemetry-compatible local trace export, execution-budget enforcement, evidence verification, and the static production build. The optional E2B provider is implemented behind the same contract but was not live-validated in this revision because no key was available.
 - **Synthetic demo fixture:** every persona, issue, repository, branch, pull request, check, log, duration, test result, metric, external integration result, and provider response shown in the workbench.
 - **Professional context:** the single statement in the separate section below. It is not evidence about the public prototype.
 
@@ -81,7 +81,7 @@ npm run demo:sandbox
 npm run sandbox:evidence:validate
 ```
 
-The command accepts no repository, patch, command, or visitor input. It operates only on `examples/toy-repo`, runs fixed checks in network-disabled constrained containers, cleans the temporary workspace, and emits synthetic/public JSON and Markdown evidence. See the [vertical-slice walkthrough](docs/vertical-slice-walkthrough.md) and [sandbox security model](docs/sandbox-security-model.md).
+The command accepts no repository, patch, command, or visitor input. It operates only on `examples/toy-repo`, runs fixed checks in network-disabled constrained containers, cleans the temporary workspace, and emits synthetic/public JSON, Markdown, and normalized trace evidence. The trace uses real OpenTelemetry spans, explicit run/stage/tool/repair/time budgets, and exact-zero model accounting for this deterministic no-LLM path. See the [vertical-slice walkthrough](docs/vertical-slice-walkthrough.md), [sandbox security model](docs/sandbox-security-model.md), and [observability guide](docs/observability-and-budgeting.md).
 
 An optional E2B implementation uses the official pinned SDK and the documented `E2B_API_KEY`, but only when explicitly selected:
 
@@ -119,9 +119,9 @@ src/demo/state/                    typed reducer and local actions
 src/demo/data/                     deterministic synthetic fixtures and content
 src/demo/control-plane/            typed control-plane domain seams
 examples/toy-repo/                  disposable synthetic repository, issue, targets, and tests
-tools/local-sandbox/                typed Docker/E2B providers, file controls, runner, and evidence
+tools/local-sandbox/                providers, controls, budgets, tracing, runner, and evidence
 tools/toy-repo-mcp/                 optional local stdio MCP server and trusted client
-evidence/generated/                 validated recorded local-run JSON and Markdown
+evidence/generated/                 validated recorded local-run JSON, Markdown, and traces
 public/capabilities/                generated capability cards, schemas, and MCP evidence
 src/shared/                        local SVG icon system
 src/styles/tokens/                 shared semantic design tokens

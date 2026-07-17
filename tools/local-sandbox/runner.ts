@@ -19,10 +19,22 @@ import type {
   SandboxUpload,
 } from "./contracts";
 import {
+  accountingBudgetUsage,
+  BudgetStopError,
+  createExecutionBudget,
+  ExecutionBudgetTracker,
+  ProviderNeutralUsageAccountant,
+  type ExecutionBudget,
+} from "./budgets";
+import {
   createEvidenceDigest,
-  sandboxEvidenceV2Schema,
+  createBudgetStopEvidenceDigest,
+  budgetStopEvidenceSchema,
+  BudgetStopEvidenceError,
+  sandboxEvidenceV3Schema,
   validateEvidencePack,
   writeEvidencePack,
+  writeBudgetStopEvidence,
   type SandboxEvidencePack,
 } from "./evidence";
 import {
@@ -32,6 +44,7 @@ import {
   sha256Bytes,
   snapshotRepository,
 } from "./security";
+import { DeliveryTelemetry, type TraceArtifactOutput } from "./telemetry";
 
 const execFileAsync = promisify(execFile);
 const EVIDENCE_OUTPUT_LIMIT_BYTES = 2 * 1024 * 1024;
@@ -82,6 +95,9 @@ export type RunSandboxOptions = {
   readonly writeEvidence?: boolean;
   readonly fixedRun?: { readonly id: string; readonly createdAt: string };
   readonly onWorkspaceCreated?: (path: string) => void;
+  readonly executionBudget?: ExecutionBudget;
+  readonly monotonicNow?: () => number;
+  readonly onTraceCreated?: (trace: TraceArtifactOutput) => void;
 };
 
 function requiredRegistryReference(id: string, kind: "agent" | "tool") {
@@ -92,6 +108,16 @@ function requiredRegistryReference(id: string, kind: "agent" | "tool") {
   if (!record || record.status !== "APPROVED")
     throw new Error(`Approved registry record missing: ${id}`);
   return { id: record.id, version: record.version, contentHash: record.contentHash };
+}
+
+function requiredApprovalPolicyReference(id: string) {
+  const policy = registrySnapshot.approvalPolicies.find((candidate) => candidate.id === id);
+  if (!policy || !policy.enabled) throw new Error(`Enabled approval policy missing: ${id}`);
+  return { id: policy.id, version: policy.version, contentHash: policy.contentHash };
+}
+
+function traceArtifactName(runId: string): string {
+  return `sandbox-trace-${runId.replace(/^sandbox-/, "")}.json`;
 }
 
 function createRunIdentity(fixed?: RunSandboxOptions["fixedRun"]): {
@@ -325,11 +351,136 @@ function evidenceBoundary(
   throw new Error("Sandbox execution providers changed during one run.");
 }
 
+function receiptEndTime(receipt: SandboxExecutionResult["commands"][number]): Date {
+  return new Date(new Date(receipt.startedAt).getTime() + receipt.durationMs);
+}
+
+async function tracedSandboxExecution(options: {
+  readonly provider: SandboxProvider;
+  readonly request: Parameters<SandboxProvider["execute"]>[0];
+  readonly telemetry: DeliveryTelemetry;
+  readonly stageSpan: import("@opentelemetry/api").Span;
+  readonly tracker: ExecutionBudgetTracker;
+  readonly validationTool: ReturnType<typeof requiredRegistryReference>;
+  readonly expectedFailureCommand: "pre-test" | null;
+}): Promise<SandboxExecutionResult> {
+  options.tracker.beforeToolCall();
+  const toolSpan = options.telemetry.startSpan("tool.call", options.stageSpan, {
+    "delivery.stage": "implement",
+    "delivery.tool.id": options.validationTool.id,
+    "delivery.tool.version": options.validationTool.version,
+    "delivery.tool.hash": options.validationTool.contentHash,
+    "delivery.tool.call_number": options.tracker
+      .snapshot()
+      .dimensions.find((item) => item.dimension === "TOOL_CALLS")?.observed,
+    "delivery.outcome": "RUNNING",
+  });
+  const sandboxSpan = options.telemetry.startSpan("sandbox.execute", toolSpan, {
+    "delivery.stage": "implement",
+    "delivery.sandbox.provider": options.provider.kind,
+    "delivery.sandbox.phase": options.request.phase,
+    "delivery.outcome": "RUNNING",
+  });
+  try {
+    const execution = await options.provider.execute(options.request);
+    let failed = false;
+    for (const receipt of execution.commands) {
+      const expectedFailure = receipt.id === options.expectedFailureCommand;
+      const commandFailed = receipt.exitCode !== 0 || receipt.timedOut || receipt.outputTruncated;
+      failed ||= commandFailed && !expectedFailure;
+      const commandSpan = options.telemetry.startSpan(
+        "validation.command",
+        sandboxSpan,
+        {
+          "delivery.stage": "implement",
+          "delivery.command.category": receipt.id,
+          "delivery.sandbox.provider": execution.provider,
+          "delivery.validation.status": expectedFailure
+            ? "EXPECTED_FAILURE"
+            : commandFailed
+              ? "FAILED"
+              : "PASSED",
+          "delivery.duration_ms": receipt.durationMs,
+          "delivery.outcome": expectedFailure
+            ? "EXPECTED_FAILURE"
+            : commandFailed
+              ? "FAILED"
+              : "SUCCEEDED",
+        },
+        new Date(receipt.startedAt),
+      );
+      if (commandFailed && !expectedFailure) {
+        options.telemetry.fail(
+          commandSpan,
+          receipt.timedOut ? "COMMAND_TIMEOUT" : "COMMAND_NONZERO_EXIT",
+          receiptEndTime(receipt),
+        );
+      } else {
+        options.telemetry.succeed(commandSpan, {}, receiptEndTime(receipt));
+      }
+    }
+    if (failed) {
+      options.telemetry.fail(sandboxSpan, "VALIDATION_COMMAND_FAILED");
+      options.telemetry.fail(toolSpan, "VALIDATION_COMMAND_FAILED");
+    } else {
+      options.telemetry.succeed(sandboxSpan, {
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.validation.command_count": execution.commands.length,
+      });
+      options.telemetry.succeed(toolSpan, { "delivery.outcome": "SUCCEEDED" });
+    }
+    options.tracker.checkTime();
+    return execution;
+  } catch (error) {
+    if (sandboxSpan.isRecording()) options.telemetry.fail(sandboxSpan, "SANDBOX_EXECUTION_ERROR");
+    if (toolSpan.isRecording()) options.telemetry.fail(toolSpan, "SANDBOX_EXECUTION_ERROR");
+    throw error;
+  }
+}
+
 export async function runSandboxSlice(options: RunSandboxOptions): Promise<SandboxEvidencePack> {
   const scenario = options.scenario ?? "successful-validation";
   const run = createRunIdentity(options.fixedRun);
   if (!/^sandbox-[a-z0-9-]+$/.test(run.id)) throw new Error("Internal sandbox run ID is invalid.");
+  const agentCard = requiredRegistryReference("agent.implementation", "agent");
+  const patchTool = requiredRegistryReference("tool.repository.patch.controlled", "tool");
+  const validationTool = requiredRegistryReference("tool.sandbox.command", "tool");
+  const approvalPolicy = requiredApprovalPolicyReference("policy.write.approved-targets");
+  const executionBudget = options.executionBudget ?? createExecutionBudget();
+  const telemetry = new DeliveryTelemetry("1.0.0");
+  const runSpan = telemetry.startSpan("delivery.run", null, {
+    "delivery.run.id": run.id,
+    "delivery.issue.id": "TOY-101",
+    "delivery.stage": "implement",
+    "delivery.agent.id": agentCard.id,
+    "delivery.agent.version": agentCard.version,
+    "delivery.agent.hash": agentCard.contentHash,
+    "delivery.approval.policy.id": approvalPolicy.id,
+    "delivery.approval.policy.hash": approvalPolicy.contentHash,
+    "delivery.budget.policy.id": executionBudget.id,
+    "delivery.budget.policy.version": executionBudget.version,
+    "delivery.budget.policy.hash": executionBudget.contentHash,
+    "delivery.sandbox.provider": options.provider.kind,
+    "delivery.outcome": "RUNNING",
+  });
+  const stageSpan = telemetry.startSpan("delivery.stage", runSpan, {
+    "delivery.run.id": run.id,
+    "delivery.issue.id": "TOY-101",
+    "delivery.stage": "implement",
+    "delivery.agent.id": agentCard.id,
+    "delivery.agent.version": agentCard.version,
+    "delivery.agent.hash": agentCard.contentHash,
+    "delivery.outcome": "RUNNING",
+  });
+  const tracker = new ExecutionBudgetTracker(executionBudget, options.monotonicNow, (event) =>
+    telemetry.budgetEvent(stageSpan, event),
+  );
+  const accountant = new ProviderNeutralUsageAccountant();
   const provenance = await projectProvenance(options.projectRoot);
+  runSpan.setAttributes({
+    "delivery.source.commit": provenance.sourceCommit,
+    "delivery.source.tree_digest": provenance.sourceTreeDigest,
+  });
   const availability = await options.provider.prepare();
   if (!availability.available || availability.provider !== options.provider.kind)
     throw new Error(`${options.provider.kind} sandbox unavailable: ${availability.detail}`);
@@ -346,12 +497,14 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
   let postPatchExecution: SandboxExecutionResult | undefined;
   let repositoryBefore: Awaited<ReturnType<typeof snapshotRepository>> | undefined;
   let repositoryAfter: Awaited<ReturnType<typeof snapshotRepository>> | undefined;
-  let unifiedDiff: string;
+  let unifiedDiff: string | undefined;
   let changes: ReturnType<typeof changedFiles> | undefined;
-  let artifacts: ReturnType<typeof artifact>[];
-  let issueContent: string;
-  let changeTargetsContent: string;
+  let artifacts: ReturnType<typeof artifact>[] | undefined;
+  let issueContent: string | undefined;
+  let changeTargetsContent: string | undefined;
   let contextPack: Awaited<ReturnType<typeof buildContextPack>> | undefined;
+  let approvalWaitDurationMs: number | undefined;
+  let earlyBudgetStop: BudgetStopError | undefined;
 
   try {
     await cp(toyRoot, repositoryRoot, { recursive: true, errorOnExist: true });
@@ -369,6 +522,17 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
     const changeTargets = changeTargetsSchema.parse(JSON.parse(changeTargetsContent));
     const approvedPath = changeTargets.paths[0];
     if (!approvedPath) throw new Error("Synthetic change-target fixture has no approved path.");
+    const agentSpan = telemetry.startSpan("agent.invoke", stageSpan, {
+      "delivery.run.id": run.id,
+      "delivery.issue.id": issue.id,
+      "delivery.stage": "implement",
+      "delivery.agent.id": agentCard.id,
+      "delivery.agent.version": agentCard.version,
+      "delivery.agent.hash": agentCard.contentHash,
+      "delivery.model.policy.id": "model.policy.delivery-balanced",
+      "delivery.model.used": false,
+      "delivery.outcome": "RUNNING",
+    });
     contextPack = await buildContextPack("synthetic-toy-repository", "implement", {
       runId: run.id,
       createdAt: run.createdAt,
@@ -387,17 +551,37 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
     await Promise.all(
       artifacts.map((item) => writeFile(resolve(temporaryRoot, item.path), item.content, "utf8")),
     );
+    telemetry.succeed(agentSpan, {
+      "delivery.context.pack_digest": contextPack.packDigest,
+      "delivery.artifact.count": artifacts.length,
+      "delivery.model.call_count": 0,
+      "delivery.model.input_tokens": 0,
+      "delivery.model.output_tokens": 0,
+      "delivery.model.cost_usd": 0,
+      "delivery.model.accounting_basis": "EXACT_ZERO_NO_MODEL",
+      "delivery.outcome": "SUCCEEDED",
+    });
+    runSpan.setAttribute("delivery.context.pack_digest", contextPack.packDigest);
+    stageSpan.setAttribute("delivery.context.pack_digest", contextPack.packDigest);
     repositoryBefore = await snapshotRepository(repositoryRoot);
-    prePatchExecution = await options.provider.execute({
-      runId: run.id,
-      phase: "before-patch",
-      workspaceRoot: repositoryRoot,
-      uploads: sandboxUploads(repositoryBefore, artifacts),
-      limits: DEFAULT_LIMITS,
-      commands: [
-        { id: "tool-versions", argv: ["sh", "-c", "node --version && npm --version"] },
-        { id: "pre-test", argv: ["npm", "test", "--silent"] },
-      ],
+    prePatchExecution = await tracedSandboxExecution({
+      provider: options.provider,
+      telemetry,
+      stageSpan,
+      tracker,
+      validationTool,
+      expectedFailureCommand: "pre-test",
+      request: {
+        runId: run.id,
+        phase: "before-patch",
+        workspaceRoot: repositoryRoot,
+        uploads: sandboxUploads(repositoryBefore, artifacts),
+        limits: DEFAULT_LIMITS,
+        commands: [
+          { id: "tool-versions", argv: ["sh", "-c", "node --version && npm --version"] },
+          { id: "pre-test", argv: ["npm", "test", "--silent"] },
+        ],
+      },
     });
     const preTest = prePatchExecution.commands.find((command) => command.id === "pre-test");
     if (!preTest || preTest.exitCode === 0 || preTest.timedOut) {
@@ -405,29 +589,77 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
     }
     const replacement =
       scenario === "successful-validation" ? SUCCESSFUL_REPLACEMENT : FAILED_REPLACEMENT;
-    await applyControlledReplacement({
-      root: repositoryRoot,
-      path: approvedPath,
-      allowedPaths: changeTargets.paths,
-      expected: EXPECTED_SOURCE,
-      replacement,
+    const approvalStarted = performance.now();
+    const approvalRequestId = `approval.${run.id}.checked-in-change-target`;
+    const approvalSpan = telemetry.startSpan("approval.wait", stageSpan, {
+      "delivery.run.id": run.id,
+      "delivery.issue.id": issue.id,
+      "delivery.stage": "implement",
+      "delivery.approval.request_id": approvalRequestId,
+      "delivery.approval.policy.id": approvalPolicy.id,
+      "delivery.approval.policy.hash": approvalPolicy.contentHash,
+      "delivery.approval.outcome": "PREAPPROVED_SYNTHETIC_FIXTURE",
+      "delivery.outcome": "SUCCEEDED",
     });
+    telemetry.succeed(approvalSpan);
+    approvalWaitDurationMs = Number((performance.now() - approvalStarted).toFixed(3));
+    tracker.beforeRepairAttempt();
+    tracker.beforeToolCall();
+    const patchSpan = telemetry.startSpan("tool.call", stageSpan, {
+      "delivery.run.id": run.id,
+      "delivery.issue.id": issue.id,
+      "delivery.stage": "implement",
+      "delivery.tool.id": patchTool.id,
+      "delivery.tool.version": patchTool.version,
+      "delivery.tool.hash": patchTool.contentHash,
+      "delivery.command.category": "controlled-patch",
+      "delivery.repair.attempt": 1,
+      "delivery.outcome": "RUNNING",
+    });
+    try {
+      await applyControlledReplacement({
+        root: repositoryRoot,
+        path: approvedPath,
+        allowedPaths: changeTargets.paths,
+        expected: EXPECTED_SOURCE,
+        replacement,
+      });
+      telemetry.succeed(patchSpan, {
+        "delivery.changed_file_count": 1,
+        "delivery.outcome": "SUCCEEDED",
+      });
+    } catch (error) {
+      telemetry.fail(patchSpan, "CONTROLLED_PATCH_FAILED");
+      throw error;
+    }
+    tracker.checkTime();
     await assertNoSymlinks(repositoryRoot);
     repositoryAfter = await snapshotRepository(repositoryRoot);
     changes = changedFiles(repositoryBefore, repositoryAfter, changeTargets.paths);
     unifiedDiff = await git(repositoryRoot, ["diff", "--no-ext-diff", "--", approvedPath]);
     if (unifiedDiff.length === 0) throw new Error("Controlled patch produced no Git diff.");
-    postPatchExecution = await options.provider.execute({
-      runId: run.id,
-      phase: "after-patch",
-      workspaceRoot: repositoryRoot,
-      uploads: sandboxUploads(repositoryAfter, artifacts),
-      limits: DEFAULT_LIMITS,
-      commands: [
-        { id: "build", argv: ["npm", "run", "build", "--silent"] },
-        { id: "test", argv: ["npm", "test", "--silent"] },
-      ],
+    postPatchExecution = await tracedSandboxExecution({
+      provider: options.provider,
+      telemetry,
+      stageSpan,
+      tracker,
+      validationTool,
+      expectedFailureCommand: null,
+      request: {
+        runId: run.id,
+        phase: "after-patch",
+        workspaceRoot: repositoryRoot,
+        uploads: sandboxUploads(repositoryAfter, artifacts),
+        limits: DEFAULT_LIMITS,
+        commands: [
+          { id: "build", argv: ["npm", "run", "build", "--silent"] },
+          { id: "test", argv: ["npm", "test", "--silent"] },
+        ],
+      },
     });
+  } catch (error) {
+    if (error instanceof BudgetStopError) earlyBudgetStop = error;
+    else throw error;
   } finally {
     providerCleanupAttempts = await options.provider
       .cleanup(run.id)
@@ -440,27 +672,168 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
       .catch(() => false));
   }
 
+  if (!temporaryWorkspaceRemoved) throw new Error("Temporary sandbox workspace cleanup failed.");
+
+  if (earlyBudgetStop) {
+    if (!repositoryBefore || !contextPack) {
+      throw new Error("A budget stop occurred before governance evidence could be assembled.");
+    }
+    const budget = tracker.snapshot(earlyBudgetStop.dimension);
+    const evidenceSpan = telemetry.startSpan("evidence.finalize", stageSpan, {
+      "delivery.run.id": run.id,
+      "delivery.issue.id": "TOY-101",
+      "delivery.stage": "implement",
+      "delivery.budget.outcome": "STOPPED",
+      "delivery.outcome": "SUCCEEDED",
+    });
+    telemetry.succeed(evidenceSpan);
+    telemetry.fail(stageSpan, "BUDGET_STOP");
+    telemetry.fail(runSpan, "BUDGET_STOP");
+    const stoppedAt = new Date().toISOString();
+    const testedTree = repositoryAfter ?? repositoryBefore;
+    const trace = await telemetry.artifact(
+      stoppedAt,
+      {
+        runId: run.id,
+        issueId: "TOY-101",
+        sourceCommit: provenance.sourceCommit,
+        sourceTreeDigest: provenance.sourceTreeDigest,
+        testedRepositoryTreeDigest: await treeDigest(testedTree),
+        contextPackDigest: contextPack.packDigest,
+        agentCardHash: agentCard.contentHash,
+        approvalPolicyHash: approvalPolicy.contentHash,
+        budgetPolicyHash: executionBudget.contentHash,
+      },
+      runSpan.spanContext().traceId,
+    );
+    options.onTraceCreated?.(trace);
+    const withoutDigest = {
+      schemaVersion: 1 as const,
+      classification: "RECORDED_REAL_SANDBOX_BUDGET_STOP_EVIDENCE" as const,
+      run: {
+        id: run.id,
+        issueId: "TOY-101" as const,
+        stage: "implement" as const,
+        createdAt: run.createdAt,
+        stoppedAt,
+        sourceCommit: provenance.sourceCommit,
+        sourceTreeDigest: provenance.sourceTreeDigest,
+        status: "FAILED" as const,
+      },
+      governance: {
+        agentCard,
+        approvalPolicy,
+        contextPackDigest: contextPack.packDigest,
+        executionBudget,
+      },
+      stop: {
+        dimension: earlyBudgetStop.dimension,
+        action: earlyBudgetStop.action,
+        result: budget,
+      },
+      trace: {
+        traceId: trace.artifact.traceId,
+        artifact: traceArtifactName(run.id),
+        artifactSha256: trace.sha256,
+      },
+      cleanup: {
+        providerCleanupAttempted: true as const,
+        temporaryWorkspaceRemoved: true as const,
+        providerAttempts: [
+          ...(prePatchExecution?.cleanupAttempts ?? []),
+          ...(postPatchExecution?.cleanupAttempts ?? []),
+          ...providerCleanupAttempts,
+        ],
+      },
+    };
+    const stopEvidence = budgetStopEvidenceSchema.parse({
+      ...withoutDigest,
+      evidenceDigest: await createBudgetStopEvidenceDigest(withoutDigest),
+    });
+    if (options.writeEvidence !== false) {
+      await writeBudgetStopEvidence(options.projectRoot, stopEvidence, trace.json);
+    }
+    throw new BudgetStopEvidenceError(stopEvidence, trace.artifact);
+  }
+
   if (
     !prePatchExecution ||
     !postPatchExecution ||
     !repositoryBefore ||
     !repositoryAfter ||
     !changes ||
-    !contextPack
+    !contextPack ||
+    !issueContent ||
+    !changeTargetsContent ||
+    !artifacts ||
+    !unifiedDiff ||
+    approvalWaitDurationMs === undefined
   ) {
     throw new Error("Sandbox run ended before complete evidence could be assembled.");
   }
-  if (!temporaryWorkspaceRemoved) throw new Error("Temporary sandbox workspace cleanup failed.");
-  const finalStatus = executionPassed(postPatchExecution, ["build", "test"])
+  let finalStatus: "SUCCEEDED" | "FAILED" = executionPassed(postPatchExecution, ["build", "test"])
     ? "SUCCEEDED"
     : "FAILED";
+  const accounting = accountant.snapshot();
+  let budgetStopReason: import("./budgets").BudgetDimension | null = null;
+  try {
+    tracker.setUsage(accountingBudgetUsage(accounting));
+    tracker.checkTime();
+  } catch (error) {
+    if (!(error instanceof BudgetStopError)) throw error;
+    budgetStopReason = error.dimension;
+    finalStatus = "FAILED";
+  }
+  const budget = tracker.snapshot(budgetStopReason);
   const versions = prePatchExecution.commands.find((command) => command.id === "tool-versions");
   const [containerNodeVersion = "unavailable", containerNpmVersion = "unavailable"] =
     versions?.stdout.split("\n") ?? [];
   const replacement =
     scenario === "successful-validation" ? SUCCESSFUL_REPLACEMENT : FAILED_REPLACEMENT;
+  const evidenceSpan = telemetry.startSpan("evidence.finalize", stageSpan, {
+    "delivery.run.id": run.id,
+    "delivery.issue.id": "TOY-101",
+    "delivery.stage": "implement",
+    "delivery.changed_file_count": changes.length,
+    "delivery.test.count": 2,
+    "delivery.validation.status": finalStatus,
+    "delivery.outcome": finalStatus,
+  });
+  telemetry.succeed(evidenceSpan, {
+    "delivery.budget.outcome": budget.outcome,
+    "delivery.tool.call_count": budget.dimensions.find((item) => item.dimension === "TOOL_CALLS")
+      ?.observed,
+    "delivery.repair.attempt_count": budget.dimensions.find(
+      (item) => item.dimension === "REPAIR_ATTEMPTS",
+    )?.observed,
+  });
+  if (finalStatus === "SUCCEEDED") {
+    telemetry.succeed(stageSpan, { "delivery.outcome": "SUCCEEDED" });
+    telemetry.succeed(runSpan, { "delivery.outcome": "SUCCEEDED" });
+  } else {
+    const errorType = budgetStopReason ? "BUDGET_STOP" : "VALIDATION_FAILED";
+    telemetry.fail(stageSpan, errorType);
+    telemetry.fail(runSpan, errorType);
+  }
+  const completedAt = new Date().toISOString();
+  const trace = await telemetry.artifact(
+    completedAt,
+    {
+      runId: run.id,
+      issueId: "TOY-101",
+      sourceCommit: provenance.sourceCommit,
+      sourceTreeDigest: provenance.sourceTreeDigest,
+      testedRepositoryTreeDigest: await treeDigest(repositoryAfter),
+      contextPackDigest: contextPack.packDigest,
+      agentCardHash: agentCard.contentHash,
+      approvalPolicyHash: approvalPolicy.contentHash,
+      budgetPolicyHash: executionBudget.contentHash,
+    },
+    runSpan.spanContext().traceId,
+  );
+  options.onTraceCreated?.(trace);
   const packWithoutDigest: Omit<SandboxEvidencePack, "evidenceDigest"> = {
-    schemaVersion: 2,
+    schemaVersion: 3,
     classification: "RECORDED_REAL_SANDBOX_EVIDENCE",
     disclosure:
       "Recorded evidence from an explicitly invoked developer command against repository-owned synthetic fixtures. The static public website does not execute code, accept patches, start sandboxes, or expose this runner as a service.",
@@ -468,7 +841,7 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
       id: run.id,
       scenario,
       createdAt: run.createdAt,
-      completedAt: new Date().toISOString(),
+      completedAt,
       sourceCommit: provenance.sourceCommit,
       sourceWorkingTree: provenance.sourceWorkingTree,
       sourceTreeDigest: provenance.sourceTreeDigest,
@@ -490,9 +863,11 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
     },
     governance: {
       stage: "implement",
-      agentCard: requiredRegistryReference("agent.implementation", "agent"),
-      patchTool: requiredRegistryReference("tool.repository.patch.controlled", "tool"),
-      validationTool: requiredRegistryReference("tool.sandbox.command", "tool"),
+      agentCard,
+      patchTool,
+      validationTool,
+      approvalPolicy,
+      executionBudget,
       approvedPaths: ["src/report.js"],
       contextPackDigest: contextPack.packDigest,
       contextPack,
@@ -530,14 +905,34 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
         ...providerCleanupAttempts,
       ],
     },
+    observability: {
+      trace: {
+        schemaVersion: 1,
+        format: "OTEL_COMPATIBLE_NORMALIZED_JSON",
+        traceId: trace.artifact.traceId,
+        artifact: traceArtifactName(run.id),
+        artifactSha256: trace.sha256,
+        spanCount: trace.artifact.spans.length,
+      },
+      budget,
+      accounting,
+      approval: {
+        requestId: `approval.${run.id}.checked-in-change-target`,
+        policyId: approvalPolicy.id,
+        outcome: "PREAPPROVED_SYNTHETIC_FIXTURE",
+        waitDurationMs: approvalWaitDurationMs,
+        measurement: "MEASURED",
+      },
+    },
   };
-  const pack = sandboxEvidenceV2Schema.parse({
+  const pack = sandboxEvidenceV3Schema.parse({
     ...packWithoutDigest,
     evidenceDigest: await createEvidenceDigest(packWithoutDigest),
   });
-  const validation = await validateEvidencePack(pack);
+  const validation = await validateEvidencePack(pack, trace.json);
   if (!validation.valid)
     throw new Error(`Generated evidence is invalid: ${validation.errors.join("; ")}`);
-  if (options.writeEvidence !== false) await writeEvidencePack(options.projectRoot, pack);
+  if (options.writeEvidence !== false)
+    await writeEvidencePack(options.projectRoot, pack, trace.json);
   return pack;
 }

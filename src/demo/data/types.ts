@@ -8,6 +8,7 @@ export type Route =
   | "validation"
   | "approvals"
   | "control-plane"
+  | "trace"
   | "architecture"
   | "settings";
 

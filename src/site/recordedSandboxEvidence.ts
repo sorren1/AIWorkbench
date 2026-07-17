@@ -7,8 +7,10 @@ export type RecordedSandboxEvidenceRender = {
   readonly html: string;
   readonly jsonName: string;
   readonly markdownName: string;
+  readonly traceName: string | null;
   readonly json: string;
   readonly markdown: string;
+  readonly trace: string | null;
 };
 
 function escapeHtml(value: string): string {
@@ -76,6 +78,14 @@ export async function renderRecordedSandboxEvidence(
       <div><dt>Execution boundary</dt><dd>${escapeHtml(boundaryLabel(pack))}</dd></div>
       <div><dt>Evidence digest</dt><dd><code>${escapeHtml(pack.evidenceDigest)}</code></dd></div>
       <div><dt>Context-pack digest</dt><dd><code>${escapeHtml(pack.governance.contextPackDigest)}</code></dd></div>
+      ${
+        pack.schemaVersion === 3
+          ? `<div><dt>Trace ID</dt><dd><code>${escapeHtml(pack.observability.trace.traceId)}</code></dd></div>
+      <div><dt>Trace artifact digest</dt><dd><code>${escapeHtml(pack.observability.trace.artifactSha256)}</code></dd></div>
+      <div><dt>Budget outcome</dt><dd>${escapeHtml(pack.observability.budget.outcome)} | ${pack.observability.budget.dimensions.find((item) => item.dimension === "TOOL_CALLS")?.observed ?? 0} tool calls | ${pack.observability.budget.dimensions.find((item) => item.dimension === "REPAIR_ATTEMPTS")?.observed ?? 0} repair attempt</dd></div>
+      <div><dt>Model accounting</dt><dd>${pack.observability.accounting.total.modelCalls} calls | $${pack.observability.accounting.total.costUsd} | ${escapeHtml(pack.observability.accounting.total.costMeasurement.toLowerCase().replaceAll("_", " "))}</dd></div>`
+          : ""
+      }
       <div><dt>Sandbox runtime</dt><dd><code>${escapeHtml(runtimeLabel(pack))}</code></dd></div>
     </dl>
     <div class="site-table-wrap" tabindex="0" role="region" aria-label="Recorded sandbox command results">
@@ -92,6 +102,12 @@ export async function renderRecordedSandboxEvidence(
     <div class="site-actions">
       <a class="site-secondary-action" href="./recorded-evidence/${escapeHtml(latest.index.latest.json)}">Open validated JSON evidence</a>
       <a class="site-text-action" href="./recorded-evidence/${escapeHtml(latest.index.latest.markdown)}">Open Markdown summary</a>
+      ${
+        pack.schemaVersion === 3
+          ? `<a class="site-text-action" href="./demo/?screen=trace">Inspect accessible Run Trace</a>
+      <a class="site-text-action" href="./recorded-evidence/${escapeHtml(pack.observability.trace.artifact)}">Open normalized trace JSON</a>`
+          : ""
+      }
       <a class="site-text-action" data-config-link="repository" data-source-path="docs/vertical-slice-walkthrough.md" hidden target="_blank">Run it locally from source</a>
     </div>
   </div>`;
@@ -99,7 +115,9 @@ export async function renderRecordedSandboxEvidence(
     html,
     jsonName: latest.index.latest.json,
     markdownName: latest.index.latest.markdown,
+    traceName: pack.schemaVersion === 3 ? pack.observability.trace.artifact : null,
     json: latest.json,
     markdown: latest.markdown,
+    trace: latest.traceJson,
   };
 }

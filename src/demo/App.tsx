@@ -21,6 +21,7 @@ import { ValidationScreen } from "./screens/ValidationScreen";
 import { ApprovalInboxScreen } from "./screens/ApprovalInboxScreen";
 import { ControlPlaneScreen } from "./screens/ControlPlaneScreen";
 import { WorkQueue } from "./screens/WorkQueueScreen";
+import { RunTraceScreen } from "./screens/RunTraceScreen";
 import { useApp } from "./state/store";
 import { clearPreferences } from "./state/preferences";
 import { clearBrowserAuthorizationState } from "./authorization/browserStore";
@@ -47,6 +48,8 @@ function Screen() {
       return <ApprovalInboxScreen />;
     case "control-plane":
       return <ControlPlaneScreen />;
+    case "trace":
+      return <RunTraceScreen />;
     case "architecture":
       return <ArchitectureScreen />;
     case "settings":

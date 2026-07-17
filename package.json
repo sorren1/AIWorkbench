@@ -18,6 +18,8 @@
     "registry:check": "tsx scripts/generate-registry.ts --check",
     "mcp:evidence:generate": "tsx scripts/generate-mcp-evidence.ts",
     "mcp:evidence:check": "tsx scripts/generate-mcp-evidence.ts --check",
+    "trace:generate": "tsx scripts/generate-recorded-trace.ts",
+    "trace:check": "tsx scripts/generate-recorded-trace.ts --check",
     "demo:sandbox": "tsx tools/local-sandbox/cli.ts run",
     "demo:sandbox:e2b": "tsx tools/local-sandbox/cli.ts run --provider e2b",
     "demo:sandbox:failure": "tsx tools/local-sandbox/cli.ts run --failed-validation",
@@ -30,10 +32,14 @@
     "test:e2b:live": "vitest run tests/e2b-sandbox.live.test.ts",
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/e2e/accessibility.spec.ts",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm run registry:check && npm run mcp:evidence:check && npm run sandbox:evidence:validate && npm run test && npm run build && npm run test:e2e"
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run registry:check && npm run mcp:evidence:check && npm run sandbox:evidence:validate && npm run trace:check && npm run test && npm run build && npm run test:e2e"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.29.0",
+    "@opentelemetry/api": "1.9.1",
+    "@opentelemetry/resources": "2.9.0",
+    "@opentelemetry/sdk-trace-base": "2.9.0",
+    "@opentelemetry/semantic-conventions": "1.43.0",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
     "e2b": "2.34.0",

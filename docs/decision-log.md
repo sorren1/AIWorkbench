@@ -338,3 +338,26 @@ Kill each sandbox in `finally`, verify inactivity, use a static kill fallback, a
 - No key was available in this revision; E2B is **implemented but not live-validated**, and no E2B evidence is checked in.
 - A future successful live run may add provider evidence only after network denial, bounded uploads, remote-tree equality, command results, and cleanup all verify.
 - E2B service, account, SDK, template, billing, and isolation remain external trust dependencies; this adapter is not a production-readiness claim.
+
+## ADR-014 — Bind local execution evidence to OpenTelemetry-compatible traces and explicit budgets
+
+- Status: Accepted
+- Date: 2026-07-17
+- Detailed records: [`docs/observability-and-budgeting.md`](observability-and-budgeting.md), [`docs/trace-data-handling.md`](trace-data-handling.md), [`docs/adr/open-telemetry-trace-contract.md`](adr/open-telemetry-trace-contract.md)
+
+### Context
+
+Command receipts proved individual checks but did not provide causal span hierarchy, approval wait, repair/tool counts, explicit threshold behavior, or one trace-to-evidence integrity binding. A hosted collector would add credentials, network calls, and operations beyond the static public project's needs.
+
+### Decision
+
+Instrument the real local controller with pinned official OpenTelemetry JavaScript packages and manual safe spans. Use a local in-memory exporter followed by versioned normalized JSON; do not configure a hosted backend or claim OTLP-wire compatibility. Evidence schema v3 binds the trace file hash and ID to source, tested tree, context pack, approved agent, approval policy, execution budget, and evidence digest.
+
+Add content-hashed `ExecutionBudget` v1 enforcement for run/stage duration, tool calls, repair attempts, and optional token/cost limits. Check exact counts before the next operation and measured time around operations. Warnings continue with events; stop actions emit failure evidence, clean up, and exit non-zero. Keep provider-returned usage and estimates distinct, and record exact zero for deterministic no-model runs.
+
+### Consequences
+
+- `/demo/?screen=trace` renders an accessible waterfall and table from checked-in validated evidence only.
+- Trace attributes exclude prompt/source/output/argument bodies, credentials, secrets, personal data, and raw exception details.
+- The trace cannot contain the final evidence digest without a circular hash; the evidence manifest is the authoritative trace-to-evidence binding.
+- This release proves local trace/evidence mechanics and budget enforcement, not hosted telemetry reliability, distributed budget settlement, or model-provider accounting.

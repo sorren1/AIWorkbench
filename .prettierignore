@@ -1,4 +1,5 @@
 dist/
+evidence/generated/
 node_modules/
 private/
 guidelines/

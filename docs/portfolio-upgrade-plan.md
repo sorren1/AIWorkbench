@@ -167,11 +167,11 @@ Every policy result records actor, persona, resource, action, decision, reason c
 ### 7. OpenTelemetry-compatible traces and local waterfall
 
 - Represent workflow, agent invocation, context retrieval, model inference, policy evaluation, approval wait, tool execution, and evidence generation as parent/child spans.
-- Export a pinned OTLP/HTTP JSON-compatible trace document and use applicable OpenTelemetry GenAI semantic conventions for agent, inference, retrieval, usage, and tool spans.
+- Create spans with pinned official OpenTelemetry JavaScript packages and export a versioned local normalized JSON artifact that preserves OpenTelemetry IDs, parentage, timing, status, attributes, and events. Do not claim OTLP wire-format or collector interoperability until tested.
 - Keep project-specific governance fields in a documented namespace and record the semantic-convention version used. Compatibility tests validate deterministic export fixtures.
 - Do not capture prompts, tool arguments, results, or context bodies by default; these may contain sensitive information. Store digests, sizes, classifications, and redacted summaries instead.
 - Render the same trace data as an accessible local waterfall with stage/tool/approval groupings, duration scale, status, measured/estimated badges, keyboard navigation, and a tabular alternative.
-- Label historical trace fixtures as simulated. Only time measured during an active local demo interaction is labeled measured.
+- Label checked-in sandbox traces as recorded synthetic/public evidence. Durations from the developer-invoked run are measured; browser-only workflow fixtures remain synthetic.
 
 ### 8. Budgets and honest measurement labels
 
@@ -330,7 +330,7 @@ Suggested commit: `feat: add the governed stage-agent registry`
 
 ### Phase 6 — Approval, context, runtime, budgets, and trace evidence
 
-Status: Scoped authorization and durable approval protocol complete in `feat: enforce scoped authorization and durable approvals`. Deterministic governed context packs are complete in `feat: add governed context packs and memory policies`; runtime gateway, budgets, and traces remain.
+Status: Scoped authorization, durable approval, deterministic governed context packs, real local execution budgets, and OpenTelemetry-compatible recorded traces are complete. A live model gateway remains deferred.
 
 Scope: make a governed run explainable end to end without introducing a live external integration.
 
@@ -340,8 +340,8 @@ Acceptance criteria:
 - The approval UI says that storage and identity are local/simulated and does not imply tamper resistance or shared enterprise durability.
 - Context-pack manifests record inclusions, exclusions, provenance, freshness, deterministic selection rules, measured-versus-estimated size labels, and a SHA-256 digest; browser and sandbox tampering/invalidation tests pass. Complete.
 - The provider-neutral gateway contract enforces agent/model/runtime/credential-reference scope locally while all provider execution remains simulated and no secret-entry UI or live endpoint exists.
-- Budget preflight and iteration enforcement cover tokens, estimated cost, iterations, tool calls, retries, and time; every displayed quantity carries its measurement basis.
-- Traces link workflow, policy, context, model, approval, tool, and evidence spans; deterministic fixtures export as pinned OTLP/HTTP JSON-compatible documents.
+- Budget preflight and iteration enforcement cover optional tokens/cost, tool calls, repair attempts, stage time, and run time; every displayed quantity carries its measurement basis. Complete for the real local vertical slice.
+- Traces link run, stage, agent, context, approval, tool, sandbox, validation, budget, and evidence operations. The deterministic no-model run truthfully emits no `model.call`. Complete as local normalized OpenTelemetry-compatible JSON; OTLP transport remains deferred.
 - The accessible waterfall and tabular fallback expose trace hierarchy, duration, status, and evidence links without capturing sensitive content by default.
 - Reducer/domain tests and end-to-end tests cover happy, denied, approval, expired, stale-context, exhausted-budget, reset, and evidence-export paths.
 

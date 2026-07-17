@@ -91,7 +91,9 @@ The provider records CPU and memory only from E2B sandbox information. It does n
 - E2B sandboxes carry project/run metadata. Cleanup kills the current instance, verifies that it is no longer running, and searches for tagged running or paused orphans. If the client process is terminated before `finally`, the two-minute `onTimeout: kill` lifecycle is the provider-side cost safeguard.
 - A timed-out Docker client triggers an explicit `docker rm --force`; final cleanup also removes any container carrying the run label.
 - Command stdout/stderr are bounded, normalized, and hashed. Output truncation prevents a run from passing.
-- JSON evidence is schema-validated and binds inputs, generated artifacts, context pack, registry references, repository trees, command receipts, tool versions, diff, cleanup result, and its own canonical SHA-256 digest.
+- JSON evidence schema v3 binds inputs, generated artifacts, context pack, registry/approval/budget references, repository trees, command receipts, tool versions, diff, cleanup result, a separate normalized OpenTelemetry-compatible trace artifact, and its own canonical SHA-256 digest.
+- Execution budgets are checked before the next tool/repair operation and around measured runtime boundaries. Stops emit a trace event, finalize failure evidence, clean up, and exit non-zero; failed evidence cannot replace the successful public pointer.
+- Trace capture is allow-listed metadata only. It excludes prompts, source/diff/output bodies, raw command input, credentials, environment values, personal data, and exception stacks/messages.
 - Markdown includes the JSON evidence digest. Immutable-style run filenames use exclusive creation; only a successful pack can update the small `index.json` pointer used by the site build.
 - A failed validation run still emits honest JSON and Markdown but exits non-zero and cannot replace the latest successful public snapshot.
 
@@ -106,6 +108,7 @@ This slice is intentionally narrower than a production untrusted-code sandbox.
 - Host-side path validation cannot eliminate every time-of-check/time-of-use race against a malicious local account with write access. The owned fixture, temporary directory permissions, exact replacement, post-write checks, and disposable scope reduce the risk for this local demonstration.
 - The host controller applies the patch because the validation container's repository mount is deliberately read-only. Production systems handling untrusted generated patches would need a more isolated patch-application worker and stronger filesystem primitives.
 - Captured output is synthetic/public in this fixture. A future runner for real repositories would require redaction, secret isolation, retention controls, and an explicit data-classification policy before evidence could be published.
+- Local trace files are hash-bound public fixtures, not an encrypted, access-controlled, tamper-resistant, or production-retention telemetry store.
 - The source commit and working-tree state are recorded separately because a generated evidence file cannot contain the hash of the commit that contains itself. A source-tree digest binds the exact inspected local content without pretending the tree was clean.
 
 ## Why the website has no live execution

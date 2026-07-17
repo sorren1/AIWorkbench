@@ -1,0 +1,379 @@
+{
+  "schemaVersion": 1,
+  "format": "OTEL_COMPATIBLE_NORMALIZED_JSON",
+  "classification": "RECORDED_SYNTHETIC_PUBLIC_TRACE_EVIDENCE",
+  "disclosure": "Recorded OpenTelemetry-compatible trace from a developer-invoked run over repository-owned synthetic fixtures. Attributes exclude prompts, source code, command input, credentials, secrets, and personal data.",
+  "generatedAt": "2026-07-17T09:04:46.906Z",
+  "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+  "resource": {
+    "serviceName": "ai-delivery-workbench.local-sandbox",
+    "serviceVersion": "1.0.0",
+    "telemetrySdk": {
+      "apiVersion": "1.9.1",
+      "sdkVersion": "2.9.0",
+      "semanticConventionsVersion": "1.43.0"
+    }
+  },
+  "bindings": {
+    "runId": "sandbox-20260717t090427-fc778e57",
+    "issueId": "TOY-101",
+    "sourceCommit": "f04ec39dbf906076307b2de2104d808388714873",
+    "sourceTreeDigest": "b09a9bd5e60471d2222ad13a9944394647c9e619b5226e486cf0b7624c0540d1",
+    "testedRepositoryTreeDigest": "03fdf54fb8de0e13baf450bbfccd611f778a05a0141fef6e1a0e0be8b4c72917",
+    "contextPackDigest": "0367e6472256c6fda784a3a45e56a8da3b498af94e0a6794f87c457d5519ba1c",
+    "agentCardHash": "803bb2ce8708aa25a4f1b61236a5a37a56cf4cb739b6c4243ae8fde0ef49491f",
+    "approvalPolicyHash": "13a8f43b51b4f036ba44d60a3f3239e6048dfe37565221048ee710c594c47bf4",
+    "budgetPolicyHash": "3b4fb2d516cab411ef1afc469a876ee1c7bc007124033be1248652b98c70003a"
+  },
+  "spans": [
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "e9e0a046f6756526",
+      "parentSpanId": null,
+      "name": "delivery.run",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:27.149Z",
+      "durationMs": 19757.173,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.agent.hash": "803bb2ce8708aa25a4f1b61236a5a37a56cf4cb739b6c4243ae8fde0ef49491f",
+        "delivery.agent.id": "agent.implementation",
+        "delivery.agent.version": "1.0.0",
+        "delivery.approval.policy.hash": "13a8f43b51b4f036ba44d60a3f3239e6048dfe37565221048ee710c594c47bf4",
+        "delivery.approval.policy.id": "policy.write.approved-targets",
+        "delivery.budget.policy.hash": "3b4fb2d516cab411ef1afc469a876ee1c7bc007124033be1248652b98c70003a",
+        "delivery.budget.policy.id": "budget.local-sandbox-bounded",
+        "delivery.budget.policy.version": "1.0.0",
+        "delivery.context.pack_digest": "0367e6472256c6fda784a3a45e56a8da3b498af94e0a6794f87c457d5519ba1c",
+        "delivery.issue.id": "TOY-101",
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.run.id": "sandbox-20260717t090427-fc778e57",
+        "delivery.sandbox.provider": "LOCAL_DOCKER",
+        "delivery.source.commit": "f04ec39dbf906076307b2de2104d808388714873",
+        "delivery.source.tree_digest": "b09a9bd5e60471d2222ad13a9944394647c9e619b5226e486cf0b7624c0540d1",
+        "delivery.stage": "implement"
+      },
+      "events": []
+    },
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "75f8c49bb4754a41",
+      "parentSpanId": "e9e0a046f6756526",
+      "name": "delivery.stage",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:27.149Z",
+      "durationMs": 19756.696,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.agent.hash": "803bb2ce8708aa25a4f1b61236a5a37a56cf4cb739b6c4243ae8fde0ef49491f",
+        "delivery.agent.id": "agent.implementation",
+        "delivery.agent.version": "1.0.0",
+        "delivery.context.pack_digest": "0367e6472256c6fda784a3a45e56a8da3b498af94e0a6794f87c457d5519ba1c",
+        "delivery.issue.id": "TOY-101",
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.run.id": "sandbox-20260717t090427-fc778e57",
+        "delivery.stage": "implement"
+      },
+      "events": [
+        {
+          "name": "budget.approaching",
+          "timestamp": "2026-07-17T09:04:34.647Z",
+          "attributes": {
+            "delivery.budget.action": "STOP_RUN",
+            "delivery.budget.dimension": "REPAIR_ATTEMPTS",
+            "delivery.budget.limit": 1,
+            "delivery.budget.observed": 1
+          }
+        }
+      ]
+    },
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "393d61f103675b1c",
+      "parentSpanId": "75f8c49bb4754a41",
+      "name": "agent.invoke",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:27.695Z",
+      "durationMs": 5.302,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.agent.hash": "803bb2ce8708aa25a4f1b61236a5a37a56cf4cb739b6c4243ae8fde0ef49491f",
+        "delivery.agent.id": "agent.implementation",
+        "delivery.agent.version": "1.0.0",
+        "delivery.artifact.count": 4,
+        "delivery.context.pack_digest": "0367e6472256c6fda784a3a45e56a8da3b498af94e0a6794f87c457d5519ba1c",
+        "delivery.issue.id": "TOY-101",
+        "delivery.model.accounting_basis": "EXACT_ZERO_NO_MODEL",
+        "delivery.model.call_count": 0,
+        "delivery.model.cost_usd": 0,
+        "delivery.model.input_tokens": 0,
+        "delivery.model.output_tokens": 0,
+        "delivery.model.policy.id": "model.policy.delivery-balanced",
+        "delivery.model.used": false,
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.run.id": "sandbox-20260717t090427-fc778e57",
+        "delivery.stage": "implement"
+      },
+      "events": []
+    },
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "96104558be26be56",
+      "parentSpanId": "75f8c49bb4754a41",
+      "name": "tool.call",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:27.704Z",
+      "durationMs": 6942.995,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.stage": "implement",
+        "delivery.tool.call_number": 1,
+        "delivery.tool.hash": "00a4522ef228a795c1626caf1ecb2717de2e93f666a36e81cbe77a7bd9ddc664",
+        "delivery.tool.id": "tool.sandbox.command",
+        "delivery.tool.version": "1.0.0"
+      },
+      "events": []
+    },
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "030f7e5679d26f89",
+      "parentSpanId": "96104558be26be56",
+      "name": "sandbox.execute",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:27.704Z",
+      "durationMs": 6942.869,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.sandbox.phase": "before-patch",
+        "delivery.sandbox.provider": "LOCAL_DOCKER",
+        "delivery.stage": "implement",
+        "delivery.validation.command_count": 2
+      },
+      "events": []
+    },
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "01f82af69fd891cf",
+      "parentSpanId": "030f7e5679d26f89",
+      "name": "validation.command",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:27.820Z",
+      "durationMs": 721,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.command.category": "tool-versions",
+        "delivery.duration_ms": 721,
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.sandbox.provider": "LOCAL_DOCKER",
+        "delivery.stage": "implement",
+        "delivery.validation.status": "PASSED"
+      },
+      "events": []
+    },
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "3fabcb43ee9bca9d",
+      "parentSpanId": "030f7e5679d26f89",
+      "name": "validation.command",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:28.541Z",
+      "durationMs": 6104,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.command.category": "pre-test",
+        "delivery.duration_ms": 6104,
+        "delivery.outcome": "EXPECTED_FAILURE",
+        "delivery.sandbox.provider": "LOCAL_DOCKER",
+        "delivery.stage": "implement",
+        "delivery.validation.status": "EXPECTED_FAILURE"
+      },
+      "events": []
+    },
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "d9cdf0113234420a",
+      "parentSpanId": "75f8c49bb4754a41",
+      "name": "approval.wait",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:34.647Z",
+      "durationMs": 0.025,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.approval.outcome": "PREAPPROVED_SYNTHETIC_FIXTURE",
+        "delivery.approval.policy.hash": "13a8f43b51b4f036ba44d60a3f3239e6048dfe37565221048ee710c594c47bf4",
+        "delivery.approval.policy.id": "policy.write.approved-targets",
+        "delivery.approval.request_id": "approval.sandbox-20260717t090427-fc778e57.checked-in-change-target",
+        "delivery.issue.id": "TOY-101",
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.run.id": "sandbox-20260717t090427-fc778e57",
+        "delivery.stage": "implement"
+      },
+      "events": []
+    },
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "6f4e8f0922b5f0ff",
+      "parentSpanId": "75f8c49bb4754a41",
+      "name": "tool.call",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:34.648Z",
+      "durationMs": 2.51,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.changed_file_count": 1,
+        "delivery.command.category": "controlled-patch",
+        "delivery.issue.id": "TOY-101",
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.repair.attempt": 1,
+        "delivery.run.id": "sandbox-20260717t090427-fc778e57",
+        "delivery.stage": "implement",
+        "delivery.tool.hash": "080618e56b066abdf555440943c063e12f5a3c34697a37786aabdb9920de5917",
+        "delivery.tool.id": "tool.repository.patch.controlled",
+        "delivery.tool.version": "1.0.0"
+      },
+      "events": []
+    },
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "6187bc58d378e520",
+      "parentSpanId": "75f8c49bb4754a41",
+      "name": "tool.call",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:34.681Z",
+      "durationMs": 12155.117,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.stage": "implement",
+        "delivery.tool.call_number": 3,
+        "delivery.tool.hash": "00a4522ef228a795c1626caf1ecb2717de2e93f666a36e81cbe77a7bd9ddc664",
+        "delivery.tool.id": "tool.sandbox.command",
+        "delivery.tool.version": "1.0.0"
+      },
+      "events": []
+    },
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "31e6fd06a4a61a8c",
+      "parentSpanId": "6187bc58d378e520",
+      "name": "sandbox.execute",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:34.681Z",
+      "durationMs": 12154.984,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.sandbox.phase": "after-patch",
+        "delivery.sandbox.provider": "LOCAL_DOCKER",
+        "delivery.stage": "implement",
+        "delivery.validation.command_count": 2
+      },
+      "events": []
+    },
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "b5d7e041769ba6cf",
+      "parentSpanId": "31e6fd06a4a61a8c",
+      "name": "validation.command",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:34.803Z",
+      "durationMs": 6036,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.command.category": "build",
+        "delivery.duration_ms": 6036,
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.sandbox.provider": "LOCAL_DOCKER",
+        "delivery.stage": "implement",
+        "delivery.validation.status": "PASSED"
+      },
+      "events": []
+    },
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "7674876a0085f600",
+      "parentSpanId": "31e6fd06a4a61a8c",
+      "name": "validation.command",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:40.840Z",
+      "durationMs": 5995,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.command.category": "test",
+        "delivery.duration_ms": 5995,
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.sandbox.provider": "LOCAL_DOCKER",
+        "delivery.stage": "implement",
+        "delivery.validation.status": "PASSED"
+      },
+      "events": []
+    },
+    {
+      "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
+      "spanId": "93dec7cabdbbaa5d",
+      "parentSpanId": "75f8c49bb4754a41",
+      "name": "evidence.finalize",
+      "kind": "INTERNAL",
+      "startedAt": "2026-07-17T09:04:46.905Z",
+      "durationMs": 0.075,
+      "status": "OK",
+      "statusDescription": null,
+      "attributes": {
+        "delivery.budget.outcome": "WARNING",
+        "delivery.changed_file_count": 1,
+        "delivery.issue.id": "TOY-101",
+        "delivery.outcome": "SUCCEEDED",
+        "delivery.repair.attempt_count": 1,
+        "delivery.run.id": "sandbox-20260717t090427-fc778e57",
+        "delivery.stage": "implement",
+        "delivery.test.count": 2,
+        "delivery.tool.call_count": 3,
+        "delivery.validation.status": "SUCCEEDED"
+      },
+      "events": []
+    }
+  ],
+  "summary": {
+    "totalDurationMs": 19757.173,
+    "spanCount": 14,
+    "failedSpanCount": 0,
+    "modelCallCount": 0,
+    "toolCallCount": 3,
+    "repairAttempts": 1,
+    "approvalWaitMs": 0.025,
+    "validationCommandCount": 4
+  },
+  "relatedArtifacts": [
+    {
+      "name": "spec.md",
+      "route": "artifacts"
+    },
+    {
+      "name": "plan.md",
+      "route": "artifacts"
+    },
+    {
+      "name": "change-targets.json",
+      "route": "artifacts"
+    },
+    {
+      "name": "context-pack.json",
+      "route": "artifacts"
+    }
+  ]
+}

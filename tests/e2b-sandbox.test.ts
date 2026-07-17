@@ -251,7 +251,7 @@ describe("optional E2B sandbox provider contract", () => {
     expect(factory.killedIds).toEqual(["e2b-orphan-1"]);
   });
 
-  it("normalizes fake E2B execution into schema v2 evidence", async () => {
+  it("normalizes fake E2B execution into trace-bound schema v3 evidence", async () => {
     const factory = new FakeE2BFactory();
     const provider = new E2BSandboxProvider(factory, "base", () => true);
     const pack = await runSandboxSlice({
@@ -260,7 +260,7 @@ describe("optional E2B sandbox provider contract", () => {
       writeEvidence: false,
       fixedRun: { id: "sandbox-e2b-evidence", createdAt: "2026-07-17T16:00:00.000Z" },
     });
-    expect(pack.schemaVersion).toBe(2);
+    expect(pack.schemaVersion).toBe(3);
     expect(pack.tools.provider).toBe("E2B");
     expect(pack.run.status).toBe("SUCCEEDED");
     expect(pack.prePatchExecution.provider).toBe("E2B");
