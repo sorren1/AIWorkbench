@@ -372,6 +372,8 @@ Implemented commits: `test: add release-grade quality gates`; `security: add sup
 
 ### Phase 8 — Portfolio polish and final release
 
+Status: Repository-curation and technical-documentation subphase complete. Publication, public-URL verification, hosted-workflow observation, and release tagging remain pending and require the separately authorized final release phase.
+
 Scope: final content/design QA followed by the only authorized publication step.
 
 Acceptance criteria:

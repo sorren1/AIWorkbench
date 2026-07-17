@@ -53,7 +53,7 @@ The resulting manifest records exact ID, version, and content-hash references. `
 
 ## Local MCP slice
 
-The optional repository-owned MCP server is under `tools/toy-repo-mcp/`. It uses the pinned official TypeScript MCP SDK over stdio. It can only receive a temporary copy of `fixtures/toy-repository/`, which carries an explicit synthetic marker. It makes no external network calls.
+The optional repository-owned MCP server is under `tools/toy-repo-mcp/`. It uses the pinned official TypeScript MCP SDK over stdio. It can only receive a temporary copy of `examples/toy-repo/`, which carries an explicit synthetic marker. It makes no external network calls.
 
 The protocol-discovered tools are:
 

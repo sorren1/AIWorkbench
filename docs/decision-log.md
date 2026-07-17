@@ -431,3 +431,63 @@ Pin GitHub dependency review and CodeQL actions by commit SHA. Treat CodeQL as c
 - All current high/critical thresholds apply to the complete inspected target, not only newly added findings.
 - Report hashes and source-tree digest provide integrity evidence but are not signed attestations or a SLSA claim.
 - Image signature/provenance verification and long-term immutable evidence retention remain release risks.
+
+## ADR-018 — Make the public clean-room boundary a contribution rule
+
+- Status: Accepted
+- Date: 2026-07-17
+- Detailed record: [`docs/adr/public-clean-room-scope.md`](adr/public-clean-room-scope.md)
+
+### Decision
+
+Require independent first-party source, schemas, fixtures, UI, copy, tests, and diagrams; record only public high-level influences; classify every claim; review generated output; keep private publication materials ignored; and use `original-prototype-v0.9.0` rather than active-branch backup exports for preservation.
+
+## ADR-019 — Use four logical planes with hash-bound handoffs
+
+- Status: Accepted
+- Date: 2026-07-17
+- Detailed record: [`docs/adr/four-plane-architecture.md`](adr/four-plane-architecture.md)
+
+### Decision
+
+Separate control, context, execution, and validation responsibilities through typed, versioned, hash-bound records. Keep them as logical module/contract boundaries in this repository rather than claiming separately deployed services.
+
+## ADR-020 — Bind and independently authorize risky human decisions
+
+- Status: Accepted
+- Date: 2026-07-17
+- Detailed record: [`docs/adr/human-approval-boundaries.md`](adr/human-approval-boundaries.md)
+
+### Decision
+
+Bind approval requests to canonical action, capability, policy, context, target, requester, expiry, and separation-of-duties requirements; fail closed and revalidate on resume. Keep browser/CLI journals explicitly local and non-production.
+
+## ADR-021 — Keep public delivery static and real execution local
+
+- Status: Accepted
+- Date: 2026-07-17
+- Detailed record: [`docs/adr/static-public-site-and-local-execution.md`](adr/static-public-site-and-local-execution.md)
+
+### Decision
+
+Expose no public runner. Permit the site to render only checked-in validated evidence, while an explicit fixture-only developer CLI performs the bounded real modification and validation path.
+
+## ADR-022 — Target a static Git-backed host with verified edge policy
+
+- Status: Accepted; provider selection deferred
+- Date: 2026-07-17
+- Detailed record: [`docs/adr/static-hosting-and-security-headers.md`](adr/static-hosting-and-security-headers.md)
+
+### Decision
+
+Retain the Vite multi-page static artifact, local-only assets, configuration-driven canonical links, default-off analytics, and restrictive generated headers. Do not claim deployment or edge enforcement until the final host is selected and observed.
+
+## ADR-023 — Grant no first-party reuse license without owner intent
+
+- Status: Accepted for this revision
+- Date: 2026-07-17
+- Detailed record: [`docs/adr/source-license-decision.md`](adr/source-license-decision.md)
+
+### Decision
+
+Do not silently select a permissive license. State that no reuse license has been granted, retain third-party upstream terms, and require an explicit owner decision plus documentation/security updates before changing the boundary.

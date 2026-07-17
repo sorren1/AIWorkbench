@@ -5,7 +5,7 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: [".security-reports/**", "dist/**", "node_modules/**", "private/**", "guidelines/**"],
+    ignores: [".security-reports/**", "dist/**", "node_modules/**", "private/**"],
   },
   eslint.configs.recommended,
   ...tseslint.configs.strictTypeChecked,

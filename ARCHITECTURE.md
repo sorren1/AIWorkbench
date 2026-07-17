@@ -1,61 +1,119 @@
 # AI Delivery Workbench architecture
 
-AI Delivery Workbench is a static portfolio case study plus a separate React demo. It demonstrates governance around an AI-assisted software-delivery workflow without requiring a backend, credentials, or live enterprise integrations.
+## Purpose and boundary
 
-## Delivery planes
+AI Delivery Workbench is a static public case study and a separate React demo for a governed coding-agent delivery workflow. It demonstrates how a controller can select versioned capabilities, assemble bounded context, require human decisions, enforce execution budgets, and bind validation to evidence. It is not a hosted agent or execution service.
 
-- **Control Plane** — workflow state, versioned stage agents and tools, lifecycle, policy decisions, human gates, budgets, and evidence references.
-- **Execution Plane** — simulated delivery-stage runs, one optional bounded local MCP process, and one explicit developer-invoked validation slice operating only on a disposable synthetic repository. Local Docker is the default; an optional E2B provider is available only by CLI flag and is implemented but not live-validated in this revision.
-- **Context Plane** — synthetic issue, artifact, and toy-repository inputs with explicit source and memory boundaries.
-- **Validation Plane** — changed-file inspection, acceptance evidence, local test evidence, OpenTelemetry-compatible run traces, explicit execution budgets, review decisions, and release gates.
-
-The browser application never contacts Jira, GitHub, an AI provider, a database, an MCP server, Docker, E2B, or localhost. Local MCP and sandbox processes are started only by explicit repository commands and are not part of ordinary static website browsing.
-
-## Versioned agent and tool registry
-
-The registry is the stage-resolution boundary between the Control Plane and Execution Plane.
+The browser never contacts Jira, GitHub, a model provider, a database, Docker, E2B, LiteLLM, an MCP server, or localhost. External behavior shown in the browser is synthetic. Real file modification and command execution happen only after a developer explicitly runs the fixed local CLI against `examples/toy-repo`.
 
 ```text
-authored typed fixtures
-  -> canonical declarative content
-  -> SHA-256 digest
-  -> JSON Schema validation
-  -> generated registry snapshot
-  -> approved stage manifest
-  -> tool invocation policy
-  -> evidence with exact version/hash references
+Static visitor
+  ├─ /                         semantic case study, no application JavaScript
+  ├─ /writing/...              semantic technical article
+  └─ /demo/                    lazy React workbench with synthetic local state
+
+Developer-only local boundary
+  ├─ registry/context generators
+  ├─ approval and model-gateway CLIs
+  └─ controlled sandbox runner ──> disposable toy-repository copy ──> evidence/trace
 ```
 
-Seven AgentCards map to Intake, Spec, Plan, Change Targets, Implement, Verify, and PR Review. Seed is a human-selected workflow input rather than an executable agent. Every card declares capabilities, skills, schema references, allowed tools and write paths, model/memory policies, approval policies, duration/tool/repair limits, optional estimated token/cost ceilings, source revision, timestamps, lifecycle, approval metadata, and a SHA-256 content hash.
+## Four-plane model
 
-Tool descriptors declare actual input/output JSON Schemas, side effects, scopes, stage allow-lists, timeouts, idempotency, network requirements, filesystem boundaries, approval policies, implementation references, lifecycle, and hashes. Model and memory records make runtime and context constraints independently versionable.
+The planes separate policy decisions from effects and make evidence ownership explicit. They are logical boundaries in one repository, not claims of independently deployed services.
 
-Approval policies are independently versioned and content-hashed. The generated snapshot includes tool/stage/risk/agent/path matchers, allow/notify/approval/deny modes, approver scopes/personas, expiry/cache rules, separation-of-duties controls, and provenance.
+| Plane                | Owns                                                                                                               | Receives                                                              | Emits                                                                         | Must not do                                                                                      |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------- | ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| **Control Plane**    | Stage state, versioned agent/tool registry, personas/scopes, policy evaluation, approvals, budgets, lifecycle      | Synthetic issue, requested transition, capability/policy versions     | Approved stage manifest, decision records, stale markers, budget action       | Execute arbitrary commands or treat discovery as authorization                                   |
+| **Context Plane**    | Versioned context records, deterministic selection, sensitivity/stage/persona rules, freshness, exclusions, digest | Issue/stage scope, approved agent and memory policy                   | Inspectable context pack plus digest                                          | Claim semantic retrieval, retain arbitrary prompt history, or include unauthorized/stale records |
+| **Execution Plane**  | Typed provider adapters, exact tool invocation, disposable workspace, bounded command execution                    | Approved manifest, context digest, checked-in fixture and targets     | Tool/command receipts, changed-file list, diff, file hashes                   | Broaden paths/commands, accept visitor input, or self-authorize                                  |
+| **Validation Plane** | Pre/post checks, diff review state, acceptance evidence, trace/evidence normalization, release guards              | Execution receipts, tested tree, approvals, policy/context references | Validation outcome, normalized trace, hash-bound evidence, readiness decision | Let the generator approve its own output or detach evidence from the tested tree                 |
 
-New execution is allowed only when all referenced records are schema-valid, hash-valid, and `APPROVED`. Changing declarative content or version returns the record to `DRAFT` and invalidates manifests with the old reference. `DEPRECATED` records remain inspectable for historical evidence but cannot be selected.
+See [ADR: four-plane architecture](docs/adr/four-plane-architecture.md).
 
-Public read-only cards live under `/capabilities/`. They are original workbench capability contracts. The project does not claim A2A compatibility.
+## Governed delivery workflow
 
-## Scoped authorization and durable approvals
+The interactive workflow is:
 
-The browser and local CLI import the same pure authorization evaluator. Effective scopes are the intersection of the initiating synthetic persona, delegated envelope, stage policy, approved agent card, approved tool descriptor, and resource/write boundaries. Deny takes precedence and no policy match fails closed.
+`Seed → Intake → Spec → Plan → Change Targets → Implement → Verify → PR Review`
 
-Risky actions produce a request bound to canonical argument, agent, tool, change-target, and context-pack hashes. Append-only hash-chained events are materialized into pending, approved, rejected, expired, or invalidated state. Browser state uses a disclosed versioned local store; CLI state uses `.workbench/runs/`. Resume revalidates every binding before the MCP host invokes a tool.
+Each stage has typed inputs and artifacts. Pure transition guards determine whether the next stage can begin. Redoing an upstream stage marks dependent outputs stale: redoing Plan invalidates Change Targets, Implement, Verify, and Review where those outputs exist. Failed Verify blocks pull-request and validation readiness. Validation approval requires reviewed diffs and all required checks; release readiness additionally requires complete validation evidence.
 
-## Local MCP adapter
+The reducer is the browser demo’s authority for local state. Deep links select a screen, synthetic issue, artifact, or subview, but invalid URL state is rejected and normalized rather than injected into the reducer.
 
-The local adapter uses `@modelcontextprotocol/sdk` 1.29.0 and stdio. The client spawns the server with an absolute path to a fresh temporary copy of `fixtures/toy-repository/`. The server checks the fixture marker, resolves real paths to prevent symlink/path traversal and `.git` access, limits readable formats and file size, restricts writes to `src/**`, exposes no arbitrary command, and makes no network call.
+## Registry, authorization, and approval
 
-Tool discovery is protocol-driven. The host validates discovered schemas but never treats discovery metadata as authorization. Before invocation it resolves an approved stage manifest, matches the discovered tool to an approved local descriptor, validates arguments and paths, evaluates scoped policy, and revalidates any required bound approval. The server then enforces its own narrower execution boundary. Either layer can deny; discovery cannot widen authority.
+Seven versioned `AgentCard` records cover Intake through PR Review; Seed remains a human-selected input. Each card references versioned tools, model policy, memory policy, budgets, lifecycle, provenance, and a content hash. A capability is eligible only when its schema and hash validate and its lifecycle is `APPROVED`.
 
-The static website reads only sanitized generated snapshots. It never opens stdio, starts a process, or connects to localhost. This is evidence for one local adapter boundary, not a remotely deployed MCP platform.
+Authorization is an intersection, not a union:
 
-## Static delivery boundary
+```text
+persona scopes
+  ∩ delegation envelope
+  ∩ stage policy
+  ∩ agent-card grants
+  ∩ tool descriptor scopes and resource boundaries
+  = effective authority
+```
 
-Vite builds the root case study, technical article, demo entry, and 404 page as static assets. Root case-study content remains authored HTML and readable without React. React loads only for `/demo/`. Public capability JSON and MCP evidence are generated before commit and checked for drift during `npm run check`.
+Explicit deny wins. Missing policy fails closed. Risky calls create a request bound to canonical arguments, agent/tool versions and hashes, change-target digest, context-pack digest, requester, expiry, and separation-of-duties policy. Approval never mutates the tool descriptor or expands the request. Resume revalidates every binding before a single-use decision can be consumed.
 
-The local Docker slice applies one deterministic host-side patch to an exact allow-listed path in a temporary copy, then runs fixed build/test commands in fresh network-disabled, non-root, read-only containers with CPU, memory, process, and timeout limits. It records hashes, diff, output, durations, tool/image versions, cleanup, registry/context references, and final status. OpenTelemetry JavaScript spans capture the run/stage/agent/tool/approval/sandbox/validation/evidence hierarchy into a local normalized JSON trace. Evidence schema v3 binds that trace to source, tested-tree, context, agent, approval-policy, budget-policy, and evidence hashes. Vite validates and renders only the latest checked-in successful evidence; it cannot invoke the runner. See `docs/sandbox-security-model.md` and `docs/observability-and-budgeting.md`.
+The browser journal is versioned local storage and is labeled synthetic/local. The CLI journal is gitignored under `.workbench/runs/`. Neither is production identity, append-only shared storage, or tamper-resistant audit evidence. See [ADR: human approval boundaries](docs/adr/human-approval-boundaries.md).
 
-The same typed provider contract has an explicit `--provider e2b` implementation using the pinned official E2B SDK. It uploads only the synthetic repository snapshot and approved artifacts, requests deny-all egress, requires a blocked outbound probe, records provider-specific metadata in evidence schema v3, and uses `finally` cleanup plus a two-minute provider lifecycle. Because no `E2B_API_KEY` was available for this revision, it is implemented but not live-validated and contributes no checked-in run evidence.
+## Context packs
 
-See `docs/agent-and-tool-registry.md`, `docs/authorization-and-separation-of-duties.md`, `docs/human-approval-protocol.md`, and `docs/threat-model.md` for contract, lifecycle, transport, threat, and claim details.
+The Context Plane uses deterministic selection over checked-in public/synthetic records. Selection considers record state, sensitivity, allowed stage/persona/agent, tags, scope, freshness/TTL, priority, recency, episodic-memory permission, and token/character budget. Included and excluded candidates both retain a reason. Stable ordering and canonical serialization produce a SHA-256 pack digest.
+
+Artifacts, approvals, stage manifests, traces, and sandbox evidence bind to that digest. A selected-record or memory-policy change produces a different pack and marks dependent stage output stale. Resume/replay rejects a mismatch unless the caller creates a new run. Semantic/vector retrieval is only a future adapter; the current repository makes no semantic-retrieval claim.
+
+## Local execution and evidence
+
+`npm run demo:sandbox` performs a fixed failing-before/passing-after flow:
+
+1. create a temporary workspace and copy the original synthetic toy repository;
+2. validate the synthetic issue, approved targets, registry references, context pack, and budget;
+3. inspect Git state and prove the pre-patch test fails for the intended reason;
+4. apply one repository-owned replacement to `src/report.js` after traversal, real-path, symlink, and allow-list checks;
+5. reject unexpected changes;
+6. run fixed build/test commands in fresh network-disabled, non-root, read-only Docker containers with CPU, memory, PID, output, and timeout limits;
+7. normalize file hashes, diff, command results, tool/image versions, budget/accounting, trace, cleanup, and final status into JSON and Markdown evidence.
+
+Cleanup runs in `finally`. The provider contract also has an explicit E2B implementation, but no credential was available for this revision, so it is implemented but not live-validated and contributes no checked-in cloud-run evidence.
+
+Evidence schema v3 binds the source commit/tree, tested tree, changed files, context, approved agent/tool/policy, execution budget, trace ID/hash, command receipts, and evidence digest. Hashes detect modification but are not signatures, attestations, or trusted timestamps. The checked-in public snapshot is a recording; Vite validates and renders it but cannot invoke the runner. See [ADR: static site and local execution](docs/adr/static-public-site-and-local-execution.md).
+
+## Tracing, budgets, and models
+
+The local controller emits nested OpenTelemetry spans for run, stage, agent, tool, approval, sandbox, validation, and evidence operations. Allow-listed attributes include safe identifiers, policy versions/hashes, context digest, attempt counts, duration, and outcome; prompts, code, arguments, credentials, source content, and raw exception bodies are excluded.
+
+Execution budgets cover wall-clock and stage duration, tool calls, repair attempts, and optional token/cost ceilings with `WARN`, `STOP_STAGE`, or `STOP_RUN` actions. The deterministic sandbox invokes no model, so its exact model usage and cost are zero. Estimated and provider-returned accounting are distinct types.
+
+The default `ModelGateway` is deterministic and offline. An optional loopback LiteLLM profile can vend and revoke a model-limited, budget-limited per-agent/run key. It is never available to browser code. No live provider credential was available in this revision; configured fallback or independent-review policies are not described as exercised without corresponding model spans.
+
+## Static delivery
+
+Vite creates a multi-page static build: root case-study HTML and the article retain their substantive content without JavaScript; React is bundled only for `/demo/`. Build-time generation injects optional configured links and metadata, synchronized code excerpts, the latest validated evidence, `robots.txt`, `sitemap.xml`, and static-host header manifests. Assets are local and the CSP does not require `unsafe-eval` or external runtime origins.
+
+The current deployment decision is host-neutral and Git-backed. Canonical metadata and public links remain absent until `src/site/config.ts` contains real public values. Publication and release tagging are explicitly outside ordinary implementation phases. See [ADR: static hosting](docs/adr/static-hosting-and-security-headers.md).
+
+## Deliberate non-goals and tradeoffs
+
+- No full AWS account, Cognito, ECS, RDS, VPC, or PrivateLink deployment.
+- No anonymous agent endpoint or arbitrary repository/patch/command input.
+- No general multi-tenant marketplace or full A2A service network.
+- No decorative fleet analytics unrelated to the coding-delivery path.
+- No claim that browser-local approvals or containers alone satisfy enterprise isolation.
+- No backend merely to make the portfolio demo look more production-like.
+
+The static split minimizes public attack surface and runtime weight, but it means public evidence is recorded rather than live. Deterministic fixtures improve reproducibility, but they do not estimate real-world agent quality. Logical planes make ownership inspectable without paying the operational complexity of separate services in a portfolio prototype.
+
+## Detailed records
+
+- [Decision log](docs/decision-log.md)
+- [Agent and tool registry](docs/agent-and-tool-registry.md)
+- [Authorization and separation of duties](docs/authorization-and-separation-of-duties.md)
+- [Context and memory governance](docs/context-pack-and-memory-governance.md)
+- [Sandbox security model](docs/sandbox-security-model.md)
+- [Observability and budgeting](docs/observability-and-budgeting.md)
+- [Model gateway and routing](docs/model-gateway-and-routing.md)
+- [Threat model](THREAT_MODEL.md)

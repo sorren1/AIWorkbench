@@ -1,6 +1,6 @@
 # Evaluation framework
 
-This document defines measurements that can be derived from governed execution evidence. Current checked-in values describe one repository-owned synthetic toy run; they are not production benchmarks, adoption metrics, or professional outcomes.
+This document defines trace-derived measurements for governed execution evidence. The authoritative repository-versus-proposed-production signal inventory is [EVALUATION.md](../EVALUATION.md). Current checked-in values describe one repository-owned synthetic toy run; they are not production benchmarks, adoption metrics, or professional outcomes.
 
 | Measure            | Definition                                                               | Basis                             | Current evidence source            | Interpretation guardrail                                                                        |
 | ------------------ | ------------------------------------------------------------------------ | --------------------------------- | ---------------------------------- | ----------------------------------------------------------------------------------------------- |

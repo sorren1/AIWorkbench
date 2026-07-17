@@ -2,163 +2,124 @@
 
 > A governed, human-in-the-loop control plane for AI-assisted software delivery.
 
-AI Delivery Workbench is an independent engineering portfolio project about the controls around coding agents: authorization, context selection, tool boundaries, human approval, workflow state, budgets, traceability, and evidence. The repository pairs a statically rendered case study with a separate interactive React demo.
+AI Delivery Workbench shows how coding-agent output can remain subordinate to explicit context, authorization, approval, validation, budget, and evidence controls.
 
-[Open the case study](./index.html) · [Read the technical article](writing/governing-ai-assisted-delivery/index.html) · [Read the interactive demo guide](docs/demo-guide.md) · [Review the architecture decisions](docs/decision-log.md)
+- **Live demo:** not published yet; run the static site locally.
+- **Source:** [github.com/sorren1/AIWorkbench](https://github.com/sorren1/AIWorkbench)
+- **Local routes:** case study at `/`, technical article at `/writing/governing-ai-assisted-delivery/`, and interactive prototype at `/demo/`.
 
-## What this project demonstrates
+![AI Delivery Workbench showing the synthetic work queue and governed delivery stages](public/assets/screenshots/workbench-overview.png)
 
-The workbench models an eight-stage delivery chain:
+The repository is an independent portfolio prototype: a statically rendered case study, a strict-TypeScript React workbench, and an explicitly invoked local sandbox that records one narrow real validation run against repository-owned synthetic code. The public website has no backend, credentials, live integrations, or code-execution endpoint.
 
-`Seed → Intake → Spec → Plan → Change Targets → Implement → Verify → PR Review`
+## What is functional and what is simulated
 
-Each stage produces or consumes explicit artifacts. Downstream state becomes stale when an upstream stage changes. Risky transitions remain gated by a human decision, and validation evidence stays associated with the selected issue and pull-request fixture.
+| Functional in this repository                                                                                                                                                                                                                                                                                                                                                                                                                                | Simulated or recorded-only in the public browser                                                                                                                                                                                                                                                                                                     |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Static case study and article; React demo navigation; deterministic scenarios and reset; deep links; reducer-backed stage transitions and stale-state propagation; artifact copy/download/export; keyboard-accessible guided tour; browser-local synthetic approval journal; versioned registry, policy, context-pack, budget, and trace contracts; checked-in evidence validation; developer-invoked Docker sandbox; deterministic offline gateway adapter. | Jira and GitHub reads/writes; LLM generation; database access; enterprise MCP operations; deployment; hosted validation; production identity; shared approvals; provider billing; the recorded sandbox and trace viewer. E2B and LiteLLM adapters are implemented but were not live-validated in this revision because credentials were unavailable. |
 
-The focused control-plane direction extends that workflow with typed domain seams for versioned stage agents and tools, capability cards, lifecycle approval, persona-scoped policy, context-pack provenance, runtime and budget policy, trace spans, approval events, and evidence envelopes. It deliberately remains a coding-agent delivery case study rather than a general agent marketplace.
+Every persona, issue, repository, branch, pull request, check, log, duration, UI metric, and external response displayed as demo data is synthetic. The local sandbox evidence is separately labeled as a measured repository run.
 
-## Evidence and claim categories
-
-Every visible value belongs to one category:
-
-- **Functional in this repository:** navigation and shareable deep links, filters, versioned theme and authorization preferences, deterministic scenario loading and reset, the guided tour, reducer-backed workflow transitions, stale-state propagation, scoped synthetic persona decisions, a durable browser-local approval inbox, hash-bound CLI pause/resume, artifact copy/download, architecture and validation-evidence exports, schema-validated/hash-versioned registry selection, generated capability cards, the bounded local toy-repository MCP slice, the explicit local Docker validation slice, OpenTelemetry-compatible local trace export, execution-budget enforcement, evidence verification, the deterministic offline model-gateway contract, and the static production build. The optional E2B and LiteLLM live-provider paths are implemented but were not live-validated in this revision because no credential was available.
-- **Synthetic demo fixture:** every persona, issue, repository, branch, pull request, check, log, duration, test result, metric, external integration result, and provider response shown in the workbench.
-- **Professional context:** the single statement in the separate section below. It is not evidence about the public prototype.
-
-External Jira, GitHub, AI/model, database, enterprise MCP, deployment, anonymous hosted test-execution, and review operations are simulated in the public browser. The repository-owned MCP fixture, sandbox validation slice, and offline gateway contract are functional only when explicitly run with local developer commands. The browser never connects to Docker, E2B, LiteLLM, or a model provider.
-
-## Architecture
+## Architecture at a glance
 
 The design separates four responsibilities:
 
-1. **Control plane** — workflow state, authorization policy, registry lifecycle, approvals, budgets, and audit references.
-2. **Execution plane** — isolated workspaces, stage runtimes, model adapters, and bounded tool calls.
-3. **Context plane** — issue, repository, documentation, schema, and prior-decision context packs with provenance.
-4. **Validation plane** — acceptance coverage, review decisions, evidence, and release gates.
+- **Control Plane** — versioned agents/tools, workflow state, scoped authorization, approvals, budgets, and lifecycle policy.
+- **Execution Plane** — bounded tool adapters and an optional local sandbox provider operating only on a disposable toy repository.
+- **Context Plane** — deterministic context records and packs with provenance, exclusions, freshness, policy versions, and digests.
+- **Validation Plane** — changed-file checks, command results, review gates, trace/evidence binding, and release-readiness decisions.
 
-Jira, GitHub, Angular, .NET, and Oracle form one illustrative adapter set behind vendor-neutral issue, repository, UI, service, and database boundaries. They preserve technical specificity without representing a required or organization-specific environment.
+Normal branch, pull-request, and human-review controls remain authoritative. A stage cannot grant itself new tools, broaden its selected context, approve its own risky operation, or declare release readiness without the required evidence.
+
+Read [ARCHITECTURE.md](ARCHITECTURE.md) for the full system model and [docs/decision-log.md](docs/decision-log.md) for the decision history.
 
 ## Run locally
 
-Use Node.js 22 LTS; `.nvmrc` records the verified version.
+Prerequisites are Node.js 22 LTS and npm. Docker is required only for generating sandbox and supply-chain evidence.
 
 ```bash
 npm ci
 npm run dev
 ```
 
-Open the URL printed by Vite. The static case study is at `/`; the interactive portfolio prototype is at `/demo/`.
-Append `?walkthrough=1` to `/demo/` to open the accessible 5–8 minute guided walkthrough.
+Vite prints the local URL. Open `/` for the case study or `/demo/` for the interactive prototype. Add `?walkthrough=1` to start the accessible 5–8 minute tour.
 
-Create and inspect the production build with:
+Build and inspect the production output:
 
 ```bash
 npm run build
 npm run preview
 ```
 
-Run the complete local release gate with:
+Run the normal source gate or the complete browser/performance release gate:
 
 ```bash
-npx playwright install chromium firefox webkit
+npm run check
 npm run check:all
 ```
 
-`npm run check:all` includes strict type checking, linting, formatting, coverage, evidence validation, the production build, internal-link and credential checks, reproducible secret/SAST/dependency/container/license/SBOM evidence, Chromium/Firefox/WebKit tests, axe, controlled screenshots, bundle budgets, and desktop/mobile Lighthouse assertions. See [the quality system](docs/quality-system.md), [release security evidence](docs/release-evidence.md), [performance and static hosting](docs/performance-and-static-hosting.md), and [docs/contributor-commands.md](docs/contributor-commands.md).
-
-Generate the detailed gitignored security reports, or refresh the sanitized public summary after a successful run, with:
+Install browser engines once before the complete gate:
 
 ```bash
-npm run security:supply-chain
-npm run security:supply-chain:record
+npx playwright install chromium firefox webkit
 ```
 
-The command requires Docker and reachable scanner/advisory sources. It fails rather than claiming success when those dependencies are unavailable. Security reporting and assurance boundaries are documented in [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-Regenerate the versioned capability cards and sanitized local MCP evidence with:
+Generate the representative public screenshot from the built application:
 
 ```bash
-npm run registry:generate
-npm run mcp:evidence:generate
+npm run screenshots:generate
 ```
 
-The corresponding `registry:check` and `mcp:evidence:check` commands fail when committed generated evidence is stale. See [docs/agent-and-tool-registry.md](docs/agent-and-tool-registry.md) for the trust boundary and public JSON paths.
-
-Run the fixed failing-before/passing-after Docker validation slice and validate its evidence with:
+Run the fixed failing-before/passing-after Docker slice and validate its evidence:
 
 ```bash
 npm run demo:sandbox
 npm run sandbox:evidence:validate
 ```
 
-The command accepts no repository, patch, command, or visitor input. It operates only on `examples/toy-repo`, runs fixed checks in network-disabled constrained containers, cleans the temporary workspace, and emits synthetic/public JSON, Markdown, and normalized trace evidence. The trace uses real OpenTelemetry spans, explicit run/stage/tool/repair/time budgets, and exact-zero model accounting for this deterministic no-LLM path. See the [vertical-slice walkthrough](docs/vertical-slice-walkthrough.md), [sandbox security model](docs/sandbox-security-model.md), and [observability guide](docs/observability-and-budgeting.md).
+The CLI accepts no visitor repository, patch, or command input. It copies `examples/toy-repo`, applies one checked-in patch to an approved path, runs fixed commands in constrained network-disabled containers, cleans up, and writes hash-bound JSON, Markdown, and trace evidence.
 
-An optional E2B implementation uses the official pinned SDK and the documented `E2B_API_KEY`, but only when explicitly selected:
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/contributor-commands.md](docs/contributor-commands.md) for the command matrix, optional provider profiles, and focused test commands.
 
-```powershell
-npm run demo:sandbox -- --provider e2b
-npm run test:e2b:live
-```
+## Tests and release gates
 
-No key was available for this revision, so E2B is **implemented but not live-validated** and no E2B evidence is checked in. `.env.example` contains the key name only. Docker remains the default and requires no E2B account.
+`npm run check:all` covers formatting, lint, strict type checking, registry/context/evidence drift, unit and component coverage, production build, static and documentation links, bundle budgets, credential-pattern checks, supply-chain evidence, Chromium/Firefox/WebKit end-to-end tests, axe checks, controlled visual captures, and desktop/mobile Lighthouse assertions.
 
-Exercise the provider-neutral gateway contract without a provider:
+The supply-chain gate adds redacted tracked-file/history secret scanning, TypeScript/JavaScript analysis, dependency and container vulnerability scans, three CycloneDX SBOMs, license policy, suppression validation, and sanitized source-linked evidence. Missing Docker, scanners, advisory data, or history fails the gate rather than becoming a pass. CodeQL is configured for hosted CI but remains labeled unvalidated until a successful hosted run is observed.
 
-```powershell
-npm run demo:model-gateway -- --run-id offline-verification
-```
+Read [EVALUATION.md](EVALUATION.md), [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md), and [docs/release-evidence.md](docs/release-evidence.md) for claim definitions and assurance limits.
 
-The default adapter is deterministic and offline. An optional digest-pinned LiteLLM/PostgreSQL profile can vend a per-agent/per-run virtual key, enforce allowed aliases and spend, trace explicit fallbacks, and block the key before evidence finalization. It requires an explicit local profile and environment credentials; the browser has no gateway client. No credential was available for this revision, so the truthful status is `gateway implemented; live provider path not validated`. See the [gateway architecture](docs/model-gateway-and-routing.md), [local runbook](docs/local-model-gateway-runbook.md), and [ADR](docs/adr/local-model-gateway.md).
+## Repository map
 
-Exercise the separate durable local approval protocol with:
+| Path                                          | Purpose                                                                         |
+| --------------------------------------------- | ------------------------------------------------------------------------------- |
+| `index.html`, `writing/`, `404.html`          | Static public case study, article, and not-found page                           |
+| `demo/index.html`, `src/demo/`                | Interactive React workbench, screens, state, data, and control-plane contracts  |
+| `src/case-study/`, `src/site/`                | Shared public styling plus typed metadata/link configuration                    |
+| `src/styles/tokens/`, `src/shared/`           | Authored semantic tokens and local SVG icon system                              |
+| `examples/toy-repo/`                          | Disposable original synthetic code and tests for the controlled patch slice     |
+| `tools/local-sandbox/`                        | Sandbox contract, Docker/E2B adapters, controls, tracing, budgets, and evidence |
+| `tools/model-gateway/`, `ops/model-gateway/`  | Offline/live gateway contracts and optional local LiteLLM profile               |
+| `public/capabilities/`, `evidence/generated/` | Generated, validated public registry/context and latest recorded run evidence   |
+| `tests/`, `quality/`, `scripts/`              | Unit/browser tests, measured baselines, and deterministic generators/checkers   |
+| `docs/`, `docs/adr/`                          | Architecture details, runbooks, audits, release evidence, and decisions         |
 
-```bash
-npm run demo:approval:start -- --scenario approval-required
-npm run demo:approve -- --request <request-id> --as synthetic-code-reviewer --reason "Reviewed bounded synthetic diff"
-npm run demo:resume -- --run <run-id>
-```
+## Limitations and production boundaries
 
-Runs stay under gitignored `.workbench/runs/`. This is a synthetic local authorization demonstration, not production OAuth/OIDC identity or shared audit storage. See [authorization and separation of duties](docs/authorization-and-separation-of-duties.md), [human approval protocol](docs/human-approval-protocol.md), and the [threat model](docs/threat-model.md).
+This repository is not a multi-tenant agent platform, anonymous execution service, production identity system, durable shared approval service, hosted telemetry backend, high-availability model gateway, or proof of safe untrusted-code execution. Browser-local state is inspectable and resettable but not tamper-resistant. Hashes detect evidence changes; they are not signatures or trusted timestamps. Docker isolation still trusts the host kernel and daemon. Optional cloud/model adapters need owner-supplied credentials and separate live validation.
 
-## Project structure
-
-```text
-index.html                         statically rendered public case study
-404.html                           static-host-compatible not-found page
-demo/index.html                    interactive React demo entry
-writing/                           statically rendered technical article
-src/case-study/                    case-study presentation
-src/site/config.ts                 typed public identity, link, canonical, and analytics configuration
-src/site/metadata.ts               metadata, structured-data, robots, and sitemap generation
-src/site/vitePlugin.ts             build-time link and synchronized-excerpt generation
-src/demo/components/               workbench shell and UI primitives
-src/demo/screens/                  delivery workflow screens
-src/demo/state/                    typed reducer and local actions
-src/demo/data/                     deterministic synthetic fixtures and content
-src/demo/control-plane/            typed control-plane domain seams
-examples/toy-repo/                  disposable synthetic repository, issue, targets, and tests
-tools/local-sandbox/                providers, controls, budgets, tracing, runner, and evidence
-tools/model-gateway/                offline/live gateway contracts, routing, credentials, traces, and evidence
-ops/model-gateway/                  digest-pinned optional LiteLLM/PostgreSQL local profile
-tools/toy-repo-mcp/                 optional local stdio MCP server and trusted client
-evidence/generated/                 validated recorded local-run JSON, Markdown, and traces
-public/capabilities/                generated capability cards, schemas, and MCP evidence
-src/shared/                        local SVG icon system
-src/styles/tokens/                 shared semantic design tokens
-public/assets/                     local logo assets
-tests/                             unit, axe, keyboard, and responsive browser tests
-docs/                              audits, provenance, decisions, and upgrade plan
-```
-
-The project uses React 18, strict TypeScript, and a static Vite multi-page build. The case study, article, and 404 page contain their substantive content without a client JavaScript bundle; React loads only on `/demo/`. Build-time generation injects configuration-driven public links, metadata, structured data, synchronized source excerpts, `robots.txt`, and `sitemap.xml`. A canonical URL, author, résumé, and contact link are intentionally omitted until public values are set in `src/site/config.ts`. The project has no browser-side Babel, development CDN, runtime font request, backend, analytics, or credential input.
+Productionization would require authenticated workload and human identity, server-side authorization, managed secrets, isolated workers, durable transactional state, signed/immutable evidence, controlled egress, incident response, rollback, quotas, retention policy, and operational ownership.
 
 ## Clean-room disclosure
 
 Independent portfolio prototype. All code, copy, fixtures, workflows, and visuals in this project were created from scratch using synthetic data. No employer or client code, prompts, schemas, screenshots, repositories, internal documentation, or confidential information were used. External Jira, GitHub, AI, database, and enterprise MCP-style operations are simulated; the interactive UI, local workflow state machine, and bounded toy-repository MCP fixture are functional. The public browser never connects to the local MCP process.
 
-The detailed boundary and independent-development principles are documented in [docs/clean-room-and-provenance.md](docs/clean-room-and-provenance.md). Public references are recorded separately in [docs/design-influences.md](docs/design-influences.md).
+The detailed boundary is in [CLEAN_ROOM.md](CLEAN_ROOM.md), with public influences recorded in [docs/design-influences.md](docs/design-influences.md).
 
 ## Professional context
 
 In professional work, I built a related governed AI-assisted delivery platform that supported approximately 50 production stories through human-reviewed pull requests. This public prototype is a separate implementation and contains none of that system’s code or data.
 
-The professional statement above is intentionally separate from the prototype’s functional and synthetic evidence. It is the only professional outcome claim made by this project.
+## License and releases
+
+No reuse license has been granted for the first-party project code in this revision. Third-party components retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the [license decision ADR](docs/adr/source-license-decision.md). See [CHANGELOG.md](CHANGELOG.md) and the [1.0.0 release notes](docs/releases/1.0.0.md) for release status and known limitations.

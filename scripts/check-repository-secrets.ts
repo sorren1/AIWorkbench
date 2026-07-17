@@ -1,15 +1,19 @@
 import { execFile } from "node:child_process";
-import { readFile } from "node:fs/promises";
+import { readFile, stat } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const root = resolve(import.meta.dirname, "..");
-const { stdout } = await execFileAsync("git", ["ls-files", "-z"], {
-  cwd: root,
-  encoding: "buffer",
-  maxBuffer: 10 * 1024 * 1024,
-});
+const { stdout } = await execFileAsync(
+  "git",
+  ["ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+  {
+    cwd: root,
+    encoding: "buffer",
+    maxBuffer: 10 * 1024 * 1024,
+  },
+);
 const tracked = stdout.toString("utf8").split("\0").filter(Boolean).sort();
 
 const allowedEnvironmentTemplates = new Set([".env.example"]);
@@ -34,7 +38,15 @@ const rules: readonly { readonly name: string; readonly pattern: RegExp }[] = [
 ];
 
 const findings: string[] = [];
+let scannedFileCount = 0;
 for (const relative of tracked) {
+  const absolute = resolve(root, relative);
+  const metadata = await stat(absolute).catch((error: unknown) => {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw error;
+  });
+  if (!metadata?.isFile()) continue;
+  scannedFileCount += 1;
   const normalized = relative.replaceAll("\\", "/");
   const name = normalized.split("/").at(-1) ?? normalized;
   if (/^\.env(?:\..+)?$/i.test(name) && !allowedEnvironmentTemplates.has(name)) {
@@ -45,7 +57,7 @@ for (const relative of tracked) {
     findings.push(`${normalized}: credential-bearing file extension`);
     continue;
   }
-  const contents = await readFile(resolve(root, relative));
+  const contents = await readFile(absolute);
   if (contents.includes(0)) continue;
   const text = contents.toString("utf8");
   for (const rule of rules) {
@@ -59,5 +71,5 @@ if (findings.length > 0) {
   );
 }
 process.stdout.write(
-  `Repository credential policy passed for ${tracked.length} tracked files; values were not logged.\n`,
+  `Repository credential policy passed for ${scannedFileCount} present tracked or untracked repository files; values were not logged.\n`,
 );

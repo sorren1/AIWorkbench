@@ -1,5 +1,7 @@
 # Threat model
 
+The authoritative repository-wide threat model is [THREAT_MODEL.md](../THREAT_MODEL.md). This document retains the control/test inventory for browser-local governance and local developer adapters.
+
 ## Scope
 
 This model covers the functional browser-local authorization demonstration and gitignored local sandbox CLI. External providers and enterprise integrations remain simulated. It does not claim that local storage or a local filesystem resists a malicious machine owner.

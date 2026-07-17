@@ -1,5 +1,7 @@
 # Clean-room and provenance
 
+The concise public boundary and disclosure are maintained in [CLEAN_ROOM.md](../CLEAN_ROOM.md). This document provides the detailed contribution and review practice.
+
 ## Purpose
 
 AI Delivery Workbench is an independent portfolio prototype. This document defines the public clean-room boundary, how provenance is recorded, and which claims the repository may make.

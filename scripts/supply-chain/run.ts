@@ -92,10 +92,19 @@ async function trackedPaths(): Promise<string[]> {
     "-z",
   ]);
   if (result.exitCode !== 0) throw new Error("Unable to enumerate supply-chain scan inputs.");
-  return result.stdout
+  const candidates = result.stdout
     .split("\0")
     .filter((path) => path.length > 0)
     .sort();
+  const present: string[] = [];
+  for (const path of candidates) {
+    const metadata = await lstat(resolve(root, path)).catch((error: unknown) => {
+      if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+      throw error;
+    });
+    if (metadata) present.push(path);
+  }
+  return present;
 }
 
 async function treeDigest(paths: readonly string[]): Promise<string> {
