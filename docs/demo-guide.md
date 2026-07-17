@@ -2,6 +2,8 @@
 
 AI Delivery Workbench is a governed, human-in-the-loop control plane for AI-assisted software delivery. The interactive route demonstrates its workflow and evidence model through deterministic synthetic fixtures.
 
+The canonical principal/staff presentation is the interruption-safe [seven-minute control-plane walkthrough](interview-walkthrough.md), with 60-second and 15-minute variants. This guide remains a broader screen-oriented reference.
+
 ## Evidence boundary
 
 Functional locally:

@@ -403,9 +403,20 @@ export function IssueDetail() {
   const val = validationFor(issue);
   const pr = prFor(issue);
   const artifacts = artifactsFor(issue);
-  const [open, setOpen] = useState<StageId | null>(cs.def.id);
+  const [open, setOpen] = useState<StageId | null>(() => {
+    const requested = new URLSearchParams(window.location.search).get("stage");
+    return stages.find((stage) => stage.id === requested)?.id ?? cs.def.id;
+  });
   const { packs: contextPacks, error: contextError } = useContextPacks(issue.key);
   const [invalidatedPacks, setInvalidatedPacks] = useState<Readonly<Record<string, string>>>({});
+
+  function setOpenStage(stageId: StageId | null): void {
+    setOpen(stageId);
+    const url = new URL(window.location.href);
+    if (stageId) url.searchParams.set("stage", stageId);
+    else url.searchParams.delete("stage");
+    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+  }
 
   async function simulateContextRevision(stageId: StageId, boundPack: ContextPack) {
     const selectedRecord = boundPack.includedRecords[0]?.record;
@@ -703,7 +714,7 @@ export function IssueDetail() {
                     issue={issue}
                     stage={s}
                     selected={open === s.id}
-                    onToggle={() => setOpen(open === s.id ? null : s.id)}
+                    onToggle={() => setOpenStage(open === s.id ? null : s.id)}
                     contextPack={contextPacks.get(s.id)}
                     invalidatedByDigest={invalidatedPacks[`${issue.key}:${s.id}`]}
                     onReviseContext={(pack) => void simulateContextRevision(s.id, pack)}

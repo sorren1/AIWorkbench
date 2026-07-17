@@ -11,8 +11,11 @@ import {
   verifyApprovalEventLog,
 } from "../authorization/approvalProtocol";
 import { isPersonaId, personaById } from "../authorization/personas";
+import { evaluateApprovalEligibility } from "../authorization/approvalEligibility";
 import { registrySnapshot } from "../control-plane/registry/generated";
+import { recordedWalkthroughEvidence } from "../observability/recordedSummary.generated";
 import { useApp } from "../state/store";
+import { isPrincipalReplayRequest } from "../walkthrough/approvalReplay";
 import { Icon } from "../../shared/Icon";
 import { Badge, Banner, Btn, Card } from "../components/primitives";
 import { buildContextPack } from "../context/runtime";
@@ -62,19 +65,27 @@ export function ApprovalInboxScreen() {
   );
   const selected = requests.find((request) => request.requestId === selectedId) ?? requests[0];
   const selectedPolicy = selected ? policyFor(selected) : undefined;
-  const missingApproverScopes = selectedPolicy
-    ? selectedPolicy.requiredApproverScopes.filter(
-        (scope) => !persona.scopes.some((candidate) => candidate === scope),
-      )
-    : [];
-  const requiredApproverPersonas: readonly string[] =
-    selectedPolicy?.requiredApproverPersonas ?? [];
-  const personaAllowed = selectedPolicy
-    ? requiredApproverPersonas.includes(persona.id) && missingApproverScopes.length === 0
-    : false;
-  const selfApprovalBlocked = Boolean(
-    selected && selectedPolicy?.forbidSelfApproval && selected.requesterActor === persona.id,
-  );
+  const selectedEligibility =
+    selected && selectedPolicy
+      ? evaluateApprovalEligibility({ request: selected, policy: selectedPolicy, persona })
+      : null;
+  const principalReplay = selected ? isPrincipalReplayRequest(selected) : false;
+  const dutyEvaluations =
+    selected && selectedPolicy
+      ? (
+          ["synthetic-implementer", "synthetic-code-reviewer", "synthetic-platform-admin"] as const
+        ).map((personaId) => {
+          const candidate = personaById(personaId);
+          return {
+            persona: candidate,
+            result: evaluateApprovalEligibility({
+              request: selected,
+              policy: selectedPolicy,
+              persona: candidate,
+            }),
+          };
+        })
+      : [];
 
   const decide = async (decision: "APPROVED" | "REJECTED") => {
     if (!selected) return;
@@ -268,6 +279,9 @@ export function ApprovalInboxScreen() {
                   <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
                     <h2>Approval request</h2>
                     <Badge tone={statusTone(selected.status)}>{selected.status}</Badge>
+                    {principalReplay && selected.status === "PENDING" && (
+                      <Badge tone="warn">WAITING_FOR_APPROVAL</Badge>
+                    )}
                   </div>
                   <p className="wb-mono wb-muted wb-mt-8">{selected.requestId}</p>
                 </div>
@@ -336,13 +350,64 @@ export function ApprovalInboxScreen() {
                 </ul>
               </section>
 
+              {principalReplay && recordedWalkthroughEvidence && (
+                <section className="wb-approval-diff" aria-labelledby="approval-diff-title">
+                  <div className="wb-between wb-wrap" style={{ gap: 8 }}>
+                    <h3 id="approval-diff-title">Synthetic proposed diff replay</h3>
+                    <Badge tone="warn">HIGH risk · bounded write</Badge>
+                  </div>
+                  <p className="wb-text-sm wb-secondary">
+                    The request binds the arguments hash and allow-listed path. This
+                    repository-owned diff is read from the validated recorded evidence for review;
+                    it is never applied by the browser.
+                  </p>
+                  <pre className="wb-code cr-scroll">
+                    {recordedWalkthroughEvidence.change.unifiedDiff}
+                  </pre>
+                  <p className="wb-mono wb-muted" style={{ fontSize: 11.5 }}>
+                    diff sha256:{recordedWalkthroughEvidence.change.unifiedDiffSha256}
+                  </p>
+                </section>
+              )}
+
+              <section aria-labelledby="approval-duty-title">
+                <h3 id="approval-duty-title">Separation-of-duties evaluation</h3>
+                <div
+                  className="wb-table-wrap"
+                  role="region"
+                  aria-label="Approver eligibility"
+                  tabIndex={0}
+                >
+                  <table className="wb-table wb-approval-duty-table">
+                    <thead>
+                      <tr>
+                        <th scope="col">Synthetic persona</th>
+                        <th scope="col">Domain result</th>
+                        <th scope="col">Reason</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dutyEvaluations.map(({ persona: candidate, result }) => (
+                        <tr key={candidate.id}>
+                          <th scope="row">{candidate.shortName}</th>
+                          <td>
+                            <Badge tone={result.allowed ? "safe" : "warn"}>
+                              {result.reasonCode}
+                            </Badge>
+                          </td>
+                          <td>{result.detail}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+
               {selected.status === "PENDING" && (
                 <div className="wb-stack-sm">
-                  {!personaAllowed || selfApprovalBlocked ? (
+                  {!selectedEligibility?.allowed ? (
                     <Banner tone="warn" title="Decision unavailable for this persona" icon="lock">
-                      {selfApprovalBlocked
-                        ? `${selectedPolicy?.id} forbids self-approval.`
-                        : `Policy ${selectedPolicy?.id ?? "unavailable"} requires ${selectedPolicy?.requiredApproverPersonas.join(", ") || "an authorized persona"}${missingApproverScopes.length > 0 ? ` with scope ${missingApproverScopes.join(", ")}` : ""}.`}
+                      {selectedEligibility?.detail ?? "The bound approval policy is unavailable."}
                     </Banner>
                   ) : (
                     <Banner
@@ -367,7 +432,7 @@ export function ApprovalInboxScreen() {
                     <Btn
                       variant="primary"
                       icon="shield-check"
-                      disabled={!personaAllowed || selfApprovalBlocked}
+                      disabled={!selectedEligibility?.allowed}
                       onClick={() => void decide("APPROVED")}
                     >
                       Approve bound request
@@ -375,7 +440,7 @@ export function ApprovalInboxScreen() {
                     <Btn
                       variant="danger"
                       icon="x"
-                      disabled={!personaAllowed || selfApprovalBlocked}
+                      disabled={!selectedEligibility?.allowed}
                       onClick={() => void decide("REJECTED")}
                     >
                       Reject request
@@ -390,9 +455,37 @@ export function ApprovalInboxScreen() {
                     Approval does not execute the action. Resume revalidates every bound hash and
                     the approver's current authority.
                   </Banner>
-                  <Btn variant="primary" icon="play" onClick={() => void resume()}>
-                    Resume bound local action
-                  </Btn>
+                  {principalReplay ? (
+                    <>
+                      <Banner
+                        tone="neutral"
+                        title="Recorded outcome is separate evidence"
+                        icon="info"
+                      >
+                        The checked-in Docker run used a preapproved synthetic fixture. Opening it
+                        replays validated execution evidence; it does not claim this browser
+                        decision was consumed by that historical run.
+                      </Banner>
+                      <Btn
+                        variant="primary"
+                        icon="play"
+                        onClick={() => {
+                          actions.toast(
+                            "info",
+                            "Opening recorded validated outcome",
+                            "The public browser is reading checked-in evidence and is not executing Docker.",
+                          );
+                          actions.navigate("trace");
+                        }}
+                      >
+                        Resume replay into recorded evidence
+                      </Btn>
+                    </>
+                  ) : (
+                    <Btn variant="primary" icon="play" onClick={() => void resume()}>
+                      Resume bound local action
+                    </Btn>
+                  )}
                 </div>
               )}
 

@@ -400,6 +400,18 @@ export const recordedRunTrace: RecordedRunTrace | null = {
     evidenceDigest: "b1e5b880b2bde6efdacca6944200fa5dd644e18435cf8b9aef36065a186f7ba7",
     traceArtifact: "sandbox-trace-20260717t113000-3a9c2170.json",
     traceArtifactSha256: "f8bbc37ea5ae0c4799811ac0501c3f9a714a42a0d75aa25c1766f9b05a68b11f",
+    evidenceArtifact: "sandbox-run-20260717t113000-3a9c2170.json",
+    evidenceMarkdownArtifact: "sandbox-run-20260717t113000-3a9c2170.md",
+    sandboxProvider: "LOCAL_DOCKER",
+    change: {
+      path: "src/report.js",
+      expectedTextSha256: "7aca0c7c793c74e2a6de7109bde4705a6f8a5bbb329f47be8aa5050d0d93a519",
+      replacementTextSha256: "b3c850a3727993bd0215985394bf6f3066540accaa933907af209341b891fb7c",
+      changedFiles: ["src/report.js"],
+      unifiedDiff:
+        'diff --git a/src/report.js b/src/report.js\nindex dbf3576..3270318 100644\n--- a/src/report.js\n+++ b/src/report.js\n@@ -1,3 +1,5 @@\n export function formatVariance(actual, budget) {\n-  return `Variance: ${actual - budget}`;\n+  const difference = actual - budget;\n+  const direction = difference >= 0 ? "over" : "under";\n+  return `Variance: ${Math.abs(difference)} ${direction}`;\n }',
+      unifiedDiffSha256: "35d718893dd7847ed97b686c222a04c392111f29ec9d1d608db1b9d29c55f060",
+    },
     budget: {
       schemaVersion: 1,
       policy: {

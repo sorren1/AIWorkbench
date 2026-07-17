@@ -1,101 +1,72 @@
 import { useEffect, useRef } from "react";
 
-import type { Route } from "../data/types";
+import { recordedWalkthroughEvidence } from "../observability/recordedSummary.generated";
 import { useApp } from "../state/store";
+import { copyText } from "../utils/browserActions";
+import {
+  PRINCIPAL_WALKTHROUGH_DURATION_SECONDS,
+  PRINCIPAL_WALKTHROUGH_STEPS,
+} from "../walkthrough/principalWalkthrough";
 import { Btn } from "./primitives";
 
-type WalkthroughStep = {
-  readonly route: Route;
-  readonly issueKey?: string;
-  readonly title: string;
-  readonly duration: string;
-  readonly show: string;
-  readonly explain: string;
-};
+function formatDuration(seconds: number): string {
+  return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, "0")}`;
+}
 
-const STEPS: readonly WalkthroughStep[] = [
-  {
-    route: "queue",
-    title: "Start with governed work, not a blank prompt",
-    duration: "45 sec",
-    show: "Filterable synthetic issues expose lifecycle, risk, failures, and review state.",
-    explain:
-      "The queue makes workflow state the entry point and keeps every fixture visibly synthetic.",
-  },
-  {
-    route: "issue",
-    issueKey: "FIN-1150",
-    title: "Follow the eight-stage chain of custody",
-    duration: "70 sec",
-    show: "Open FIN-1150, inspect stage artifacts, then redo a completed upstream stage.",
-    explain: "A redo invalidates downstream work instead of allowing stale success to survive.",
-  },
-  {
-    route: "issue",
-    issueKey: "FIN-1150",
-    title: "Audit the context before trusting the artifact",
-    duration: "60 sec",
-    show: "Expand a stage and inspect its Context Manifest: inclusions, exclusions, TTL, policy, estimate, and digest.",
-    explain:
-      "Deterministic rules make context selection replayable. A selected-record revision changes the digest and marks dependent work stale.",
-  },
-  {
-    route: "artifacts",
-    issueKey: "FIN-1150",
-    title: "Inspect deterministic handoffs",
-    duration: "50 sec",
-    show: "Move between intake, specification, plan, targets, provenance, and evidence artifacts.",
-    explain:
-      "Named artifacts turn transient generation into reviewable handoffs with stage and risk metadata.",
-  },
-  {
-    route: "github",
-    issueKey: "FIN-1150",
-    title: "Keep the human review gate authoritative",
-    duration: "80 sec",
-    show: "Try approval before changed-file review, inspect expected versus unexpected files, then record review.",
-    explain:
-      "Synthetic provider state stays behind normal pull-request controls; the AI does not approve itself.",
-  },
-  {
-    route: "validation",
-    issueKey: "FIN-1150",
-    title: "Bind evidence to the proposed change",
-    duration: "60 sec",
-    show: "Inspect the commit reference, acceptance coverage, scenarios, and final tester decision.",
-    explain:
-      "The fixture models evidence that travels with the change rather than a detached green status.",
-  },
-  {
-    route: "architecture",
-    title: "Separate responsibility planes",
-    duration: "55 sec",
-    show: "Compare control, execution, context, and validation responsibilities and adapter boundaries.",
-    explain:
-      "The focused control plane governs a coding-agent workflow without becoming a generic agent marketplace.",
-  },
-  {
-    route: "trace",
-    title: "Inspect the recorded execution trace and budgets",
-    duration: "65 sec",
-    show: "Follow the nested waterfall, approval wait, tool calls, repair count, budget thresholds, and evidence hashes.",
-    explain:
-      "The browser renders validated checked-in telemetry; it never connects to a collector or executes the sandbox.",
-  },
-];
+function WalkthroughArchitectureDiagram() {
+  return (
+    <figure
+      className="wb-walkthrough-architecture"
+      aria-labelledby="walkthrough-architecture-caption"
+    >
+      <ol>
+        <li>
+          <strong>Issue + stage</strong>
+          <span>deterministic workflow</span>
+        </li>
+        <li>
+          <strong>Run manifest</strong>
+          <span>agent · tool · context · budget</span>
+        </li>
+        <li>
+          <strong>Human gate</strong>
+          <span>distinct scoped reviewer</span>
+        </li>
+        <li>
+          <strong>Local execution</strong>
+          <span>allow-listed disposable sandbox</span>
+        </li>
+        <li>
+          <strong>Evidence + trace</strong>
+          <span>tested tree · receipts · spans</span>
+        </li>
+        <li>
+          <strong>PR readiness</strong>
+          <span>human-controlled transition</span>
+        </li>
+      </ol>
+      <figcaption id="walkthrough-architecture-caption">
+        The seven-minute path follows one authorization and evidence chain. The public browser
+        replays checked-in execution evidence; only the explicit local CLI can run the sandbox.
+      </figcaption>
+    </figure>
+  );
+}
 
 export function GuidedWalkthrough({
   stepIndex,
   onStepChange,
+  onStartApprovalReplay,
   onClose,
 }: {
   readonly stepIndex: number;
   readonly onStepChange: (stepIndex: number) => void;
+  readonly onStartApprovalReplay: () => Promise<void>;
   readonly onClose: () => void;
 }) {
   const { actions } = useApp();
   const regionRef = useRef<HTMLElement>(null);
-  const step = STEPS[stepIndex];
+  const step = PRINCIPAL_WALKTHROUGH_STEPS[stepIndex];
 
   useEffect(() => {
     regionRef.current?.focus();
@@ -111,17 +82,25 @@ export function GuidedWalkthrough({
 
   if (!step) return null;
 
-  const openStep = () => actions.navigate(step.route, step.issueKey);
   const previous = () => onStepChange(Math.max(0, stepIndex - 1));
   const next = () => {
-    if (stepIndex === STEPS.length - 1) {
+    if (stepIndex === PRINCIPAL_WALKTHROUGH_STEPS.length - 1) {
       onClose();
       return;
     }
-    const nextIndex = stepIndex + 1;
-    const nextStep = STEPS[nextIndex];
-    onStepChange(nextIndex);
-    if (nextStep) actions.navigate(nextStep.route, nextStep.issueKey);
+    onStepChange(stepIndex + 1);
+  };
+  const copyStepLink = async () => {
+    try {
+      await copyText(window.location.href);
+      actions.toast("success", "Walkthrough link copied", `${step.id} can be reopened directly.`);
+    } catch (error) {
+      actions.toast(
+        "error",
+        "Could not copy walkthrough link",
+        error instanceof Error ? error.message : "Clipboard access failed.",
+      );
+    }
   };
 
   return (
@@ -130,11 +109,15 @@ export function GuidedWalkthrough({
       className="wb-walkthrough"
       aria-labelledby="walkthrough-title"
       tabIndex={-1}
+      data-tour-step={step.id}
     >
       <div className="wb-walkthrough-meta">
-        <span className="eyebrow">Guided walkthrough · 5–8 minutes</span>
+        <span className="eyebrow">Principal walkthrough · 7 minutes</span>
         <span className="wb-mono wb-muted">
-          Step {stepIndex + 1} of {STEPS.length} · {step.duration}
+          Step {stepIndex + 1} of {PRINCIPAL_WALKTHROUGH_STEPS.length} ·{" "}
+          {formatDuration(step.durationSeconds)}
+          {" / "}
+          {formatDuration(PRINCIPAL_WALKTHROUGH_DURATION_SECONDS)}
         </span>
       </div>
       <div className="wb-walkthrough-layout">
@@ -144,33 +127,63 @@ export function GuidedWalkthrough({
             <strong>Show:</strong> {step.show}
           </p>
           <p className="wb-muted">
-            <strong>Explain:</strong> {step.explain}
+            <strong>Why it matters:</strong> {step.explain}
           </p>
+          {step.id === "sandbox-replay" && recordedWalkthroughEvidence && (
+            <p className="wb-walkthrough-proof">
+              Recorded run <code>{recordedWalkthroughEvidence.runId}</code> · source commit{" "}
+              <code>{recordedWalkthroughEvidence.sourceCommit}</code> ·{" "}
+              {recordedWalkthroughEvidence.sandboxProvider}
+            </p>
+          )}
         </div>
         <div className="wb-walkthrough-actions">
-          <Btn size="sm" variant="secondary" onClick={openStep}>
-            Open this screen
+          <Btn size="sm" variant="secondary" onClick={() => onStepChange(stepIndex)}>
+            Open this step
+          </Btn>
+          {step.id === "approval-pause" && (
+            <Btn
+              size="sm"
+              variant="primary"
+              icon="shield-check"
+              onClick={() => void onStartApprovalReplay()}
+            >
+              Create high-risk approval replay
+            </Btn>
+          )}
+          <Btn size="sm" variant="ghost" icon="link" onClick={() => void copyStepLink()}>
+            Copy step link
           </Btn>
           <Btn size="sm" variant="ghost" onClick={previous} disabled={stepIndex === 0}>
             Previous
           </Btn>
           <Btn size="sm" variant="primary" onClick={next}>
-            {stepIndex === STEPS.length - 1 ? "Finish" : "Next"}
+            {stepIndex === PRINCIPAL_WALKTHROUGH_STEPS.length - 1 ? "Finish" : "Next"}
           </Btn>
           <Btn size="sm" variant="ghost" onClick={onClose} aria-label="Close guided walkthrough">
             Close
           </Btn>
         </div>
       </div>
+      {step.id === "thesis" && <WalkthroughArchitectureDiagram />}
+      {step.id === "boundaries-provenance" && (
+        <p className="wb-walkthrough-links">
+          Finish with the case study’s{" "}
+          <a href="../#production-boundaries">productionization boundaries</a> and{" "}
+          <a href="../#clean-room">clean-room/provenance statement</a>.
+        </p>
+      )}
       <div
         className="wb-walkthrough-progress"
         role="progressbar"
         aria-label="Walkthrough progress"
         aria-valuemin={1}
-        aria-valuemax={STEPS.length}
+        aria-valuemax={PRINCIPAL_WALKTHROUGH_STEPS.length}
         aria-valuenow={stepIndex + 1}
       >
-        <span style={{ width: `${((stepIndex + 1) / STEPS.length) * 100}%` }} />
+        <span
+          style={{ width: `${((stepIndex + 1) / PRINCIPAL_WALKTHROUGH_STEPS.length) * 100}%` }}
+        />
       </div>
     </section>
   );

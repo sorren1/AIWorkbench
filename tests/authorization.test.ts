@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import { authorizeRegistryAction } from "../src/demo/authorization/authorizeAction";
+import { evaluateApprovalEligibility } from "../src/demo/authorization/approvalEligibility";
 import {
   addApprovalRequest,
   createBoundApprovalRequest,
@@ -197,6 +198,34 @@ describe("shared authorization policy engine", () => {
       policy: pending.policy,
     });
     expect(rejected.requests[pending.requestId]?.status).toBe("REJECTED");
+  });
+
+  it("explains requester, reviewer, and administrator approval eligibility from shared domain logic", async () => {
+    const pending = await pendingPatch();
+    const request = pending.store.requests[pending.requestId];
+    if (!request) throw new Error("Pending request missing.");
+
+    expect(
+      evaluateApprovalEligibility({
+        request,
+        policy: pending.policy,
+        persona: personaById("synthetic-implementer"),
+      }),
+    ).toMatchObject({ allowed: false, reasonCode: "SELF_APPROVAL_FORBIDDEN" });
+    expect(
+      evaluateApprovalEligibility({
+        request,
+        policy: pending.policy,
+        persona: personaById("synthetic-code-reviewer"),
+      }),
+    ).toMatchObject({ allowed: true, reasonCode: "ELIGIBLE_DISTINCT_REVIEWER" });
+    expect(
+      evaluateApprovalEligibility({
+        request,
+        policy: pending.policy,
+        persona: personaById("synthetic-platform-admin"),
+      }),
+    ).toMatchObject({ allowed: false, reasonCode: "PERSONA_NOT_ALLOWED" });
   });
 
   it("expires pending decisions and enforces decision-cache TTL", async () => {

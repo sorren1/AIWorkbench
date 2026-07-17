@@ -14,6 +14,7 @@ import type {
   ResumeBinding,
   SyntheticPersona,
 } from "./contracts";
+import { evaluateApprovalEligibility } from "./approvalEligibility";
 
 export const EMPTY_APPROVAL_STORE: ApprovalStore = { version: 1, requests: {}, events: [] };
 
@@ -150,17 +151,12 @@ export async function decideApprovalRequest(options: {
       timestamp: options.decidedAt,
     });
   }
-  if (!options.policy.requiredApproverPersonas.includes(options.actor.id)) {
-    throw new Error(`${options.actor.id} is not an allowed approver for ${options.policy.id}.`);
-  }
-  const missingScopes = options.policy.requiredApproverScopes.filter(
-    (scope) => !options.actor.scopes.some((candidate) => candidate === scope),
-  );
-  if (missingScopes.length > 0)
-    throw new Error(`Approver is missing scope: ${missingScopes.join(", ")}.`);
-  if (options.policy.forbidSelfApproval && request.requesterActor === options.actor.id) {
-    throw new Error("Self-approval is forbidden by policy.");
-  }
+  const eligibility = evaluateApprovalEligibility({
+    request,
+    policy: options.policy,
+    persona: options.actor,
+  });
+  if (!eligibility.allowed) throw new Error(eligibility.detail);
   if (options.policy.reasonRequired && !options.reason.trim()) {
     throw new Error("A decision reason is required by policy.");
   }

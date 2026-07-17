@@ -395,6 +395,69 @@ body {
   line-height: var(--leading-relaxed);
 }
 
+.wb-walkthrough-proof,
+.wb-walkthrough-links {
+  padding: 8px 10px;
+  border: 1px solid var(--accent-soft-border);
+  border-radius: var(--radius-md);
+  background: color-mix(in srgb, var(--bg-surface) 74%, transparent);
+  overflow-wrap: anywhere;
+}
+
+.wb-walkthrough-architecture {
+  margin: 14px 0 0;
+}
+
+.wb-walkthrough-architecture ol {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(120px, 1fr));
+  gap: 8px;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.wb-walkthrough-architecture li {
+  position: relative;
+  min-width: 0;
+  padding: 9px 10px;
+  border: 1px solid var(--accent-soft-border);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+
+.wb-walkthrough-architecture li:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  z-index: 1;
+  inset-inline-end: -9px;
+  top: 50%;
+  padding: 0 2px;
+  color: var(--accent);
+  background: var(--bg-surface);
+  transform: translateY(-50%);
+}
+
+.wb-walkthrough-architecture strong,
+.wb-walkthrough-architecture span {
+  display: block;
+}
+
+.wb-walkthrough-architecture strong {
+  font-size: 12px;
+}
+
+.wb-walkthrough-architecture span,
+.wb-walkthrough-architecture figcaption {
+  color: var(--text-secondary);
+  font-size: 11px;
+  line-height: var(--leading-normal);
+}
+
+.wb-walkthrough-architecture figcaption {
+  margin-top: 8px;
+}
+
 .wb-walkthrough-actions {
   flex: none;
   flex-wrap: wrap;
@@ -530,6 +593,14 @@ body {
 
   .wb-walkthrough-actions {
     justify-content: flex-start;
+  }
+
+  .wb-walkthrough-architecture ol {
+    grid-template-columns: repeat(3, minmax(130px, 1fr));
+  }
+
+  .wb-walkthrough-architecture li::after {
+    display: none;
   }
 }
 .wb-page {
@@ -1960,6 +2031,16 @@ textarea.wb-input {
 }
 .wb-trace-bindings code {
   overflow-wrap: anywhere;
+}
+
+.wb-approval-diff .wb-code {
+  max-height: 280px;
+  margin-top: 10px;
+}
+
+.wb-approval-duty-table th,
+.wb-approval-duty-table td {
+  vertical-align: top;
 }
 
 .wb-flex {

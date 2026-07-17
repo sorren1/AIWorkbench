@@ -50,6 +50,18 @@ function parseRegistryTab(value: string): RegistryTab {
   return "agents";
 }
 
+function registryTabFromUrl(): RegistryTab {
+  return parseRegistryTab(new URLSearchParams(window.location.search).get("registry") ?? "agents");
+}
+
+function replaceRegistryQuery(tab: RegistryTab, resourceId?: string): void {
+  const url = new URL(window.location.href);
+  url.searchParams.set("registry", tab);
+  if (resourceId) url.searchParams.set("resource", resourceId);
+  else url.searchParams.delete("resource");
+  window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+}
+
 function parseStatusFilter(value: string): StatusFilter {
   if (value === "ALL") return value;
   return REGISTRY_STATUSES.find((status) => status === value) ?? "ALL";
@@ -287,10 +299,15 @@ function ResourceDetail({ resource }: { readonly resource: RegistryResource }) {
 
 export function ControlPlaneScreen() {
   const { actions } = useApp();
-  const [tab, setTab] = useState<RegistryTab>("agents");
+  const initialTab = registryTabFromUrl();
+  const [tab, setTab] = useState<RegistryTab>(initialTab);
   const [query, setQuery] = useState("");
   const [status, setStatus] = useState<StatusFilter>("ALL");
-  const [selectedKey, setSelectedKey] = useState("");
+  const [selectedKey, setSelectedKey] = useState(() => {
+    const requestedId = new URLSearchParams(window.location.search).get("resource");
+    const resource = resourcesFor(initialTab).find((candidate) => candidate.id === requestedId);
+    return resource ? resourceKey(resource) : "";
+  });
   const resources = resourcesFor(tab);
   const filtered = useMemo(() => {
     const normalizedQuery = query.trim().toLocaleLowerCase();
@@ -390,8 +407,10 @@ export function ControlPlaneScreen() {
           tabs={RESOURCE_TABS}
           active={tab}
           onChange={(next) => {
-            setTab(parseRegistryTab(next));
+            const nextTab = parseRegistryTab(next);
+            setTab(nextTab);
             setSelectedKey("");
+            replaceRegistryQuery(nextTab);
           }}
         />
       </div>
@@ -445,7 +464,10 @@ export function ControlPlaneScreen() {
                     key={resourceKey(resource)}
                     type="button"
                     className={`wb-control-resource${selected && resourceKey(selected) === resourceKey(resource) ? " is-selected" : ""}`}
-                    onClick={() => setSelectedKey(resourceKey(resource))}
+                    onClick={() => {
+                      setSelectedKey(resourceKey(resource));
+                      replaceRegistryQuery(tab, resource.id);
+                    }}
                     aria-pressed={
                       selected ? resourceKey(selected) === resourceKey(resource) : false
                     }

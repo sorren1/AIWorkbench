@@ -9,7 +9,6 @@ import {
   ToastHost,
   useTheme,
 } from "./components/AppShell";
-import { GuidedWalkthrough } from "./components/GuidedWalkthrough";
 import { Btn } from "./components/primitives";
 import { meta } from "./data/fixtures";
 import { ArtifactsScreen } from "./screens/ArtifactsScreen";
@@ -23,9 +22,23 @@ import { clearPreferences } from "./state/preferences";
 import { clearBrowserAuthorizationState } from "./authorization/browserStore";
 import { DEMO_SCENARIOS, isDemoScenarioId, type DemoScenarioId } from "./state/scenarios";
 import { Icon } from "../shared/Icon";
+import {
+  configurePrincipalWalkthroughUrl,
+  PRINCIPAL_WALKTHROUGH_ID,
+  PRINCIPAL_WALKTHROUGH_STEPS,
+  principalWalkthroughStepAt,
+  principalWalkthroughStepIndex,
+} from "./walkthrough/principalWalkthrough";
+import {
+  isPrincipalReplayRequest,
+  queuePrincipalApprovalReplay,
+} from "./walkthrough/approvalReplay";
 
 const ArchitectureScreen = lazy(async () => ({
   default: (await import("./screens/ArchitectureScreen")).ArchitectureScreen,
+}));
+const GuidedWalkthrough = lazy(async () => ({
+  default: (await import("./components/GuidedWalkthrough")).GuidedWalkthrough,
 }));
 const ControlPlaneScreen = lazy(async () => ({
   default: (await import("./screens/ControlPlaneScreen")).ControlPlaneScreen,
@@ -108,18 +121,14 @@ function Footer() {
   );
 }
 
-const WALKTHROUGH_STEP_COUNT = 8;
-
 function walkthroughStepFromQuery(): number {
-  const value = Number.parseInt(new URLSearchParams(window.location.search).get("tourStep") ?? "1");
-  return Number.isInteger(value) && value >= 1 && value <= WALKTHROUGH_STEP_COUNT ? value - 1 : 0;
+  return principalWalkthroughStepIndex(new URLSearchParams(window.location.search).get("tourStep"));
 }
 
 function updateWalkthroughQuery(open: boolean, stepIndex = 0): void {
-  const url = new URL(window.location.href);
+  let url = new URL(window.location.href);
   if (open) {
-    url.searchParams.set("walkthrough", "1");
-    url.searchParams.set("tourStep", String(stepIndex + 1));
+    url = configurePrincipalWalkthroughUrl(url, stepIndex);
   } else {
     url.searchParams.delete("walkthrough");
     url.searchParams.delete("tourStep");
@@ -170,7 +179,7 @@ function DemoControls({
       </p>
       <div className="wb-spacer" />
       <Btn size="sm" variant="secondary" icon="workflow" onClick={onOpenWalkthrough}>
-        {walkthroughOpen ? "Restart guided tour" : "Guided tour"}
+        {walkthroughOpen ? "Restart principal tour" : "7-minute principal tour"}
       </Btn>
       <Btn size="sm" variant="ghost" icon="rotate-ccw" onClick={onRequestReset}>
         Reset demo
@@ -184,7 +193,11 @@ export function App() {
   const [theme, setTheme] = useTheme();
   const [walkthroughOpen, setWalkthroughOpen] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get("walkthrough") === "1" || params.get("tour") === "1";
+    return (
+      params.get("walkthrough") === "1" ||
+      params.get("walkthrough") === PRINCIPAL_WALKTHROUGH_ID ||
+      params.get("tour") === "1"
+    );
   });
   const [walkthroughStep, setWalkthroughStep] = useState(walkthroughStepFromQuery);
   const [walkthroughSession, setWalkthroughSession] = useState(0);
@@ -195,7 +208,7 @@ export function App() {
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
     setWalkthroughStep(0);
     updateWalkthroughQuery(true, 0);
-    actions.navigate("queue", "FIN-1150");
+    actions.navigate(principalWalkthroughStepAt(0).route);
     setWalkthroughSession((session) => session + 1);
     setWalkthroughOpen(true);
   }, [actions]);
@@ -207,10 +220,44 @@ export function App() {
       if (returnTarget?.isConnected) returnTarget.focus();
     });
   }, []);
-  const changeWalkthroughStep = useCallback((stepIndex: number) => {
-    setWalkthroughStep(stepIndex);
-    updateWalkthroughQuery(true, stepIndex);
-  }, []);
+  const changeWalkthroughStep = useCallback(
+    (stepIndex: number) => {
+      const step = PRINCIPAL_WALKTHROUGH_STEPS[stepIndex];
+      if (!step) return;
+      setWalkthroughStep(stepIndex);
+      updateWalkthroughQuery(true, stepIndex);
+      actions.navigate(step.route, step.issueKey);
+    },
+    [actions],
+  );
+  const startApprovalReplay = useCallback(async () => {
+    const existing = Object.values(state.approvalStore.requests).find(isPrincipalReplayRequest);
+    actions.setPersona("synthetic-implementer");
+    if (existing) {
+      actions.navigate("approvals");
+      actions.toast(
+        "info",
+        `Approval replay is ${existing.status}`,
+        "Reset the demo to recreate the deterministic WAITING_FOR_APPROVAL checkpoint.",
+      );
+      return;
+    }
+    try {
+      const request = await queuePrincipalApprovalReplay(actions);
+      actions.navigate("approvals");
+      actions.toast(
+        "info",
+        "WAITING_FOR_APPROVAL",
+        `${request.tool.id}@${request.tool.version} is paused before invocation. No patch was executed.`,
+      );
+    } catch (error) {
+      actions.toast(
+        "error",
+        "Approval replay could not start",
+        error instanceof Error ? error.message : "The local policy replay failed.",
+      );
+    }
+  }, [actions, state.approvalStore.requests]);
   const applyScenario = useCallback(
     (scenarioId: DemoScenarioId) => {
       setWalkthroughOpen(false);
@@ -286,12 +333,15 @@ export function App() {
               onRequestReset={resetDemo}
             />
             {walkthroughOpen && (
-              <GuidedWalkthrough
-                key={walkthroughSession}
-                stepIndex={walkthroughStep}
-                onStepChange={changeWalkthroughStep}
-                onClose={closeWalkthrough}
-              />
+              <Suspense fallback={<div role="status">Loading local walkthrough…</div>}>
+                <GuidedWalkthrough
+                  key={walkthroughSession}
+                  stepIndex={walkthroughStep}
+                  onStepChange={changeWalkthroughStep}
+                  onStartApprovalReplay={startApprovalReplay}
+                  onClose={closeWalkthrough}
+                />
+              </Suspense>
             )}
             <Screen />
             <Footer />

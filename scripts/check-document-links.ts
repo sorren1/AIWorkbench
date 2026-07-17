@@ -73,7 +73,7 @@ function localReference(source: string, rawReference: string): MarkdownReference
       : rawReference;
   if (/^(?:https?:|mailto:|tel:|data:|blob:)/i.test(unwrapped)) return null;
   const [rawPath = "", rawFragment = ""] = unwrapped.split("#", 2);
-  const targetPath = decode(rawPath);
+  const targetPath = decode(rawPath.split("?", 1)[0] ?? "");
   const path = targetPath.startsWith("/")
     ? resolve(root, targetPath.replace(/^[/\\]+/, ""))
     : resolve(source, "..", targetPath || ".");

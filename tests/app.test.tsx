@@ -34,16 +34,16 @@ describe("workbench application", () => {
     expect(screen.getByRole("heading", { level: 2, name: "Intake Agent" })).toBeVisible();
   });
 
-  it("offers a keyboard-operable guided walkthrough that navigates the demo", () => {
+  it("offers a keyboard-operable guided walkthrough that navigates the demo", async () => {
     render(
       <AppProvider>
         <App />
       </AppProvider>,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Guided tour" }));
+    fireEvent.click(screen.getByRole("button", { name: "7-minute principal tour" }));
     expect(
-      screen.getByRole("heading", { name: "Start with governed work, not a blank prompt" }),
+      await screen.findByRole("heading", { name: "Govern delivery, not just generation" }),
     ).toBeVisible();
     expect(screen.getByRole("progressbar", { name: "Walkthrough progress" })).toHaveAttribute(
       "aria-valuenow",
@@ -52,7 +52,9 @@ describe("workbench application", () => {
 
     fireEvent.click(screen.getByRole("button", { name: "Next" }));
     expect(
-      screen.getByRole("heading", { name: "Follow the eight-stage chain of custody" }),
+      screen.getByRole("heading", {
+        name: "Follow one synthetic issue through deterministic stages",
+      }),
     ).toBeVisible();
     expect(screen.getByText("AI delivery workflow")).toBeVisible();
 

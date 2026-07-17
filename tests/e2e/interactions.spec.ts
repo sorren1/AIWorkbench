@@ -111,9 +111,11 @@ test("the complete guided walkthrough advances using only the keyboard", async (
   await expect(page.getByRole("button", { name: "Open this screen" })).toBeFocused();
   await page.keyboard.press("Tab");
   const next = page.getByRole("button", { name: "Next" });
+  await expect(page.getByRole("button", { name: "Copy step link" })).toBeFocused();
+  await page.keyboard.press("Tab");
   await expect(next).toBeFocused();
 
-  for (let step = 2; step <= 8; step += 1) {
+  for (let step = 2; step <= 12; step += 1) {
     await page.keyboard.press("Enter");
     await expect(page.getByRole("progressbar", { name: "Walkthrough progress" })).toHaveAttribute(
       "aria-valuenow",
@@ -125,22 +127,25 @@ test("the complete guided walkthrough advances using only the keyboard", async (
   await expect(finish).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(walkthrough).toBeHidden();
-  await expect(page.getByRole("heading", { level: 1, name: "Run Trace" })).toBeVisible();
+  await expect(page.getByRole("heading", { level: 1, name: "Architecture" })).toBeVisible();
 });
 
 test("the guided walkthrough resumes its URL-bound step after interruption", async ({ page }) => {
-  await page.goto("/demo/?walkthrough=1&tourStep=5");
+  await page.goto("/demo/?walkthrough=principal&tourStep=sandbox-replay&screen=trace");
   const progress = page.getByRole("progressbar", { name: "Walkthrough progress" });
   await expect(progress).toHaveAttribute("aria-valuenow", "5");
   await expect(
-    page.getByRole("heading", { level: 2, name: "Keep the human review gate authoritative" }),
+    page.getByRole("heading", {
+      level: 2,
+      name: "Replay a validated real local sandbox recording",
+    }),
   ).toBeVisible();
 
   await page.reload();
   await expect(progress).toHaveAttribute("aria-valuenow", "5");
 
   await page.getByRole("button", { name: "Next" }).click();
-  await expect(page).toHaveURL(/tourStep=6/);
+  await expect(page).toHaveURL(/tourStep=approval-pause/);
   await page.getByRole("button", { name: "Close guided walkthrough" }).click();
   await expect(page).not.toHaveURL(/(?:walkthrough|tourStep)=/);
 });

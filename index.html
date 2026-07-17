@@ -57,8 +57,8 @@
           <a class="site-secondary-action" data-config-link="repository" hidden target="_blank"
             >View source</a
           >
-          <a class="site-text-action" href="./demo/?walkthrough=1">
-            Start guided walkthrough <span aria-hidden="true">·</span> 5–8 min
+          <a class="site-text-action" href="./demo/?walkthrough=principal&amp;tourStep=thesis">
+            Start principal walkthrough <span aria-hidden="true">·</span> 7 min
           </a>
         </div>
       </section>
@@ -73,7 +73,47 @@
         local MCP process.
       </aside>
 
-      <section class="site-section" aria-labelledby="problem-title">
+      <section
+        id="principal-walkthrough"
+        class="site-section site-section--inset"
+        aria-labelledby="principal-walkthrough-title"
+      >
+        <div class="site-section-heading site-section-heading--split">
+          <div>
+            <p class="eyebrow">Seven-minute guided walkthrough</p>
+            <h2 id="principal-walkthrough-title">Follow one authorization and evidence chain.</h2>
+          </div>
+          <p>
+            Start with the thesis, drill into one synthetic issue, make a distinct human decision,
+            and finish at the recorded sandbox evidence and production boundaries.
+          </p>
+        </div>
+        <figure
+          class="site-walkthrough-architecture"
+          aria-labelledby="principal-walkthrough-title principal-walkthrough-caption"
+        >
+          <ol>
+            <li><strong>Issue</strong><span>stage state</span></li>
+            <li><strong>Run manifest</strong><span>agent · tool · context · budget</span></li>
+            <li><strong>Human gate</strong><span>scoped reviewer</span></li>
+            <li><strong>Local sandbox</strong><span>allow-listed execution</span></li>
+            <li><strong>Evidence + trace</strong><span>tested tree · receipts · spans</span></li>
+            <li><strong>PR readiness</strong><span>human transition</span></li>
+          </ol>
+          <figcaption id="principal-walkthrough-caption">
+            The browser replays checked-in evidence; it never executes Docker or accepts visitor
+            code. Every tour step has a resumable deep link.
+          </figcaption>
+        </figure>
+        <div class="site-actions">
+          <a class="site-primary-action" href="./demo/?walkthrough=principal&amp;tourStep=thesis"
+            >Start the 7-minute walkthrough</a
+          >
+          <a class="site-secondary-action" href="#recorded-sandbox">Preview recorded evidence</a>
+        </div>
+      </section>
+
+      <section id="governed-thesis" class="site-section" aria-labelledby="problem-title">
         <div class="site-section-heading site-section-heading--split">
           <div>
             <p class="eyebrow">The problem</p>
@@ -551,7 +591,7 @@
         </div>
       </section>
 
-      <section class="site-section" aria-labelledby="production-title">
+      <section id="production-boundaries" class="site-section" aria-labelledby="production-title">
         <div class="site-section-heading site-section-heading--split">
           <div>
             <p class="eyebrow">Productionization plan</p>
@@ -641,7 +681,7 @@
         </div>
       </section>
 
-      <section class="site-section" aria-labelledby="clean-room-title">
+      <section id="clean-room" class="site-section" aria-labelledby="clean-room-title">
         <div class="site-clean-room-panel">
           <div>
             <p class="eyebrow">Clean-room disclosure</p>
@@ -671,8 +711,8 @@
         <h2 id="final-title">Follow the evidence from intake to human review.</h2>
         <div class="site-actions">
           <a class="site-primary-action" href="./demo/">Open interactive prototype</a>
-          <a class="site-secondary-action" href="./demo/?walkthrough=1"
-            >Start 5–8 minute walkthrough</a
+          <a class="site-secondary-action" href="./demo/?walkthrough=principal&amp;tourStep=thesis"
+            >Start 7-minute walkthrough</a
           >
           <a class="site-secondary-action" data-config-link="repository" hidden target="_blank"
             >View source</a

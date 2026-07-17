@@ -42,7 +42,7 @@ npm ci
 npm run dev
 ```
 
-Vite prints the local URL. Open `/` for the case study or `/demo/` for the interactive prototype. Add `?walkthrough=1` to start the accessible 5–8 minute tour.
+Vite prints the local URL. Open `/` for the case study or `/demo/` for the interactive prototype. Open `/demo/?walkthrough=principal&tourStep=thesis` to start the accessible, interruption-safe seven-minute principal/staff walkthrough. The presenter script, 60-second summary, and 15-minute deep dive are in [`docs/interview-walkthrough.md`](docs/interview-walkthrough.md).
 
 Build and inspect the production output:
 

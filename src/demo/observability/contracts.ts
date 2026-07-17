@@ -12,6 +12,17 @@ export type RecordedRunTrace = {
     readonly evidenceDigest: string;
     readonly traceArtifact: string;
     readonly traceArtifactSha256: string;
+    readonly evidenceArtifact: string;
+    readonly evidenceMarkdownArtifact: string;
+    readonly sandboxProvider: string;
+    readonly change: {
+      readonly path: string;
+      readonly expectedTextSha256: string;
+      readonly replacementTextSha256: string;
+      readonly changedFiles: readonly string[];
+      readonly unifiedDiff: string;
+      readonly unifiedDiffSha256: string;
+    };
     readonly budget: BudgetResult;
     readonly accounting: RunAccounting;
     readonly approval: {
@@ -21,5 +32,20 @@ export type RecordedRunTrace = {
       readonly waitDurationMs: number;
       readonly measurement: "MEASURED";
     };
+  };
+};
+
+export type RecordedWalkthroughEvidence = {
+  readonly runId: string;
+  readonly sourceCommit: string;
+  readonly sourceWorkingTree: "CLEAN" | "MODIFIED";
+  readonly sandboxProvider: string;
+  readonly approvalOutcome: "PREAPPROVED_SYNTHETIC_FIXTURE";
+  readonly change: {
+    readonly path: string;
+    readonly expectedTextSha256: string;
+    readonly replacementTextSha256: string;
+    readonly unifiedDiff: string;
+    readonly unifiedDiffSha256: string;
   };
 };
