@@ -13,7 +13,7 @@
   "maxRepairAttempts": 0,
   "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
   "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-  "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+  "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
   "createdAt": "2026-07-16T18:00:00.000Z",
   "updatedAt": "2026-07-16T18:00:00.000Z",
   "approval": {
@@ -28,7 +28,12 @@
   "stageId": "review",
   "capabilities": ["diff summary", "risk flagging", "evidence cross-check"],
   "skills": ["review preparation", "acceptance evidence comparison"],
-  "allowedToolIds": ["tool.repository.diff.inspect", "tool.evidence.write"],
+  "allowedToolIds": [
+    "tool.repository.diff.inspect",
+    "tool.evidence.write",
+    "tool.workflow.diff-review",
+    "tool.workflow.release-readiness"
+  ],
   "allowedWritePaths": ["browser-local://evidence/review-summary.json"],
-  "contentHash": "cb296c571145e011866d200706c738aa91baa0f42d5da05b85a8ffb3166ad2ad"
+  "contentHash": "351e7edb83301a9975440820d13ae83b3cad69db9340b966f74ea8fddb5bf5e9"
 }

@@ -20,11 +20,11 @@ The seven stage agents map directly to the existing workflow after the non-agent
 | Verify    | Verification Agent   | Runs the fixed local validation command and records evidence.        |
 | PR Review | Review Assistant     | Summarizes and flags risk; it can never grant human approval.        |
 
-The seven tool descriptors are issue read, repository search, repository file read, controlled patch application, sandbox command execution, diff inspection, and evidence writing. The local MCP server exposes the repository search/read/patch/diff/validation subset. Issue and evidence behavior stays in the workbench boundary.
+The seven execution descriptors are issue read, repository search, repository file read, controlled patch application, sandbox command execution, diff inspection, and evidence writing. Two additional browser-local workflow descriptors record human diff review and request/resume release readiness. The local MCP server exposes only the repository search/read/patch/diff/validation subset.
 
 ## Contracts and validation
 
-Source contracts are in `src/demo/control-plane/registry/contracts.ts`. JSON Schemas are in `src/demo/control-plane/registry/schemas/` and are also copied to `/capabilities/schemas/` for public inspection.
+Source contracts are in `src/demo/control-plane/registry/contracts.ts`. JSON Schemas—including approval policy, request, event, identity-envelope, and materialized-store contracts—are in `src/demo/control-plane/registry/schemas/` and copied to `/capabilities/schemas/` for public inspection.
 
 `npm run registry:generate` performs canonical SHA-256 hashing and JSON Schema validation, then writes:
 
@@ -62,7 +62,7 @@ The protocol-discovered tools are:
 - a fixed read-only Git diff; and
 - the fixed `node --test` validation command.
 
-The host client treats discovered schemas and annotations as untrusted input. It validates each discovered schema, then checks the matching local descriptor, stage manifest, path boundary, input schema, and approval-policy grant. The server repeats the path and fixed-command boundary, but it does not replace host authorization.
+The host client treats discovered schemas and annotations as untrusted input. It validates each discovered schema, then checks the matching local descriptor, stage manifest, delegated persona scopes, path boundary, input schema, versioned policy, and exact bound approval. The server repeats the path and fixed-command boundary, but it does not replace host authorization.
 
 Generate and verify sanitized evidence with:
 

@@ -58,6 +58,40 @@
       "properties": {
         "type": { "const": "object" }
       }
+    },
+    "scope": {
+      "enum": [
+        "issue:read",
+        "artifact:read",
+        "artifact:write",
+        "registry:read",
+        "registry:manage",
+        "tool:invoke",
+        "sandbox:execute",
+        "diff:review",
+        "validation:approve",
+        "policy:manage",
+        "evidence:read"
+      ]
+    },
+    "persona": {
+      "enum": [
+        "synthetic-implementer",
+        "synthetic-code-reviewer",
+        "synthetic-validator",
+        "synthetic-platform-admin",
+        "synthetic-auditor"
+      ]
+    },
+    "registryReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "contentHash"],
+      "properties": {
+        "id": { "$ref": "#/$defs/identifier" },
+        "version": { "$ref": "#/$defs/semanticVersion" },
+        "contentHash": { "$ref": "#/$defs/contentHash" }
+      }
     }
   }
 }

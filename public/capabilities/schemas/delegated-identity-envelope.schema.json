@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.invalid/schemas/registry/delegated-identity-envelope.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "envelopeVersion",
+    "initiatingHumanActor",
+    "effectiveSubject",
+    "executingAgent",
+    "grantedScopes",
+    "delegationChain",
+    "runId",
+    "sessionId",
+    "expiresAt",
+    "policyDecisionId"
+  ],
+  "properties": {
+    "envelopeVersion": { "const": 1 },
+    "initiatingHumanActor": { "$ref": "common.schema.json#/$defs/persona" },
+    "effectiveSubject": { "type": "string", "minLength": 1 },
+    "executingAgent": { "$ref": "common.schema.json#/$defs/registryReference" },
+    "grantedScopes": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/scope" },
+      "uniqueItems": true
+    },
+    "delegationChain": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["delegator", "delegate", "grantedScopes", "delegatedAt", "expiresAt"],
+        "properties": {
+          "delegator": { "$ref": "common.schema.json#/$defs/persona" },
+          "delegate": { "type": "string", "minLength": 1 },
+          "grantedScopes": {
+            "type": "array",
+            "items": { "$ref": "common.schema.json#/$defs/scope" },
+            "uniqueItems": true
+          },
+          "delegatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+          "expiresAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+        }
+      }
+    },
+    "runId": { "$ref": "common.schema.json#/$defs/identifier" },
+    "sessionId": { "$ref": "common.schema.json#/$defs/identifier" },
+    "expiresAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "policyDecisionId": { "$ref": "common.schema.json#/$defs/identifier" }
+  }
+}

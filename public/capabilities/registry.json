@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "generatedAt": "2026-07-16T20:00:00.000Z",
   "classification": "SYNTHETIC_PUBLIC_PORTFOLIO_FIXTURE",
   "agents": [
@@ -18,7 +18,7 @@
       "maxRepairAttempts": 2,
       "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
       "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -35,7 +35,7 @@
       "skills": ["structured intake", "risk cue extraction"],
       "allowedToolIds": ["tool.issue.read"],
       "allowedWritePaths": ["artifacts/intake.json"],
-      "contentHash": "c633a05f0322bdce22d1660b3e2305a1e0294c2cb74933b9b33fdc4327b4d28d"
+      "contentHash": "c50efaa342bbd465294df709dbd01140910dc607c25b2388c786181e305896a9"
     },
     {
       "kind": "AgentCard",
@@ -52,7 +52,7 @@
       "maxRepairAttempts": 2,
       "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
       "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -69,7 +69,7 @@
       "skills": ["specification writing", "repository context lookup"],
       "allowedToolIds": ["tool.issue.read", "tool.repository.search", "tool.repository.file.read"],
       "allowedWritePaths": ["artifacts/spec.md"],
-      "contentHash": "be1d524ae89236870730b7df2efc7185ce9f1e12b9701cf5efedba0cfe984d8e"
+      "contentHash": "86ed6acc2b42f5fdb99e8ea26d755d10bac04e0c081443e581649a837ef47fd2"
     },
     {
       "kind": "AgentCard",
@@ -86,7 +86,7 @@
       "maxRepairAttempts": 2,
       "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
       "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -103,7 +103,7 @@
       "skills": ["change sequencing", "dependency inspection"],
       "allowedToolIds": ["tool.issue.read", "tool.repository.search", "tool.repository.file.read"],
       "allowedWritePaths": ["artifacts/plan.md"],
-      "contentHash": "6c91a9859a06a85a03895ebc2ad3c9b89baff59dd4fa48485b2dce4819d54d59"
+      "contentHash": "75a1cd76b61731653471c291de05a74b677e06914feb1d4d25a95ab0c7fb6ec0"
     },
     {
       "kind": "AgentCard",
@@ -120,7 +120,7 @@
       "maxRepairAttempts": 2,
       "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
       "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -145,7 +145,7 @@
         "tool.repository.diff.inspect"
       ],
       "allowedWritePaths": ["artifacts/change-targets.json"],
-      "contentHash": "950cea7e196a2ecfb073f03544069a0be49353fc924fade5946b1ab760367482"
+      "contentHash": "594d109fd046fddd0aff97d2860b1a168c479802a7ec15b7227cf094dc981415"
     },
     {
       "kind": "AgentCard",
@@ -158,15 +158,15 @@
       "memoryPolicyId": "memory.policy.issue-bounded",
       "approvalPolicyIds": [
         "policy.registry.separation-of-duties",
-        "policy.tool.bounded-write-human-approval",
-        "policy.tool.local-process-approval"
+        "policy.write.approved-targets",
+        "policy.sandbox.validation-notify"
       ],
       "maxDurationMs": 120000,
       "maxToolCalls": 18,
       "maxRepairAttempts": 2,
       "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
       "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -190,7 +190,7 @@
         "tool.evidence.write"
       ],
       "allowedWritePaths": ["src/**", "browser-local://evidence/**"],
-      "contentHash": "b19a2e922d02f6402a4a0e002942fefaf6f9073a88e2835d82a9715dec4ce726"
+      "contentHash": "e699f8b90fe63d81888a7179e06dbfaae53f197a1cd9462f43b46f576afc9624"
     },
     {
       "kind": "AgentCard",
@@ -203,14 +203,14 @@
       "memoryPolicyId": "memory.policy.issue-bounded",
       "approvalPolicyIds": [
         "policy.registry.separation-of-duties",
-        "policy.tool.local-process-approval"
+        "policy.sandbox.validation-notify"
       ],
       "maxDurationMs": 120000,
       "maxToolCalls": 12,
       "maxRepairAttempts": 2,
       "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
       "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -236,7 +236,7 @@
         "tool.evidence.write"
       ],
       "allowedWritePaths": ["browser-local://evidence/**"],
-      "contentHash": "43bb7b82dbcb99f777ac43d64de7d4e3281e4bf38ca762eb3d9b15fa8702bcc6"
+      "contentHash": "d0d7b03f7e2e191f9dc65f79f6490686a8c4e2bb27bdb883c7f251cccd979078"
     },
     {
       "kind": "AgentCard",
@@ -253,7 +253,7 @@
       "maxRepairAttempts": 0,
       "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
       "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -268,16 +268,21 @@
       "stageId": "review",
       "capabilities": ["diff summary", "risk flagging", "evidence cross-check"],
       "skills": ["review preparation", "acceptance evidence comparison"],
-      "allowedToolIds": ["tool.repository.diff.inspect", "tool.evidence.write"],
+      "allowedToolIds": [
+        "tool.repository.diff.inspect",
+        "tool.evidence.write",
+        "tool.workflow.diff-review",
+        "tool.workflow.release-readiness"
+      ],
       "allowedWritePaths": ["browser-local://evidence/review-summary.json"],
-      "contentHash": "cb296c571145e011866d200706c738aa91baa0f42d5da05b85a8ffb3166ad2ad"
+      "contentHash": "351e7edb83301a9975440820d13ae83b3cad69db9340b966f74ea8fddb5bf5e9"
     }
   ],
   "tools": [
     {
       "kind": "ToolDescriptor",
       "status": "APPROVED",
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -304,7 +309,7 @@
         "required": ["issue"]
       },
       "sideEffects": ["None; reads a checked-in synthetic fixture."],
-      "requiredScopes": ["synthetic:issue:read"],
+      "requiredScopes": ["issue:read", "tool:invoke"],
       "allowedStages": ["intake", "spec", "plan"],
       "timeoutMs": 1000,
       "idempotency": "IDEMPOTENT",
@@ -312,12 +317,12 @@
       "filesystemBoundary": { "mode": "NONE", "allowedPaths": [] },
       "approvalPolicyId": null,
       "sourceImplementation": { "module": "src/demo/data/fixtures.ts", "exportName": "issues" },
-      "contentHash": "e6a79b1c1c4bd16ca0ba70144c95d4f7e15ac989ff912455900a3cfb5005ee90"
+      "contentHash": "3f4cc2c9035961de138b993885695e39b4476fa91752f192ab2be60c958b36a0"
     },
     {
       "kind": "ToolDescriptor",
       "status": "APPROVED",
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -347,7 +352,7 @@
         "required": ["matches"]
       },
       "sideEffects": ["None; file reads remain inside the disposable toy repository."],
-      "requiredScopes": ["toy-repository:read"],
+      "requiredScopes": ["artifact:read", "tool:invoke"],
       "allowedStages": ["spec", "plan", "targets", "implement"],
       "timeoutMs": 2000,
       "idempotency": "IDEMPOTENT",
@@ -361,12 +366,12 @@
         "module": "tools/toy-repo-mcp/server.ts",
         "exportName": "registerRepositorySearch"
       },
-      "contentHash": "0d8689f129ea921ef9d2940344a7f23f68eb48a85b946d36d926f35abd70ed23"
+      "contentHash": "58efc9182f4b592249e514de7242607bca8506c1c952ec7331956bbe81b66aee"
     },
     {
       "kind": "ToolDescriptor",
       "status": "APPROVED",
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -396,7 +401,7 @@
         "required": ["path", "contents"]
       },
       "sideEffects": ["None; file reads remain inside the disposable toy repository."],
-      "requiredScopes": ["toy-repository:read"],
+      "requiredScopes": ["artifact:read", "tool:invoke"],
       "allowedStages": ["spec", "plan", "targets", "implement", "verify"],
       "timeoutMs": 2000,
       "idempotency": "IDEMPOTENT",
@@ -410,12 +415,12 @@
         "module": "tools/toy-repo-mcp/server.ts",
         "exportName": "registerRepositoryFileRead"
       },
-      "contentHash": "289247aa539523a54402f547d75cc25a206034c9c7fbb9f4815a2d47a040eca3"
+      "contentHash": "2256baff80d79b40ae1a095223ab73287aff9f95bb7400e93466e8cbee076c10"
     },
     {
       "kind": "ToolDescriptor",
       "status": "APPROVED",
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -451,23 +456,23 @@
       "sideEffects": [
         "Writes one bounded file in a disposable temporary copy after host approval."
       ],
-      "requiredScopes": ["toy-repository:write"],
+      "requiredScopes": ["artifact:write", "tool:invoke"],
       "allowedStages": ["implement"],
       "timeoutMs": 3000,
       "idempotency": "IDEMPOTENT",
       "networkRequired": false,
       "filesystemBoundary": { "mode": "BOUNDED_WRITE", "allowedPaths": ["src/**"] },
-      "approvalPolicyId": "policy.tool.bounded-write-human-approval",
+      "approvalPolicyId": "policy.write.approved-targets",
       "sourceImplementation": {
         "module": "tools/toy-repo-mcp/server.ts",
         "exportName": "registerControlledPatch"
       },
-      "contentHash": "f4d1e469a851fae19dc72d633a3940eecdd1b1907777df7503780171bc9b9af9"
+      "contentHash": "080618e56b066abdf555440943c063e12f5a3c34697a37786aabdb9920de5917"
     },
     {
       "kind": "ToolDescriptor",
       "status": "APPROVED",
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -500,23 +505,23 @@
       "sideEffects": [
         "Starts a bounded local Node test subprocess; it cannot select an arbitrary command."
       ],
-      "requiredScopes": ["toy-repository:validate"],
+      "requiredScopes": ["sandbox:execute", "tool:invoke"],
       "allowedStages": ["implement", "verify"],
       "timeoutMs": 10000,
       "idempotency": "IDEMPOTENT",
       "networkRequired": false,
       "filesystemBoundary": { "mode": "READ_ONLY", "allowedPaths": ["src/**", "test/**"] },
-      "approvalPolicyId": "policy.tool.local-process-approval",
+      "approvalPolicyId": "policy.sandbox.validation-notify",
       "sourceImplementation": {
         "module": "tools/toy-repo-mcp/server.ts",
         "exportName": "registerSandboxValidation"
       },
-      "contentHash": "e6a536a1804c330f7cab327048872c6b185403df19fefd6ae6d0ca77d1116347"
+      "contentHash": "00a4522ef228a795c1626caf1ecb2717de2e93f666a36e81cbe77a7bd9ddc664"
     },
     {
       "kind": "ToolDescriptor",
       "status": "APPROVED",
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -550,7 +555,7 @@
         "required": ["diff", "changedPaths"]
       },
       "sideEffects": ["None; executes a fixed read-only Git diff command."],
-      "requiredScopes": ["toy-repository:read"],
+      "requiredScopes": ["artifact:read", "tool:invoke"],
       "allowedStages": ["targets", "implement", "verify", "review"],
       "timeoutMs": 3000,
       "idempotency": "IDEMPOTENT",
@@ -561,12 +566,12 @@
         "module": "tools/toy-repo-mcp/server.ts",
         "exportName": "registerDiffInspection"
       },
-      "contentHash": "28201220a09b92bde58fe683acf0441ac6d859baa072f03d22aac307602796e8"
+      "contentHash": "620e4b73947a11e0f403368a9183fcea127a98cc26a22ed200b8e07ed8d8fe67"
     },
     {
       "kind": "ToolDescriptor",
       "status": "APPROVED",
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -601,7 +606,7 @@
       "sideEffects": [
         "Writes only synthetic evidence within an explicitly selected local boundary."
       ],
-      "requiredScopes": ["synthetic:evidence:write"],
+      "requiredScopes": ["artifact:write", "tool:invoke"],
       "allowedStages": ["implement", "verify", "review"],
       "timeoutMs": 2000,
       "idempotency": "IDEMPOTENT_WITH_KEY",
@@ -610,12 +615,107 @@
         "mode": "BOUNDED_WRITE",
         "allowedPaths": ["browser-local://evidence/**"]
       },
-      "approvalPolicyId": "policy.tool.synthetic-evidence-write",
+      "approvalPolicyId": "policy.evidence.write",
       "sourceImplementation": {
         "module": "src/demo/exports/validation.ts",
         "exportName": "createValidationEvidencePack"
       },
-      "contentHash": "fa5d9330d00975f3b6b33839b56dd635896b5c0497635c36bd5d899798064d0c"
+      "contentHash": "e1dbb9e11a1616f040f05c2ad379ac360010542e4c03968f860f980ef398964b"
+    },
+    {
+      "kind": "ToolDescriptor",
+      "status": "APPROVED",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      "createdAt": "2026-07-16T18:00:00.000Z",
+      "updatedAt": "2026-07-16T18:00:00.000Z",
+      "approval": {
+        "approvedBy": "Synthetic control reviewer",
+        "approvedAt": "2026-07-16T19:00:00.000Z",
+        "approvalPolicyId": "policy.registry.separation-of-duties",
+        "decisionRecordId": "decision.synthetic.registry-v1"
+      },
+      "id": "tool.workflow.diff-review",
+      "name": "Human diff review record",
+      "version": "1.0.0",
+      "description": "Records that an authorized synthetic code-reviewer persona inspected a demo diff.",
+      "riskLevel": "LOW",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "issueKey": { "type": "string", "minLength": 1 },
+          "diffDigest": { "type": "string", "minLength": 1 }
+        },
+        "required": ["issueKey", "diffDigest"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "reviewRecorded": { "type": "boolean" } },
+        "required": ["reviewRecorded"]
+      },
+      "sideEffects": ["Updates browser-local synthetic review state only."],
+      "requiredScopes": ["diff:review", "tool:invoke"],
+      "allowedStages": ["review"],
+      "timeoutMs": 1000,
+      "idempotency": "IDEMPOTENT_WITH_KEY",
+      "networkRequired": false,
+      "filesystemBoundary": { "mode": "NONE", "allowedPaths": [] },
+      "approvalPolicyId": null,
+      "sourceImplementation": {
+        "module": "src/demo/screens/GitHubScreen.tsx",
+        "exportName": "GitHubScreen"
+      },
+      "contentHash": "08f802246c5c27e9f0f6de15d684b87a45c7451417b6f2eb529caa1c9230f346"
+    },
+    {
+      "kind": "ToolDescriptor",
+      "status": "APPROVED",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+      "createdAt": "2026-07-16T18:00:00.000Z",
+      "updatedAt": "2026-07-16T18:00:00.000Z",
+      "approval": {
+        "approvedBy": "Synthetic control reviewer",
+        "approvedAt": "2026-07-16T19:00:00.000Z",
+        "approvalPolicyId": "policy.registry.separation-of-duties",
+        "decisionRecordId": "decision.synthetic.registry-v1"
+      },
+      "id": "tool.workflow.release-readiness",
+      "name": "Release-readiness transition",
+      "version": "1.0.0",
+      "description": "Requests or resumes a browser-local release-readiness transition after validator approval.",
+      "riskLevel": "HIGH",
+      "inputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "issueKey": { "type": "string", "minLength": 1 },
+          "testedCommit": { "type": "string", "minLength": 1 },
+          "decision": { "const": "release-ready" }
+        },
+        "required": ["issueKey", "testedCommit", "decision"]
+      },
+      "outputSchema": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": { "transitionRecorded": { "type": "boolean" } },
+        "required": ["transitionRecorded"]
+      },
+      "sideEffects": [
+        "Updates browser-local synthetic workflow state only after a bound approval."
+      ],
+      "requiredScopes": ["tool:invoke"],
+      "allowedStages": ["review"],
+      "timeoutMs": 1000,
+      "idempotency": "IDEMPOTENT_WITH_KEY",
+      "networkRequired": false,
+      "filesystemBoundary": { "mode": "NONE", "allowedPaths": [] },
+      "approvalPolicyId": "policy.release.validator-approval",
+      "sourceImplementation": {
+        "module": "src/demo/screens/GitHubScreen.tsx",
+        "exportName": "GitHubScreen"
+      },
+      "contentHash": "8df36b6209ab2cf66f928e538e03c329ae259de30a92562c4fff1f41dc69ad3e"
     }
   ],
   "modelPolicies": [
@@ -634,7 +734,7 @@
       "maximumTokens": 12000,
       "costCeilingUsd": 0.35,
       "liveExecutionEnabled": false,
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -643,7 +743,7 @@
         "approvalPolicyId": "policy.registry.separation-of-duties",
         "decisionRecordId": "decision.synthetic.registry-v1"
       },
-      "contentHash": "46e5e1b6078bfe2ed499ee7e482d2baf2a4b57ffa60fd686e78aee3e31acc463"
+      "contentHash": "25c5352c17bb0bba6cb287275a4bf7fc94bfde07e3d3140f8d3315e56cc8376c"
     },
     {
       "kind": "ModelPolicy",
@@ -660,10 +760,10 @@
       "maximumTokens": 16000,
       "costCeilingUsd": 0.5,
       "liveExecutionEnabled": false,
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
-      "contentHash": "fa469f5f075b4273626466e8f21e041518102903bc85d2ec51b55505dcb21096"
+      "contentHash": "a5f63562a1c62b2b81614c1aca448b2119d54022a815cd10e2b9a73524cf927a"
     }
   ],
   "memoryPolicies": [
@@ -679,7 +779,7 @@
       "freshness": { "maximumAgeSeconds": 3600, "staleBehavior": "EXCLUDE" },
       "maximumContextBytes": 196608,
       "priorRunEpisodicMemoryPermitted": false,
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -688,7 +788,7 @@
         "approvalPolicyId": "policy.registry.separation-of-duties",
         "decisionRecordId": "decision.synthetic.registry-v1"
       },
-      "contentHash": "c25f9881c5cc8bb766d5a3512bd23bb90a313116b3c33b032fbbc2981f0d7716"
+      "contentHash": "605338b8a95e1ce1ff787b964ff8ae71e071e461d462c7df1a7b18c460882f52"
     },
     {
       "kind": "MemoryPolicy",
@@ -702,7 +802,7 @@
       "freshness": { "maximumAgeSeconds": 900, "staleBehavior": "FLAG_FOR_REVIEW" },
       "maximumContextBytes": 131072,
       "priorRunEpisodicMemoryPermitted": false,
-      "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+      "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
       "createdAt": "2026-07-16T18:00:00.000Z",
       "updatedAt": "2026-07-16T18:00:00.000Z",
       "approval": {
@@ -711,7 +811,217 @@
         "approvalPolicyId": "policy.registry.separation-of-duties",
         "decisionRecordId": "decision.synthetic.registry-v1"
       },
-      "contentHash": "9cfb72896608ac398e785c44e025678d845fad664342a8054e61158f81f2a753"
+      "contentHash": "4bc58d0b4ff4393ffea2e06198646ef713ab6ea7accf3320563668db2f44e865"
+    }
+  ],
+  "approvalPolicies": [
+    {
+      "kind": "ApprovalPolicy",
+      "enabled": true,
+      "provenance": {
+        "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        "independentlyAuthored": true,
+        "createdAt": "2026-07-17T12:00:00.000Z"
+      },
+      "id": "policy.repository.read",
+      "name": "Repository reads",
+      "version": "1.0.0",
+      "description": "Allows bounded reads from synthetic issue and repository fixtures.",
+      "matcher": {
+        "toolIds": ["tool.issue.read", "tool.repository.search", "tool.repository.file.read"],
+        "riskLevels": ["READ_ONLY"]
+      },
+      "mode": "ALLOW",
+      "requiredApproverScopes": [],
+      "requiredApproverPersonas": [],
+      "timeoutSeconds": 300,
+      "forbidSelfApproval": false,
+      "reasonRequired": false,
+      "contentHash": "e05592eecc4286b81ec554594287ce85cc5cde6ca98cc421afb277f1293dd7e9"
+    },
+    {
+      "kind": "ApprovalPolicy",
+      "enabled": true,
+      "provenance": {
+        "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        "independentlyAuthored": true,
+        "createdAt": "2026-07-17T12:00:00.000Z"
+      },
+      "id": "policy.write.approved-targets",
+      "name": "Controlled writes inside approved targets",
+      "version": "1.0.0",
+      "description": "Requires a distinct code reviewer for a patch bounded by all write allow-lists.",
+      "matcher": {
+        "toolIds": ["tool.repository.patch.controlled"],
+        "stages": ["implement"],
+        "riskLevels": ["HIGH"],
+        "pathPatterns": ["src/**"],
+        "pathBoundary": "INSIDE_APPROVED_TARGETS"
+      },
+      "mode": "REQUIRE_APPROVAL",
+      "requiredApproverScopes": ["diff:review"],
+      "requiredApproverPersonas": ["synthetic-code-reviewer"],
+      "timeoutSeconds": 1800,
+      "decisionCacheTtlSeconds": 300,
+      "forbidSelfApproval": true,
+      "reasonRequired": true,
+      "contentHash": "13a8f43b51b4f036ba44d60a3f3239e6048dfe37565221048ee710c594c47bf4"
+    },
+    {
+      "kind": "ApprovalPolicy",
+      "enabled": true,
+      "provenance": {
+        "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        "independentlyAuthored": true,
+        "createdAt": "2026-07-17T12:00:00.000Z"
+      },
+      "id": "policy.write.outside-targets-deny",
+      "name": "Writes outside approved targets",
+      "version": "1.0.0",
+      "description": "Denies any controlled patch that escapes an agent, tool, or change-target boundary.",
+      "matcher": {
+        "toolIds": ["tool.repository.patch.controlled"],
+        "pathPatterns": ["**"],
+        "pathBoundary": "OUTSIDE_APPROVED_TARGETS"
+      },
+      "mode": "DENY",
+      "requiredApproverScopes": [],
+      "requiredApproverPersonas": [],
+      "timeoutSeconds": 300,
+      "forbidSelfApproval": true,
+      "reasonRequired": true,
+      "contentHash": "02e215efb53deeece217af55fa0ca98f5e1064c45dde64cade0fe3981cc79ade"
+    },
+    {
+      "kind": "ApprovalPolicy",
+      "enabled": true,
+      "provenance": {
+        "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        "independentlyAuthored": true,
+        "createdAt": "2026-07-17T12:00:00.000Z"
+      },
+      "id": "policy.sandbox.network-deny",
+      "name": "Sandbox network access denied",
+      "version": "1.0.0",
+      "description": "Denies network-enabled sandbox requests in the functional local demonstration.",
+      "matcher": { "toolIds": ["tool.sandbox.*"], "networkAccess": true },
+      "mode": "DENY",
+      "requiredApproverScopes": [],
+      "requiredApproverPersonas": [],
+      "timeoutSeconds": 300,
+      "forbidSelfApproval": true,
+      "reasonRequired": true,
+      "contentHash": "01b5225d7a524f680c9746f2a9d7d4250ce020c54d181f59814cc4ff1715e874"
+    },
+    {
+      "kind": "ApprovalPolicy",
+      "enabled": true,
+      "provenance": {
+        "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        "independentlyAuthored": true,
+        "createdAt": "2026-07-17T12:00:00.000Z"
+      },
+      "id": "policy.sandbox.validation-notify",
+      "name": "Fixed validation command",
+      "version": "1.0.0",
+      "description": "Allows the fixed local validation command and records a notification decision.",
+      "matcher": {
+        "toolIds": ["tool.sandbox.command"],
+        "stages": ["implement", "verify"],
+        "networkAccess": false
+      },
+      "mode": "NOTIFY",
+      "requiredApproverScopes": [],
+      "requiredApproverPersonas": [],
+      "timeoutSeconds": 600,
+      "forbidSelfApproval": false,
+      "reasonRequired": false,
+      "contentHash": "fd233975c9ce1fe5fbee11b564a579c0fda8d8decfe891767320e9205895c0c4"
+    },
+    {
+      "kind": "ApprovalPolicy",
+      "enabled": true,
+      "provenance": {
+        "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        "independentlyAuthored": true,
+        "createdAt": "2026-07-17T12:00:00.000Z"
+      },
+      "id": "policy.evidence.finalized-deny",
+      "name": "Finalized evidence is immutable",
+      "version": "1.0.0",
+      "description": "Denies mutation after browser-local evidence is marked final.",
+      "matcher": { "toolIds": ["tool.evidence.write"], "evidenceFinalized": true },
+      "mode": "DENY",
+      "requiredApproverScopes": [],
+      "requiredApproverPersonas": [],
+      "timeoutSeconds": 300,
+      "forbidSelfApproval": true,
+      "reasonRequired": true,
+      "contentHash": "4ce6f22514a5de6bca1ca21af4e97cd726044732da934f9916b0d713e7c84af1"
+    },
+    {
+      "kind": "ApprovalPolicy",
+      "enabled": true,
+      "provenance": {
+        "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        "independentlyAuthored": true,
+        "createdAt": "2026-07-17T12:00:00.000Z"
+      },
+      "id": "policy.evidence.write",
+      "name": "Mutable evidence write",
+      "version": "1.0.0",
+      "description": "Allows bounded synthetic evidence writes before finalization.",
+      "matcher": { "toolIds": ["tool.evidence.write"], "evidenceFinalized": false },
+      "mode": "ALLOW",
+      "requiredApproverScopes": [],
+      "requiredApproverPersonas": [],
+      "timeoutSeconds": 300,
+      "forbidSelfApproval": false,
+      "reasonRequired": false,
+      "contentHash": "3c005415c4347d3fb59e236683990a27d90242af55010f97d7f8f94482e3ff2b"
+    },
+    {
+      "kind": "ApprovalPolicy",
+      "enabled": true,
+      "provenance": {
+        "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        "independentlyAuthored": true,
+        "createdAt": "2026-07-17T12:00:00.000Z"
+      },
+      "id": "policy.diff.human-review",
+      "name": "Human diff review",
+      "version": "1.0.0",
+      "description": "Allows an authorized reviewer to record inspection of a synthetic diff.",
+      "matcher": { "toolIds": ["tool.repository.diff.inspect", "tool.workflow.diff-review"] },
+      "mode": "ALLOW",
+      "requiredApproverScopes": [],
+      "requiredApproverPersonas": [],
+      "timeoutSeconds": 300,
+      "forbidSelfApproval": false,
+      "reasonRequired": false,
+      "contentHash": "42ab59b0c202003c6d942fd2e53cbe232d4bc96f713b8ee3f39fe18ad8c9eade"
+    },
+    {
+      "kind": "ApprovalPolicy",
+      "enabled": true,
+      "provenance": {
+        "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+        "independentlyAuthored": true,
+        "createdAt": "2026-07-17T12:00:00.000Z"
+      },
+      "id": "policy.release.validator-approval",
+      "name": "Release readiness requires validation approval",
+      "version": "1.0.0",
+      "description": "Requires a distinct validator persona before a release-readiness transition.",
+      "matcher": { "toolIds": ["tool.workflow.release-readiness"], "stages": ["review"] },
+      "mode": "REQUIRE_APPROVAL",
+      "requiredApproverScopes": ["validation:approve"],
+      "requiredApproverPersonas": ["synthetic-validator"],
+      "timeoutSeconds": 3600,
+      "decisionCacheTtlSeconds": 600,
+      "forbidSelfApproval": true,
+      "reasonRequired": true,
+      "contentHash": "dc20f0aa8bdd0ee88d624d8a9d695f2bc993dce14138cf5a8480ba32a42706cb"
     }
   ]
 }

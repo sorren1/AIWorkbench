@@ -1,4 +1,9 @@
-import type { RegistryResource, RegistryResourceSource } from "./contracts";
+import type {
+  ApprovalPolicy,
+  ApprovalPolicySource,
+  RegistryResource,
+  RegistryResourceSource,
+} from "./contracts";
 
 export function canonicalJson(value: unknown): string {
   if (value === null || typeof value !== "object") return JSON.stringify(value);
@@ -12,6 +17,10 @@ export function canonicalJson(value: unknown): string {
 export function contentHashInput(resource: RegistryResource | RegistryResourceSource): unknown {
   const lifecycleFields = new Set(["status", "approval", "createdAt", "updatedAt", "contentHash"]);
   return Object.fromEntries(Object.entries(resource).filter(([key]) => !lifecycleFields.has(key)));
+}
+
+export function approvalPolicyHashInput(policy: ApprovalPolicy | ApprovalPolicySource): unknown {
+  return Object.fromEntries(Object.entries(policy).filter(([key]) => key !== "contentHash"));
 }
 
 export async function sha256Hex(value: unknown): Promise<string> {

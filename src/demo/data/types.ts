@@ -6,6 +6,7 @@ export type Route =
   | "artifacts"
   | "github"
   | "validation"
+  | "approvals"
   | "control-plane"
   | "architecture"
   | "settings";

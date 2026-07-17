@@ -1,0 +1,21 @@
+{
+  "kind": "ApprovalPolicy",
+  "enabled": true,
+  "provenance": {
+    "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+    "independentlyAuthored": true,
+    "createdAt": "2026-07-17T12:00:00.000Z"
+  },
+  "id": "policy.diff.human-review",
+  "name": "Human diff review",
+  "version": "1.0.0",
+  "description": "Allows an authorized reviewer to record inspection of a synthetic diff.",
+  "matcher": { "toolIds": ["tool.repository.diff.inspect", "tool.workflow.diff-review"] },
+  "mode": "ALLOW",
+  "requiredApproverScopes": [],
+  "requiredApproverPersonas": [],
+  "timeoutSeconds": 300,
+  "forbidSelfApproval": false,
+  "reasonRequired": false,
+  "contentHash": "42ab59b0c202003c6d942fd2e53cbe232d4bc96f713b8ee3f39fe18ad8c9eade"
+}

@@ -1,0 +1,32 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.invalid/schemas/registry/approval-event.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "eventId",
+    "requestId",
+    "sequence",
+    "type",
+    "timestamp",
+    "actor",
+    "reason",
+    "previousEventHash",
+    "contentHash"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "eventId": { "$ref": "common.schema.json#/$defs/identifier" },
+    "requestId": { "$ref": "common.schema.json#/$defs/identifier" },
+    "sequence": { "type": "integer", "minimum": 1 },
+    "type": { "enum": ["REQUESTED", "APPROVED", "REJECTED", "EXPIRED", "INVALIDATED"] },
+    "timestamp": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "actor": { "$ref": "common.schema.json#/$defs/persona" },
+    "reason": { "type": "string", "minLength": 1 },
+    "previousEventHash": {
+      "oneOf": [{ "$ref": "common.schema.json#/$defs/contentHash" }, { "type": "null" }]
+    },
+    "contentHash": { "$ref": "common.schema.json#/$defs/contentHash" }
+  }
+}

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "classification": "SYNTHETIC_PUBLIC_PORTFOLIO_FIXTURE",
+  "policies": [
+    {
+      "id": "policy.repository.read",
+      "version": "1.0.0",
+      "contentHash": "e05592eecc4286b81ec554594287ce85cc5cde6ca98cc421afb277f1293dd7e9",
+      "href": "/capabilities/policies/policy.repository.read.json"
+    },
+    {
+      "id": "policy.write.approved-targets",
+      "version": "1.0.0",
+      "contentHash": "13a8f43b51b4f036ba44d60a3f3239e6048dfe37565221048ee710c594c47bf4",
+      "href": "/capabilities/policies/policy.write.approved-targets.json"
+    },
+    {
+      "id": "policy.write.outside-targets-deny",
+      "version": "1.0.0",
+      "contentHash": "02e215efb53deeece217af55fa0ca98f5e1064c45dde64cade0fe3981cc79ade",
+      "href": "/capabilities/policies/policy.write.outside-targets-deny.json"
+    },
+    {
+      "id": "policy.sandbox.network-deny",
+      "version": "1.0.0",
+      "contentHash": "01b5225d7a524f680c9746f2a9d7d4250ce020c54d181f59814cc4ff1715e874",
+      "href": "/capabilities/policies/policy.sandbox.network-deny.json"
+    },
+    {
+      "id": "policy.sandbox.validation-notify",
+      "version": "1.0.0",
+      "contentHash": "fd233975c9ce1fe5fbee11b564a579c0fda8d8decfe891767320e9205895c0c4",
+      "href": "/capabilities/policies/policy.sandbox.validation-notify.json"
+    },
+    {
+      "id": "policy.evidence.finalized-deny",
+      "version": "1.0.0",
+      "contentHash": "4ce6f22514a5de6bca1ca21af4e97cd726044732da934f9916b0d713e7c84af1",
+      "href": "/capabilities/policies/policy.evidence.finalized-deny.json"
+    },
+    {
+      "id": "policy.evidence.write",
+      "version": "1.0.0",
+      "contentHash": "3c005415c4347d3fb59e236683990a27d90242af55010f97d7f8f94482e3ff2b",
+      "href": "/capabilities/policies/policy.evidence.write.json"
+    },
+    {
+      "id": "policy.diff.human-review",
+      "version": "1.0.0",
+      "contentHash": "42ab59b0c202003c6d942fd2e53cbe232d4bc96f713b8ee3f39fe18ad8c9eade",
+      "href": "/capabilities/policies/policy.diff.human-review.json"
+    },
+    {
+      "id": "policy.release.validator-approval",
+      "version": "1.0.0",
+      "contentHash": "dc20f0aa8bdd0ee88d624d8a9d695f2bc993dce14138cf5a8480ba32a42706cb",
+      "href": "/capabilities/policies/policy.release.validator-approval.json"
+    }
+  ]
+}

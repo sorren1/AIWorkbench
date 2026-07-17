@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.invalid/schemas/registry/approval-policy.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "id",
+    "name",
+    "version",
+    "description",
+    "enabled",
+    "matcher",
+    "mode",
+    "requiredApproverScopes",
+    "requiredApproverPersonas",
+    "timeoutSeconds",
+    "forbidSelfApproval",
+    "reasonRequired",
+    "contentHash",
+    "provenance"
+  ],
+  "properties": {
+    "kind": { "const": "ApprovalPolicy" },
+    "id": { "$ref": "common.schema.json#/$defs/identifier" },
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "$ref": "common.schema.json#/$defs/semanticVersion" },
+    "description": { "type": "string", "minLength": 1 },
+    "enabled": { "type": "boolean" },
+    "matcher": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "toolIds": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
+        "stages": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/stage" },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "riskLevels": {
+          "type": "array",
+          "items": { "enum": ["READ_ONLY", "LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "agentIds": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
+        "pathPatterns": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
+        "pathBoundary": {
+          "enum": ["INSIDE_APPROVED_TARGETS", "OUTSIDE_APPROVED_TARGETS"]
+        },
+        "networkAccess": { "type": "boolean" },
+        "evidenceFinalized": { "type": "boolean" }
+      },
+      "minProperties": 1
+    },
+    "mode": { "enum": ["ALLOW", "NOTIFY", "REQUIRE_APPROVAL", "DENY"] },
+    "requiredApproverScopes": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "requiredApproverPersonas": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/identifier" },
+      "uniqueItems": true
+    },
+    "timeoutSeconds": { "type": "integer", "minimum": 1, "maximum": 604800 },
+    "decisionCacheTtlSeconds": { "type": "integer", "minimum": 0, "maximum": 86400 },
+    "forbidSelfApproval": { "type": "boolean" },
+    "reasonRequired": { "type": "boolean" },
+    "contentHash": { "$ref": "common.schema.json#/$defs/contentHash" },
+    "provenance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["sourceCommit", "independentlyAuthored", "createdAt"],
+      "properties": {
+        "sourceCommit": { "$ref": "common.schema.json#/$defs/sourceCommit" },
+        "independentlyAuthored": { "const": true },
+        "createdAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+      }
+    }
+  }
+}

@@ -15,6 +15,7 @@ import type { Route } from "../data/types";
 import { useApp, type LogDrawer, type ToastKind, type WorkbenchModal } from "../state/store";
 import { readPreferences, writePreferences, type ThemePreference } from "../state/preferences";
 import { Icon, type IconName } from "../../shared/Icon";
+import { PERSONAS, personaById } from "../authorization/personas";
 import { Avatar, Badge, Banner, Btn, IconBtn } from "./primitives";
 
 /* ============================================================
@@ -34,6 +35,7 @@ const NAV: NavigationSection[] = [
       { id: "artifacts", label: "Artifacts", icon: "file-code" },
       { id: "github", label: "GitHub / PR", icon: "git-pull-request" },
       { id: "validation", label: "Validation Evidence", icon: "flask" },
+      { id: "approvals", label: "Approval Inbox", icon: "shield-check" },
     ],
   },
   {
@@ -52,6 +54,7 @@ const ROUTE_TITLES: Record<Route, string> = {
   artifacts: "Artifacts",
   github: "GitHub / PR",
   validation: "Validation Evidence",
+  approvals: "Approval Inbox",
   "control-plane": "Control Plane",
   architecture: "Architecture",
   settings: "Settings",
@@ -93,7 +96,11 @@ export function Sidebar() {
     queue: issues.length,
     github: needsReview || null,
     validation: failed || null,
+    approvals:
+      Object.values(state.approvalStore.requests).filter((request) => request.status === "PENDING")
+        .length || null,
   };
+  const activePersona = personaById(state.personaId);
 
   return (
     <aside className="wb-side">
@@ -126,10 +133,10 @@ export function Sidebar() {
       </nav>
       <div className="wb-side-foot">
         <div className="wb-user">
-          <Avatar name={meta.user.name} />
+          <Avatar name={activePersona.shortName} />
           <div className="wb-user-meta">
-            <div className="wb-user-name">{meta.user.name}</div>
-            <div className="wb-user-role">{meta.user.role}</div>
+            <div className="wb-user-name">{activePersona.shortName}</div>
+            <div className="wb-user-role">Synthetic demo persona</div>
           </div>
         </div>
       </div>
@@ -181,6 +188,24 @@ export function Header({
         <span className="wb-dot" aria-hidden="true" />
         Demo mode · Synthetic data · No external writes
       </div>
+
+      <label className="wb-persona-selector">
+        <span>View as</span>
+        <select
+          aria-label="View authorization as synthetic persona"
+          value={state.personaId}
+          onChange={(event) => {
+            const selected = PERSONAS.find((persona) => persona.id === event.currentTarget.value);
+            if (selected) actions.setPersona(selected.id);
+          }}
+        >
+          {PERSONAS.map((persona) => (
+            <option key={persona.id} value={persona.id}>
+              {persona.shortName}
+            </option>
+          ))}
+        </select>
+      </label>
 
       <div className="wb-header-actions">
         <IconBtn

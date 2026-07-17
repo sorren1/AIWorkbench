@@ -150,6 +150,9 @@ test("reset requires confirmation and restores the deterministic baseline and th
 }) => {
   await page.goto("/demo/?scenario=failed-verification");
   await page.getByRole("button", { name: "Switch to dark" }).click();
+  await page
+    .getByLabel("View authorization as synthetic persona")
+    .selectOption("synthetic-validator");
   await page.getByRole("button", { name: "Reset demo" }).click();
   const dialog = page.getByRole("dialog", { name: "Reset the synthetic demo?" });
   await expect(dialog).toBeVisible();
@@ -164,13 +167,16 @@ test("reset requires confirmation and restores the deterministic baseline and th
   await expect(page.getByRole("heading", { level: 1, name: "Work Queue" })).toBeVisible();
   await expect(page.getByLabel("Scenario seed")).toHaveValue("baseline");
   await expect(page.locator("html")).toHaveAttribute("data-theme", "light");
+  await expect(page.getByLabel("View authorization as synthetic persona")).toHaveValue(
+    "synthetic-code-reviewer",
+  );
   expect(new URL(page.url()).searchParams.get("scenario")).toBeNull();
   await page.reload();
   await expect(page.getByRole("heading", { level: 1, name: "Work Queue" })).toBeVisible();
   await expect(page.getByLabel("Scenario seed")).toHaveValue("baseline");
 });
 
-test("theme is the only persisted preference and the disclosure keeps writes unambiguous", async ({
+test("versioned local preferences persist and the disclosure keeps writes unambiguous", async ({
   page,
 }) => {
   await page.goto("/demo/");
@@ -205,13 +211,20 @@ test("browser-local workflow decisions mutate the intended state without externa
   await checklist.first().uncheck();
   await expect(checklist.first()).not.toBeChecked();
   await expect(checklist.nth(1)).toBeChecked();
-  await page.getByRole("button", { name: "Approve demo for validation" }).click();
+  await page.getByRole("button", { name: "Request validation approval" }).click();
   await expect(page.getByText("Complete the demo checklist", { exact: true })).toBeVisible();
   await expect(
     page.getByRole("heading", { level: 1, name: "GitHub / PR readiness" }),
   ).toBeVisible();
   await checklist.first().check();
-  await page.getByRole("button", { name: "Approve demo for validation" }).click();
+  await page.getByRole("button", { name: "Request validation approval" }).click();
+  await expect(page.getByRole("heading", { level: 1, name: "Approval Inbox" })).toBeVisible();
+  await page
+    .getByLabel("View authorization as synthetic persona")
+    .selectOption("synthetic-validator");
+  await page.getByLabel("Decision reason").fill("Synthetic evidence and tested commit reviewed.");
+  await page.getByRole("button", { name: "Approve bound request" }).click();
+  await page.getByRole("button", { name: "Resume bound local action" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Validation Evidence" })).toBeVisible();
 
   await page.goto("/demo/?screen=validation&issue=FIN-1234");
@@ -219,7 +232,7 @@ test("browser-local workflow decisions mutate the intended state without externa
   await expect(page.getByText("In Progress", { exact: true }).first()).toBeVisible();
   await page.getByRole("button", { name: "Mark scenario passed" }).click();
   await page.getByRole("button", { name: "Mark demo evidence complete" }).click();
-  await expect(page.getByText("Complete", { exact: true }).first()).toBeVisible();
+  await expect(page.getByText("Bound release approval required", { exact: true })).toBeVisible();
 
   await page.goto("/demo/?screen=github&issue=FIN-1113");
   await page.getByRole("button", { name: "Create mock PR" }).click();

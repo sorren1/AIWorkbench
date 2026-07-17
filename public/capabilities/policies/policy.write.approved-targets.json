@@ -1,0 +1,28 @@
+{
+  "kind": "ApprovalPolicy",
+  "enabled": true,
+  "provenance": {
+    "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+    "independentlyAuthored": true,
+    "createdAt": "2026-07-17T12:00:00.000Z"
+  },
+  "id": "policy.write.approved-targets",
+  "name": "Controlled writes inside approved targets",
+  "version": "1.0.0",
+  "description": "Requires a distinct code reviewer for a patch bounded by all write allow-lists.",
+  "matcher": {
+    "toolIds": ["tool.repository.patch.controlled"],
+    "stages": ["implement"],
+    "riskLevels": ["HIGH"],
+    "pathPatterns": ["src/**"],
+    "pathBoundary": "INSIDE_APPROVED_TARGETS"
+  },
+  "mode": "REQUIRE_APPROVAL",
+  "requiredApproverScopes": ["diff:review"],
+  "requiredApproverPersonas": ["synthetic-code-reviewer"],
+  "timeoutSeconds": 1800,
+  "decisionCacheTtlSeconds": 300,
+  "forbidSelfApproval": true,
+  "reasonRequired": true,
+  "contentHash": "13a8f43b51b4f036ba44d60a3f3239e6048dfe37565221048ee710c594c47bf4"
+}

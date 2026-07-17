@@ -7,6 +7,7 @@ import type { Tone, ValidationStatus } from "../data/types";
 import { useApp, useIssue } from "../state/store";
 import { Icon, type IconName } from "../../shared/Icon";
 import { downloadTextFile } from "../utils/browserActions";
+import { personaById } from "../authorization/personas";
 import {
   Avatar,
   Badge,
@@ -70,6 +71,8 @@ export function ValidationScreen() {
   const passedScenarioCount = scen.filter((s) => s.status === "Passed").length;
   const scenarioProgress = Math.round((passedScenarioCount / Math.max(1, scen.length)) * 100);
   const evidencePack = createValidationEvidencePack(issue, base, ov);
+  const activePersona = personaById(state.personaId);
+  const canApproveValidation = activePersona.scopes.includes("validation:approve");
 
   const setScenario = (name: string, status: Extract<ValidationStatus, "Passed" | "Failed">) => {
     actions.setVal(issue.key, { scenarios: { ...(ov.scenarios || {}), [name]: status } });
@@ -101,6 +104,22 @@ export function ValidationScreen() {
     );
   };
   const complete = () => {
+    if (!state.prState[issue.key]?.approvedForValidation) {
+      actions.toast(
+        "error",
+        "Bound release approval required",
+        "Resume an approved release-readiness request before recording the final validation decision.",
+      );
+      return;
+    }
+    if (!canApproveValidation) {
+      actions.toast(
+        "error",
+        "Validation decision blocked",
+        `The ${activePersona.shortName} persona lacks validation:approve; policy requires a distinct synthetic validator.`,
+      );
+      return;
+    }
     if (!allPassed) {
       actions.toast(
         "warn",
@@ -226,6 +245,14 @@ export function ValidationScreen() {
             </Btn>
           </div>
         </div>
+        {!canApproveValidation && (
+          <div className="wb-card-body" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+            <Banner tone="warn" title="Final decision unavailable for this persona" icon="lock">
+              {activePersona.shortName} does not hold validation:approve. Use the View as selector
+              to inspect the distinct Validator / Release Approver policy path.
+            </Banner>
+          </div>
+        )}
       </Card>
 
       <div

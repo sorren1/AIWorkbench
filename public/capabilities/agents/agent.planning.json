@@ -13,7 +13,7 @@
   "maxRepairAttempts": 2,
   "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
   "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-  "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+  "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
   "createdAt": "2026-07-16T18:00:00.000Z",
   "updatedAt": "2026-07-16T18:00:00.000Z",
   "approval": {
@@ -30,5 +30,5 @@
   "skills": ["change sequencing", "dependency inspection"],
   "allowedToolIds": ["tool.issue.read", "tool.repository.search", "tool.repository.file.read"],
   "allowedWritePaths": ["artifacts/plan.md"],
-  "contentHash": "6c91a9859a06a85a03895ebc2ad3c9b89baff59dd4fa48485b2dce4819d54d59"
+  "contentHash": "75a1cd76b61731653471c291de05a74b677e06914feb1d4d25a95ab0c7fb6ec0"
 }

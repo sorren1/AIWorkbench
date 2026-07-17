@@ -20,7 +20,7 @@ The focused control-plane direction extends that workflow with typed domain seam
 
 Every visible value belongs to one category:
 
-- **Functional in this repository:** navigation and shareable deep links, filters, versioned theme preference, deterministic scenario loading and reset, the guided tour, reducer-backed workflow transitions, stale-state propagation, local review decisions, artifact copy/download, architecture and validation-evidence exports, schema-validated/hash-versioned registry selection, generated capability cards, the bounded local toy-repository MCP slice, and the static production build.
+- **Functional in this repository:** navigation and shareable deep links, filters, versioned theme and authorization preferences, deterministic scenario loading and reset, the guided tour, reducer-backed workflow transitions, stale-state propagation, scoped synthetic persona decisions, a durable browser-local approval inbox, hash-bound CLI pause/resume, artifact copy/download, architecture and validation-evidence exports, schema-validated/hash-versioned registry selection, generated capability cards, the bounded local toy-repository MCP slice, and the static production build.
 - **Synthetic demo fixture:** every persona, issue, repository, branch, pull request, check, log, duration, test result, metric, external integration result, and provider response shown in the workbench.
 - **Professional context:** the single statement in the separate section below. It is not evidence about the public prototype.
 
@@ -73,6 +73,16 @@ npm run mcp:evidence:generate
 ```
 
 The corresponding `registry:check` and `mcp:evidence:check` commands fail when committed generated evidence is stale. See [docs/agent-and-tool-registry.md](docs/agent-and-tool-registry.md) for the trust boundary and public JSON paths.
+
+Exercise the durable local approval protocol with:
+
+```bash
+npm run demo:sandbox -- --scenario approval-required
+npm run demo:approve -- --request <request-id> --as synthetic-code-reviewer --reason "Reviewed bounded synthetic diff"
+npm run demo:resume -- --run <run-id>
+```
+
+Runs stay under gitignored `.workbench/runs/`. This is a synthetic local authorization demonstration, not production OAuth/OIDC identity or shared audit storage. See [authorization and separation of duties](docs/authorization-and-separation-of-duties.md), [human approval protocol](docs/human-approval-protocol.md), and the [threat model](docs/threat-model.md).
 
 ## Project structure
 

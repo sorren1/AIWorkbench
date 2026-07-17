@@ -50,6 +50,9 @@ npm run test:a11y
 npm run test:e2e
 npm run build
 npm run check
+npm run demo:sandbox -- --scenario approval-required
+npm run demo:approve -- --request <request-id> --as synthetic-code-reviewer --reason "..."
+npm run demo:resume -- --run <run-id>
 ```
 
 `npm run check` must be the local CI-equivalent aggregate. The lockfile is authoritative; use `npm ci` in CI and clean verification.

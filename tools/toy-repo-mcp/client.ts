@@ -11,7 +11,18 @@ import { hasValidContentHash } from "../../src/demo/control-plane/registry/canon
 import type { StageId } from "../../src/demo/data/types";
 import { registrySnapshot } from "../../src/demo/control-plane/registry/generated";
 import { resolveStageExecutionManifest } from "../../src/demo/control-plane/registry/lifecycle";
-import { validateToolDescriptor } from "../../src/demo/control-plane/registry/validation";
+import {
+  validateApprovalRequest,
+  validateToolDescriptor,
+} from "../../src/demo/control-plane/registry/validation";
+import { authorizeRegistryAction } from "../../src/demo/authorization/authorizeAction";
+import {
+  proposedArgumentsHash,
+  validateApprovalForResume,
+} from "../../src/demo/authorization/approvalProtocol";
+import type { ApprovalRequest, PersonaId } from "../../src/demo/authorization/contracts";
+import { isPersonaId, personaById } from "../../src/demo/authorization/personas";
+import { sha256Hex } from "../../src/demo/control-plane/registry/canonical";
 
 const projectRoot = resolve(import.meta.dirname, "../..");
 const serverPath = resolve(import.meta.dirname, "server.ts");
@@ -46,8 +57,10 @@ export type InvocationPolicyEvidence = {
   readonly registryContentHash: string;
   readonly stageId: Exclude<StageId, "seed">;
   readonly decision: "ALLOW";
-  readonly reasonCode: "APPROVED_TOOL_IN_APPROVED_STAGE_MANIFEST";
+  readonly reasonCode: "POLICY_ALLOW" | "POLICY_NOTIFY" | "BOUND_APPROVAL_CURRENT";
   readonly approvalPolicyId: string | null;
+  readonly initiatingActor: PersonaId;
+  readonly policyDecisionId: string;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -116,7 +129,16 @@ export async function startToyMcpSession(options: {
   readonly toyRepositoryRoot: string;
   readonly stageId: Exclude<StageId, "seed">;
   readonly approvedToolIds: readonly string[];
-  readonly grantedApprovalPolicyIds: readonly string[];
+  readonly authorization: {
+    readonly personaId: PersonaId;
+    readonly effectiveSubject: string;
+    readonly runId: string;
+    readonly sessionId: string;
+    readonly now: string;
+    readonly approvedChangeTargets: readonly string[];
+    readonly contextPackDigest: string;
+  };
+  readonly approvalRequest?: ApprovalRequest;
 }): Promise<ToyMcpSession> {
   const manifestDecision = await resolveStageExecutionManifest(
     registrySnapshot,
@@ -130,14 +152,10 @@ export async function startToyMcpSession(options: {
     );
   }
 
-  const writeDescriptor = registrySnapshot.tools.find(
-    (tool) => tool.id === "tool.repository.patch.controlled",
-  );
   const writeEnabled =
     options.approvedToolIds.includes("tool.repository.patch.controlled") &&
-    writeDescriptor?.approvalPolicyId !== null &&
-    writeDescriptor?.approvalPolicyId !== undefined &&
-    options.grantedApprovalPolicyIds.includes(writeDescriptor.approvalPolicyId);
+    options.approvalRequest?.tool.id === "tool.repository.patch.controlled" &&
+    options.approvalRequest.status === "APPROVED";
 
   const transport = new StdioClientTransport({
     command: process.execPath,
@@ -193,12 +211,8 @@ export async function startToyMcpSession(options: {
         if (!approvedDescriptor.allowedStages.includes(options.stageId)) {
           throw new Error(`Local policy denied ${toolId} for stage ${options.stageId}.`);
         }
-        if (
-          approvedDescriptor.approvalPolicyId &&
-          !options.grantedApprovalPolicyIds.includes(approvedDescriptor.approvalPolicyId)
-        ) {
-          throw new Error(`Local policy requires approval ${approvedDescriptor.approvalPolicyId}.`);
-        }
+        if (!isPersonaId(options.authorization.personaId))
+          throw new Error("Local authorization persona is invalid.");
         const validateArguments = schemaCompiler.compile(approvedDescriptor.inputSchema);
         if (!validateArguments(args)) {
           throw new Error(`Local registry input schema denied arguments for ${toolId}.`);
@@ -209,6 +223,69 @@ export async function startToyMcpSession(options: {
           !pathAllowed(args.path, approvedDescriptor.filesystemBoundary.allowedPaths)
         ) {
           throw new Error(`Local path policy denied ${args.path} for ${toolId}.`);
+        }
+        const actionNow = options.authorization.now;
+        const action = await authorizeRegistryAction({
+          snapshot: registrySnapshot,
+          persona: personaById(options.authorization.personaId),
+          stageId: options.stageId,
+          toolId,
+          targetPaths: typeof args.path === "string" ? [args.path] : [],
+          approvedChangeTargets: options.authorization.approvedChangeTargets,
+          networkAccess: approvedDescriptor.networkRequired,
+          evidenceFinalized: false,
+          effectiveSubject: options.authorization.effectiveSubject,
+          runId: options.authorization.runId,
+          sessionId: options.authorization.sessionId,
+          now: actionNow,
+          expiresAt: new Date(Date.parse(actionNow) + 15 * 60 * 1000).toISOString(),
+          decisionId: `decision.${options.authorization.runId}.${toolId.replaceAll(".", "-")}`,
+        });
+        let reasonCode: InvocationPolicyEvidence["reasonCode"];
+        if (action.decision.mode === "REQUIRE_APPROVAL") {
+          const approval = options.approvalRequest;
+          const policy = action.decision.matchedPolicy;
+          if (!approval || !policy) {
+            throw new Error(`Local policy requires a bound approval for ${toolId}.`);
+          }
+          const approvalValidation = validateApprovalRequest(approval);
+          if (!approvalValidation.valid) {
+            throw new Error("Local approval request failed JSON Schema validation.");
+          }
+          const approver =
+            approval.decisionActor && isPersonaId(approval.decisionActor)
+              ? personaById(approval.decisionActor)
+              : null;
+          const resume = validateApprovalForResume({
+            request: approval,
+            binding: {
+              proposedArgumentsHash: await proposedArgumentsHash(args),
+              agent: action.request.identity.executingAgent,
+              tool: {
+                id: approvedDescriptor.id,
+                version: approvedDescriptor.version,
+                contentHash: approvedDescriptor.contentHash,
+              },
+              changeTargetDigest: await sha256Hex(options.authorization.approvedChangeTargets),
+              contextPackDigest: options.authorization.contextPackDigest,
+            },
+            policy,
+            approver,
+            now: actionNow,
+          });
+          if (!resume.allowed) {
+            throw new Error(
+              `Local approval denied on resume: ${resume.reasonCode} (${resume.detail})`,
+            );
+          }
+          reasonCode = resume.reasonCode;
+        } else if (!action.decision.allowed) {
+          throw new Error(
+            `Local policy denied ${toolId}: ${action.decision.reasonCode} (${action.decision.explanation})`,
+          );
+        } else {
+          reasonCode =
+            action.decision.reasonCode === "POLICY_NOTIFY" ? "POLICY_NOTIFY" : "POLICY_ALLOW";
         }
         const response = await client.callTool({ name: toolId, arguments: args });
         if (response.isError || !isRecord(response.structuredContent)) {
@@ -222,8 +299,10 @@ export async function startToyMcpSession(options: {
             registryContentHash: approvedDescriptor.contentHash,
             stageId: options.stageId,
             decision: "ALLOW",
-            reasonCode: "APPROVED_TOOL_IN_APPROVED_STAGE_MANIFEST",
+            reasonCode,
             approvalPolicyId: approvedDescriptor.approvalPolicyId,
+            initiatingActor: options.authorization.personaId,
+            policyDecisionId: action.decision.decisionId,
           },
         };
       },

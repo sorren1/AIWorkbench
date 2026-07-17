@@ -12,16 +12,18 @@ export type DisposableToyRepository = {
   cleanup: () => Promise<void>;
 };
 
+export async function initializeToyRepository(root: string): Promise<void> {
+  await execFileAsync("git", ["init", "--quiet"], { cwd: root });
+  await execFileAsync("git", ["config", "user.name", "Synthetic Fixture"], { cwd: root });
+  await execFileAsync("git", ["config", "user.email", "fixture@example.invalid"], { cwd: root });
+  await execFileAsync("git", ["add", "."], { cwd: root });
+  await execFileAsync("git", ["commit", "--quiet", "-m", "synthetic baseline"], { cwd: root });
+}
+
 export async function createDisposableToyRepository(): Promise<DisposableToyRepository> {
   const root = await mkdtemp(resolve(tmpdir(), "ai-delivery-workbench-toy-"));
   await cp(fixtureRoot, root, { recursive: true });
-  await execFileAsync("git", ["init", "--quiet"], { cwd: root });
-  await execFileAsync("git", ["config", "user.name", "Synthetic Fixture"], { cwd: root });
-  await execFileAsync("git", ["config", "user.email", "fixture@example.invalid"], {
-    cwd: root,
-  });
-  await execFileAsync("git", ["add", "."], { cwd: root });
-  await execFileAsync("git", ["commit", "--quiet", "-m", "synthetic baseline"], { cwd: root });
+  await initializeToyRepository(root);
   return {
     root,
     cleanup: async () => {

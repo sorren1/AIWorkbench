@@ -1,0 +1,25 @@
+{
+  "kind": "ApprovalPolicy",
+  "enabled": true,
+  "provenance": {
+    "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+    "independentlyAuthored": true,
+    "createdAt": "2026-07-17T12:00:00.000Z"
+  },
+  "id": "policy.sandbox.validation-notify",
+  "name": "Fixed validation command",
+  "version": "1.0.0",
+  "description": "Allows the fixed local validation command and records a notification decision.",
+  "matcher": {
+    "toolIds": ["tool.sandbox.command"],
+    "stages": ["implement", "verify"],
+    "networkAccess": false
+  },
+  "mode": "NOTIFY",
+  "requiredApproverScopes": [],
+  "requiredApproverPersonas": [],
+  "timeoutSeconds": 600,
+  "forbidSelfApproval": false,
+  "reasonRequired": false,
+  "contentHash": "fd233975c9ce1fe5fbee11b564a579c0fda8d8decfe891767320e9205895c0c4"
+}

@@ -47,7 +47,7 @@ test("registry and selected capability records download as deterministic JSON", 
   const registry: unknown = JSON.parse(await downloadedText(registryDownload));
   expect(registry).toEqual(
     expect.objectContaining({
-      schemaVersion: 1,
+      schemaVersion: 2,
       classification: "SYNTHETIC_PUBLIC_PORTFOLIO_FIXTURE",
     }),
   );
@@ -66,6 +66,11 @@ test("generated capability cards and local MCP evidence are public static files"
     ["/capabilities/agents/agent.implementation.json", { kind: "AgentCard" }],
     ["/capabilities/mcp/discovery.json", { schemaVersion: 1 }],
     ["/capabilities/mcp/invocation-evidence.json", { schemaVersion: 1 }],
+    ["/capabilities/policies/policy.write.approved-targets.json", { kind: "ApprovalPolicy" }],
+    [
+      "/capabilities/schemas/approval-policy.schema.json",
+      { $id: "https://portfolio.invalid/schemas/registry/approval-policy.schema.json" },
+    ],
   ] as const) {
     const response = await request.get(path);
     expect(response.ok(), path).toBe(true);

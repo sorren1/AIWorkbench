@@ -5,43 +5,43 @@
     {
       "id": "agent.intake",
       "version": "1.0.0",
-      "contentHash": "c633a05f0322bdce22d1660b3e2305a1e0294c2cb74933b9b33fdc4327b4d28d",
+      "contentHash": "c50efaa342bbd465294df709dbd01140910dc607c25b2388c786181e305896a9",
       "href": "/capabilities/agents/agent.intake.json"
     },
     {
       "id": "agent.specification",
       "version": "1.0.0",
-      "contentHash": "be1d524ae89236870730b7df2efc7185ce9f1e12b9701cf5efedba0cfe984d8e",
+      "contentHash": "86ed6acc2b42f5fdb99e8ea26d755d10bac04e0c081443e581649a837ef47fd2",
       "href": "/capabilities/agents/agent.specification.json"
     },
     {
       "id": "agent.planning",
       "version": "1.0.0",
-      "contentHash": "6c91a9859a06a85a03895ebc2ad3c9b89baff59dd4fa48485b2dce4819d54d59",
+      "contentHash": "75a1cd76b61731653471c291de05a74b677e06914feb1d4d25a95ab0c7fb6ec0",
       "href": "/capabilities/agents/agent.planning.json"
     },
     {
       "id": "agent.change-target",
       "version": "1.0.0",
-      "contentHash": "950cea7e196a2ecfb073f03544069a0be49353fc924fade5946b1ab760367482",
+      "contentHash": "594d109fd046fddd0aff97d2860b1a168c479802a7ec15b7227cf094dc981415",
       "href": "/capabilities/agents/agent.change-target.json"
     },
     {
       "id": "agent.implementation",
       "version": "1.0.0",
-      "contentHash": "b19a2e922d02f6402a4a0e002942fefaf6f9073a88e2835d82a9715dec4ce726",
+      "contentHash": "e699f8b90fe63d81888a7179e06dbfaae53f197a1cd9462f43b46f576afc9624",
       "href": "/capabilities/agents/agent.implementation.json"
     },
     {
       "id": "agent.verification",
       "version": "1.0.0",
-      "contentHash": "43bb7b82dbcb99f777ac43d64de7d4e3281e4bf38ca762eb3d9b15fa8702bcc6",
+      "contentHash": "d0d7b03f7e2e191f9dc65f79f6490686a8c4e2bb27bdb883c7f251cccd979078",
       "href": "/capabilities/agents/agent.verification.json"
     },
     {
       "id": "agent.review-assistant",
       "version": "1.0.0",
-      "contentHash": "cb296c571145e011866d200706c738aa91baa0f42d5da05b85a8ffb3166ad2ad",
+      "contentHash": "351e7edb83301a9975440820d13ae83b3cad69db9340b966f74ea8fddb5bf5e9",
       "href": "/capabilities/agents/agent.review-assistant.json"
     }
   ]

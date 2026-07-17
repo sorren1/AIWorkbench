@@ -43,6 +43,7 @@ test("principal workbench screens have no serious or critical axe violations", a
     "Artifacts",
     "GitHub / PR",
     "Validation Evidence",
+    "Approval Inbox",
     "Control Plane",
     "Architecture",
     "Settings",

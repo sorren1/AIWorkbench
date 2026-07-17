@@ -209,7 +209,7 @@ Implement safe utilities with browser platform APIs: Clipboard for artifact text
 
 Encode only validated public fixture selections in URL parameters: major screen, known synthetic issue, known selected artifact, Settings subview, and named scenario seed. Scenario loading and confirmed reset always rebuild from the same typed baseline and cancel pending simulated transitions. Keep workflow, review, validation, scenario, note, and approval state in memory only. Persist only a versioned light/dark theme preference, with reset support.
 
-Use a persistent `Demo mode · Synthetic data · No external writes` indicator. External-system actions remain deterministic simulations and say so at the action or immediate context; browser-local decisions use `demo`, `synthetic`, or `locally` where a production-shaped verb might otherwise be ambiguous.
+Use a persistent `Demo mode · Synthetic data · No external writes` indicator. External-system actions remain deterministic simulations and say so at the action or immediate context; browser-local decisions use `demo`, `synthetic`, or `locally` where a production-shaped verb might otherwise be ambiguous. ADR-010 supersedes the approval-specific part of this decision by introducing a separate, explicitly disclosed versioned approval store while ordinary workflow state stays ephemeral.
 
 ### Consequences
 
@@ -241,3 +241,26 @@ Pin the recommended stable official TypeScript MCP SDK v1.29.0 and use stdio for
 - Discovery cannot grant authority; an unapproved discovered tool is refused locally.
 - Public files are called capability cards and make no A2A compatibility claim.
 - The local slice demonstrates bounded protocol mechanics, not remote identity, multi-user durability, hosted sandboxing, or production MCP-platform readiness.
+
+## ADR-010 — Share one scoped policy and hash-bound approval protocol across browser and CLI
+
+- Status: Accepted
+- Date: 2026-07-17
+- Detailed records: [`docs/authorization-and-separation-of-duties.md`](authorization-and-separation-of-duties.md), [`docs/human-approval-protocol.md`](human-approval-protocol.md)
+
+### Context
+
+Registry gating proves which agent/tool version is eligible, but a risky call could still be authorized by presentation state or a remembered policy ID. The browser needs an inspectable approval inbox, and the real local MCP slice needs a durable pause/resume path without introducing a backend or claiming production identity.
+
+### Decision
+
+Use a pure TypeScript policy evaluator in both browser and CLI. Model five synthetic personas with a closed scope vocabulary and delegated identity envelope. Effective authority is the intersection of persona, delegation, stage, approved agent, approved tool, and resource boundary. Deny takes precedence; absent policy fails closed.
+
+Version and hash approval policies. Bind approval requests to canonical argument, agent, tool, change-target, and context-pack hashes. Keep an append-only hash-chained event log plus materialized state. Persist the browser approval journal in a versioned, clearly labeled local store and CLI runs in gitignored `.workbench/runs/`. Revalidate the complete binding in the CLI and again in the MCP host before invocation.
+
+### Consequences
+
+- Button visibility and workflow completion are no longer authorization controls.
+- Persona switching is functional policy exploration but remains synthetic identity.
+- Browser/CLI durability is local and inspectable, not authenticated, shared, or tamper-resistant.
+- A production adapter must replace the envelope/store with OIDC/OAuth2 on-behalf-of credentials, server-side authorization, transactional single-use decisions, and immutable audit retention.

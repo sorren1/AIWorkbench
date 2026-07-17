@@ -152,8 +152,8 @@ Every policy result records actor, persona, resource, action, decision, reason c
 - Classify tools as `read_only`, `workspace_write`, `external_write`, or `privileged`.
 - Convert a gated tool request into an approval envelope containing the exact agent version, tool version, redacted normalized arguments, context digest, policy decision, risk reason, requester, required approver persona, expiration, and trace linkage.
 - Model `pending`, `approved`, `rejected`, `expired`, `cancelled`, `executed`, and `failed` states as append-only events. A decision never overwrites the request.
-- Persist the journal in IndexedDB so it survives reload in the same browser profile. Provide functional export, import, and reset actions for local evidence portability.
-- Enforce request/approver separation and single-use, time-bounded approval before resuming the simulated tool step.
+- Persist the bounded journal in a versioned local-storage record so it survives reload in the same browser profile; reset is functional and deterministic. Defer export/import until a later evidence-portability phase because it is not needed for the approval enforcement path.
+- Enforce request/approver separation and time-bounded approval before browser resume; enforce single-use execution for the write-capable local CLI run.
 - Label this precisely as a browser-local durable demo record, not shared, tamper-resistant, authenticated, or production storage. A transactional server-side event store is a production adapter, not part of the static release.
 
 ### 6. Context-pack manifests
@@ -309,7 +309,7 @@ Delivered commit: `fix: harden accessibility and responsive behavior`
 
 ### Phase 5 — Honest demo behavior and control-plane registry
 
-Status: Functional-demo portion complete (2026-07-16) in `feat: add functional demo actions and guided walkthrough`. The versioned agent/tool registry, capability cards, lifecycle/manifest gating, and bounded local MCP slice are complete in `feat: add versioned agent and tool registry`; persona authorization and durable approval-journal work remain in Phase 6.
+Status: Complete. Functional demo actions landed in `feat: add functional demo actions and guided walkthrough`; registry/MCP foundations in `feat: add versioned agent and tool registry`; scoped persona authorization and durable approval work in `feat: enforce scoped authorization and durable approvals`.
 
 Scope: make the local/external boundary explicit and implement the narrow registry, capability cards, lifecycle, and persona policy model.
 
@@ -330,11 +330,13 @@ Suggested commit: `feat: add the governed stage-agent registry`
 
 ### Phase 6 — Approval, context, runtime, budgets, and trace evidence
 
+Status: Scoped authorization and durable approval protocol complete in `feat: enforce scoped authorization and durable approvals`; context manifests, runtime gateway, budgets, and traces remain.
+
 Scope: make a governed run explainable end to end without introducing a live external integration.
 
 Acceptance criteria:
 
-- Risky tool requests create durable browser-local approval envelopes and append-only state transitions; reload, expiry, separation of duties, single-use decisions, export/import, and reset are tested.
+- Risky tool requests create durable browser-local approval envelopes and append-only state transitions; reload, expiry, separation of duties, CLI single-use execution, and reset are tested. Browser approval export/import remains intentionally deferred.
 - The approval UI says that storage and identity are local/simulated and does not imply tamper resistance or shared enterprise durability.
 - Context-pack manifests record inclusions, exclusions, provenance, freshness, redactions, and a deterministic SHA-256 digest; digest tampering/invalidation tests pass.
 - The provider-neutral gateway contract enforces agent/model/runtime/credential-reference scope locally while all provider execution remains simulated and no secret-entry UI or live endpoint exists.

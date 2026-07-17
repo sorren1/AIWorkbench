@@ -7,16 +7,13 @@
   "outputSchema": { "$ref": "/capabilities/schemas/stage-output.schema.json" },
   "modelPolicyId": "model.policy.delivery-balanced",
   "memoryPolicyId": "memory.policy.issue-bounded",
-  "approvalPolicyIds": [
-    "policy.registry.separation-of-duties",
-    "policy.tool.local-process-approval"
-  ],
+  "approvalPolicyIds": ["policy.registry.separation-of-duties", "policy.sandbox.validation-notify"],
   "maxDurationMs": 120000,
   "maxToolCalls": 12,
   "maxRepairAttempts": 2,
   "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
   "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-  "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+  "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
   "createdAt": "2026-07-16T18:00:00.000Z",
   "updatedAt": "2026-07-16T18:00:00.000Z",
   "approval": {
@@ -42,5 +39,5 @@
     "tool.evidence.write"
   ],
   "allowedWritePaths": ["browser-local://evidence/**"],
-  "contentHash": "43bb7b82dbcb99f777ac43d64de7d4e3281e4bf38ca762eb3d9b15fa8702bcc6"
+  "contentHash": "d0d7b03f7e2e191f9dc65f79f6490686a8c4e2bb27bdb883c7f251cccd979078"
 }

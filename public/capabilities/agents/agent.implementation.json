@@ -9,15 +9,15 @@
   "memoryPolicyId": "memory.policy.issue-bounded",
   "approvalPolicyIds": [
     "policy.registry.separation-of-duties",
-    "policy.tool.bounded-write-human-approval",
-    "policy.tool.local-process-approval"
+    "policy.write.approved-targets",
+    "policy.sandbox.validation-notify"
   ],
   "maxDurationMs": 120000,
   "maxToolCalls": 18,
   "maxRepairAttempts": 2,
   "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
   "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-  "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+  "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
   "createdAt": "2026-07-16T18:00:00.000Z",
   "updatedAt": "2026-07-16T18:00:00.000Z",
   "approval": {
@@ -41,5 +41,5 @@
     "tool.evidence.write"
   ],
   "allowedWritePaths": ["src/**", "browser-local://evidence/**"],
-  "contentHash": "b19a2e922d02f6402a4a0e002942fefaf6f9073a88e2835d82a9715dec4ce726"
+  "contentHash": "e699f8b90fe63d81888a7179e06dbfaae53f197a1cd9462f43b46f576afc9624"
 }

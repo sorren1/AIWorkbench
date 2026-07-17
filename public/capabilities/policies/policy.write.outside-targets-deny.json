@@ -1,0 +1,25 @@
+{
+  "kind": "ApprovalPolicy",
+  "enabled": true,
+  "provenance": {
+    "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+    "independentlyAuthored": true,
+    "createdAt": "2026-07-17T12:00:00.000Z"
+  },
+  "id": "policy.write.outside-targets-deny",
+  "name": "Writes outside approved targets",
+  "version": "1.0.0",
+  "description": "Denies any controlled patch that escapes an agent, tool, or change-target boundary.",
+  "matcher": {
+    "toolIds": ["tool.repository.patch.controlled"],
+    "pathPatterns": ["**"],
+    "pathBoundary": "OUTSIDE_APPROVED_TARGETS"
+  },
+  "mode": "DENY",
+  "requiredApproverScopes": [],
+  "requiredApproverPersonas": [],
+  "timeoutSeconds": 300,
+  "forbidSelfApproval": true,
+  "reasonRequired": true,
+  "contentHash": "02e215efb53deeece217af55fa0ca98f5e1064c45dde64cade0fe3981cc79ade"
+}

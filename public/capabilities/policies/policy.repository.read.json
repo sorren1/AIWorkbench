@@ -1,0 +1,24 @@
+{
+  "kind": "ApprovalPolicy",
+  "enabled": true,
+  "provenance": {
+    "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+    "independentlyAuthored": true,
+    "createdAt": "2026-07-17T12:00:00.000Z"
+  },
+  "id": "policy.repository.read",
+  "name": "Repository reads",
+  "version": "1.0.0",
+  "description": "Allows bounded reads from synthetic issue and repository fixtures.",
+  "matcher": {
+    "toolIds": ["tool.issue.read", "tool.repository.search", "tool.repository.file.read"],
+    "riskLevels": ["READ_ONLY"]
+  },
+  "mode": "ALLOW",
+  "requiredApproverScopes": [],
+  "requiredApproverPersonas": [],
+  "timeoutSeconds": 300,
+  "forbidSelfApproval": false,
+  "reasonRequired": false,
+  "contentHash": "e05592eecc4286b81ec554594287ce85cc5cde6ca98cc421afb277f1293dd7e9"
+}

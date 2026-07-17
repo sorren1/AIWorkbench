@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { hasValidContentHash } from "../src/demo/control-plane/registry/canonical";
+import {
+  approvalPolicyHashInput,
+  hasValidContentHash,
+  sha256Hex,
+} from "../src/demo/control-plane/registry/canonical";
 import type { AgentCard, RegistrySnapshot } from "../src/demo/control-plane/registry/contracts";
 import { registrySnapshot } from "../src/demo/control-plane/registry/generated";
 import {
@@ -12,6 +16,7 @@ import {
 } from "../src/demo/control-plane/registry/lifecycle";
 import {
   validateAgentCard,
+  validateApprovalPolicy,
   validateMemoryPolicy,
   validateModelPolicy,
   validateToolDescriptor,
@@ -38,10 +43,16 @@ describe("versioned agent and tool registry", () => {
     expect(
       registrySnapshot.memoryPolicies.every((resource) => validateMemoryPolicy(resource).valid),
     ).toBe(true);
+    expect(
+      registrySnapshot.approvalPolicies.every((resource) => validateApprovalPolicy(resource).valid),
+    ).toBe(true);
 
     const malformed = { ...registrySnapshot.agents[0], maxToolCalls: -1 };
     const validation = validateAgentCard(malformed);
     expect(validation.valid).toBe(false);
+
+    const malformedPolicy = { ...registrySnapshot.approvalPolicies[0], mode: "BYPASS" };
+    expect(validateApprovalPolicy(malformedPolicy).valid).toBe(false);
   });
 
   it("verifies SHA-256 content hashes for every record", async () => {
@@ -54,6 +65,14 @@ describe("versioned agent and tool registry", () => {
     await expect(Promise.all(resources.map(hasValidContentHash))).resolves.toEqual(
       resources.map(() => true),
     );
+    await expect(
+      Promise.all(
+        registrySnapshot.approvalPolicies.map(
+          async (policy) =>
+            (await sha256Hex(approvalPolicyHashInput(policy))) === policy.contentHash,
+        ),
+      ),
+    ).resolves.toEqual(registrySnapshot.approvalPolicies.map(() => true));
     const agent = registrySnapshot.agents[0];
     expect(agent).toBeDefined();
     if (!agent) return;

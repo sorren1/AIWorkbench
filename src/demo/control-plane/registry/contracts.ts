@@ -12,6 +12,7 @@ export type RegistryStatus = (typeof REGISTRY_STATUSES)[number];
 export type ToolRiskLevel = "READ_ONLY" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
 export type IdempotencySemantics = "IDEMPOTENT" | "IDEMPOTENT_WITH_KEY" | "NOT_IDEMPOTENT";
 export type ProviderCategory = "PROVIDER_NEUTRAL_SIMULATED" | "LOCAL_DETERMINISTIC";
+export type ApprovalMode = "ALLOW" | "NOTIFY" | "REQUIRE_APPROVAL" | "DENY";
 
 export type ApprovalMetadata = {
   readonly approvedBy: string;
@@ -139,23 +140,59 @@ export type MemoryPolicy = {
   readonly approval?: ApprovalMetadata;
 };
 
+export type ApprovalPolicyMatcher = {
+  readonly toolIds?: readonly string[];
+  readonly stages?: readonly Exclude<StageId, "seed">[];
+  readonly riskLevels?: readonly ToolRiskLevel[];
+  readonly agentIds?: readonly string[];
+  readonly pathPatterns?: readonly string[];
+  readonly pathBoundary?: "INSIDE_APPROVED_TARGETS" | "OUTSIDE_APPROVED_TARGETS";
+  readonly networkAccess?: boolean;
+  readonly evidenceFinalized?: boolean;
+};
+
+export type ApprovalPolicy = {
+  readonly kind: "ApprovalPolicy";
+  readonly id: string;
+  readonly name: string;
+  readonly version: string;
+  readonly description: string;
+  readonly enabled: boolean;
+  readonly matcher: ApprovalPolicyMatcher;
+  readonly mode: ApprovalMode;
+  readonly requiredApproverScopes: readonly string[];
+  readonly requiredApproverPersonas: readonly string[];
+  readonly timeoutSeconds: number;
+  readonly decisionCacheTtlSeconds?: number;
+  readonly forbidSelfApproval: boolean;
+  readonly reasonRequired: boolean;
+  readonly contentHash: string;
+  readonly provenance: {
+    readonly sourceCommit: string;
+    readonly independentlyAuthored: true;
+    readonly createdAt: string;
+  };
+};
+
 export type RegistryResource = AgentCard | ToolDescriptor | ModelPolicy | MemoryPolicy;
 
 export type AgentCardSource = Omit<AgentCard, "contentHash">;
 export type ToolDescriptorSource = Omit<ToolDescriptor, "contentHash">;
 export type ModelPolicySource = Omit<ModelPolicy, "contentHash">;
 export type MemoryPolicySource = Omit<MemoryPolicy, "contentHash">;
+export type ApprovalPolicySource = Omit<ApprovalPolicy, "contentHash">;
 export type RegistryResourceSource =
   AgentCardSource | ToolDescriptorSource | ModelPolicySource | MemoryPolicySource;
 
 export type RegistrySnapshot = {
-  readonly schemaVersion: 1;
+  readonly schemaVersion: 2;
   readonly generatedAt: string;
   readonly classification: "SYNTHETIC_PUBLIC_PORTFOLIO_FIXTURE";
   readonly agents: readonly AgentCard[];
   readonly tools: readonly ToolDescriptor[];
   readonly modelPolicies: readonly ModelPolicy[];
   readonly memoryPolicies: readonly MemoryPolicy[];
+  readonly approvalPolicies: readonly ApprovalPolicy[];
 };
 
 export type RegistryReference = {

@@ -347,6 +347,7 @@ export function ControlPlaneScreen() {
         <a href="../capabilities/agents/index.json">Capability-card index</a>
         <a href="../capabilities/mcp/discovery.json">Local MCP discovery snapshot</a>
         <a href="../capabilities/mcp/invocation-evidence.json">Local MCP invocation evidence</a>
+        <a href="../capabilities/schemas/approval-policy.schema.json">Approval policy schema</a>
       </div>
 
       <div className="wb-mt-16">

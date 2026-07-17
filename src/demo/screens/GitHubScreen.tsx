@@ -3,6 +3,10 @@ import { issues } from "../data/fixtures";
 import type { Issue, PullRequestFile, Tone } from "../data/types";
 import { useApp, useIssue } from "../state/store";
 import { Icon, type IconName } from "../../shared/Icon";
+import { authorizeRegistryAction } from "../authorization/authorizeAction";
+import { personaById } from "../authorization/personas";
+import { sha256Hex } from "../control-plane/registry/canonical";
+import { registrySnapshot } from "../control-plane/registry/generated";
 import {
   Avatar,
   Badge,
@@ -48,7 +52,33 @@ export function GitHubScreen() {
   };
   const refresh = () =>
     actions.toast("info", "PR status refreshed", "Checks re-read from the simulated provider.");
-  const markReviewed = () => {
+  const authorizeDiffReview = async (decisionIdSuffix: string) => {
+    const now = new Date().toISOString();
+    const context = await authorizeRegistryAction({
+      snapshot: registrySnapshot,
+      persona: personaById(state.personaId),
+      stageId: "review",
+      toolId: "tool.workflow.diff-review",
+      targetPaths: [],
+      approvedChangeTargets: [],
+      networkAccess: false,
+      evidenceFinalized: false,
+      effectiveSubject: issue.key,
+      runId: `run.browser.${issue.key.toLocaleLowerCase()}`,
+      sessionId: "session.browser.demo",
+      now,
+      expiresAt: new Date(Date.parse(now) + 15 * 60 * 1000).toISOString(),
+      decisionId: `decision.browser.diff-review.${issue.key.toLocaleLowerCase()}.${decisionIdSuffix}`,
+    });
+    actions.recordAuthorizationDecision(context.decision);
+    if (!context.decision.allowed) {
+      actions.toast("error", "Review action blocked", context.decision.explanation);
+      return false;
+    }
+    return true;
+  };
+  const markReviewed = async () => {
+    if (!(await authorizeDiffReview("reviewed"))) return;
     actions.setPR(issue.key, {
       diffReviewed: true,
       checklist: Object.fromEntries(base.checklist.map((item) => [item.label, true])),
@@ -59,7 +89,8 @@ export function GitHubScreen() {
       "Changed-file review recorded in browser-local state for synthetic PR #" + base.number + ".",
     );
   };
-  const requestChanges = () => {
+  const requestChanges = async () => {
+    if (!(await authorizeDiffReview("changes-requested"))) return;
     actions.setPR(issue.key, { status: "Changes requested", reviewer: "changes" });
     actions.patchIssue(issue.key, { prStatus: "Changes requested" });
     actions.toast(
@@ -69,7 +100,7 @@ export function GitHubScreen() {
     );
   };
   /* excerpt:start:human-approval-gate */
-  const approveForValidation = () => {
+  const approveForValidation = async () => {
     if (!ov.diffReviewed) {
       actions.toast(
         "warn",
@@ -86,18 +117,62 @@ export function GitHubScreen() {
       );
       return;
     }
-    actions.setPR(issue.key, {
-      status: "Approved — validation",
-      reviewer: "approved",
-      approvedForValidation: true,
+    const now = new Date().toISOString();
+    const validation = validationFor(issue);
+    const argumentsValue = {
+      issueKey: issue.key,
+      testedCommit: validation.commitSha,
+      decision: "release-ready",
+    } as const;
+    const context = await authorizeRegistryAction({
+      snapshot: registrySnapshot,
+      persona: personaById(state.personaId),
+      stageId: "review",
+      toolId: "tool.workflow.release-readiness",
+      targetPaths: [],
+      approvedChangeTargets: [],
+      networkAccess: false,
+      evidenceFinalized: true,
+      effectiveSubject: issue.key,
+      runId: `run.browser.${issue.key.toLocaleLowerCase()}`,
+      sessionId: "session.browser.demo",
+      now,
+      expiresAt: new Date(Date.parse(now) + 15 * 60 * 1000).toISOString(),
+      decisionId: `decision.browser.release.${issue.key.toLocaleLowerCase()}`,
     });
-    actions.patchIssue(issue.key, { prStatus: "Approved for validation" });
+    actions.recordAuthorizationDecision(context.decision);
+    if (context.decision.mode !== "REQUIRE_APPROVAL") {
+      actions.toast(
+        context.decision.allowed ? "success" : "error",
+        context.decision.allowed ? "Transition allowed" : "Transition blocked",
+        context.decision.explanation,
+      );
+      return;
+    }
+    const changeTargetDigest = await sha256Hex(base.files.map((file) => file.path).sort());
+    const contextPackDigest = await sha256Hex({
+      issueKey: issue.key,
+      testedCommit: validation.commitSha,
+      diffReviewed: ov.diffReviewed,
+      checklist: base.checklist.map((item) => [
+        item.label,
+        ov.checklist?.[item.label] ?? item.done,
+      ]),
+    });
+    const request = await actions.queueApproval({
+      context,
+      argumentsValue,
+      targetPaths: [],
+      changeTargetDigest,
+      contextPackDigest,
+      requestedAt: now,
+    });
     actions.toast(
-      "success",
-      "Approved for validation",
-      "Local human-review gate met. Routing to synthetic validation evidence.",
+      "info",
+      "Validation approval requested",
+      `${request.requestId} is waiting for a distinct synthetic validator; no transition ran.`,
     );
-    actions.navigate("validation", issue.key);
+    actions.navigate("approvals", issue.key);
   };
   /* excerpt:end:human-approval-gate */
 
@@ -232,18 +307,35 @@ export function GitHubScreen() {
                   size="sm"
                   variant={ov.diffReviewed ? "secondary" : "primary"}
                   icon={ov.diffReviewed ? "check" : "eye"}
-                  onClick={markReviewed}
+                  onClick={() => void markReviewed()}
                   disabled={ov.diffReviewed}
                 >
                   {ov.diffReviewed ? "Demo diff reviewed" : "Mark demo diff reviewed"}
                 </Btn>
-                <Btn size="sm" variant="danger" icon="rotate-ccw" onClick={requestChanges}>
+                <Btn
+                  size="sm"
+                  variant="danger"
+                  icon="rotate-ccw"
+                  onClick={() => void requestChanges()}
+                >
                   Record demo changes requested
                 </Btn>
-                <Btn size="sm" variant="primary" icon="shield-check" onClick={approveForValidation}>
-                  Approve demo for validation
+                <Btn
+                  size="sm"
+                  variant="primary"
+                  icon="shield-check"
+                  onClick={() => void approveForValidation()}
+                >
+                  Request validation approval
                 </Btn>
               </div>
+              {state.lastAuthorizationDecision && !state.lastAuthorizationDecision.allowed && (
+                <Banner tone="warn" title="Policy enforcement result" icon="lock">
+                  {state.lastAuthorizationDecision.explanation} Required and effective scopes plus
+                  the matched policy are evaluated in shared domain logic, not inferred from this
+                  button's visibility.
+                </Banner>
+              )}
             </div>
           </Card>
 

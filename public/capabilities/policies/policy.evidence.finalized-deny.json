@@ -1,0 +1,21 @@
+{
+  "kind": "ApprovalPolicy",
+  "enabled": true,
+  "provenance": {
+    "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+    "independentlyAuthored": true,
+    "createdAt": "2026-07-17T12:00:00.000Z"
+  },
+  "id": "policy.evidence.finalized-deny",
+  "name": "Finalized evidence is immutable",
+  "version": "1.0.0",
+  "description": "Denies mutation after browser-local evidence is marked final.",
+  "matcher": { "toolIds": ["tool.evidence.write"], "evidenceFinalized": true },
+  "mode": "DENY",
+  "requiredApproverScopes": [],
+  "requiredApproverPersonas": [],
+  "timeoutSeconds": 300,
+  "forbidSelfApproval": true,
+  "reasonRequired": true,
+  "contentHash": "4ce6f22514a5de6bca1ca21af4e97cd726044732da934f9916b0d713e7c84af1"
+}

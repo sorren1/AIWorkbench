@@ -24,6 +24,26 @@ import type {
 import type { IconName } from "../../shared/Icon";
 import { buildDemoDeepLink, parseDemoDeepLink } from "./deepLinks";
 import { applyDemoScenario, type DemoScenarioId } from "./scenarios";
+import type {
+  ApprovalRequest,
+  ApprovalStatus,
+  ApprovalStore,
+  AuthorizationDecision,
+  PersonaId,
+} from "../authorization/contracts";
+import {
+  addApprovalRequest,
+  createBoundApprovalRequest,
+  decideApprovalRequest,
+} from "../authorization/approvalProtocol";
+import {
+  createBaselineAuthorizationState,
+  readBrowserAuthorizationState,
+  writeBrowserAuthorizationState,
+} from "../authorization/browserStore";
+import { personaById } from "../authorization/personas";
+import { registrySnapshot } from "../control-plane/registry/generated";
+import type { AuthorizedActionContext } from "../authorization/authorizeAction";
 
 export const STAGE_IDS: readonly StageId[] = stageDefs.map(({ id }) => id);
 
@@ -96,6 +116,9 @@ export type WorkbenchState = {
   settings: WorkbenchSettings;
   busy: Record<string, boolean>;
   filters: QueueFilters;
+  personaId: PersonaId;
+  approvalStore: ApprovalStore;
+  lastAuthorizationDecision: AuthorizationDecision | null;
 };
 
 export type IssuePatch = Partial<Omit<Issue, "flags" | "s">> & { flags?: IssueFlags };
@@ -121,6 +144,9 @@ export type Action =
   | { type: "FILTER"; patch: Partial<QueueFilters> }
   | { type: "TOGGLE_GOV"; id: string }
   | { type: "APPLY_SCENARIO"; scenarioId: DemoScenarioId }
+  | { type: "SET_PERSONA"; personaId: PersonaId }
+  | { type: "SET_APPROVAL_STORE"; approvalStore: ApprovalStore }
+  | { type: "AUTHORIZATION_DECISION"; decision: AuthorizationDecision | null }
   | { type: "RESET" };
 /* excerpt:end:typed-transitions */
 
@@ -133,6 +159,7 @@ function cloneIssues(): Record<string, Issue> {
 }
 
 export function createInitialState(): WorkbenchState {
+  const authorization = createBaselineAuthorizationState();
   return {
     route: "queue",
     selectedKey: "FIN-1150",
@@ -158,6 +185,9 @@ export function createInitialState(): WorkbenchState {
       failed: false,
       stale: false,
     },
+    personaId: authorization.personaId,
+    approvalStore: authorization.approvalStore,
+    lastAuthorizationDecision: null,
   };
 }
 
@@ -283,6 +313,12 @@ export function reducer(state: WorkbenchState, action: Action): WorkbenchState {
     }
     case "APPLY_SCENARIO":
       return applyDemoScenario(createInitialState(), action.scenarioId);
+    case "SET_PERSONA":
+      return { ...state, personaId: action.personaId, lastAuthorizationDecision: null };
+    case "SET_APPROVAL_STORE":
+      return { ...state, approvalStore: action.approvalStore };
+    case "AUTHORIZATION_DECISION":
+      return { ...state, lastAuthorizationDecision: action.decision };
     case "RESET":
       return createInitialState();
   }
@@ -317,6 +353,23 @@ export type WorkbenchActions = {
   setFilter: (patch: Partial<QueueFilters>) => void;
   toggleGov: (id: string) => void;
   applyScenario: (scenarioId: DemoScenarioId) => void;
+  setPersona: (personaId: PersonaId) => void;
+  queueApproval: (input: {
+    readonly context: AuthorizedActionContext;
+    readonly argumentsValue: unknown;
+    readonly targetPaths: readonly string[];
+    readonly changeTargetDigest: string;
+    readonly contextPackDigest: string;
+    readonly requestedAt: string;
+  }) => Promise<ApprovalRequest>;
+  decideApproval: (
+    requestId: string,
+    status: Extract<ApprovalStatus, "APPROVED" | "REJECTED">,
+    reason: string,
+    decidedAt: string,
+  ) => Promise<void>;
+  recordAuthorizationDecision: (decision: AuthorizationDecision) => void;
+  setApprovalStore: (store: ApprovalStore) => void;
   resetDemo: () => void;
   dispatch: Dispatch<Action>;
 };
@@ -326,9 +379,15 @@ const AppContext = createContext<AppContextValue | null>(null);
 let toastId = 0;
 
 export function AppProvider({ children }: { readonly children: ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, undefined, () =>
-    createInitialStateFromUrl(new URL(window.location.href)),
-  );
+  const [state, dispatch] = useReducer(reducer, undefined, () => {
+    const initial = createInitialStateFromUrl(new URL(window.location.href));
+    const authorization = readBrowserAuthorizationState(localStorage);
+    return {
+      ...initial,
+      personaId: authorization.personaId,
+      approvalStore: authorization.approvalStore,
+    };
+  });
   const timers = useRef(new Set<number>());
 
   const schedule = useCallback((callback: () => void, delay: number) => {
@@ -351,6 +410,14 @@ export function AppProvider({ children }: { readonly children: ReactNode }) {
     const nextUrl = buildDemoDeepLink(state, new URL(window.location.href));
     window.history.replaceState(null, "", `${nextUrl.pathname}${nextUrl.search}${nextUrl.hash}`);
   }, [state]);
+
+  useEffect(() => {
+    writeBrowserAuthorizationState(localStorage, {
+      version: 1,
+      personaId: state.personaId,
+      approvalStore: state.approvalStore,
+    });
+  }, [state.approvalStore, state.personaId]);
 
   const toast = useCallback(
     (kind: ToastKind, title: string, msg: string) => {
@@ -466,6 +533,80 @@ export function AppProvider({ children }: { readonly children: ReactNode }) {
     },
     [clearTimers],
   );
+  const setPersona = useCallback(
+    (personaId: PersonaId) => dispatch({ type: "SET_PERSONA", personaId }),
+    [],
+  );
+  const queueApproval = useCallback(
+    async (input: {
+      readonly context: AuthorizedActionContext;
+      readonly argumentsValue: unknown;
+      readonly targetPaths: readonly string[];
+      readonly changeTargetDigest: string;
+      readonly contextPackDigest: string;
+      readonly requestedAt: string;
+    }) => {
+      const requestId = `approval.browser.${state.approvalStore.events.length + 1}`;
+      const created = await createBoundApprovalRequest({
+        requestId,
+        identity: input.context.request.identity,
+        decision: input.context.decision,
+        tool: {
+          id: input.context.request.tool.id,
+          version: input.context.request.tool.version,
+          contentHash: input.context.request.tool.contentHash,
+        },
+        stage: input.context.request.stageId,
+        argumentsValue: input.argumentsValue,
+        targetPaths: input.targetPaths,
+        changeTargetDigest: input.changeTargetDigest,
+        contextPackDigest: input.contextPackDigest,
+        requestedAt: input.requestedAt,
+      });
+      const approvalStore = addApprovalRequest(state.approvalStore, created);
+      dispatch({ type: "SET_APPROVAL_STORE", approvalStore });
+      dispatch({ type: "AUTHORIZATION_DECISION", decision: input.context.decision });
+      return created.request;
+    },
+    [state.approvalStore],
+  );
+  const decideApproval = useCallback(
+    async (
+      requestId: string,
+      status: Extract<ApprovalStatus, "APPROVED" | "REJECTED">,
+      reason: string,
+      decidedAt: string,
+    ) => {
+      const request = state.approvalStore.requests[requestId];
+      if (!request) throw new Error(`Unknown approval request: ${requestId}`);
+      const policy = registrySnapshot.approvalPolicies.find(
+        (candidate) =>
+          candidate.id === request.policy.id &&
+          candidate.version === request.policy.version &&
+          candidate.contentHash === request.policy.contentHash,
+      );
+      if (!policy) throw new Error("The bound approval policy is no longer current.");
+      const approvalStore = await decideApprovalRequest({
+        store: state.approvalStore,
+        requestId,
+        status,
+        actor: personaById(state.personaId),
+        reason,
+        decidedAt,
+        policy,
+      });
+      dispatch({ type: "SET_APPROVAL_STORE", approvalStore });
+    },
+    [state.approvalStore, state.personaId],
+  );
+  const recordAuthorizationDecision = useCallback(
+    (decision: AuthorizationDecision) => dispatch({ type: "AUTHORIZATION_DECISION", decision }),
+    [],
+  );
+  const setApprovalStore = useCallback(
+    (approvalStore: ApprovalStore) => dispatch({ type: "SET_APPROVAL_STORE", approvalStore }),
+    [],
+  );
   const resetDemo = useCallback(() => {
     clearTimers();
     toastId = 0;
@@ -492,6 +633,11 @@ export function AppProvider({ children }: { readonly children: ReactNode }) {
     setFilter,
     toggleGov,
     applyScenario,
+    setPersona,
+    queueApproval,
+    decideApproval,
+    recordAuthorizationDecision,
+    setApprovalStore,
     resetDemo,
     dispatch,
   };

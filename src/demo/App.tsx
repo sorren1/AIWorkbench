@@ -18,10 +18,12 @@ import { GitHubScreen } from "./screens/GitHubScreen";
 import { IssueDetail } from "./screens/IssueScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { ValidationScreen } from "./screens/ValidationScreen";
+import { ApprovalInboxScreen } from "./screens/ApprovalInboxScreen";
 import { ControlPlaneScreen } from "./screens/ControlPlaneScreen";
 import { WorkQueue } from "./screens/WorkQueueScreen";
 import { useApp } from "./state/store";
 import { clearPreferences } from "./state/preferences";
+import { clearBrowserAuthorizationState } from "./authorization/browserStore";
 import { DEMO_SCENARIOS, isDemoScenarioId, type DemoScenarioId } from "./state/scenarios";
 import { Icon } from "../shared/Icon";
 
@@ -41,6 +43,8 @@ function Screen() {
       return <GitHubScreen />;
     case "validation":
       return <ValidationScreen />;
+    case "approvals":
+      return <ApprovalInboxScreen />;
     case "control-plane":
       return <ControlPlaneScreen />;
     case "architecture":
@@ -189,6 +193,7 @@ export function App() {
         setWalkthroughOpen(false);
         updateWalkthroughQuery(false);
         clearPreferences(localStorage);
+        clearBrowserAuthorizationState(localStorage);
         setTheme("light");
         actions.resetDemo();
       },

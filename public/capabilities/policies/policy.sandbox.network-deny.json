@@ -1,0 +1,21 @@
+{
+  "kind": "ApprovalPolicy",
+  "enabled": true,
+  "provenance": {
+    "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+    "independentlyAuthored": true,
+    "createdAt": "2026-07-17T12:00:00.000Z"
+  },
+  "id": "policy.sandbox.network-deny",
+  "name": "Sandbox network access denied",
+  "version": "1.0.0",
+  "description": "Denies network-enabled sandbox requests in the functional local demonstration.",
+  "matcher": { "toolIds": ["tool.sandbox.*"], "networkAccess": true },
+  "mode": "DENY",
+  "requiredApproverScopes": [],
+  "requiredApproverPersonas": [],
+  "timeoutSeconds": 300,
+  "forbidSelfApproval": true,
+  "reasonRequired": true,
+  "contentHash": "01b5225d7a524f680c9746f2a9d7d4250ce020c54d181f59814cc4ff1715e874"
+}

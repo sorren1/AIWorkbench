@@ -4,20 +4,30 @@ import { dirname, resolve } from "node:path";
 
 import { format, resolveConfig } from "prettier";
 
-import { canonicalJson, contentHashInput } from "../src/demo/control-plane/registry/canonical";
+import {
+  approvalPolicyHashInput,
+  canonicalJson,
+  contentHashInput,
+} from "../src/demo/control-plane/registry/canonical";
 import type {
+  ApprovalPolicy,
+  ApprovalPolicySource,
   RegistryResource,
   RegistryResourceSource,
   RegistrySnapshot,
 } from "../src/demo/control-plane/registry/contracts";
 import {
   agentCardSources,
+  approvalPolicySources,
   memoryPolicySources,
   modelPolicySources,
   registryGeneratedAt,
   toolDescriptorSources,
 } from "../src/demo/control-plane/registry/fixtures";
-import { assertValidRegistryResource } from "../src/demo/control-plane/registry/validation";
+import {
+  assertValidRegistryResource,
+  validateApprovalPolicy,
+} from "../src/demo/control-plane/registry/validation";
 
 const root = resolve(import.meta.dirname, "..");
 const checkOnly = process.argv.includes("--check");
@@ -38,14 +48,26 @@ function withHash(source: RegistryResourceSource): RegistryResource {
   return assertValidRegistryResource({ ...source, contentHash });
 }
 
+function withPolicyHash(source: ApprovalPolicySource): ApprovalPolicy {
+  const contentHash = createHash("sha256")
+    .update(canonicalJson(approvalPolicyHashInput(source)))
+    .digest("hex");
+  const result = validateApprovalPolicy({ ...source, contentHash });
+  if (!result.valid) {
+    throw new Error(`Approval policy schema validation failed: ${result.errors.join("; ")}`);
+  }
+  return result.value;
+}
+
 const snapshot: RegistrySnapshot = {
-  schemaVersion: 1,
+  schemaVersion: 2,
   generatedAt: registryGeneratedAt,
   classification: "SYNTHETIC_PUBLIC_PORTFOLIO_FIXTURE",
   agents: agentCardSources.map(withHash).filter((item) => item.kind === "AgentCard"),
   tools: toolDescriptorSources.map(withHash).filter((item) => item.kind === "ToolDescriptor"),
   modelPolicies: modelPolicySources.map(withHash).filter((item) => item.kind === "ModelPolicy"),
   memoryPolicies: memoryPolicySources.map(withHash).filter((item) => item.kind === "MemoryPolicy"),
+  approvalPolicies: approvalPolicySources.map(withPolicyHash),
 };
 
 const schemaNames = [
@@ -56,6 +78,11 @@ const schemaNames = [
   "memory-policy.schema.json",
   "stage-input.schema.json",
   "stage-output.schema.json",
+  "approval-policy.schema.json",
+  "delegated-identity-envelope.schema.json",
+  "approval-request.schema.json",
+  "approval-event.schema.json",
+  "approval-store.schema.json",
 ] as const;
 
 const outputs = new Map<string, string>();
@@ -80,6 +107,22 @@ outputs.set(
 );
 for (const agent of snapshot.agents) {
   outputs.set(`public/capabilities/agents/${agent.id}.json`, await jsonFile(agent));
+}
+outputs.set(
+  "public/capabilities/policies/index.json",
+  await jsonFile({
+    schemaVersion: 1,
+    classification: snapshot.classification,
+    policies: snapshot.approvalPolicies.map((policy) => ({
+      id: policy.id,
+      version: policy.version,
+      contentHash: policy.contentHash,
+      href: `/capabilities/policies/${policy.id}.json`,
+    })),
+  }),
+);
+for (const policy of snapshot.approvalPolicies) {
+  outputs.set(`public/capabilities/policies/${policy.id}.json`, await jsonFile(policy));
 }
 for (const schemaName of schemaNames) {
   const schema = await readFile(

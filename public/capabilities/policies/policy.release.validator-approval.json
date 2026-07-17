@@ -1,0 +1,22 @@
+{
+  "kind": "ApprovalPolicy",
+  "enabled": true,
+  "provenance": {
+    "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+    "independentlyAuthored": true,
+    "createdAt": "2026-07-17T12:00:00.000Z"
+  },
+  "id": "policy.release.validator-approval",
+  "name": "Release readiness requires validation approval",
+  "version": "1.0.0",
+  "description": "Requires a distinct validator persona before a release-readiness transition.",
+  "matcher": { "toolIds": ["tool.workflow.release-readiness"], "stages": ["review"] },
+  "mode": "REQUIRE_APPROVAL",
+  "requiredApproverScopes": ["validation:approve"],
+  "requiredApproverPersonas": ["synthetic-validator"],
+  "timeoutSeconds": 3600,
+  "decisionCacheTtlSeconds": 600,
+  "forbidSelfApproval": true,
+  "reasonRequired": true,
+  "contentHash": "dc20f0aa8bdd0ee88d624d8a9d695f2bc993dce14138cf5a8480ba32a42706cb"
+}

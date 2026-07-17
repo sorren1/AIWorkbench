@@ -57,6 +57,7 @@ venv/
 .vite/
 playwright-report/
 test-results/
+.workbench/
 
 # Private local review notes (retain the tracked directory notice)
 private/*

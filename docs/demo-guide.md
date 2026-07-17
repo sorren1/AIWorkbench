@@ -15,7 +15,9 @@ Functional locally:
 - architecture Markdown/JSON and validation-evidence Markdown/JSON exports;
 - validated deep links for screen, synthetic issue, artifact, and Settings subview;
 - five named deterministic synthetic scenario seeds and an explicitly confirmed reset;
-- generated, schema-validated agent/tool/model/memory registry inspection and JSON export;
+- generated, schema-validated agent/tool/model/memory/approval-policy registry inspection and JSON export;
+- synthetic persona switching, pure local scope enforcement, and a versioned browser-local approval inbox;
+- explicit approval pause/decision/resume bound to arguments, versions, change targets, and context;
 - optional local MCP discovery and bounded toy-repository invocation through repository commands.
 
 Synthetic fixtures:
@@ -69,7 +71,7 @@ Validation exports deliberately exclude freeform browser-local tester-note text 
 - **Stale after upstream redo** — FIN-1198 with invalidated downstream stages.
 - **Clean end-to-end walkthrough** — FIN-1150 with a complete synthetic chain.
 
-Changing the scenario starts again from the same in-memory baseline. `Reset demo` requires confirmation, clears workflow changes, restores harmless preferences to their defaults, cancels pending simulated transitions, and returns to the baseline queue. Only the versioned theme preference is stored; synthetic workflow, review, validation, and approval state is not persisted across reloads.
+Changing the scenario starts again from the same deterministic workflow baseline. `Reset demo` requires confirmation, clears workflow and approval changes, restores preferences/persona to defaults, cancels pending simulated transitions, and returns to the baseline queue. Theme plus the explicitly disclosed versioned authorization/approval store persist locally; ordinary workflow, PR, validation, and note state remains ephemeral.
 
 ## Suggested walkthrough
 
@@ -81,4 +83,4 @@ Changing the scenario starts again from the same in-memory baseline. `Reset demo
 6. **Architecture** — review the control, execution, context, and validation responsibility boundaries.
    Use the persistent prototype badge for the concise boundary and the About panel for full provenance and the separately labeled professional context.
 
-The separate **Control Plane** destination provides a focused registry inspection path when time permits. It shows exact versions, lifecycle, content hashes, capabilities, schemas, tool/write boundaries, model/memory policies, and estimated budgets without expanding the guided workflow into a generic admin tour.
+The separate **Control Plane** destination provides a focused registry inspection path when time permits. It shows exact versions, lifecycle, content hashes, capabilities, schemas, tool/write boundaries, model/memory policies, and estimated budgets without expanding the guided workflow into a generic admin tour. **Approval Inbox** demonstrates persona scope reasons, durable local decisions, separation of duties, and exact hash-bound resume.

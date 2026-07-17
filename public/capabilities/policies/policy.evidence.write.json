@@ -1,0 +1,21 @@
+{
+  "kind": "ApprovalPolicy",
+  "enabled": true,
+  "provenance": {
+    "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+    "independentlyAuthored": true,
+    "createdAt": "2026-07-17T12:00:00.000Z"
+  },
+  "id": "policy.evidence.write",
+  "name": "Mutable evidence write",
+  "version": "1.0.0",
+  "description": "Allows bounded synthetic evidence writes before finalization.",
+  "matcher": { "toolIds": ["tool.evidence.write"], "evidenceFinalized": false },
+  "mode": "ALLOW",
+  "requiredApproverScopes": [],
+  "requiredApproverPersonas": [],
+  "timeoutSeconds": 300,
+  "forbidSelfApproval": false,
+  "reasonRequired": false,
+  "contentHash": "3c005415c4347d3fb59e236683990a27d90242af55010f97d7f8f94482e3ff2b"
+}

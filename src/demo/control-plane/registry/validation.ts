@@ -2,7 +2,12 @@ import Ajv2020, { type ErrorObject, type ValidateFunction } from "ajv/dist/2020.
 import addFormats from "ajv-formats";
 
 import agentCardSchema from "./schemas/agent-card.schema.json";
+import approvalPolicySchema from "./schemas/approval-policy.schema.json";
+import approvalEventSchema from "./schemas/approval-event.schema.json";
+import approvalRequestSchema from "./schemas/approval-request.schema.json";
+import approvalStoreSchema from "./schemas/approval-store.schema.json";
 import commonSchema from "./schemas/common.schema.json";
+import delegatedIdentityEnvelopeSchema from "./schemas/delegated-identity-envelope.schema.json";
 import memoryPolicySchema from "./schemas/memory-policy.schema.json";
 import modelPolicySchema from "./schemas/model-policy.schema.json";
 import stageInputSchema from "./schemas/stage-input.schema.json";
@@ -10,23 +15,38 @@ import stageOutputSchema from "./schemas/stage-output.schema.json";
 import toolDescriptorSchema from "./schemas/tool-descriptor.schema.json";
 import type {
   AgentCard,
+  ApprovalPolicy,
   MemoryPolicy,
   ModelPolicy,
   RegistryResource,
   ToolDescriptor,
 } from "./contracts";
+import type { ApprovalEvent, ApprovalRequest, ApprovalStore } from "../../authorization/contracts";
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
 ajv.addSchema(commonSchema);
 ajv.addSchema(stageInputSchema);
 ajv.addSchema(stageOutputSchema);
+ajv.addSchema(delegatedIdentityEnvelopeSchema);
+ajv.addSchema(approvalRequestSchema);
+ajv.addSchema(approvalEventSchema);
+
+const approvalRequestValidator = ajv.getSchema<ApprovalRequest>(approvalRequestSchema.$id);
+const approvalEventValidator = ajv.getSchema<ApprovalEvent>(approvalEventSchema.$id);
+if (!approvalRequestValidator || !approvalEventValidator) {
+  throw new Error("Approval protocol schemas failed to register.");
+}
 
 const validators = {
   AgentCard: ajv.compile<AgentCard>(agentCardSchema),
   ToolDescriptor: ajv.compile<ToolDescriptor>(toolDescriptorSchema),
   ModelPolicy: ajv.compile<ModelPolicy>(modelPolicySchema),
   MemoryPolicy: ajv.compile<MemoryPolicy>(memoryPolicySchema),
+  ApprovalPolicy: ajv.compile<ApprovalPolicy>(approvalPolicySchema),
+  ApprovalRequest: approvalRequestValidator,
+  ApprovalEvent: approvalEventValidator,
+  ApprovalStore: ajv.compile<ApprovalStore>(approvalStoreSchema),
 };
 
 export type SchemaValidationResult<T> =
@@ -65,6 +85,22 @@ export function validateModelPolicy(value: unknown): SchemaValidationResult<Mode
 
 export function validateMemoryPolicy(value: unknown): SchemaValidationResult<MemoryPolicy> {
   return validateWith(validators.MemoryPolicy, value);
+}
+
+export function validateApprovalPolicy(value: unknown): SchemaValidationResult<ApprovalPolicy> {
+  return validateWith(validators.ApprovalPolicy, value);
+}
+
+export function validateApprovalRequest(value: unknown): SchemaValidationResult<ApprovalRequest> {
+  return validateWith(validators.ApprovalRequest, value);
+}
+
+export function validateApprovalEvent(value: unknown): SchemaValidationResult<ApprovalEvent> {
+  return validateWith(validators.ApprovalEvent, value);
+}
+
+export function validateApprovalStore(value: unknown): SchemaValidationResult<ApprovalStore> {
+  return validateWith(validators.ApprovalStore, value);
 }
 
 export function validateRegistryResource(value: unknown): SchemaValidationResult<RegistryResource> {

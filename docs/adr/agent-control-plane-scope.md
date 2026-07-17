@@ -74,7 +74,7 @@ Every decision records an inspectable reason code and the exact policy/version i
 
 Risky tool requests become immutable envelopes linked to exact agent/tool versions, redacted arguments, context digest, policy, trace, requester, risk reason, required approver persona, and expiry. State changes are append-only events: pending, approved, rejected, expired, cancelled, executed, or failed.
 
-For the static public release, IndexedDB provides browser-local persistence across reloads. Export/import makes the journal portable and reset makes the demo recoverable. This is “durable in this browser profile,” not multi-user, authenticated, tamper-resistant, or production audit storage. A production implementation would require a transactional server-side event store and real identity; that adapter is not part of the public release.
+For the static public release, a small versioned local-storage record provides browser-local persistence across reloads, and reset makes the demo recoverable. The payload is bounded approval metadata rather than artifact bodies or secrets, so IndexedDB adds no useful complexity at this scale. This is “durable in this browser profile,” not multi-user, authenticated, tamper-resistant, or production audit storage. A production implementation would require a transactional server-side event store and real identity; that adapter is not part of the public release.
 
 ### Context selection and provenance
 

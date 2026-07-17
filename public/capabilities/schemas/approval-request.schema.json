@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.invalid/schemas/registry/approval-request.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "requestId",
+    "runId",
+    "stage",
+    "agent",
+    "tool",
+    "proposedToolArgumentsHash",
+    "targetPaths",
+    "requesterActor",
+    "effectiveSubject",
+    "identityEnvelope",
+    "policy",
+    "binding",
+    "status",
+    "requestedAt",
+    "expiresAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "requestId": { "$ref": "common.schema.json#/$defs/identifier" },
+    "runId": { "$ref": "common.schema.json#/$defs/identifier" },
+    "stage": { "$ref": "common.schema.json#/$defs/stage" },
+    "agent": { "$ref": "common.schema.json#/$defs/registryReference" },
+    "tool": { "$ref": "common.schema.json#/$defs/registryReference" },
+    "proposedToolArgumentsHash": { "$ref": "common.schema.json#/$defs/contentHash" },
+    "targetPaths": { "type": "array", "items": { "type": "string" }, "uniqueItems": true },
+    "requesterActor": { "$ref": "common.schema.json#/$defs/persona" },
+    "effectiveSubject": { "type": "string", "minLength": 1 },
+    "identityEnvelope": {
+      "$ref": "delegated-identity-envelope.schema.json"
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "contentHash"],
+      "properties": {
+        "id": { "$ref": "common.schema.json#/$defs/identifier" },
+        "version": { "$ref": "common.schema.json#/$defs/semanticVersion" },
+        "contentHash": { "$ref": "common.schema.json#/$defs/contentHash" }
+      }
+    },
+    "binding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "proposedArgumentsHash",
+        "agent",
+        "tool",
+        "changeTargetDigest",
+        "contextPackDigest"
+      ],
+      "properties": {
+        "proposedArgumentsHash": { "$ref": "common.schema.json#/$defs/contentHash" },
+        "agent": { "$ref": "common.schema.json#/$defs/registryReference" },
+        "tool": { "$ref": "common.schema.json#/$defs/registryReference" },
+        "changeTargetDigest": { "$ref": "common.schema.json#/$defs/contentHash" },
+        "contextPackDigest": { "$ref": "common.schema.json#/$defs/contentHash" }
+      }
+    },
+    "status": { "enum": ["PENDING", "APPROVED", "REJECTED", "EXPIRED", "INVALIDATED"] },
+    "requestedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "expiresAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "decidedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "decisionActor": { "$ref": "common.schema.json#/$defs/persona" },
+    "decisionReason": { "type": "string", "minLength": 1 },
+    "decisionContentHash": { "$ref": "common.schema.json#/$defs/contentHash" }
+  }
+}
