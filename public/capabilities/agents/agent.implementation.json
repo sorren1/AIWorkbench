@@ -1,0 +1,45 @@
+{
+  "kind": "AgentCard",
+  "version": "1.0.0",
+  "owner": "Synthetic delivery controls group",
+  "status": "APPROVED",
+  "inputSchema": { "$ref": "/capabilities/schemas/stage-input.schema.json" },
+  "outputSchema": { "$ref": "/capabilities/schemas/stage-output.schema.json" },
+  "modelPolicyId": "model.policy.delivery-balanced",
+  "memoryPolicyId": "memory.policy.issue-bounded",
+  "approvalPolicyIds": [
+    "policy.registry.separation-of-duties",
+    "policy.tool.bounded-write-human-approval",
+    "policy.tool.local-process-approval"
+  ],
+  "maxDurationMs": 120000,
+  "maxToolCalls": 18,
+  "maxRepairAttempts": 2,
+  "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
+  "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
+  "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+  "createdAt": "2026-07-16T18:00:00.000Z",
+  "updatedAt": "2026-07-16T18:00:00.000Z",
+  "approval": {
+    "approvedBy": "Synthetic control reviewer",
+    "approvedAt": "2026-07-16T19:00:00.000Z",
+    "approvalPolicyId": "policy.registry.separation-of-duties",
+    "decisionRecordId": "decision.synthetic.registry-v1"
+  },
+  "id": "agent.implementation",
+  "name": "Implementation Agent",
+  "description": "Applies a human-approved bounded patch only in the disposable toy repository.",
+  "stageId": "implement",
+  "capabilities": ["bounded patching", "local validation", "repair attempt accounting"],
+  "skills": ["source editing", "test-guided repair", "diff inspection"],
+  "allowedToolIds": [
+    "tool.repository.search",
+    "tool.repository.file.read",
+    "tool.repository.patch.controlled",
+    "tool.sandbox.command",
+    "tool.repository.diff.inspect",
+    "tool.evidence.write"
+  ],
+  "allowedWritePaths": ["src/**", "browser-local://evidence/**"],
+  "contentHash": "b19a2e922d02f6402a4a0e002942fefaf6f9073a88e2835d82a9715dec4ce726"
+}

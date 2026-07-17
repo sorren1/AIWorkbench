@@ -1,0 +1,200 @@
+import type { StageId } from "../../data/types";
+
+export const REGISTRY_STATUSES = [
+  "DRAFT",
+  "PENDING_APPROVAL",
+  "APPROVED",
+  "REJECTED",
+  "DEPRECATED",
+] as const;
+
+export type RegistryStatus = (typeof REGISTRY_STATUSES)[number];
+export type ToolRiskLevel = "READ_ONLY" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+export type IdempotencySemantics = "IDEMPOTENT" | "IDEMPOTENT_WITH_KEY" | "NOT_IDEMPOTENT";
+export type ProviderCategory = "PROVIDER_NEUTRAL_SIMULATED" | "LOCAL_DETERMINISTIC";
+
+export type ApprovalMetadata = {
+  readonly approvedBy: string;
+  readonly approvedAt: string;
+  readonly approvalPolicyId: string;
+  readonly decisionRecordId: string;
+};
+
+export type SchemaReference = {
+  readonly $ref: string;
+};
+
+export type JsonSchema = Record<string, unknown>;
+
+export type AgentCard = {
+  readonly kind: "AgentCard";
+  readonly id: string;
+  readonly name: string;
+  readonly version: string;
+  readonly description: string;
+  readonly owner: string;
+  readonly status: RegistryStatus;
+  readonly stageId: Exclude<StageId, "seed">;
+  readonly capabilities: readonly string[];
+  readonly skills: readonly string[];
+  readonly inputSchema: SchemaReference;
+  readonly outputSchema: SchemaReference;
+  readonly allowedToolIds: readonly string[];
+  readonly allowedWritePaths: readonly string[];
+  readonly modelPolicyId: string;
+  readonly memoryPolicyId: string;
+  readonly approvalPolicyIds: readonly string[];
+  readonly maxDurationMs: number;
+  readonly maxToolCalls: number;
+  readonly maxRepairAttempts: number;
+  readonly tokenBudget?: {
+    readonly maxInputTokens: number;
+    readonly maxOutputTokens: number;
+    readonly basis: "ESTIMATED";
+  };
+  readonly costBudget?: {
+    readonly maxEstimatedUsd: number;
+    readonly basis: "ESTIMATED";
+  };
+  readonly sourceCommit: string;
+  readonly contentHash: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly approval?: ApprovalMetadata;
+};
+
+export type ToolDescriptor = {
+  readonly kind: "ToolDescriptor";
+  readonly id: string;
+  readonly name: string;
+  readonly version: string;
+  readonly description: string;
+  readonly status: RegistryStatus;
+  readonly riskLevel: ToolRiskLevel;
+  readonly inputSchema: JsonSchema;
+  readonly outputSchema: JsonSchema;
+  readonly sideEffects: readonly string[];
+  readonly requiredScopes: readonly string[];
+  readonly allowedStages: readonly Exclude<StageId, "seed">[];
+  readonly timeoutMs: number;
+  readonly idempotency: IdempotencySemantics;
+  readonly networkRequired: boolean;
+  readonly filesystemBoundary: {
+    readonly mode: "NONE" | "READ_ONLY" | "BOUNDED_WRITE";
+    readonly allowedPaths: readonly string[];
+  };
+  readonly approvalPolicyId: string | null;
+  readonly sourceImplementation: {
+    readonly module: string;
+    readonly exportName: string;
+  };
+  readonly sourceCommit: string;
+  readonly contentHash: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly approval?: ApprovalMetadata;
+};
+
+export type ModelPolicy = {
+  readonly kind: "ModelPolicy";
+  readonly id: string;
+  readonly name: string;
+  readonly version: string;
+  readonly description: string;
+  readonly status: RegistryStatus;
+  readonly providerCategory: ProviderCategory;
+  readonly modelIdentifier: string;
+  readonly reasoningProfile: "LOW" | "BALANCED" | "HIGH";
+  readonly temperature: number | null;
+  readonly fallbackChain: readonly string[];
+  readonly maximumTokens: number;
+  readonly costCeilingUsd: number;
+  readonly liveExecutionEnabled: false;
+  readonly sourceCommit: string;
+  readonly contentHash: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly approval?: ApprovalMetadata;
+};
+
+export type MemoryPolicy = {
+  readonly kind: "MemoryPolicy";
+  readonly id: string;
+  readonly name: string;
+  readonly version: string;
+  readonly description: string;
+  readonly status: RegistryStatus;
+  readonly allowedRecordTypes: readonly string[];
+  readonly sourceScopes: readonly string[];
+  readonly freshness: {
+    readonly maximumAgeSeconds: number;
+    readonly staleBehavior: "EXCLUDE" | "FLAG_FOR_REVIEW";
+  };
+  readonly maximumContextBytes: number;
+  readonly priorRunEpisodicMemoryPermitted: boolean;
+  readonly sourceCommit: string;
+  readonly contentHash: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly approval?: ApprovalMetadata;
+};
+
+export type RegistryResource = AgentCard | ToolDescriptor | ModelPolicy | MemoryPolicy;
+
+export type AgentCardSource = Omit<AgentCard, "contentHash">;
+export type ToolDescriptorSource = Omit<ToolDescriptor, "contentHash">;
+export type ModelPolicySource = Omit<ModelPolicy, "contentHash">;
+export type MemoryPolicySource = Omit<MemoryPolicy, "contentHash">;
+export type RegistryResourceSource =
+  AgentCardSource | ToolDescriptorSource | ModelPolicySource | MemoryPolicySource;
+
+export type RegistrySnapshot = {
+  readonly schemaVersion: 1;
+  readonly generatedAt: string;
+  readonly classification: "SYNTHETIC_PUBLIC_PORTFOLIO_FIXTURE";
+  readonly agents: readonly AgentCard[];
+  readonly tools: readonly ToolDescriptor[];
+  readonly modelPolicies: readonly ModelPolicy[];
+  readonly memoryPolicies: readonly MemoryPolicy[];
+};
+
+export type RegistryReference = {
+  readonly id: string;
+  readonly version: string;
+  readonly contentHash: string;
+};
+
+export type StageExecutionManifest = {
+  readonly manifestVersion: 1;
+  readonly stageId: Exclude<StageId, "seed">;
+  readonly agent: RegistryReference;
+  readonly tools: readonly RegistryReference[];
+  readonly modelPolicy: RegistryReference;
+  readonly memoryPolicy: RegistryReference;
+  readonly resolvedAt: string;
+};
+
+export type RegistryDecision =
+  | {
+      readonly allowed: true;
+      readonly reasonCode: "APPROVED_MANIFEST_RESOLVED";
+      readonly manifest: StageExecutionManifest;
+    }
+  | {
+      readonly allowed: false;
+      readonly reasonCode:
+        | "AGENT_NOT_FOUND"
+        | "AGENT_SCHEMA_INVALID"
+        | "AGENT_HASH_INVALID"
+        | "AGENT_NOT_APPROVED"
+        | "STAGE_MISMATCH"
+        | "TOOL_NOT_FOUND"
+        | "TOOL_SCHEMA_INVALID"
+        | "TOOL_HASH_INVALID"
+        | "TOOL_NOT_APPROVED"
+        | "TOOL_NOT_ALLOWED_FOR_AGENT"
+        | "TOOL_NOT_ALLOWED_FOR_STAGE"
+        | "MODEL_POLICY_NOT_APPROVED"
+        | "MEMORY_POLICY_NOT_APPROVED";
+      readonly detail: string;
+    };

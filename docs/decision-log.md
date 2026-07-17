@@ -218,3 +218,26 @@ Use a persistent `Demo mode · Synthetic data · No external writes` indicator. 
 - Downloads work entirely in the visitor's browser and require no backend, temporary server storage, or analytics call.
 - URLs remain safe to share because only allow-listed route and synthetic fixture identifiers are serialized.
 - A future durable approval journal must introduce its own clearly labeled storage and identity model; it cannot silently reuse this ephemeral demo state.
+
+## ADR-009 — Generate versioned capability cards and keep MCP authorization in the local host
+
+- Status: Accepted
+- Date: 2026-07-16
+- Detailed record: [`docs/adr/capability-card-schema-and-lifecycle.md`](adr/capability-card-schema-and-lifecycle.md)
+
+### Context
+
+The stage-bound control plane needs executable, inspectable definitions rather than UI-only agent cards. The project also needs one real MCP slice without exposing a browser endpoint, widening the static-host boundary, or implying that external enterprise MCP integrations are functional.
+
+### Decision
+
+Independently define strict TypeScript and JSON Schema contracts for stage AgentCards, tools, model policies, and memory policies. Generate schema-valid public capability cards with canonical SHA-256 content hashes. Resolve new stage manifests only from exact schema-valid, hash-valid `APPROVED` versions; revisions return to `DRAFT`, and `DEPRECATED` resources remain historical only.
+
+Pin the recommended stable official TypeScript MCP SDK v1.29.0 and use stdio for one repository-owned server against a disposable synthetic toy repository. Tool schemas are discovered through MCP. The trusted local client matches discovery to the approved registry/stage manifest, validates inputs and paths, and requires the declared approval policy before invocation. The public browser reads sanitized static evidence only and never starts or connects to the process.
+
+### Consequences
+
+- Exact versions, content hashes, policy references, schemas, boundaries, and budgets are inspectable for every executable stage.
+- Discovery cannot grant authority; an unapproved discovered tool is refused locally.
+- Public files are called capability cards and make no A2A compatibility claim.
+- The local slice demonstrates bounded protocol mechanics, not remote identity, multi-user durability, hosted sandboxing, or production MCP-platform readiness.

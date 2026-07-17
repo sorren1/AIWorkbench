@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.invalid/schemas/registry/tool-descriptor.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "id",
+    "name",
+    "version",
+    "description",
+    "status",
+    "riskLevel",
+    "inputSchema",
+    "outputSchema",
+    "sideEffects",
+    "requiredScopes",
+    "allowedStages",
+    "timeoutMs",
+    "idempotency",
+    "networkRequired",
+    "filesystemBoundary",
+    "approvalPolicyId",
+    "sourceImplementation",
+    "sourceCommit",
+    "contentHash",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "kind": { "const": "ToolDescriptor" },
+    "id": { "$ref": "common.schema.json#/$defs/identifier" },
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "$ref": "common.schema.json#/$defs/semanticVersion" },
+    "description": { "type": "string", "minLength": 1 },
+    "status": { "$ref": "common.schema.json#/$defs/status" },
+    "riskLevel": { "enum": ["READ_ONLY", "LOW", "MEDIUM", "HIGH", "CRITICAL"] },
+    "inputSchema": { "$ref": "common.schema.json#/$defs/jsonSchema" },
+    "outputSchema": { "$ref": "common.schema.json#/$defs/jsonSchema" },
+    "sideEffects": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
+    "requiredScopes": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
+    "allowedStages": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/stage" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "timeoutMs": { "type": "integer", "minimum": 100, "maximum": 120000 },
+    "idempotency": { "enum": ["IDEMPOTENT", "IDEMPOTENT_WITH_KEY", "NOT_IDEMPOTENT"] },
+    "networkRequired": { "type": "boolean" },
+    "filesystemBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode", "allowedPaths"],
+      "properties": {
+        "mode": { "enum": ["NONE", "READ_ONLY", "BOUNDED_WRITE"] },
+        "allowedPaths": { "type": "array", "items": { "type": "string" }, "uniqueItems": true }
+      }
+    },
+    "approvalPolicyId": {
+      "oneOf": [{ "$ref": "common.schema.json#/$defs/identifier" }, { "type": "null" }]
+    },
+    "sourceImplementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["module", "exportName"],
+      "properties": {
+        "module": { "type": "string", "minLength": 1 },
+        "exportName": { "type": "string", "minLength": 1 }
+      }
+    },
+    "sourceCommit": { "$ref": "common.schema.json#/$defs/sourceCommit" },
+    "contentHash": { "$ref": "common.schema.json#/$defs/contentHash" },
+    "createdAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "updatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "approval": { "$ref": "common.schema.json#/$defs/approval" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "APPROVED" } }, "required": ["status"] },
+      "then": { "properties": { "approval": true }, "required": ["approval"] }
+    }
+  ]
+}

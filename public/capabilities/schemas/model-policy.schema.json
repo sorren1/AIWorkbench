@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.invalid/schemas/registry/model-policy.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "id",
+    "name",
+    "version",
+    "description",
+    "status",
+    "providerCategory",
+    "modelIdentifier",
+    "reasoningProfile",
+    "temperature",
+    "fallbackChain",
+    "maximumTokens",
+    "costCeilingUsd",
+    "liveExecutionEnabled",
+    "sourceCommit",
+    "contentHash",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "kind": { "const": "ModelPolicy" },
+    "id": { "$ref": "common.schema.json#/$defs/identifier" },
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "$ref": "common.schema.json#/$defs/semanticVersion" },
+    "description": { "type": "string", "minLength": 1 },
+    "status": { "$ref": "common.schema.json#/$defs/status" },
+    "providerCategory": { "enum": ["PROVIDER_NEUTRAL_SIMULATED", "LOCAL_DETERMINISTIC"] },
+    "modelIdentifier": { "type": "string", "minLength": 1 },
+    "reasoningProfile": { "enum": ["LOW", "BALANCED", "HIGH"] },
+    "temperature": {
+      "oneOf": [{ "type": "number", "minimum": 0, "maximum": 2 }, { "type": "null" }]
+    },
+    "fallbackChain": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
+    "maximumTokens": { "type": "integer", "minimum": 1 },
+    "costCeilingUsd": { "type": "number", "minimum": 0 },
+    "liveExecutionEnabled": { "const": false },
+    "sourceCommit": { "$ref": "common.schema.json#/$defs/sourceCommit" },
+    "contentHash": { "$ref": "common.schema.json#/$defs/contentHash" },
+    "createdAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "updatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "approval": { "$ref": "common.schema.json#/$defs/approval" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "APPROVED" } }, "required": ["status"] },
+      "then": { "properties": { "approval": true }, "required": ["approval"] }
+    }
+  ]
+}

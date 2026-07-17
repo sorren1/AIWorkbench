@@ -1,0 +1,64 @@
+{
+  "schemaVersion": 1,
+  "classification": "SYNTHETIC_PUBLIC_LOCAL_MCP_EVIDENCE",
+  "executionMode": "FUNCTIONAL_LOCAL_STDIO",
+  "externalNetworkCalls": 0,
+  "temporaryRepository": true,
+  "registrySnapshot": {
+    "generatedAt": "2026-07-16T20:00:00.000Z",
+    "classification": "SYNTHETIC_PUBLIC_PORTFOLIO_FIXTURE"
+  },
+  "invocations": [
+    {
+      "toolId": "tool.repository.search",
+      "registryVersion": "1.0.0",
+      "registryContentHash": "0d8689f129ea921ef9d2940344a7f23f68eb48a85b946d36d926f35abd70ed23",
+      "stageId": "implement",
+      "decision": "ALLOW",
+      "reasonCode": "APPROVED_TOOL_IN_APPROVED_STAGE_MANIFEST",
+      "approvalPolicyId": null,
+      "sanitizedResult": { "matchCount": 3 }
+    },
+    {
+      "toolId": "tool.repository.file.read",
+      "registryVersion": "1.0.0",
+      "registryContentHash": "289247aa539523a54402f547d75cc25a206034c9c7fbb9f4815a2d47a040eca3",
+      "stageId": "implement",
+      "decision": "ALLOW",
+      "reasonCode": "APPROVED_TOOL_IN_APPROVED_STAGE_MANIFEST",
+      "approvalPolicyId": null,
+      "sanitizedResult": { "path": "src/report.js", "contentIncluded": false }
+    },
+    {
+      "toolId": "tool.repository.patch.controlled",
+      "registryVersion": "1.0.0",
+      "registryContentHash": "f4d1e469a851fae19dc72d633a3940eecdd1b1907777df7503780171bc9b9af9",
+      "stageId": "implement",
+      "decision": "ALLOW",
+      "reasonCode": "APPROVED_TOOL_IN_APPROVED_STAGE_MANIFEST",
+      "approvalPolicyId": "policy.tool.bounded-write-human-approval",
+      "sanitizedResult": { "path": "src/report.js", "changed": true }
+    },
+    {
+      "toolId": "tool.repository.diff.inspect",
+      "registryVersion": "1.0.0",
+      "registryContentHash": "28201220a09b92bde58fe683acf0441ac6d859baa072f03d22aac307602796e8",
+      "stageId": "implement",
+      "decision": "ALLOW",
+      "reasonCode": "APPROVED_TOOL_IN_APPROVED_STAGE_MANIFEST",
+      "approvalPolicyId": null,
+      "sanitizedResult": { "changedPaths": ["src/report.js"], "diffBodyIncluded": false }
+    },
+    {
+      "toolId": "tool.sandbox.command",
+      "registryVersion": "1.0.0",
+      "registryContentHash": "e6a536a1804c330f7cab327048872c6b185403df19fefd6ae6d0ca77d1116347",
+      "stageId": "implement",
+      "decision": "ALLOW",
+      "reasonCode": "APPROVED_TOOL_IN_APPROVED_STAGE_MANIFEST",
+      "approvalPolicyId": "policy.tool.local-process-approval",
+      "sanitizedResult": { "exitCode": 0, "outputIncluded": false }
+    }
+  ],
+  "disclosure": "This evidence proves one bounded local MCP slice. External enterprise MCP integrations remain simulated; this is not a production-readiness claim."
+}

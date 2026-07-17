@@ -18,6 +18,7 @@ import { GitHubScreen } from "./screens/GitHubScreen";
 import { IssueDetail } from "./screens/IssueScreen";
 import { SettingsScreen } from "./screens/SettingsScreen";
 import { ValidationScreen } from "./screens/ValidationScreen";
+import { ControlPlaneScreen } from "./screens/ControlPlaneScreen";
 import { WorkQueue } from "./screens/WorkQueueScreen";
 import { useApp } from "./state/store";
 import { clearPreferences } from "./state/preferences";
@@ -40,6 +41,8 @@ function Screen() {
       return <GitHubScreen />;
     case "validation":
       return <ValidationScreen />;
+    case "control-plane":
+      return <ControlPlaneScreen />;
     case "architecture":
       return <ArchitectureScreen />;
     case "settings":

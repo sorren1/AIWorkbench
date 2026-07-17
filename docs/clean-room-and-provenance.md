@@ -33,7 +33,7 @@ Functional does not mean production-ready. Browser-local state is not shared ide
 
 Every persona, issue, repository, branch, pull request, commit, changed file, check, log, duration, test result, cost, count, approval record, and external-system response shown in the workbench is synthetic. Fixture values demonstrate information shape and interaction behavior; they are not measurements of this repository or observations from another system.
 
-Jira, GitHub, AI/model, database, MCP-style, deployment, test-execution, notification, authentication, and external review operations are simulated. UI controls representing those operations change local demo state only.
+Jira, GitHub, AI/model, database, external enterprise MCP, deployment, hosted test-execution, notification, authentication, and external review operations are simulated. UI controls representing those operations change local demo state only. The independently authored repository-owned MCP server is functional only over stdio against a disposable synthetic toy repository; it is never contacted by the public browser and does not imply production MCP-platform readiness.
 
 ### Professional context
 

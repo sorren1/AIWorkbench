@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.invalid/schemas/registry/memory-policy.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "kind",
+    "id",
+    "name",
+    "version",
+    "description",
+    "status",
+    "allowedRecordTypes",
+    "sourceScopes",
+    "freshness",
+    "maximumContextBytes",
+    "priorRunEpisodicMemoryPermitted",
+    "sourceCommit",
+    "contentHash",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "kind": { "const": "MemoryPolicy" },
+    "id": { "$ref": "common.schema.json#/$defs/identifier" },
+    "name": { "type": "string", "minLength": 1 },
+    "version": { "$ref": "common.schema.json#/$defs/semanticVersion" },
+    "description": { "type": "string", "minLength": 1 },
+    "status": { "$ref": "common.schema.json#/$defs/status" },
+    "allowedRecordTypes": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
+    "sourceScopes": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["maximumAgeSeconds", "staleBehavior"],
+      "properties": {
+        "maximumAgeSeconds": { "type": "integer", "minimum": 0 },
+        "staleBehavior": { "enum": ["EXCLUDE", "FLAG_FOR_REVIEW"] }
+      }
+    },
+    "maximumContextBytes": { "type": "integer", "minimum": 1024 },
+    "priorRunEpisodicMemoryPermitted": { "type": "boolean" },
+    "sourceCommit": { "$ref": "common.schema.json#/$defs/sourceCommit" },
+    "contentHash": { "$ref": "common.schema.json#/$defs/contentHash" },
+    "createdAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "updatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "approval": { "$ref": "common.schema.json#/$defs/approval" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "status": { "const": "APPROVED" } }, "required": ["status"] },
+      "then": { "properties": { "approval": true }, "required": ["approval"] }
+    }
+  ]
+}

@@ -29,11 +29,11 @@ The repository may reuse standard-defined wire names only where needed for inter
 
 ## Model Context Protocol
 
-- **Public project or standard consulted:** the official [MCP server overview](https://modelcontextprotocol.io/specification/2025-06-18/server/index), [tools specification](https://modelcontextprotocol.io/specification/2025-06-18/server/tools), [resources specification](https://modelcontextprotocol.io/specification/2025-06-18/server/resources), and [authorization specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization).
-- **High-level concept considered:** tools and resources are distinct capabilities; tool definitions declare input/output shape; resource metadata can inform context choice; clients must apply authorization and human-approval safeguards rather than trusting tool metadata.
-- **Independently implemented here:** bounded local tool registry records, risk classes, allow/deny/approval policy, context-pack source metadata, and simulated MCP adapters that are always labeled as external simulations.
-- **Deliberately not adopted:** an MCP server/client runtime, OAuth flow, network transport, remote discovery, automatic trust of server annotations, live tool invocation, or a generic tool directory.
-- **Copy confirmation:** no MCP implementation source or UI assets were copied. Protocol-defined names are referenced only when a future adapter requires interoperability; the workbench manifests and UI are original.
+- **Public project or standard consulted:** the official [MCP server overview](https://modelcontextprotocol.io/specification/2025-06-18/server/index), [tools specification](https://modelcontextprotocol.io/specification/2025-06-18/server/tools), [resources specification](https://modelcontextprotocol.io/specification/2025-06-18/server/resources), [authorization specification](https://modelcontextprotocol.io/specification/2025-06-18/basic/authorization), and official [TypeScript SDK v1 server documentation](https://ts.sdk.modelcontextprotocol.io/server).
+- **High-level concept considered:** tools and resources are distinct capabilities; tool definitions declare discoverable input/output shape; stdio bounds a process-spawned local integration; clients must apply authorization and human-approval safeguards rather than trusting discovered metadata.
+- **Independently implemented here:** original versioned tool descriptors and host policy, a repository-owned stdio server for a disposable synthetic toy repository, protocol-driven schema discovery, bounded search/read/patch/diff/fixed-validation behavior, process cleanup, and sanitized static evidence. External enterprise MCP adapters remain simulated.
+- **Deliberately not adopted:** OAuth, an HTTP/network listener, browser-to-localhost access, remote discovery, automatic trust of server annotations, arbitrary shell commands, a generic tool directory, or the pre-release TypeScript SDK v2 line.
+- **Copy confirmation:** no MCP SDK implementation source, example source, copy, or UI assets were copied. The pinned official package is used through its public API; protocol-defined wire fields appear only in the interoperability adapter. The registry contracts, server behavior, policy engine, fixtures, UI, and tests were independently authored.
 
 ## CycloneDX
 

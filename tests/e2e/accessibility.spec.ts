@@ -43,6 +43,7 @@ test("principal workbench screens have no serious or critical axe violations", a
     "Artifacts",
     "GitHub / PR",
     "Validation Evidence",
+    "Control Plane",
     "Architecture",
     "Settings",
   ] as const;

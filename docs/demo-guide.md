@@ -6,7 +6,7 @@ AI Delivery Workbench is a governed, human-in-the-loop control plane for AI-assi
 
 Functional locally:
 
-- navigation across the seven primary screens;
+- navigation across the eight primary screens;
 - work-queue search and filters;
 - light and dark themes;
 - reducer-backed stage transitions, stale cascades, review state, and validation state;
@@ -14,15 +14,17 @@ Functional locally:
 - clipboard copy and issue-scoped artifact downloads;
 - architecture Markdown/JSON and validation-evidence Markdown/JSON exports;
 - validated deep links for screen, synthetic issue, artifact, and Settings subview;
-- five named deterministic synthetic scenario seeds and an explicitly confirmed reset.
+- five named deterministic synthetic scenario seeds and an explicitly confirmed reset;
+- generated, schema-validated agent/tool/model/memory registry inspection and JSON export;
+- optional local MCP discovery and bounded toy-repository invocation through repository commands.
 
 Synthetic fixtures:
 
 - every persona, issue, repository, branch, pull request, check, log, duration, test result, and metric;
-- Jira sync, GitHub and pull-request operations, AI generation, database access, MCP-style tools, test execution, deployment, external review, credentials, and provider calls;
+- Jira sync, GitHub and pull-request operations, AI generation, database access, external enterprise MCP integrations, hosted test execution, deployment, external review, credentials, and provider calls;
 - all apparent connection, authentication, notification, persistence, and environment-readiness results.
 
-External-system controls change browser-local demo state only. They do not contact a provider or perform a network write.
+External-system controls change browser-local demo state only. They do not contact a provider or perform a network write. The repository-owned MCP fixture is a separate functional local command-line slice against a disposable synthetic toy repository; the public browser never connects to it.
 
 ## Illustrative reference stack
 
@@ -51,6 +53,7 @@ Deep links use validated public fixture identifiers. For example:
 ```text
 /demo/?screen=artifacts&issue=FIN-1150&artifact=spec.md
 /demo/?screen=settings&view=gov
+/demo/?screen=control-plane
 /demo/?scenario=failed-verification
 ```
 
@@ -77,3 +80,5 @@ Changing the scenario starts again from the same in-memory baseline. `Reset demo
 5. **Validation Evidence** — update synthetic scenarios and tester notes, then inspect the browser-local decision state.
 6. **Architecture** — review the control, execution, context, and validation responsibility boundaries.
    Use the persistent prototype badge for the concise boundary and the About panel for full provenance and the separately labeled professional context.
+
+The separate **Control Plane** destination provides a focused registry inspection path when time permits. It shows exact versions, lifecycle, content hashes, capabilities, schemas, tool/write boundaries, model/memory policies, and estimated budgets without expanding the guided workflow into a generic admin tour.

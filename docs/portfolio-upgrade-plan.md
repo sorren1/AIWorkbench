@@ -309,7 +309,7 @@ Delivered commit: `fix: harden accessibility and responsive behavior`
 
 ### Phase 5 — Honest demo behavior and control-plane registry
 
-Status: Functional-demo portion complete (2026-07-16) in `feat: add functional demo actions and guided walkthrough`; the versioned agent/tool registry and policy engine remain in scope for a later focused commit.
+Status: Functional-demo portion complete (2026-07-16) in `feat: add functional demo actions and guided walkthrough`. The versioned agent/tool registry, capability cards, lifecycle/manifest gating, and bounded local MCP slice are complete in `feat: add versioned agent and tool registry`; persona authorization and durable approval-journal work remain in Phase 6.
 
 Scope: make the local/external boundary explicit and implement the narrow registry, capability cards, lifecycle, and persona policy model.
 
@@ -317,7 +317,7 @@ Acceptance criteria:
 
 - A persistent demo disclosure distinguishes “Functional locally” from “Simulated external system.”
 - Local copy uses the Clipboard API with explicit unavailable/error feedback; local artifact download creates a real client-side file. These are labeled functional.
-- Jira sync, connection tests, AI generation, repository/PR operations, Oracle/MCP access, test runs, review, merge, deployment, persona identity, and remote credentials remain deterministic simulations and are labeled at the action/result level.
+- Jira sync, connection tests, AI generation, external repository/PR operations, Oracle access, enterprise MCP integrations, hosted test runs, review, merge, deployment, persona identity, and remote credentials remain deterministic simulations and are labeled at the action/result level. The repository-owned toy-repository MCP slice is the only functional local protocol exception and is never contacted by the browser.
 - Canned durations, test counts, “immutable,” “authenticated,” “opened,” “notified,” “environment ready,” and similar messages cannot be mistaken for observed external facts.
 - Versioned stage-agent/tool manifests, lifecycle state, immutable version selection, capability cards, and provenance digests are functional and covered by schema/type tests.
 - The local authorization engine enforces persona scopes, deny-by-default tool policy, self-approval prevention, and approved-version gating with inspectable reason codes.

@@ -39,6 +39,7 @@ const NAV: NavigationSection[] = [
   {
     group: "Platform",
     items: [
+      { id: "control-plane", label: "Control Plane", icon: "shield" },
       { id: "architecture", label: "Architecture", icon: "network" },
       { id: "settings", label: "Settings", icon: "sliders" },
     ],
@@ -51,6 +52,7 @@ const ROUTE_TITLES: Record<Route, string> = {
   artifacts: "Artifacts",
   github: "GitHub / PR",
   validation: "Validation Evidence",
+  "control-plane": "Control Plane",
   architecture: "Architecture",
   settings: "Settings",
 };

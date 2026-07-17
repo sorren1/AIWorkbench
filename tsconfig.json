@@ -23,7 +23,15 @@
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
     "jsx": "react-jsx",
-    "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"]
+    "types": ["node", "vite/client", "vitest/globals", "@testing-library/jest-dom"]
   },
-  "include": ["src", "tests", "vite.config.ts", "playwright.config.ts", "eslint.config.mjs"]
+  "include": [
+    "src",
+    "tests",
+    "scripts/**/*.ts",
+    "tools/**/*.ts",
+    "vite.config.ts",
+    "playwright.config.ts",
+    "eslint.config.mjs"
+  ]
 }

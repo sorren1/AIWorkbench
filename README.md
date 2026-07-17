@@ -20,11 +20,11 @@ The focused control-plane direction extends that workflow with typed domain seam
 
 Every visible value belongs to one category:
 
-- **Functional in this repository:** navigation and shareable deep links, filters, versioned theme preference, deterministic scenario loading and reset, the guided tour, reducer-backed workflow transitions, stale-state propagation, local review decisions, artifact copy/download, architecture and validation-evidence exports, deterministic artifact rendering, and the static production build.
+- **Functional in this repository:** navigation and shareable deep links, filters, versioned theme preference, deterministic scenario loading and reset, the guided tour, reducer-backed workflow transitions, stale-state propagation, local review decisions, artifact copy/download, architecture and validation-evidence exports, schema-validated/hash-versioned registry selection, generated capability cards, the bounded local toy-repository MCP slice, and the static production build.
 - **Synthetic demo fixture:** every persona, issue, repository, branch, pull request, check, log, duration, test result, metric, external integration result, and provider response shown in the workbench.
 - **Professional context:** the single statement in the separate section below. It is not evidence about the public prototype.
 
-External Jira, GitHub, AI/model, database, MCP-style, deployment, test-execution, and review operations are simulated. No demo interaction contacts those systems.
+External Jira, GitHub, AI/model, database, enterprise MCP, deployment, test-execution, and review operations are simulated. The repository-owned MCP fixture is functional only when explicitly run against a disposable local toy repository; the public browser never connects to it.
 
 ## Architecture
 
@@ -65,6 +65,15 @@ npm run check
 
 `npm run check` includes strict type checking, linting, formatting, unit tests, the production build, and Playwright browser tests. Run `npm run test:a11y` for the focused axe suite or `npm run test:e2e` for all keyboard, overlay, accessibility, and responsive browser checks. See [docs/contributor-commands.md](docs/contributor-commands.md) for the complete command reference.
 
+Regenerate the versioned capability cards and sanitized local MCP evidence with:
+
+```bash
+npm run registry:generate
+npm run mcp:evidence:generate
+```
+
+The corresponding `registry:check` and `mcp:evidence:check` commands fail when committed generated evidence is stale. See [docs/agent-and-tool-registry.md](docs/agent-and-tool-registry.md) for the trust boundary and public JSON paths.
+
 ## Project structure
 
 ```text
@@ -81,6 +90,9 @@ src/demo/screens/                  delivery workflow screens
 src/demo/state/                    typed reducer and local actions
 src/demo/data/                     deterministic synthetic fixtures and content
 src/demo/control-plane/            typed control-plane domain seams
+fixtures/toy-repository/            disposable synthetic repository source
+tools/toy-repo-mcp/                 optional local stdio MCP server and trusted client
+public/capabilities/                generated capability cards, schemas, and MCP evidence
 src/shared/                        local SVG icon system
 src/styles/tokens/                 shared semantic design tokens
 public/assets/                     local logo assets
@@ -92,7 +104,7 @@ The project uses React 18, strict TypeScript, and a static Vite multi-page build
 
 ## Clean-room disclosure
 
-Independent portfolio prototype. All code, copy, fixtures, workflows, and visuals in this project were created from scratch using synthetic data. No employer or client code, prompts, schemas, screenshots, repositories, internal documentation, or confidential information were used. External Jira, GitHub, AI, database, and MCP-style operations are simulated; the interactive UI and local workflow state machine are functional.
+Independent portfolio prototype. All code, copy, fixtures, workflows, and visuals in this project were created from scratch using synthetic data. No employer or client code, prompts, schemas, screenshots, repositories, internal documentation, or confidential information were used. External Jira, GitHub, AI, database, and enterprise MCP-style operations are simulated; the interactive UI, local workflow state machine, and bounded toy-repository MCP fixture are functional. The public browser never connects to the local MCP process.
 
 The detailed boundary and independent-development principles are documented in [docs/clean-room-and-provenance.md](docs/clean-room-and-provenance.md). Public references are recorded separately in [docs/design-influences.md](docs/design-influences.md).
 

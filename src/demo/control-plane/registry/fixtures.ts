@@ -1,0 +1,440 @@
+import type {
+  AgentCardSource,
+  JsonSchema,
+  MemoryPolicySource,
+  ModelPolicySource,
+  ToolDescriptorSource,
+} from "./contracts";
+
+const SOURCE_COMMIT = "ce90338bae56ebe2850aca506ee28b6646eac9e3";
+const CREATED_AT = "2026-07-16T18:00:00.000Z";
+const APPROVAL = {
+  approvedBy: "Synthetic control reviewer",
+  approvedAt: "2026-07-16T19:00:00.000Z",
+  approvalPolicyId: "policy.registry.separation-of-duties",
+  decisionRecordId: "decision.synthetic.registry-v1",
+} as const;
+
+const INPUT_SCHEMA_REF = { $ref: "/capabilities/schemas/stage-input.schema.json" } as const;
+const OUTPUT_SCHEMA_REF = { $ref: "/capabilities/schemas/stage-output.schema.json" } as const;
+
+const stringField = { type: "string", minLength: 1 } as const;
+const stringArray = { type: "array", items: stringField, uniqueItems: true } as const;
+
+function objectSchema(
+  properties: Readonly<Record<string, JsonSchema>>,
+  required: readonly string[],
+): JsonSchema {
+  return { type: "object", additionalProperties: false, properties, required };
+}
+
+function approvedTool(
+  source: Omit<
+    ToolDescriptorSource,
+    "kind" | "status" | "sourceCommit" | "createdAt" | "updatedAt" | "approval"
+  >,
+): ToolDescriptorSource {
+  return {
+    kind: "ToolDescriptor",
+    status: "APPROVED",
+    sourceCommit: SOURCE_COMMIT,
+    createdAt: CREATED_AT,
+    updatedAt: CREATED_AT,
+    approval: APPROVAL,
+    ...source,
+  };
+}
+
+export const toolDescriptorSources = [
+  approvedTool({
+    id: "tool.issue.read",
+    name: "Issue read",
+    version: "1.0.0",
+    description: "Reads one allow-listed synthetic issue fixture without contacting Jira.",
+    riskLevel: "READ_ONLY",
+    inputSchema: objectSchema({ issueKey: stringField }, ["issueKey"]),
+    outputSchema: objectSchema({ issue: { type: "object" } }, ["issue"]),
+    sideEffects: ["None; reads a checked-in synthetic fixture."],
+    requiredScopes: ["synthetic:issue:read"],
+    allowedStages: ["intake", "spec", "plan"],
+    timeoutMs: 1000,
+    idempotency: "IDEMPOTENT",
+    networkRequired: false,
+    filesystemBoundary: { mode: "NONE", allowedPaths: [] },
+    approvalPolicyId: null,
+    sourceImplementation: {
+      module: "src/demo/data/fixtures.ts",
+      exportName: "issues",
+    },
+  }),
+  approvedTool({
+    id: "tool.repository.search",
+    name: "Repository search",
+    version: "1.0.0",
+    description: "Searches text within the disposable synthetic toy repository.",
+    riskLevel: "READ_ONLY",
+    inputSchema: objectSchema({ query: stringField, path: stringField }, ["query"]),
+    outputSchema: objectSchema({ matches: { type: "array", items: { type: "object" } } }, [
+      "matches",
+    ]),
+    sideEffects: ["None; file reads remain inside the disposable toy repository."],
+    requiredScopes: ["toy-repository:read"],
+    allowedStages: ["spec", "plan", "targets", "implement"],
+    timeoutMs: 2000,
+    idempotency: "IDEMPOTENT",
+    networkRequired: false,
+    filesystemBoundary: { mode: "READ_ONLY", allowedPaths: ["README.md", "src/**", "test/**"] },
+    approvalPolicyId: null,
+    sourceImplementation: {
+      module: "tools/toy-repo-mcp/server.ts",
+      exportName: "registerRepositorySearch",
+    },
+  }),
+  approvedTool({
+    id: "tool.repository.file.read",
+    name: "Repository file read",
+    version: "1.0.0",
+    description: "Reads one allow-listed UTF-8 file from the disposable synthetic toy repository.",
+    riskLevel: "READ_ONLY",
+    inputSchema: objectSchema({ path: stringField }, ["path"]),
+    outputSchema: objectSchema({ path: stringField, contents: stringField }, ["path", "contents"]),
+    sideEffects: ["None; file reads remain inside the disposable toy repository."],
+    requiredScopes: ["toy-repository:read"],
+    allowedStages: ["spec", "plan", "targets", "implement", "verify"],
+    timeoutMs: 2000,
+    idempotency: "IDEMPOTENT",
+    networkRequired: false,
+    filesystemBoundary: { mode: "READ_ONLY", allowedPaths: ["README.md", "src/**", "test/**"] },
+    approvalPolicyId: null,
+    sourceImplementation: {
+      module: "tools/toy-repo-mcp/server.ts",
+      exportName: "registerRepositoryFileRead",
+    },
+  }),
+  approvedTool({
+    id: "tool.repository.patch.controlled",
+    name: "Controlled patch application",
+    version: "1.0.0",
+    description:
+      "Replaces one exact text occurrence inside an allow-listed toy-repository source file.",
+    riskLevel: "HIGH",
+    inputSchema: objectSchema(
+      { path: stringField, expected: stringField, replacement: stringField },
+      ["path", "expected", "replacement"],
+    ),
+    outputSchema: objectSchema({ path: stringField, changed: { type: "boolean" } }, [
+      "path",
+      "changed",
+    ]),
+    sideEffects: ["Writes one bounded file in a disposable temporary copy after host approval."],
+    requiredScopes: ["toy-repository:write"],
+    allowedStages: ["implement"],
+    timeoutMs: 3000,
+    idempotency: "IDEMPOTENT",
+    networkRequired: false,
+    filesystemBoundary: { mode: "BOUNDED_WRITE", allowedPaths: ["src/**"] },
+    approvalPolicyId: "policy.tool.bounded-write-human-approval",
+    sourceImplementation: {
+      module: "tools/toy-repo-mcp/server.ts",
+      exportName: "registerControlledPatch",
+    },
+  }),
+  approvedTool({
+    id: "tool.sandbox.command",
+    name: "Sandbox command execution",
+    version: "1.0.0",
+    description: "Runs only the fixed validation command in the disposable toy repository.",
+    riskLevel: "MEDIUM",
+    inputSchema: objectSchema({ command: { const: "validate" } }, ["command"]),
+    outputSchema: objectSchema(
+      { exitCode: { type: "integer" }, stdout: stringField, stderr: stringField },
+      ["exitCode", "stdout", "stderr"],
+    ),
+    sideEffects: [
+      "Starts a bounded local Node test subprocess; it cannot select an arbitrary command.",
+    ],
+    requiredScopes: ["toy-repository:validate"],
+    allowedStages: ["implement", "verify"],
+    timeoutMs: 10000,
+    idempotency: "IDEMPOTENT",
+    networkRequired: false,
+    filesystemBoundary: { mode: "READ_ONLY", allowedPaths: ["src/**", "test/**"] },
+    approvalPolicyId: "policy.tool.local-process-approval",
+    sourceImplementation: {
+      module: "tools/toy-repo-mcp/server.ts",
+      exportName: "registerSandboxValidation",
+    },
+  }),
+  approvedTool({
+    id: "tool.repository.diff.inspect",
+    name: "Diff inspection",
+    version: "1.0.0",
+    description: "Returns the sanitized Git diff for the disposable synthetic toy repository.",
+    riskLevel: "READ_ONLY",
+    inputSchema: objectSchema({}, []),
+    outputSchema: objectSchema({ diff: { type: "string" }, changedPaths: stringArray }, [
+      "diff",
+      "changedPaths",
+    ]),
+    sideEffects: ["None; executes a fixed read-only Git diff command."],
+    requiredScopes: ["toy-repository:read"],
+    allowedStages: ["targets", "implement", "verify", "review"],
+    timeoutMs: 3000,
+    idempotency: "IDEMPOTENT",
+    networkRequired: false,
+    filesystemBoundary: { mode: "READ_ONLY", allowedPaths: ["src/**", "test/**"] },
+    approvalPolicyId: null,
+    sourceImplementation: {
+      module: "tools/toy-repo-mcp/server.ts",
+      exportName: "registerDiffInspection",
+    },
+  }),
+  approvedTool({
+    id: "tool.evidence.write",
+    name: "Evidence writing",
+    version: "1.0.0",
+    description:
+      "Writes deterministic evidence to browser-local state or a generated public fixture path.",
+    riskLevel: "LOW",
+    inputSchema: objectSchema({ evidenceType: stringField, payload: { type: "object" } }, [
+      "evidenceType",
+      "payload",
+    ]),
+    outputSchema: objectSchema({ evidenceId: stringField, digest: stringField }, [
+      "evidenceId",
+      "digest",
+    ]),
+    sideEffects: ["Writes only synthetic evidence within an explicitly selected local boundary."],
+    requiredScopes: ["synthetic:evidence:write"],
+    allowedStages: ["implement", "verify", "review"],
+    timeoutMs: 2000,
+    idempotency: "IDEMPOTENT_WITH_KEY",
+    networkRequired: false,
+    filesystemBoundary: { mode: "BOUNDED_WRITE", allowedPaths: ["browser-local://evidence/**"] },
+    approvalPolicyId: "policy.tool.synthetic-evidence-write",
+    sourceImplementation: {
+      module: "src/demo/exports/validation.ts",
+      exportName: "createValidationEvidencePack",
+    },
+  }),
+] satisfies readonly ToolDescriptorSource[];
+
+export const modelPolicySources = [
+  {
+    kind: "ModelPolicy",
+    id: "model.policy.delivery-balanced",
+    name: "Delivery balanced",
+    version: "1.0.0",
+    description: "Provider-neutral synthetic runtime policy for bounded delivery-stage fixtures.",
+    status: "APPROVED",
+    providerCategory: "PROVIDER_NEUTRAL_SIMULATED",
+    modelIdentifier: "delivery-reasoning-balanced",
+    reasoningProfile: "BALANCED",
+    temperature: null,
+    fallbackChain: ["delivery-reasoning-low"],
+    maximumTokens: 12000,
+    costCeilingUsd: 0.35,
+    liveExecutionEnabled: false,
+    sourceCommit: SOURCE_COMMIT,
+    createdAt: CREATED_AT,
+    updatedAt: CREATED_AT,
+    approval: APPROVAL,
+  },
+  {
+    kind: "ModelPolicy",
+    id: "model.policy.experimental-draft",
+    name: "Experimental draft",
+    version: "0.1.0",
+    description: "Non-executable lifecycle fixture used to demonstrate fail-closed selection.",
+    status: "DRAFT",
+    providerCategory: "PROVIDER_NEUTRAL_SIMULATED",
+    modelIdentifier: "unselected-experimental-alias",
+    reasoningProfile: "HIGH",
+    temperature: 0.2,
+    fallbackChain: ["none"],
+    maximumTokens: 16000,
+    costCeilingUsd: 0.5,
+    liveExecutionEnabled: false,
+    sourceCommit: SOURCE_COMMIT,
+    createdAt: CREATED_AT,
+    updatedAt: CREATED_AT,
+  },
+] satisfies readonly ModelPolicySource[];
+
+export const memoryPolicySources = [
+  {
+    kind: "MemoryPolicy",
+    id: "memory.policy.issue-bounded",
+    name: "Issue-bounded context",
+    version: "1.0.0",
+    description:
+      "Allows only current synthetic issue, approved artifacts, and toy-repository records.",
+    status: "APPROVED",
+    allowedRecordTypes: ["synthetic_issue", "approved_artifact", "toy_repository_file"],
+    sourceScopes: ["selected_issue", "current_run", "toy_repository"],
+    freshness: { maximumAgeSeconds: 3600, staleBehavior: "EXCLUDE" },
+    maximumContextBytes: 196608,
+    priorRunEpisodicMemoryPermitted: false,
+    sourceCommit: SOURCE_COMMIT,
+    createdAt: CREATED_AT,
+    updatedAt: CREATED_AT,
+    approval: APPROVAL,
+  },
+  {
+    kind: "MemoryPolicy",
+    id: "memory.policy.review-bounded",
+    name: "Review evidence only",
+    version: "1.0.0",
+    description:
+      "Limits review context to the tested diff, acceptance evidence, and approved artifacts.",
+    status: "APPROVED",
+    allowedRecordTypes: ["tested_diff", "acceptance_evidence", "approved_artifact"],
+    sourceScopes: ["selected_issue", "tested_commit"],
+    freshness: { maximumAgeSeconds: 900, staleBehavior: "FLAG_FOR_REVIEW" },
+    maximumContextBytes: 131072,
+    priorRunEpisodicMemoryPermitted: false,
+    sourceCommit: SOURCE_COMMIT,
+    createdAt: CREATED_AT,
+    updatedAt: CREATED_AT,
+    approval: APPROVAL,
+  },
+] satisfies readonly MemoryPolicySource[];
+
+const AGENT_DEFAULTS = {
+  kind: "AgentCard",
+  version: "1.0.0",
+  owner: "Synthetic delivery controls group",
+  status: "APPROVED",
+  inputSchema: INPUT_SCHEMA_REF,
+  outputSchema: OUTPUT_SCHEMA_REF,
+  modelPolicyId: "model.policy.delivery-balanced",
+  memoryPolicyId: "memory.policy.issue-bounded",
+  approvalPolicyIds: ["policy.registry.separation-of-duties"],
+  maxDurationMs: 120000,
+  maxToolCalls: 12,
+  maxRepairAttempts: 2,
+  tokenBudget: { maxInputTokens: 9000, maxOutputTokens: 3000, basis: "ESTIMATED" },
+  costBudget: { maxEstimatedUsd: 0.35, basis: "ESTIMATED" },
+  sourceCommit: SOURCE_COMMIT,
+  createdAt: CREATED_AT,
+  updatedAt: CREATED_AT,
+  approval: APPROVAL,
+} as const;
+
+export const agentCardSources = [
+  {
+    ...AGENT_DEFAULTS,
+    id: "agent.intake",
+    name: "Intake Agent",
+    description: "Normalizes one synthetic issue into a bounded intake artifact.",
+    stageId: "intake",
+    capabilities: ["issue normalization", "scope extraction", "ambiguity flagging"],
+    skills: ["structured intake", "risk cue extraction"],
+    allowedToolIds: ["tool.issue.read"],
+    allowedWritePaths: ["artifacts/intake.json"],
+    maxToolCalls: 2,
+  },
+  {
+    ...AGENT_DEFAULTS,
+    id: "agent.specification",
+    name: "Specification Agent",
+    description: "Creates testable synthetic acceptance criteria from approved intake context.",
+    stageId: "spec",
+    capabilities: ["acceptance criteria", "scope boundaries", "assumption recording"],
+    skills: ["specification writing", "repository context lookup"],
+    allowedToolIds: ["tool.issue.read", "tool.repository.search", "tool.repository.file.read"],
+    allowedWritePaths: ["artifacts/spec.md"],
+  },
+  {
+    ...AGENT_DEFAULTS,
+    id: "agent.planning",
+    name: "Planning Agent",
+    description: "Emits an ordered implementation plan with risks and verification steps.",
+    stageId: "plan",
+    capabilities: ["task decomposition", "risk analysis", "verification planning"],
+    skills: ["change sequencing", "dependency inspection"],
+    allowedToolIds: ["tool.issue.read", "tool.repository.search", "tool.repository.file.read"],
+    allowedWritePaths: ["artifacts/plan.md"],
+  },
+  {
+    ...AGENT_DEFAULTS,
+    id: "agent.change-target",
+    name: "Change-Target Agent",
+    description: "Constrains implementation to an explicit, inspectable file allow-list.",
+    stageId: "targets",
+    capabilities: ["file classification", "write-boundary declaration", "change impact mapping"],
+    skills: ["repository search", "diff boundary reasoning"],
+    allowedToolIds: [
+      "tool.repository.search",
+      "tool.repository.file.read",
+      "tool.repository.diff.inspect",
+    ],
+    allowedWritePaths: ["artifacts/change-targets.json"],
+  },
+  {
+    ...AGENT_DEFAULTS,
+    id: "agent.implementation",
+    name: "Implementation Agent",
+    description: "Applies a human-approved bounded patch only in the disposable toy repository.",
+    stageId: "implement",
+    capabilities: ["bounded patching", "local validation", "repair attempt accounting"],
+    skills: ["source editing", "test-guided repair", "diff inspection"],
+    allowedToolIds: [
+      "tool.repository.search",
+      "tool.repository.file.read",
+      "tool.repository.patch.controlled",
+      "tool.sandbox.command",
+      "tool.repository.diff.inspect",
+      "tool.evidence.write",
+    ],
+    allowedWritePaths: ["src/**", "browser-local://evidence/**"],
+    approvalPolicyIds: [
+      "policy.registry.separation-of-duties",
+      "policy.tool.bounded-write-human-approval",
+      "policy.tool.local-process-approval",
+    ],
+    maxToolCalls: 18,
+    maxRepairAttempts: 2,
+  },
+  {
+    ...AGENT_DEFAULTS,
+    id: "agent.verification",
+    name: "Verification Agent",
+    description: "Runs the fixed local validation command and records synthetic evidence.",
+    stageId: "verify",
+    capabilities: [
+      "fixed-command validation",
+      "diff-to-evidence linkage",
+      "failure classification",
+    ],
+    skills: ["test interpretation", "evidence packaging"],
+    allowedToolIds: [
+      "tool.repository.file.read",
+      "tool.sandbox.command",
+      "tool.repository.diff.inspect",
+      "tool.evidence.write",
+    ],
+    allowedWritePaths: ["browser-local://evidence/**"],
+    approvalPolicyIds: [
+      "policy.registry.separation-of-duties",
+      "policy.tool.local-process-approval",
+    ],
+  },
+  {
+    ...AGENT_DEFAULTS,
+    id: "agent.review-assistant",
+    name: "Review Assistant",
+    description:
+      "Summarizes the tested diff and flags risk; it cannot grant, record, or substitute for human approval.",
+    stageId: "review",
+    capabilities: ["diff summary", "risk flagging", "evidence cross-check"],
+    skills: ["review preparation", "acceptance evidence comparison"],
+    allowedToolIds: ["tool.repository.diff.inspect", "tool.evidence.write"],
+    allowedWritePaths: ["browser-local://evidence/review-summary.json"],
+    memoryPolicyId: "memory.policy.review-bounded",
+    maxToolCalls: 6,
+    maxRepairAttempts: 0,
+  },
+] satisfies readonly AgentCardSource[];
+
+export const registryGeneratedAt = "2026-07-16T20:00:00.000Z";

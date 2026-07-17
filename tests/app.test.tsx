@@ -26,6 +26,10 @@ describe("workbench application", () => {
 
     fireEvent.click(screen.getByText("Validation Evidence", { selector: ".wb-nav-item span" }));
     expect(screen.getByText("Acceptance criteria coverage")).toBeVisible();
+
+    fireEvent.click(screen.getByText("Control Plane", { selector: ".wb-nav-item span" }));
+    expect(screen.getByRole("heading", { level: 1, name: "Control Plane" })).toBeVisible();
+    expect(screen.getByRole("heading", { level: 2, name: "Intake Agent" })).toBeVisible();
   });
 
   it("offers a keyboard-operable guided walkthrough that navigates the demo", () => {

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.invalid/schemas/registry/stage-output.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["stageId", "artifactIds", "evidenceDigest"],
+  "properties": {
+    "stageId": { "$ref": "common.schema.json#/$defs/stage" },
+    "artifactIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "evidenceDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" }
+  }
+}

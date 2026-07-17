@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "classification": "SYNTHETIC_PUBLIC_LOCAL_MCP_EVIDENCE",
+  "protocol": "Model Context Protocol",
+  "sdk": { "package": "@modelcontextprotocol/sdk", "version": "1.29.0" },
+  "transport": "stdio",
+  "server": { "name": "ai-delivery-workbench-toy-repository", "version": "1.0.0" },
+  "boundary": "Functional local discovery against a disposable synthetic toy repository; the public browser never starts or connects to this process.",
+  "tools": [
+    {
+      "name": "tool.repository.diff.inspect",
+      "title": "Diff inspection",
+      "description": "Inspect the current diff in the disposable toy repository.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "diff": { "type": "string" },
+          "changedPaths": { "type": "array", "items": { "type": "string" } }
+        },
+        "required": ["diff", "changedPaths"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "tool.repository.file.read",
+      "title": "Repository file read",
+      "description": "Read one UTF-8 file inside the disposable toy repository.",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "path": { "type": "string", "minLength": 1, "maxLength": 240 } },
+        "required": ["path"],
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": { "path": { "type": "string" }, "contents": { "type": "string" } },
+        "required": ["path", "contents"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "tool.repository.patch.controlled",
+      "title": "Controlled patch",
+      "description": "Replace one exact occurrence in a toy-repository src/** file.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string", "minLength": 1, "maxLength": 240 },
+          "expected": { "type": "string", "minLength": 1, "maxLength": 4000 },
+          "replacement": { "type": "string", "maxLength": 4000 }
+        },
+        "required": ["path", "expected", "replacement"],
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": { "path": { "type": "string" }, "changed": { "type": "boolean" } },
+        "required": ["path", "changed"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "tool.repository.search",
+      "title": "Repository search",
+      "description": "Search synthetic text files inside the disposable toy repository.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string", "minLength": 1, "maxLength": 120 },
+          "path": { "type": "string" }
+        },
+        "required": ["query"],
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "matches": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": { "type": "string" },
+                "line": { "type": "integer", "exclusiveMinimum": 0, "maximum": 9007199254740991 },
+                "excerpt": { "type": "string" }
+              },
+              "required": ["path", "line", "excerpt"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": ["matches"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "tool.sandbox.command",
+      "title": "Sandbox validation",
+      "description": "Run the fixed node --test command in the disposable toy repository.",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "command": { "type": "string", "const": "validate" } },
+        "required": ["command"],
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "outputSchema": {
+        "type": "object",
+        "properties": {
+          "exitCode": {
+            "type": "integer",
+            "minimum": -9007199254740991,
+            "maximum": 9007199254740991
+          },
+          "stdout": { "type": "string" },
+          "stderr": { "type": "string" }
+        },
+        "required": ["exitCode", "stdout", "stderr"],
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": null,
+        "idempotentHint": null,
+        "openWorldHint": false
+      }
+    }
+  ]
+}

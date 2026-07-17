@@ -1,0 +1,38 @@
+{
+  "kind": "AgentCard",
+  "version": "1.0.0",
+  "owner": "Synthetic delivery controls group",
+  "status": "APPROVED",
+  "inputSchema": { "$ref": "/capabilities/schemas/stage-input.schema.json" },
+  "outputSchema": { "$ref": "/capabilities/schemas/stage-output.schema.json" },
+  "modelPolicyId": "model.policy.delivery-balanced",
+  "memoryPolicyId": "memory.policy.issue-bounded",
+  "approvalPolicyIds": ["policy.registry.separation-of-duties"],
+  "maxDurationMs": 120000,
+  "maxToolCalls": 12,
+  "maxRepairAttempts": 2,
+  "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
+  "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
+  "sourceCommit": "ce90338bae56ebe2850aca506ee28b6646eac9e3",
+  "createdAt": "2026-07-16T18:00:00.000Z",
+  "updatedAt": "2026-07-16T18:00:00.000Z",
+  "approval": {
+    "approvedBy": "Synthetic control reviewer",
+    "approvedAt": "2026-07-16T19:00:00.000Z",
+    "approvalPolicyId": "policy.registry.separation-of-duties",
+    "decisionRecordId": "decision.synthetic.registry-v1"
+  },
+  "id": "agent.change-target",
+  "name": "Change-Target Agent",
+  "description": "Constrains implementation to an explicit, inspectable file allow-list.",
+  "stageId": "targets",
+  "capabilities": ["file classification", "write-boundary declaration", "change impact mapping"],
+  "skills": ["repository search", "diff boundary reasoning"],
+  "allowedToolIds": [
+    "tool.repository.search",
+    "tool.repository.file.read",
+    "tool.repository.diff.inspect"
+  ],
+  "allowedWritePaths": ["artifacts/change-targets.json"],
+  "contentHash": "950cea7e196a2ecfb073f03544069a0be49353fc924fade5946b1ab760367482"
+}

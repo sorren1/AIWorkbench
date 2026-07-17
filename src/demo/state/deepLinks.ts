@@ -10,6 +10,7 @@ const ROUTES: readonly Route[] = [
   "artifacts",
   "github",
   "validation",
+  "control-plane",
   "architecture",
   "settings",
 ];

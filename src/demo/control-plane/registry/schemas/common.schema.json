@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.invalid/schemas/registry/common.schema.json",
+  "$defs": {
+    "status": {
+      "enum": ["DRAFT", "PENDING_APPROVAL", "APPROVED", "REJECTED", "DEPRECATED"]
+    },
+    "semanticVersion": {
+      "type": "string",
+      "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "identifier": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9._-]+$"
+    },
+    "contentHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sourceCommit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "nonEmptyStrings": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    },
+    "approval": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["approvedBy", "approvedAt", "approvalPolicyId", "decisionRecordId"],
+      "properties": {
+        "approvedBy": { "type": "string", "minLength": 1 },
+        "approvedAt": { "$ref": "#/$defs/timestamp" },
+        "approvalPolicyId": { "$ref": "#/$defs/identifier" },
+        "decisionRecordId": { "$ref": "#/$defs/identifier" }
+      }
+    },
+    "schemaReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["$ref"],
+      "properties": {
+        "$ref": { "type": "string", "pattern": "^/capabilities/schemas/" }
+      }
+    },
+    "stage": {
+      "enum": ["intake", "spec", "plan", "targets", "implement", "verify", "review"]
+    },
+    "jsonSchema": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": { "const": "object" }
+      }
+    }
+  }
+}

@@ -1857,3 +1857,222 @@ textarea.wb-input {
 .wb-log > span {
   display: block;
 }
+
+.wb-control-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  font-size: 12px;
+}
+
+.wb-control-links a {
+  color: var(--accent-text);
+  font-weight: var(--weight-semibold);
+  text-underline-offset: 3px;
+}
+
+.wb-control-panel {
+  outline: none;
+}
+
+.wb-control-filters {
+  display: grid;
+  grid-template-columns: minmax(240px, 1fr) minmax(190px, 0.35fr);
+  gap: 12px;
+  align-items: end;
+}
+
+.wb-control-layout {
+  display: grid;
+  grid-template-columns: minmax(250px, 0.72fr) minmax(420px, 1.6fr);
+  gap: 12px;
+  align-items: start;
+}
+
+.wb-control-results {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-tertiary);
+  font-size: 11px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.wb-control-resource-list {
+  max-height: 650px;
+  overflow: auto;
+}
+
+.wb-control-resource {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+  border: 0;
+  border-bottom: 1px solid var(--border-subtle);
+  border-left: 3px solid transparent;
+  color: var(--text-primary);
+  background: transparent;
+  font: inherit;
+  text-align: left;
+}
+
+.wb-control-resource:hover {
+  background: var(--bg-hover);
+}
+
+.wb-control-resource.is-selected {
+  border-left-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.wb-control-resource > span:first-child {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.wb-control-resource strong,
+.wb-control-resource small {
+  overflow-wrap: anywhere;
+}
+
+.wb-control-resource-meta {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  flex: none;
+}
+
+.wb-control-empty {
+  padding: 20px 12px;
+}
+
+.wb-control-detail-head {
+  align-items: flex-start;
+}
+
+.wb-control-detail-head h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.wb-control-provenance {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--border-subtle);
+}
+
+.wb-control-provenance > div {
+  min-width: 0;
+  padding: 10px 12px;
+  background: var(--bg-inset);
+}
+
+.wb-control-provenance dt {
+  color: var(--text-tertiary);
+  font-size: 10px;
+  font-weight: var(--weight-semibold);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.wb-control-provenance dd {
+  margin: 4px 0 0;
+  overflow: hidden;
+  color: var(--text-secondary);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wb-control-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.wb-control-detail-grid section {
+  min-width: 0;
+  padding: 12px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-inset);
+}
+
+.wb-control-detail-grid h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+
+.wb-control-list {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding-left: 18px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.wb-control-list li {
+  overflow-wrap: anywhere;
+}
+
+.wb-control-policy-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.wb-control-policy-strip span {
+  padding: 5px 8px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  background: var(--bg-inset);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.wb-control-schema {
+  min-width: 0;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  background: var(--bg-inset);
+}
+
+.wb-control-schema summary {
+  padding: 10px 12px;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: var(--weight-semibold);
+}
+
+.wb-control-schema .wb-code {
+  max-height: 280px;
+  margin: 0;
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+  border-radius: 0 0 var(--radius-md) var(--radius-md);
+  font-size: 10.5px;
+}
+
+@media (max-width: 1120px) {
+  .wb-control-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .wb-control-resource-list {
+    max-height: 320px;
+  }
+}

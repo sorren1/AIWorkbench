@@ -1,7 +1,14 @@
 import type { IconName } from "../../shared/Icon";
 
 export type Route =
-  "queue" | "issue" | "artifacts" | "github" | "validation" | "architecture" | "settings";
+  | "queue"
+  | "issue"
+  | "artifacts"
+  | "github"
+  | "validation"
+  | "control-plane"
+  | "architecture"
+  | "settings";
 
 export type StageId =
   "seed" | "intake" | "spec" | "plan" | "targets" | "implement" | "verify" | "review";

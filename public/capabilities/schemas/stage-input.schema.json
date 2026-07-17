@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.invalid/schemas/registry/stage-input.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["issueKey", "contextManifestDigest"],
+  "properties": {
+    "issueKey": { "type": "string", "pattern": "^FIN-[0-9]{4}$" },
+    "contextManifestDigest": { "type": "string", "pattern": "^[a-f0-9]{64}$" },
+    "upstreamArtifactIds": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "uniqueItems": true
+    }
+  }
+}

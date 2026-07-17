@@ -45,4 +45,10 @@ export default tseslint.config(
       globals: globals.node,
     },
   },
+  {
+    files: ["scripts/**/*.ts", "tools/**/*.ts"],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
 );

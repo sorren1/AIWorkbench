@@ -58,9 +58,10 @@
         <strong>Independent portfolio prototype.</strong> All code, copy, fixtures, workflows, and
         visuals in this project were created from scratch using synthetic data. No employer or
         client code, prompts, schemas, screenshots, repositories, internal documentation, or
-        confidential information were used. External Jira, GitHub, AI, database, and MCP-style
-        operations are simulated; the interactive UI and local workflow state machine are
-        functional.
+        confidential information were used. External Jira, GitHub, AI, database, and enterprise
+        MCP-style operations are simulated; the interactive UI, local workflow state machine, and
+        bounded toy-repository MCP fixture are functional. The public browser never connects to the
+        local MCP process.
       </aside>
 
       <section class="site-section" aria-labelledby="problem-title">
@@ -311,8 +312,26 @@
                 </td>
               </tr>
               <tr>
+                <th scope="row">Versioned agent/tool registry and capability cards</th>
+                <td><span class="site-status site-status--functional">Functional</span></td>
+                <td>
+                  JSON Schema validation, SHA-256 content hashes, approved-version gating, manifest
+                  invalidation, search/detail UI, and generated public JSON are exercised in this
+                  repository.
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Repository-owned local MCP toy-repository slice</th>
+                <td><span class="site-status site-status--functional">Functional locally</span></td>
+                <td>
+                  A repository command discovers and invokes bounded tools over stdio in a
+                  disposable synthetic repository, then emits sanitized static evidence. The browser
+                  never connects to the process.
+                </td>
+              </tr>
+              <tr>
                 <th scope="row">
-                  Jira, GitHub, LLM, database, MCP-style, review, and deployment operations
+                  Jira, GitHub, LLM, database, enterprise MCP, review, and deployment operations
                 </th>
                 <td><span class="site-status site-status--simulated">Simulated</span></td>
                 <td>No provider credentials, writes, or live data calls exist.</td>
@@ -530,9 +549,10 @@
               Independent portfolio prototype. All code, copy, fixtures, workflows, and visuals in
               this project were created from scratch using synthetic data. No employer or client
               code, prompts, schemas, screenshots, repositories, internal documentation, or
-              confidential information were used. External Jira, GitHub, AI, database, and MCP-style
-              operations are simulated; the interactive UI and local workflow state machine are
-              functional.
+              confidential information were used. External Jira, GitHub, AI, database, and
+              enterprise MCP-style operations are simulated; the interactive UI, local workflow
+              state machine, and bounded toy-repository MCP fixture are functional. The public
+              browser never connects to the local MCP process.
             </p>
             <p>
               Public design influences and independent-development decisions are documented in the
