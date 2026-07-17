@@ -37,5 +37,9 @@ test("public supply-chain claims distinguish executed and unvalidated controls",
   await expect(section).toBeVisible();
   await expect(section.getByText("Tracked files and Git history secret scan")).toBeVisible();
   await expect(section.getByText("Configured · not validated")).toBeVisible();
-  await expect(section.getByText("Active suppressions").locator("..").getByText("0")).toBeVisible();
+  await expect(
+    section.getByText("Active suppressions").locator("..").getByText("15"),
+  ).toBeVisible();
+  await expect(section.getByText("PostgreSQL database")).toBeVisible();
+  await expect(section.getByText("LiteLLM gateway")).toBeVisible();
 });

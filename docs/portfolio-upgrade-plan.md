@@ -351,7 +351,7 @@ Suggested commit: `feat: add governed run evidence and traceability`
 
 ### Phase 7 — Quality gates, CI, security, and supply-chain evidence
 
-Status: Complete across `test: add release-grade quality gates` and `security: add supply-chain evidence and SBOM`. The repository now produces normalized SARIF, three validated CycloneDX SBOMs, scanner/version metadata, license inventory, suppression evidence, and a sanitized source-linked summary. GitHub CodeQL is configured but remains explicitly `configured · not validated` until a successful hosted run is observed.
+Status: Complete across `test: add release-grade quality gates` and `security: add supply-chain evidence and SBOM`. The repository now produces normalized SARIF, five validated CycloneDX SBOMs (two npm graphs plus the sandbox, LiteLLM, and PostgreSQL runtimes), scanner/version metadata, LiteLLM signature evidence, license inventory, suppression evidence, and a sanitized source-linked summary. GitHub CodeQL is configured but remains explicitly `configured · not validated` until a successful hosted run is observed.
 
 Scope: make the repository safe, predictable, and evidentiary for contributors.
 

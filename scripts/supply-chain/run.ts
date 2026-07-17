@@ -12,15 +12,18 @@ import {
   toolingSchema,
   type ReleaseControlSummary,
   type ReleaseSummary,
+  type RuntimeImageSummary,
   type SarifFinding,
   type SupplyChainSuppression,
 } from "./contracts";
 import {
   analyzeComposeConfig,
   analyzeLanguageCoverage,
+  analyzeLiteLlmDockerfile,
   analyzeSandboxDockerfile,
 } from "./containerPolicy";
 import { createSarif, sanitizeSarif, sarifFindings, sha256File, writeJson } from "./reporting";
+import { versionAtLeast } from "./versionPolicy";
 
 type CommandResult = {
   readonly exitCode: number;
@@ -33,6 +36,15 @@ const reportsRoot = resolve(root, ".security-reports");
 const recordSummary = process.argv.includes("--record");
 const npmCli =
   process.env.npm_execpath ?? resolve(dirname(process.execPath), "node_modules/npm/bin/npm-cli.js");
+const composeSyntheticEnvironment = {
+  LITELLM_DB_PASSWORD: "synthetic-config-validation",
+  LITELLM_MASTER_KEY: "sk-synthetic-config-validation",
+  LITELLM_SALT_KEY: "sk-synthetic-salt-validation",
+  MODEL_GATEWAY_UPSTREAM_API_KEY: "sk-synthetic-config-validation",
+  MODEL_GATEWAY_PRIMARY_MODEL: "synthetic/provider-primary",
+  MODEL_GATEWAY_FALLBACK_MODEL: "synthetic/provider-fallback",
+  MODEL_GATEWAY_REVIEW_MODEL: "synthetic/provider-review",
+} as const;
 
 async function command(
   executable: string,
@@ -73,14 +85,17 @@ function isSuppressed(
   entries: readonly SupplyChainSuppression[],
   scanner: SupplyChainSuppression["scanner"],
   finding: Pick<SarifFinding, "ruleId" | "path">,
+  matchedSuppressionIds: Set<string>,
 ): boolean {
   const path = normalizePath(finding.path);
-  return entries.some(
+  const matching = entries.filter(
     (entry) =>
       entry.scanner === scanner &&
       entry.ruleId === finding.ruleId &&
       normalizePath(entry.path) === path,
   );
+  for (const entry of matching) matchedSuppressionIds.add(entry.id);
+  return matching.length > 0;
 }
 
 async function trackedPaths(): Promise<string[]> {
@@ -154,6 +169,7 @@ async function runGitleaks(
   reportName: string,
   sourceMount: string,
   suppressions: readonly SupplyChainSuppression[],
+  matchedSuppressionIds: Set<string>,
 ): Promise<SarifFinding[]> {
   const result = await dockerRun(
     image,
@@ -178,7 +194,9 @@ async function runGitleaks(
   const reportPath = resolve(reportsRoot, reportName);
   await sanitizeSarif(reportPath);
   const findings = sarifFindings(await readJson(reportPath), source);
-  return findings.filter((finding) => !isSuppressed(suppressions, "gitleaks", finding));
+  return findings.filter(
+    (finding) => !isSuppressed(suppressions, "gitleaks", finding, matchedSuppressionIds),
+  );
 }
 
 const eslintOutputSchema = z.array(
@@ -196,7 +214,10 @@ const eslintOutputSchema = z.array(
   }),
 );
 
-async function runEslint(suppressions: readonly SupplyChainSuppression[]): Promise<SarifFinding[]> {
+async function runEslint(
+  suppressions: readonly SupplyChainSuppression[],
+  matchedSuppressionIds: Set<string>,
+): Promise<SarifFinding[]> {
   const jsonPath = resolve(reportsRoot, "eslint.json");
   const eslint = resolve(root, "node_modules/eslint/bin/eslint.js");
   const result = await command(process.execPath, [
@@ -231,33 +252,35 @@ async function runEslint(suppressions: readonly SupplyChainSuppression[]): Promi
     }),
   );
   await rm(jsonPath, { force: true });
-  return findings.filter((finding) => !isSuppressed(suppressions, "eslint", finding));
+  return findings.filter(
+    (finding) => !isSuppressed(suppressions, "eslint", finding, matchedSuppressionIds),
+  );
 }
 
 async function runContainerPolicy(
   paths: readonly string[],
   tooling: z.infer<typeof toolingSchema>,
   suppressions: readonly SupplyChainSuppression[],
+  matchedSuppressionIds: Set<string>,
 ): Promise<SarifFinding[]> {
   const compose = await command(
     "docker",
     ["compose", "-f", "ops/model-gateway/compose.yaml", "config", "--format", "json"],
     {
-      env: {
-        LITELLM_DB_PASSWORD: "synthetic-config-validation",
-        LITELLM_MASTER_KEY: "synthetic-config-validation",
-        LITELLM_SALT_KEY: "synthetic-config-validation",
-        MODEL_GATEWAY_UPSTREAM_API_KEY: "synthetic-config-validation",
-        MODEL_GATEWAY_PRIMARY_MODEL: "synthetic/provider-primary",
-        MODEL_GATEWAY_FALLBACK_MODEL: "synthetic/provider-fallback",
-        MODEL_GATEWAY_REVIEW_MODEL: "synthetic/provider-review",
-      },
+      env: composeSyntheticEnvironment,
     },
   );
   if (compose.exitCode !== 0) throw new Error("Docker Compose configuration validation failed.");
   const findings = [
-    ...analyzeComposeConfig(JSON.parse(compose.stdout) as unknown),
+    ...analyzeComposeConfig(JSON.parse(compose.stdout) as unknown, {
+      expectedImages: {
+        database: tooling.postgres.image,
+        gateway: tooling.liteLlm.image,
+      },
+      locallyBuiltServices: ["gateway"],
+    }),
     ...(await analyzeSandboxDockerfile(root, tooling)),
+    ...(await analyzeLiteLlmDockerfile(root, tooling)),
     ...analyzeLanguageCoverage(paths),
   ];
   const sarifPath = resolve(reportsRoot, "container-policy.sarif");
@@ -269,7 +292,9 @@ async function runContainerPolicy(
       findings,
     }),
   );
-  return findings.filter((finding) => !isSuppressed(suppressions, "container-policy", finding));
+  return findings.filter(
+    (finding) => !isSuppressed(suppressions, "container-policy", finding, matchedSuppressionIds),
+  );
 }
 
 const auditSchema = z.object({
@@ -294,7 +319,10 @@ const auditSchema = z.object({
   }),
 });
 
-async function runNpmAudit(suppressions: readonly SupplyChainSuppression[]): Promise<{
+async function runNpmAudit(
+  suppressions: readonly SupplyChainSuppression[],
+  matchedSuppressionIds: Set<string>,
+): Promise<{
   readonly findings: SarifFinding[];
   readonly totals: z.infer<typeof auditSchema>["metadata"]["vulnerabilities"];
 }> {
@@ -318,7 +346,9 @@ async function runNpmAudit(suppressions: readonly SupplyChainSuppression[]): Pro
     }));
   });
   return {
-    findings: findings.filter((finding) => !isSuppressed(suppressions, "npm-audit", finding)),
+    findings: findings.filter(
+      (finding) => !isSuppressed(suppressions, "npm-audit", finding, matchedSuppressionIds),
+    ),
     totals: audit.metadata.vulnerabilities,
   };
 }
@@ -442,31 +472,45 @@ async function generateNpmSboms(): Promise<{
   };
 }
 
-async function buildAndScanSandbox(
-  tooling: z.infer<typeof toolingSchema>,
-  suppressions: readonly SupplyChainSuppression[],
-): Promise<{ readonly imageId: string; readonly findings: SarifFinding[] }> {
-  const build = await command("docker", ["build", "--tag", tooling.sandbox.image, "ops/sandbox"]);
-  if (build.exitCode !== 0) throw new Error("Sandbox runtime image build failed.");
-  const inspect = await command("docker", [
-    "image",
-    "inspect",
-    tooling.sandbox.image,
-    "--format",
-    "{{.Id}}",
-  ]);
+type RuntimeImageScan = {
+  readonly role: RuntimeImageSummary["role"];
+  readonly displayName: string;
+  readonly reference: string;
+  readonly imageId: string;
+  readonly sarifArtifact: string;
+  readonly sbomArtifact: string;
+  readonly bom: z.infer<typeof bomSchema>;
+  readonly findings: readonly SarifFinding[];
+};
+
+async function inspectImageId(reference: string): Promise<string> {
+  const inspect = await command("docker", ["image", "inspect", reference, "--format", "{{.Id}}"]);
   const imageId = inspect.stdout.trim();
   if (inspect.exitCode !== 0 || !/^sha256:[a-f0-9]{64}$/.test(imageId)) {
-    throw new Error("Sandbox runtime image did not resolve to a content ID.");
+    throw new Error(`Runtime image did not resolve to a content ID: ${reference}`);
   }
+  return imageId;
+}
+
+async function scanRuntimeImage(input: {
+  readonly role: RuntimeImageSummary["role"];
+  readonly displayName: string;
+  readonly reference: string;
+  readonly imageId: string;
+  readonly artifactPrefix: string;
+  readonly tooling: z.infer<typeof toolingSchema>;
+  readonly suppressions: readonly SupplyChainSuppression[];
+  readonly matchedSuppressionIds: Set<string>;
+}): Promise<RuntimeImageScan> {
   const mounts = [
     "/var/run/docker.sock:/var/run/docker.sock",
     `${reportsRoot}:/reports`,
     "ai-delivery-workbench-trivy-cache:/root/.cache/trivy",
   ];
-  const vulnerabilityReport = "sandbox-image.sarif";
+  const vulnerabilityReport = `${input.artifactPrefix}.sarif`;
+  const sbomArtifact = `${input.artifactPrefix}.cdx.json`;
   const vulnerability = await dockerRun(
-    tooling.trivy.image,
+    input.tooling.trivy.image,
     [
       "image",
       "--quiet",
@@ -477,18 +521,18 @@ async function buildAndScanSandbox(
       "--scanners",
       "vuln",
       "--severity",
-      tooling.policy.containerFailureSeverities.join(","),
+      input.tooling.policy.containerFailureSeverities.join(","),
       "--format",
       "sarif",
       "--output",
       `/reports/${vulnerabilityReport}`,
-      imageId,
+      input.imageId,
     ],
     mounts,
   );
   if (vulnerability.exitCode !== 0) throw new Error("Trivy container vulnerability scan failed.");
   const sbom = await dockerRun(
-    tooling.trivy.image,
+    input.tooling.trivy.image,
     [
       "image",
       "--quiet",
@@ -499,27 +543,197 @@ async function buildAndScanSandbox(
       "--format",
       "cyclonedx",
       "--output",
-      "/reports/sandbox-image.cdx.json",
-      imageId,
+      `/reports/${sbomArtifact}`,
+      input.imageId,
     ],
     mounts,
   );
   if (sbom.exitCode !== 0) throw new Error("Trivy container SBOM generation failed.");
-  bomSchema.parse(await readJson(resolve(reportsRoot, "sandbox-image.cdx.json")));
+  const bom = bomSchema.parse(await readJson(resolve(reportsRoot, sbomArtifact)));
   const reportPath = resolve(reportsRoot, vulnerabilityReport);
   await sanitizeSarif(reportPath);
-  const findings = sarifFindings(await readJson(reportPath), `image:${imageId}`);
+  const target = input.reference.includes("@sha256:") ? input.reference : input.imageId;
+  const findings = sarifFindings(await readJson(reportPath), `image:${target}`).map((finding) => ({
+    ...finding,
+    path:
+      finding.path === `image:${input.imageId}`
+        ? `image:${target}`
+        : `image:${target}/${finding.path.replace(/^\/+/, "")}`,
+  }));
   return {
-    imageId,
-    findings: findings.filter((finding) => !isSuppressed(suppressions, "trivy", finding)),
+    role: input.role,
+    displayName: input.displayName,
+    reference: input.reference,
+    imageId: input.imageId,
+    sarifArtifact: vulnerabilityReport,
+    sbomArtifact,
+    bom,
+    findings: findings.filter(
+      (finding) => !isSuppressed(input.suppressions, "trivy", finding, input.matchedSuppressionIds),
+    ),
   };
+}
+
+async function buildAndScanSandbox(
+  tooling: z.infer<typeof toolingSchema>,
+  suppressions: readonly SupplyChainSuppression[],
+  matchedSuppressionIds: Set<string>,
+): Promise<RuntimeImageScan> {
+  const build = await command("docker", [
+    "build",
+    "--pull",
+    "--tag",
+    tooling.sandbox.image,
+    "ops/sandbox",
+  ]);
+  if (build.exitCode !== 0) throw new Error("Sandbox runtime image build failed.");
+  const imageId = await inspectImageId(tooling.sandbox.image);
+  return scanRuntimeImage({
+    role: "sandbox",
+    displayName: "Sandbox",
+    reference: tooling.sandbox.image,
+    imageId,
+    artifactPrefix: "sandbox-image",
+    tooling,
+    suppressions,
+    matchedSuppressionIds,
+  });
+}
+
+const cosignClaimSchema = z.array(
+  z.object({
+    critical: z.object({
+      image: z.object({ "docker-manifest-digest": z.string() }),
+      type: z.string(),
+    }),
+  }),
+);
+
+async function verifyLiteLlmSignature(tooling: z.infer<typeof toolingSchema>): Promise<void> {
+  const publicKeyPath = resolve(root, tooling.liteLlm.cosignPublicKey);
+  if ((await sha256File(publicKeyPath)) !== tooling.liteLlm.cosignPublicKeySha256) {
+    throw new Error("LiteLLM Cosign public key does not match its pinned digest.");
+  }
+  const pull = await command("docker", ["pull", tooling.liteLlm.upstreamImage]);
+  if (pull.exitCode !== 0) throw new Error("Pinned LiteLLM upstream image pull failed.");
+  const verification = await dockerRun(
+    tooling.cosign.image,
+    ["verify", "--key", "/keys/litellm-cosign.pub", tooling.liteLlm.upstreamImage],
+    [`${dirname(publicKeyPath)}:/keys:ro`],
+  );
+  if (verification.exitCode !== 0) throw new Error("LiteLLM Cosign verification failed.");
+  const claims = cosignClaimSchema.parse(JSON.parse(verification.stdout) as unknown);
+  const expectedDigest = tooling.liteLlm.upstreamImage.split("@")[1];
+  if (
+    claims.length === 0 ||
+    claims.some((claim) => claim.critical.image["docker-manifest-digest"] !== expectedDigest) ||
+    !claims.some((claim) => claim.critical.type === "https://sigstore.dev/cosign/sign/v1")
+  ) {
+    throw new Error("LiteLLM Cosign claims do not bind the configured upstream digest.");
+  }
+  await writeJson(resolve(reportsRoot, "litellm-signature.json"), {
+    schemaVersion: 1,
+    verified: true,
+    image: tooling.liteLlm.upstreamImage,
+    digest: expectedDigest,
+    verifier: { version: tooling.cosign.version, image: tooling.cosign.image },
+    publicKey: {
+      path: tooling.liteLlm.cosignPublicKey,
+      sha256: tooling.liteLlm.cosignPublicKeySha256,
+      source:
+        "https://raw.githubusercontent.com/BerriAI/litellm/0112e53046018d726492c814b3644b7d376029d0/cosign.pub",
+    },
+    claimTypes: [...new Set(claims.map((claim) => claim.critical.type))].sort(),
+    signatureCount: claims.length,
+    transparencyLogVerified: verification.stderr.includes("transparency log was verified"),
+  });
+}
+
+function liteLlmPackageFloorFindings(
+  scan: RuntimeImageScan,
+  tooling: z.infer<typeof toolingSchema>,
+): SarifFinding[] {
+  return Object.entries(tooling.liteLlm.minimumVersions).flatMap(([name, minimum]) => {
+    const installed = scan.bom.components
+      .filter((component) => component.name === name)
+      .map((component) => component.version)
+      .filter((version): version is string => version !== undefined);
+    if (installed.length > 0 && installed.every((version) => versionAtLeast(version, minimum))) {
+      return [];
+    }
+    return [
+      {
+        ruleId: "CONTAINER-PACKAGE-MINIMUM",
+        level: "error" as const,
+        message: `${name} must be ${minimum} or newer; found ${installed.join(", ") || "nothing"}.`,
+        path: `image:${scan.imageId}/package:${name}`,
+      },
+    ];
+  });
+}
+
+async function buildAndScanLiteLlm(
+  tooling: z.infer<typeof toolingSchema>,
+  suppressions: readonly SupplyChainSuppression[],
+  matchedSuppressionIds: Set<string>,
+): Promise<RuntimeImageScan> {
+  await verifyLiteLlmSignature(tooling);
+  const build = await command(
+    "docker",
+    ["compose", "-f", "ops/model-gateway/compose.yaml", "build", "--pull", "gateway"],
+    { env: composeSyntheticEnvironment },
+  );
+  if (build.exitCode !== 0) throw new Error("Patched LiteLLM runtime image build failed.");
+  const imageId = await inspectImageId(tooling.liteLlm.image);
+  const user = await command("docker", [
+    "image",
+    "inspect",
+    imageId,
+    "--format",
+    "{{.Config.User}}",
+  ]);
+  if (user.exitCode !== 0 || user.stdout.trim() !== "65534") {
+    throw new Error("Patched LiteLLM runtime image is not configured for numeric user 65534.");
+  }
+  const scan = await scanRuntimeImage({
+    role: "litellm",
+    displayName: "LiteLLM gateway",
+    reference: tooling.liteLlm.image,
+    imageId,
+    artifactPrefix: "litellm-image",
+    tooling,
+    suppressions,
+    matchedSuppressionIds,
+  });
+  const packageFindings = liteLlmPackageFloorFindings(scan, tooling);
+  return { ...scan, findings: [...scan.findings, ...packageFindings] };
+}
+
+async function pullAndScanPostgres(
+  tooling: z.infer<typeof toolingSchema>,
+  suppressions: readonly SupplyChainSuppression[],
+  matchedSuppressionIds: Set<string>,
+): Promise<RuntimeImageScan> {
+  const pull = await command("docker", ["pull", tooling.postgres.image]);
+  if (pull.exitCode !== 0) throw new Error("Pinned PostgreSQL runtime image pull failed.");
+  const imageId = await inspectImageId(tooling.postgres.image);
+  return scanRuntimeImage({
+    role: "postgresql",
+    displayName: "PostgreSQL database",
+    reference: tooling.postgres.image,
+    imageId,
+    artifactPrefix: "postgres-image",
+    tooling,
+    suppressions,
+    matchedSuppressionIds,
+  });
 }
 
 async function scannerMetadata(
   tooling: z.infer<typeof toolingSchema>,
-  imageId: string,
+  runtimeImages: readonly RuntimeImageScan[],
 ): Promise<Record<string, unknown>> {
-  const [docker, eslint, cyclone, gitleaks, trivy] = await Promise.all([
+  const [docker, eslint, cyclone, gitleaks, trivy, cosign] = await Promise.all([
     command("docker", ["version", "--format", "{{.Client.Version}}|{{.Server.Version}}"]),
     command(process.execPath, [resolve(root, "node_modules/eslint/bin/eslint.js"), "--version"]),
     command(process.execPath, [
@@ -532,8 +746,9 @@ async function scannerMetadata(
       ["--version"],
       ["ai-delivery-workbench-trivy-cache:/root/.cache/trivy"],
     ),
+    dockerRun(tooling.cosign.image, ["version"]),
   ]);
-  if ([docker, eslint, cyclone, gitleaks, trivy].some((result) => result.exitCode !== 0)) {
+  if ([docker, eslint, cyclone, gitleaks, trivy, cosign].some((result) => result.exitCode !== 0)) {
     throw new Error("Scanner version collection failed.");
   }
   return {
@@ -543,15 +758,20 @@ async function scannerMetadata(
       gitleaks: { version: gitleaks.stdout.trim(), image: tooling.gitleaks.image },
       eslint: { version: eslint.stdout.trim() },
       trivy: { version: trivy.stdout.trim(), image: tooling.trivy.image },
+      cosign: { version: cosign.stdout.trim(), image: tooling.cosign.image },
       cycloneDxNpm: { version: cyclone.stdout.trim() },
       codeql: { version: tooling.codeql.version, actionSha: tooling.codeql.actionSha },
       npmAudit: { version: process.env.npm_config_user_agent?.split(" ")[0] ?? "npm" },
       containerPolicy: { version: "1.0.0", dockerCompose: docker.stdout.trim() },
     },
     targets: {
-      sandboxImage: tooling.sandbox.image,
-      sandboxImageId: imageId,
       sandboxBaseImage: tooling.sandbox.baseImage,
+      liteLlmUpstreamImage: tooling.liteLlm.upstreamImage,
+      runtimeImages: runtimeImages.map((image) => ({
+        role: image.role,
+        reference: image.reference,
+        scannedDigest: image.imageId,
+      })),
     },
   };
 }
@@ -568,11 +788,18 @@ async function main(): Promise<void> {
     await readJson(resolve(root, "security/suppressions.json")),
   );
   const suppressionIds = new Set<string>();
+  const suppressionSelectors = new Set<string>();
+  const matchedSuppressionIds = new Set<string>();
   const today = new Date().toISOString().slice(0, 10);
   let expired = 0;
   for (const entry of suppressionDocument.entries) {
     if (suppressionIds.has(entry.id)) throw new Error(`Duplicate suppression ID: ${entry.id}`);
     suppressionIds.add(entry.id);
+    const selector = `${entry.scanner}\0${entry.ruleId}\0${normalizePath(entry.path)}`;
+    if (suppressionSelectors.has(selector)) {
+      throw new Error(`Duplicate suppression selector: ${entry.scanner}/${entry.ruleId}`);
+    }
+    suppressionSelectors.add(selector);
     if (entry.expiresOn < today || entry.reviewOn > entry.expiresOn) expired += 1;
   }
   if (expired > 0) throw new Error("One or more supply-chain suppressions are expired or invalid.");
@@ -590,6 +817,7 @@ async function main(): Promise<void> {
       "gitleaks-history.sarif",
       root,
       suppressionDocument.entries,
+      matchedSuppressionIds,
     );
     const worktreeSecrets = await runGitleaks(
       tooling.gitleaks.image,
@@ -598,16 +826,33 @@ async function main(): Promise<void> {
       "gitleaks-worktree.sarif",
       scanInput,
       suppressionDocument.entries,
+      matchedSuppressionIds,
     );
-    const eslintFindings = await runEslint(suppressionDocument.entries);
+    const eslintFindings = await runEslint(suppressionDocument.entries, matchedSuppressionIds);
     const containerPolicyFindings = await runContainerPolicy(
       paths,
       tooling,
       suppressionDocument.entries,
+      matchedSuppressionIds,
     );
-    const npmAudit = await runNpmAudit(suppressionDocument.entries);
+    const npmAudit = await runNpmAudit(suppressionDocument.entries, matchedSuppressionIds);
     const licenses = await generateNpmSboms();
-    const sandbox = await buildAndScanSandbox(tooling, suppressionDocument.entries);
+    const sandbox = await buildAndScanSandbox(
+      tooling,
+      suppressionDocument.entries,
+      matchedSuppressionIds,
+    );
+    const liteLlm = await buildAndScanLiteLlm(
+      tooling,
+      suppressionDocument.entries,
+      matchedSuppressionIds,
+    );
+    const postgres = await pullAndScanPostgres(
+      tooling,
+      suppressionDocument.entries,
+      matchedSuppressionIds,
+    );
+    const runtimeImageScans = [sandbox, liteLlm, postgres] as const;
 
     const blocking = [
       ...historySecrets,
@@ -616,17 +861,27 @@ async function main(): Promise<void> {
       ...containerPolicyFindings,
       ...npmAudit.findings,
       ...licenses.licenseFindings,
-      ...sandbox.findings,
+      ...runtimeImageScans.flatMap((image) => image.findings),
     ];
+    const unusedSuppressions = suppressionDocument.entries.filter(
+      (entry) => !matchedSuppressionIds.has(entry.id),
+    );
     await writeJson(resolve(reportsRoot, "suppression-report.json"), {
       schemaVersion: 1,
       active: suppressionDocument.entries,
+      applied: [...matchedSuppressionIds].sort(),
+      unused: unusedSuppressions.map((entry) => entry.id),
       expired,
       unsuppressedFindingCount: blocking.length,
     });
-    const metadata = await scannerMetadata(tooling, sandbox.imageId);
+    const metadata = await scannerMetadata(tooling, runtimeImageScans);
     await writeJson(resolve(reportsRoot, "scanner-metadata.json"), metadata);
 
+    if (unusedSuppressions.length > 0) {
+      throw new Error(
+        `Supply-chain policy rejected ${unusedSuppressions.length} unused suppression(s).`,
+      );
+    }
     if (blocking.length > 0) {
       throw new Error(
         `Supply-chain policy failed with ${blocking.length} unsuppressed finding(s); inspect the private CI artifacts.`,
@@ -640,6 +895,42 @@ async function main(): Promise<void> {
     }
     const baseCommit = process.env.GITHUB_SHA ?? baseCommitResult.stdout.trim();
     const generatedAt = new Date().toISOString();
+    const runtimeImages = [
+      {
+        role: "sandbox",
+        displayName: sandbox.displayName,
+        reference: sandbox.reference,
+        scannedDigest: sandbox.imageId,
+        sbomArtifact: sandbox.sbomArtifact,
+        provenance: {
+          status: "DIGEST_PINNED_BUILD",
+          detail: `Built locally from ${tooling.sandbox.baseImage}.`,
+        },
+      },
+      {
+        role: "litellm",
+        displayName: liteLlm.displayName,
+        reference: liteLlm.reference,
+        scannedDigest: liteLlm.imageId,
+        sbomArtifact: liteLlm.sbomArtifact,
+        provenance: {
+          status: "VERIFIED_UPSTREAM_SIGNATURE",
+          detail: `Derived from Cosign-verified ${tooling.liteLlm.upstreamImage}; the local patch is hash-locked and the exact result is scanned.`,
+        },
+      },
+      {
+        role: "postgresql",
+        displayName: postgres.displayName,
+        reference: postgres.reference,
+        scannedDigest: postgres.imageId,
+        sbomArtifact: postgres.sbomArtifact,
+        provenance: {
+          status: "DIGEST_PINNED",
+          detail:
+            "Pulled from the Docker Official Image digest; no vendor Cosign key is published for this image.",
+        },
+      },
+    ] satisfies RuntimeImageSummary[];
     const controls = [
       control({
         id: "secret-scan",
@@ -658,7 +949,8 @@ async function main(): Promise<void> {
         status: "PASSED",
         scanner: "ESLint + repository container policy",
         version: "10.7.0 / 1.0.0",
-        target: "TypeScript/JavaScript sources, Compose configuration, and sandbox Dockerfile",
+        target:
+          "TypeScript/JavaScript sources, Compose configuration, and both runtime Dockerfiles",
         findingCount: 0,
         detail:
           "Language coverage fails closed if unscanned Python, shell, PowerShell, or Dockerfile sources appear.",
@@ -675,13 +967,25 @@ async function main(): Promise<void> {
       }),
       control({
         id: "container-scan",
-        label: "Sandbox runtime container vulnerability scan",
+        label: "Runtime container vulnerability scans",
         status: "PASSED",
         scanner: "Trivy",
         version: tooling.trivy.version,
-        target: sandbox.imageId,
+        target: runtimeImages.map((image) => image.scannedDigest).join(", "),
         findingCount: 0,
-        detail: "The exact locally built image ID was scanned for high and critical findings.",
+        detail:
+          "The exact sandbox, LiteLLM, and PostgreSQL runtime image IDs were scanned; all unsuppressed high and critical findings are release-blocking.",
+      }),
+      control({
+        id: "image-provenance",
+        label: "Runtime image signature and provenance policy",
+        status: "PASSED",
+        scanner: "Cosign + digest/build policy",
+        version: `${tooling.cosign.version} / 1.0.0`,
+        target: tooling.liteLlm.upstreamImage,
+        findingCount: 0,
+        detail:
+          "LiteLLM's pinned upstream digest was verified with its commit-pinned public key; local builds and the PostgreSQL pull remain content-addressed.",
       }),
       control({
         id: "sbom",
@@ -689,10 +993,10 @@ async function main(): Promise<void> {
         status: "PASSED",
         scanner: "CycloneDX npm + Trivy",
         version: `${tooling.cycloneDxNpm.version} / ${tooling.trivy.version}`,
-        target: "Locked npm production graph and sandbox runtime image",
+        target: "Locked npm graphs and all three runtime images",
         findingCount: 0,
         detail:
-          "Validated CycloneDX JSON artifacts were generated and retained outside the repository.",
+          "Validated CycloneDX JSON artifacts were generated for the two npm graphs and each exact runtime image.",
       }),
       control({
         id: "license-policy",
@@ -738,9 +1042,14 @@ async function main(): Promise<void> {
       { kind: "SARIF", name: "container-policy.sarif" },
       { kind: "SARIF", name: "license-policy.sarif" },
       { kind: "SARIF", name: "sandbox-image.sarif" },
+      { kind: "SARIF", name: "litellm-image.sarif" },
+      { kind: "SARIF", name: "postgres-image.sarif" },
       { kind: "SBOM", name: "npm-production.cdx.json" },
       { kind: "SBOM", name: "npm-all.cdx.json" },
       { kind: "SBOM", name: "sandbox-image.cdx.json" },
+      { kind: "SBOM", name: "litellm-image.cdx.json" },
+      { kind: "SBOM", name: "postgres-image.cdx.json" },
+      { kind: "PROVENANCE", name: "litellm-signature.json" },
       { kind: "INVENTORY", name: "license-inventory.json" },
       { kind: "INVENTORY", name: "scanner-metadata.json" },
       { kind: "INVENTORY", name: "suppression-report.json" },
@@ -753,7 +1062,7 @@ async function main(): Promise<void> {
       })),
     );
     const summary: ReleaseSummary = {
-      schemaVersion: 1,
+      schemaVersion: 2,
       generatedAt,
       source: {
         baseCommit,
@@ -763,6 +1072,7 @@ async function main(): Promise<void> {
       controls,
       artifacts,
       suppressions: { active: suppressionDocument.entries.length, expired },
+      runtimeImages,
     };
     await writeJson(resolve(reportsRoot, "release-summary.json"), summary);
     const markdown = [
@@ -772,6 +1082,13 @@ async function main(): Promise<void> {
       `Source base commit: ${baseCommit}`,
       `Source state: ${summary.source.revisionKind}`,
       `Source tree digest: ${sourceTreeDigest}`,
+      "",
+      "| Runtime image | Reference | Scanned digest | Provenance |",
+      "| --- | --- | --- | --- |",
+      ...runtimeImages.map(
+        (image) =>
+          `| ${image.displayName} | ${image.reference} | ${image.scannedDigest} | ${image.provenance.status} |`,
+      ),
       "",
       "| Control | Status | Scanner | Findings |",
       "| --- | --- | --- | ---: |",
@@ -792,7 +1109,7 @@ async function main(): Promise<void> {
       await writeJson(publicPath, summary);
     }
     process.stdout.write(
-      `Supply-chain evidence passed: ${controls.filter((item) => item.status === "PASSED").length} controls passed, ${summary.suppressions.active} suppressions, sandbox ${sandbox.imageId.slice(0, 19)}.\n`,
+      `Supply-chain evidence passed: ${controls.filter((item) => item.status === "PASSED").length} controls passed, ${summary.suppressions.active} suppressions, ${runtimeImages.length} runtime images scanned.\n`,
     );
   } finally {
     await rm(scanInput, { force: true, recursive: true });

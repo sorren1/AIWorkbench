@@ -14,24 +14,62 @@ const controlSchema = z.object({
   detail: z.string(),
 });
 
-export const publicSupplyChainSummarySchema = z.object({
-  schemaVersion: z.literal(1),
-  generatedAt: z.iso.datetime(),
-  source: z.object({
-    baseCommit: z.string().regex(/^[a-f0-9]{40}$/),
-    revisionKind: z.enum(["COMMIT", "WORKTREE"]),
-    treeDigest: z.string().regex(/^[a-f0-9]{64}$/),
-  }),
-  controls: z.array(controlSchema),
-  artifacts: z.array(
-    z.object({
-      kind: z.enum(["SARIF", "SBOM", "INVENTORY", "SUMMARY"]),
-      name: z.string(),
-      sha256: z.string().regex(/^[a-f0-9]{64}$/),
+export const publicSupplyChainSummarySchema = z
+  .object({
+    schemaVersion: z.literal(2),
+    generatedAt: z.iso.datetime(),
+    source: z.object({
+      baseCommit: z.string().regex(/^[a-f0-9]{40}$/),
+      revisionKind: z.enum(["COMMIT", "WORKTREE"]),
+      treeDigest: z.string().regex(/^[a-f0-9]{64}$/),
     }),
-  ),
-  suppressions: z.object({ active: z.number().int().nonnegative(), expired: z.literal(0) }),
-});
+    controls: z.array(controlSchema),
+    artifacts: z.array(
+      z.object({
+        kind: z.enum(["SARIF", "SBOM", "INVENTORY", "PROVENANCE", "SUMMARY"]),
+        name: z.string(),
+        sha256: z.string().regex(/^[a-f0-9]{64}$/),
+      }),
+    ),
+    suppressions: z.object({ active: z.number().int().nonnegative(), expired: z.literal(0) }),
+    runtimeImages: z
+      .array(
+        z.object({
+          role: z.enum(["sandbox", "litellm", "postgresql"]),
+          displayName: z.string().min(1),
+          reference: z.string().min(1),
+          scannedDigest: z.string().regex(/^sha256:[a-f0-9]{64}$/),
+          sbomArtifact: z.string().endsWith(".cdx.json"),
+          provenance: z.object({
+            status: z.enum(["DIGEST_PINNED_BUILD", "VERIFIED_UPSTREAM_SIGNATURE", "DIGEST_PINNED"]),
+            detail: z.string().min(1),
+          }),
+        }),
+      )
+      .length(3),
+  })
+  .superRefine((summary, context) => {
+    if (new Set(summary.runtimeImages.map((image) => image.role)).size !== 3) {
+      context.addIssue({
+        code: "custom",
+        message: "Runtime-image evidence must contain sandbox, LiteLLM, and PostgreSQL once each.",
+        path: ["runtimeImages"],
+      });
+    }
+    for (const image of summary.runtimeImages) {
+      if (
+        !summary.artifacts.some(
+          (artifact) => artifact.kind === "SBOM" && artifact.name === image.sbomArtifact,
+        )
+      ) {
+        context.addIssue({
+          code: "custom",
+          message: `${image.role} does not have a matching SBOM artifact.`,
+          path: ["runtimeImages"],
+        });
+      }
+    }
+  });
 
 export type PublicSupplyChainSummary = z.infer<typeof publicSupplyChainSummarySchema>;
 
@@ -91,13 +129,28 @@ export async function renderSupplyChainEvidence(root: string): Promise<string> {
       </tr>`;
     })
     .join("\n");
-  const sbomCount = summary.artifacts.filter((artifact) => artifact.kind === "SBOM").length;
+  const imageRows = summary.runtimeImages
+    .map(
+      (image) => `<tr>
+        <th scope="row">${escapeHtml(image.displayName)}</th>
+        <td><code>${escapeHtml(image.reference)}</code></td>
+        <td><code>${escapeHtml(image.scannedDigest)}</code></td>
+        <td>${escapeHtml(image.provenance.status.toLowerCase().replaceAll("_", " "))}</td>
+      </tr>`,
+    )
+    .join("\n");
   return `<div class="site-evidence-summary">
     <div class="site-evidence-summary__facts" aria-label="Recorded supply-chain evidence facts">
       <div><span>Validated source state</span><strong>${escapeHtml(summary.source.revisionKind.toLowerCase())}</strong></div>
       <div><span>Validation base commit</span><strong><code>${escapeHtml(summary.source.baseCommit.slice(0, 12))}</code></strong></div>
-      <div><span>CycloneDX SBOM artifacts</span><strong>${sbomCount}</strong></div>
+      <div><span>Runtime image SBOMs</span><strong>${summary.runtimeImages.length}</strong></div>
       <div><span>Active suppressions</span><strong>${summary.suppressions.active}</strong></div>
+    </div>
+    <div class="site-table-wrap" role="region" aria-label="Scanned runtime image digests" tabindex="0">
+      <table class="site-matrix">
+        <thead><tr><th scope="col">Runtime image</th><th scope="col">Pinned source</th><th scope="col">Scanned digest</th><th scope="col">Provenance</th></tr></thead>
+        <tbody>${imageRows}</tbody>
+      </table>
     </div>
     <p class="site-evidence-summary__binding">Recorded ${escapeHtml(summary.generatedAt)} against source-tree digest <code>${escapeHtml(summary.source.treeDigest)}</code>. Detailed SARIF, SBOM, inventory, and scanner metadata stay in local or CI artifacts rather than the public bundle.</p>
     <div class="site-table-wrap" role="region" aria-label="Supply-chain control results" tabindex="0">

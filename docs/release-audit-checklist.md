@@ -18,10 +18,12 @@ Complete this checklist against the candidate commit before publication or taggi
 - [ ] `.security-reports/security-summary.md` identifies the candidate source state and expected scanner versions.
 - [ ] Gitleaks scanned both tracked files and complete fetched Git history with zero unsuppressed findings.
 - [ ] ESLint, CodeQL, Compose/Dockerfile policy, and language-coverage status are reviewed.
-- [ ] npm and sandbox-image high/critical counts are zero after documented suppressions.
-- [ ] Production npm, complete npm, and sandbox-image CycloneDX SBOMs exist and their hashes match `release-summary.json`.
+- [ ] npm and all three runtime-image unsuppressed HIGH/CRITICAL counts are zero.
+- [ ] Production npm, complete npm, sandbox, LiteLLM, and PostgreSQL CycloneDX SBOMs exist and their hashes match `release-summary.json`.
+- [ ] LiteLLM's upstream Cosign signature verifies with the commit-pinned public key, and the public summary lists all three scanned runtime digests.
 - [ ] License inventory matches `security/license-policy.json` and `THIRD_PARTY_NOTICES.md`.
 - [ ] Every suppression has rule, path, reason, reviewer, review date, expiry, and explicit owner acceptance.
+- [ ] PostgreSQL `gosu` exceptions still match the documented reachability boundary and have not reached 2026-08-15.
 - [ ] Scanner reports were retained as restricted CI artifacts and were not committed to the repository.
 
 ## Claims and publication

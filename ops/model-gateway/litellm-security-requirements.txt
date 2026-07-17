@@ -1,0 +1,1 @@
+mcp==1.28.1 --hash=sha256:2726bca5e7193f61c5dde8b12500a6de2d9acf6d1a1c0be9e8c2e706437991df

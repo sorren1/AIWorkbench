@@ -1,4 +1,155 @@
 {
   "schemaVersion": 1,
-  "entries": []
+  "entries": [
+    {
+      "id": "SUP-2026-001",
+      "scanner": "trivy",
+      "ruleId": "CVE-2025-68121",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-002",
+      "scanner": "trivy",
+      "ruleId": "CVE-2025-61726",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-003",
+      "scanner": "trivy",
+      "ruleId": "CVE-2025-61729",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-004",
+      "scanner": "trivy",
+      "ruleId": "CVE-2026-25679",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-005",
+      "scanner": "trivy",
+      "ruleId": "CVE-2026-27145",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-006",
+      "scanner": "trivy",
+      "ruleId": "CVE-2026-32280",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-007",
+      "scanner": "trivy",
+      "ruleId": "CVE-2026-32281",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-008",
+      "scanner": "trivy",
+      "ruleId": "CVE-2026-32283",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-009",
+      "scanner": "trivy",
+      "ruleId": "CVE-2026-33811",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-010",
+      "scanner": "trivy",
+      "ruleId": "CVE-2026-33814",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-011",
+      "scanner": "trivy",
+      "ruleId": "CVE-2026-39820",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-012",
+      "scanner": "trivy",
+      "ruleId": "CVE-2026-39822",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-013",
+      "scanner": "trivy",
+      "ruleId": "CVE-2026-39836",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-014",
+      "scanner": "trivy",
+      "ruleId": "CVE-2026-42499",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    },
+    {
+      "id": "SUP-2026-015",
+      "scanner": "trivy",
+      "ruleId": "CVE-2026-42504",
+      "path": "image:postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193/usr/local/bin/gosu",
+      "reason": "Only gosu in the exact PostgreSQL 17.10 digest is affected; the trusted entrypoint supplies fixed local arguments solely to drop privileges before PostgreSQL starts, so untrusted input cannot reach the vulnerable Go code paths.",
+      "reviewer": "repository owner",
+      "reviewOn": "2026-07-17",
+      "expiresOn": "2026-08-15"
+    }
+  ]
 }

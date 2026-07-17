@@ -1,6 +1,6 @@
 # Release-grade quality system
 
-The quality system is organized around claims rather than test volume. `npm run check:all` is the release gate; it runs deterministic source checks, evidence validation, coverage, the production build, link and credential checks, the reproducible supply-chain evidence gate, Chromium/Firefox/WebKit browser tests, axe, controlled screenshots, and desktop/mobile Lighthouse assertions. The supply-chain gate covers redacted Git history/worktree secret scanning, SAST and container policy, lockfile and image vulnerability checks, license policy, CycloneDX SBOMs, and source/report binding; see `docs/release-evidence.md`.
+The quality system is organized around claims rather than test volume. `npm run check:all` is the release gate; it runs deterministic source checks, evidence validation, coverage, the production build, link and credential checks, the reproducible supply-chain evidence gate, Chromium/Firefox/WebKit browser tests, axe, controlled screenshots, and desktop/mobile Lighthouse assertions. The supply-chain gate covers redacted Git history/worktree secret scanning, SAST and container policy, lockfile and all three runtime-image vulnerability checks, five CycloneDX SBOMs, LiteLLM signature/package-floor checks, license policy, suppression expiry/use, and source/report binding; see `docs/release-evidence.md`.
 
 ## Claim-to-test map
 

@@ -1,10 +1,10 @@
 {
-  "schemaVersion": 1,
-  "generatedAt": "2026-07-17T11:57:47.222Z",
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-17T20:30:29.718Z",
   "source": {
-    "baseCommit": "c7c3c39474dd3375cf005d653e181d1780a01076",
-    "revisionKind": "COMMIT",
-    "treeDigest": "0896f94d3d2babb8f62e8e9d9d33faa65e88703e7dcc1d05003e816ceb822624"
+    "baseCommit": "f032903b9b9f840c7bc0f293852f7127d864ba51",
+    "revisionKind": "WORKTREE",
+    "treeDigest": "68556afee1d29f9839f79fc24a6f34f54533ece0236327c29c4a749990adda8e"
   },
   "controls": [
     {
@@ -13,7 +13,7 @@
       "status": "PASSED",
       "scanner": "Gitleaks",
       "version": "8.30.1",
-      "target": "289 source files plus reachable Git history",
+      "target": "320 source files plus reachable Git history",
       "findingCount": 0,
       "detail": "Redacted SARIF reports were generated for history and the tracked worktree snapshot."
     },
@@ -23,7 +23,7 @@
       "status": "PASSED",
       "scanner": "ESLint + repository container policy",
       "version": "10.7.0 / 1.0.0",
-      "target": "TypeScript/JavaScript sources, Compose configuration, and sandbox Dockerfile",
+      "target": "TypeScript/JavaScript sources, Compose configuration, and both runtime Dockerfiles",
       "findingCount": 0,
       "detail": "Language coverage fails closed if unscanned Python, shell, PowerShell, or Dockerfile sources appear."
     },
@@ -39,13 +39,23 @@
     },
     {
       "id": "container-scan",
-      "label": "Sandbox runtime container vulnerability scan",
+      "label": "Runtime container vulnerability scans",
       "status": "PASSED",
       "scanner": "Trivy",
       "version": "0.70.0",
-      "target": "sha256:adae508da516a8ea332e1b2ed1177ae1b35960a7225d3db1c233b09a9408a8fa",
+      "target": "sha256:adae508da516a8ea332e1b2ed1177ae1b35960a7225d3db1c233b09a9408a8fa, sha256:e0ff27fefe8fa4fce5e3282294415fe5d8881cea6c3fcd99666642e36d3e7563, sha256:93aa428db0aeeb71d24dcad1491bef6e1396a4255697e4bfc4c725bfeb981b74",
       "findingCount": 0,
-      "detail": "The exact locally built image ID was scanned for high and critical findings."
+      "detail": "The exact sandbox, LiteLLM, and PostgreSQL runtime image IDs were scanned; all unsuppressed high and critical findings are release-blocking."
+    },
+    {
+      "id": "image-provenance",
+      "label": "Runtime image signature and provenance policy",
+      "status": "PASSED",
+      "scanner": "Cosign + digest/build policy",
+      "version": "3.1.2 / 1.0.0",
+      "target": "ghcr.io/berriai/litellm-non_root:v1.94.0-dev.3@sha256:81137025eadb62943d571f9c431578a4575e2b43ce29e4ba1ecc2cb7d13bf0f8",
+      "findingCount": 0,
+      "detail": "LiteLLM's pinned upstream digest was verified with its commit-pinned public key; local builds and the PostgreSQL pull remain content-addressed."
     },
     {
       "id": "sbom",
@@ -53,9 +63,9 @@
       "status": "PASSED",
       "scanner": "CycloneDX npm + Trivy",
       "version": "6.0.0 / 0.70.0",
-      "target": "Locked npm production graph and sandbox runtime image",
+      "target": "Locked npm graphs and all three runtime images",
       "findingCount": 0,
-      "detail": "Validated CycloneDX JSON artifacts were generated and retained outside the repository."
+      "detail": "Validated CycloneDX JSON artifacts were generated for the two npm graphs and each exact runtime image."
     },
     {
       "id": "license-policy",
@@ -63,7 +73,7 @@
       "status": "PASSED",
       "scanner": "CycloneDX inventory + repository policy",
       "version": "1.0.0",
-      "target": "605 npm components / 16 license expressions",
+      "target": "607 npm components / 16 license expressions",
       "findingCount": 0,
       "detail": "Every inventoried npm component declared an allowed license expression."
     },
@@ -120,6 +130,16 @@
       "sha256": "d04e4980a11aec5215d1c1176f8a5c710b957af1f14c2567e03f1b1246de586d"
     },
     {
+      "kind": "SARIF",
+      "name": "litellm-image.sarif",
+      "sha256": "b2dfd43e33d309d015160877bb1e545da477a5da80794ac111f2e1b61a666ec8"
+    },
+    {
+      "kind": "SARIF",
+      "name": "postgres-image.sarif",
+      "sha256": "1082ee71199abeb872e42cef18c98d4d29afebbceb408b3f9fc930642e0f34b5"
+    },
+    {
       "kind": "SBOM",
       "name": "npm-production.cdx.json",
       "sha256": "5e5a645bd9355ae14b6ea3f2f4668f80c269c13c6f59dd2b6d2d98f5b5a53c82"
@@ -127,27 +147,42 @@
     {
       "kind": "SBOM",
       "name": "npm-all.cdx.json",
-      "sha256": "3382cbcbac42f3e8214ef2335d81d3519184a432fcb99a5091d0dadb89864a97"
+      "sha256": "3cc6897eeaa0ae333ac619a6d4e76dc4f96818f3ffd70215b7b162b71e9ff66e"
     },
     {
       "kind": "SBOM",
       "name": "sandbox-image.cdx.json",
-      "sha256": "1114b35a1722f11c8f2b394c673a6b51ca072c3d58ad634eb8377f5a7d86081f"
+      "sha256": "04c4f0e72e4391d03da6ea98ffac05af209313c51983820f9c78051ebff1514e"
+    },
+    {
+      "kind": "SBOM",
+      "name": "litellm-image.cdx.json",
+      "sha256": "98311aeebf6fd3696c91704426d0a8f6854efce92af86530495c1cb453e3471a"
+    },
+    {
+      "kind": "SBOM",
+      "name": "postgres-image.cdx.json",
+      "sha256": "9e60a30f8047ad0d832c94a91175eabe1bd1bb5474eeb7132f5419a0af1e478a"
+    },
+    {
+      "kind": "PROVENANCE",
+      "name": "litellm-signature.json",
+      "sha256": "8080e24a8e96c91d3caddb3504acf63d25a9c8336fb89dc4a6dde410e22622ab"
     },
     {
       "kind": "INVENTORY",
       "name": "license-inventory.json",
-      "sha256": "b1e4cec3756002f76f1768db6368f69058d451e81c077c4ae13bca6766b6d245"
+      "sha256": "6499f6eb2e3f567dd391404d0445dd82fb3318bd5d88b3c2309c97beb9c514df"
     },
     {
       "kind": "INVENTORY",
       "name": "scanner-metadata.json",
-      "sha256": "ca931b69867f09ae1aa8248b458aeda007a53eebec14ee32b78a771f3853d7ce"
+      "sha256": "46e8240431bfe6011027f6f23365698d318ffa261512b70ac65fae5714ebba26"
     },
     {
       "kind": "INVENTORY",
       "name": "suppression-report.json",
-      "sha256": "02379c286d795e280811da828f22d4a81cef0a1b1f7a9685f970f79eb5e7e23e"
+      "sha256": "ac4a4e5cefc9547b55945007d6ad142d6505f137b67f51fd9a29b063065e0781"
     },
     {
       "kind": "SUMMARY",
@@ -156,7 +191,42 @@
     }
   ],
   "suppressions": {
-    "active": 0,
+    "active": 15,
     "expired": 0
-  }
+  },
+  "runtimeImages": [
+    {
+      "role": "sandbox",
+      "displayName": "Sandbox",
+      "reference": "ai-delivery-workbench-sandbox:node-22.23.1",
+      "scannedDigest": "sha256:adae508da516a8ea332e1b2ed1177ae1b35960a7225d3db1c233b09a9408a8fa",
+      "sbomArtifact": "sandbox-image.cdx.json",
+      "provenance": {
+        "status": "DIGEST_PINNED_BUILD",
+        "detail": "Built locally from node:22.23.1-alpine3.24@sha256:16e22a550f3863206a3f701448c45f7912c6896a62de43add43bb9c86130c3e2."
+      }
+    },
+    {
+      "role": "litellm",
+      "displayName": "LiteLLM gateway",
+      "reference": "ai-delivery-workbench-litellm:v1.94.0-dev.3-mcp1.28.1",
+      "scannedDigest": "sha256:e0ff27fefe8fa4fce5e3282294415fe5d8881cea6c3fcd99666642e36d3e7563",
+      "sbomArtifact": "litellm-image.cdx.json",
+      "provenance": {
+        "status": "VERIFIED_UPSTREAM_SIGNATURE",
+        "detail": "Derived from Cosign-verified ghcr.io/berriai/litellm-non_root:v1.94.0-dev.3@sha256:81137025eadb62943d571f9c431578a4575e2b43ce29e4ba1ecc2cb7d13bf0f8; the local patch is hash-locked and the exact result is scanned."
+      }
+    },
+    {
+      "role": "postgresql",
+      "displayName": "PostgreSQL database",
+      "reference": "postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193",
+      "scannedDigest": "sha256:93aa428db0aeeb71d24dcad1491bef6e1396a4255697e4bfc4c725bfeb981b74",
+      "sbomArtifact": "postgres-image.cdx.json",
+      "provenance": {
+        "status": "DIGEST_PINNED",
+        "detail": "Pulled from the Docker Official Image digest; no vendor Cosign key is published for this image."
+      }
+    }
+  ]
 }

@@ -374,7 +374,7 @@ The registry can declare model/runtime policy and the local runtime can enforce 
 
 ### Decision
 
-Add an original provider-neutral `ModelGateway` contract with a deterministic offline adapter and an explicit loopback LiteLLM `1.92.0` adapter. Keep preferred/allowed models, fallback order, stage/task scope, token/cost/latency ceilings, and independent-review requirements in the versioned workbench registry. Use LiteLLM virtual keys only as local enforcement credentials: reconcile a deterministic per-agent/per-run alias, restrict models and spend, retain the raw key only in gitignored local recovery state, block it in `finally`, and provide an interrupted-run cleanup command.
+Add an original provider-neutral `ModelGateway` contract with a deterministic offline adapter and an explicit loopback LiteLLM adapter. The initial runtime used `1.92.0`; ADR-025 supersedes that image pin without changing this gateway boundary. Keep preferred/allowed models, fallback order, stage/task scope, token/cost/latency ceilings, and independent-review requirements in the versioned workbench registry. Use LiteLLM virtual keys only as local enforcement credentials: reconcile a deterministic per-agent/per-run alias, restrict models and spend, retain the raw key only in gitignored local recovery state, block it in `finally`, and provide an interrupted-run cleanup command.
 
 The browser imports sanitized generated status only. A live catalog and validated claim may be published only from a schema/hash-validated local evidence pack whose credential was revoked. No successful live credential/run was available for this decision, so the public label remains `gateway implemented; live provider path not validated`.
 
@@ -430,7 +430,7 @@ Pin GitHub dependency review and CodeQL actions by commit SHA. Treat CodeQL as c
 - Local and CI validation require Docker, full reachable Git history, scanner-image downloads, and current advisory databases.
 - All current high/critical thresholds apply to the complete inspected target, not only newly added findings.
 - Report hashes and source-tree digest provide integrity evidence but are not signed attestations or a SLSA claim.
-- Image signature/provenance verification and long-term immutable evidence retention remain release risks.
+- Vendor signatures are verified where a key is published; locally derived images and long-term immutable evidence retention remain release risks.
 
 ## ADR-018 — Make the public clean-room boundary a contribution rule
 
@@ -506,3 +506,26 @@ State the functional-versus-simulated boundary in the case-study hero, preserve 
 - The first viewport answers what is functional and what is simulated without relying on a visitor opening the demo.
 - Walkthrough progress is shareable but contains only a bounded step number; closing the guide removes its URL state and no workflow approval is persisted.
 - Public visual evidence can be reproduced from the built application and fails validation when checked-in assets materially drift without turning browser antialias noise into a false release failure.
+
+## ADR-025 — Gate every runtime image and patch LiteLLM from a verified upstream
+
+- Status: Accepted
+- Date: 2026-07-17
+- Detailed records: [`docs/release-evidence.md`](release-evidence.md), [`docs/postgres-gosu-reachability.md`](postgres-gosu-reachability.md), and [`docs/adr/local-model-gateway.md`](adr/local-model-gateway.md)
+
+### Context
+
+The original supply-chain gate scanned only the locally built sandbox. The optional Compose stack also executes LiteLLM and PostgreSQL, and their old pins contained fixed HIGH/CRITICAL advisories. LiteLLM signs its images and publishes a non-root variant, but no current stable or pre-release image simultaneously met the required Python, `ddtrace`, and `mcp` floors.
+
+### Decision
+
+Treat the sandbox, LiteLLM, and PostgreSQL as the exact runtime-image inventory. Build or pull each target, resolve and publish its scanned content ID, run Trivy with zero unsuppressed HIGH/CRITICAL findings, and generate a CycloneDX SBOM for each. Verify LiteLLM's signed non-root upstream digest with Cosign and the public key pinned to immutable upstream commit `0112e53046018d726492c814b3644b7d376029d0`.
+
+Derive the local LiteLLM runtime from signed `v1.94.0-dev.3`, which supplies Python `3.13.14-r2` and `ddtrace 4.11.0`, and install only `mcp 1.28.1` from its SHA-256-locked wheel without dependency re-resolution. Remove the temporary installer and restore numeric user `65534`. Use PostgreSQL `17.10-alpine3.24`; permit only its exact-digest `/usr/local/bin/gosu` findings under individual, expiring, reachability-documented exceptions.
+
+### Consequences
+
+- The complete release gate now requires container registries, PyPI for one hash-locked wheel, Sigstore verification, current Trivy databases, and more CI time.
+- The LiteLLM runtime is a local derivative, so the vendor signature applies to its exact upstream base, not to the derived content ID. The Dockerfile, wheel hash, package floors, non-root user, scan, and SBOM bind the derivative.
+- A pre-release LiteLLM base is a temporary compatibility risk. Replace it with the next signed stable non-root digest that meets every package floor.
+- PostgreSQL exceptions fail if the digest/path/CVE stops matching and expire on 2026-08-15; a maintained rebuild is required if the official image is not fixed and reachability can no longer justify the exception.

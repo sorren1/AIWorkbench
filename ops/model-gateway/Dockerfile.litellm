@@ -1,0 +1,23 @@
+FROM ghcr.io/berriai/litellm-non_root:v1.94.0-dev.3@sha256:81137025eadb62943d571f9c431578a4575e2b43ce29e4ba1ecc2cb7d13bf0f8
+
+USER 0
+
+COPY litellm-security-requirements.txt /tmp/litellm-security-requirements.txt
+
+RUN python -m ensurepip --upgrade \
+    && python -m pip install \
+      --disable-pip-version-check \
+      --no-cache-dir \
+      --no-deps \
+      --require-hashes \
+      --requirement /tmp/litellm-security-requirements.txt \
+    && python -c "import importlib.metadata; assert importlib.metadata.version('mcp') == '1.28.1'" \
+    && rm -rf \
+      /tmp/litellm-security-requirements.txt \
+      /app/.venv/bin/pip \
+      /app/.venv/bin/pip3 \
+      /app/.venv/bin/pip3.13 \
+      /app/.venv/lib/python3.13/site-packages/pip \
+      /app/.venv/lib/python3.13/site-packages/pip-*.dist-info
+
+USER 65534

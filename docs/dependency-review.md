@@ -6,7 +6,7 @@ For each dependency change:
 
 1. inspect the direct and transitive lockfile diff, release notes, runtime purpose, and license;
 2. confirm the package is maintained and that a smaller existing dependency cannot meet the need;
-3. run `npm ci` and `npm run check:all` from a clean checkout; the aggregate includes the lockfile vulnerability gate, license policy, SBOM generation, exact sandbox-image scan, and browser/performance checks;
+3. run `npm ci` and `npm run check:all` from a clean checkout; the aggregate includes the lockfile vulnerability gate, license policy, five SBOMs, exact sandbox/LiteLLM/PostgreSQL image scans, LiteLLM signature verification, and browser/performance checks;
 4. verify that browser bundles, network behavior, CSP, and performance measurements did not expand unexpectedly;
 5. keep GitHub Actions pinned to reviewed full commit SHAs and retain the human-readable version comment;
 6. reject newly introduced moderate-or-higher known vulnerabilities through the pull-request dependency-review workflow.

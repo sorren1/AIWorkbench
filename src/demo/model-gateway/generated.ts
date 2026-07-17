@@ -4,12 +4,12 @@ import type { ModelGatewayPublicStatus } from "./status";
 export const modelGatewayStatus = {
   schemaVersion: 1,
   implementation: "LiteLLM",
-  implementationVersion: "1.92.0",
-  imageDigest: "sha256:64d3547e0b131bf4638342e52c12bc46d6f1d9b8498e4b731ff31be5ab316ea9",
+  implementationVersion: "1.94.0-dev.3+mcp.1.28.1",
+  imageDigest: "sha256:81137025eadb62943d571f9c431578a4575e2b43ce29e4ba1ecc2cb7d13bf0f8",
   label: "gateway implemented; live provider path not validated",
   liveValidated: false,
   sourceCommit: null,
   catalog: null,
   disclosure:
-    "The adapter, credential lifecycle, policy enforcement, and fake-gateway tests are implemented. No live provider credential or successful live run was available for this checked-in build.",
+    "The adapter, credential lifecycle, policy enforcement, signed non-root upstream, hash-locked MCP security update, and fake-gateway tests are implemented. No live provider credential or successful live run was available for this checked-in build.",
 } as const satisfies ModelGatewayPublicStatus;

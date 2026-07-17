@@ -12,7 +12,9 @@ The required control is broader than an OpenAI-compatible completion endpoint. A
 
 ## Decision
 
-Use [LiteLLM Proxy](https://docs.litellm.ai/docs/simple_proxy) as an optional loopback-only local gateway. The implementation is pinned to LiteLLM `1.92.0` and the multi-platform image digest `sha256:64d3547e0b131bf4638342e52c12bc46d6f1d9b8498e4b731ff31be5ab316ea9`. A digest-pinned PostgreSQL 17.6 container provides the database required by LiteLLM virtual keys.
+Use [LiteLLM Proxy](https://docs.litellm.ai/docs/simple_proxy) as an optional loopback-only local gateway. The runtime derives from LiteLLM's signed non-root `v1.94.0-dev.3` multi-platform digest `sha256:81137025eadb62943d571f9c431578a4575e2b43ce29e4ba1ecc2cb7d13bf0f8`. The repository applies one hash-locked, dependency-neutral `mcp==1.28.1` wheel because the current upstream image already contains Python `3.13.14-r2` and `ddtrace 4.11.0` but still resolves vulnerable `mcp 1.26.0`. The exact locally built result runs as user `65534`, is Trivy-gated, and receives a CycloneDX SBOM. PostgreSQL `17.10-alpine3.24` at multi-platform digest `sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193` provides the database required by LiteLLM virtual keys.
+
+The release gate verifies the LiteLLM upstream with Cosign and the public key pinned to immutable upstream commit `0112e53046018d726492c814b3644b7d376029d0`. The derivative itself is not described as vendor-signed; its Dockerfile, wheel hash, upstream digest, exact built content ID, SBOM, package floors, and vulnerability scan are the recorded evidence. The pre-release base is a deliberate short-term security tradeoff because no current stable/non-root upstream image meets all required package floors; return to a stable signed tag as soon as one does.
 
 The choice is based on these public, documented interfaces:
 

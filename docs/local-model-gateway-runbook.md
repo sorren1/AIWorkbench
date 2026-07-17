@@ -52,7 +52,7 @@ npm run model-gateway:up
 docker compose -f ops/model-gateway/compose.yaml ps
 ```
 
-The Compose file pins LiteLLM `1.92.0` and PostgreSQL 17.6 by multi-platform digest. Port 4000 binds only to `127.0.0.1`. The database uses an internal-only Docker network. The gateway also joins a provider-egress network because real model calls require outbound access; this profile does **not** claim network isolation.
+The Compose file builds a hash-locked security derivative of LiteLLM's signed non-root `v1.94.0-dev.3` digest and pins PostgreSQL `17.10-alpine3.24` by multi-platform digest. The derivative updates only `mcp` to `1.28.1`, retains user `65534`, and is rebuilt/scanned by the release gate. Port 4000 binds only to `127.0.0.1`. The database uses an internal-only Docker network. The gateway also joins a provider-egress network because real model calls require outbound access; this profile does **not** claim network isolation.
 
 ## 4. Run the opt-in integration check
 

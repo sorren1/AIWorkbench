@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -11,8 +12,10 @@ import {
 import {
   analyzeComposeConfig,
   analyzeLanguageCoverage,
+  analyzeLiteLlmDockerfile,
   analyzeSandboxDockerfile,
 } from "../scripts/supply-chain/containerPolicy";
+import { versionAtLeast } from "../scripts/supply-chain/versionPolicy";
 import {
   publicSupplyChainSummarySchema,
   renderSupplyChainEvidence,
@@ -32,12 +35,27 @@ describe("supply-chain policy", () => {
 
     expect(tooling.gitleaks.image).toMatch(/@sha256:[a-f0-9]{64}$/);
     expect(tooling.trivy.image).toMatch(/@sha256:[a-f0-9]{64}$/);
+    expect(tooling.cosign.image).toMatch(/@sha256:[a-f0-9]{64}$/);
     expect(tooling.codeql.actionSha).toMatch(/^[a-f0-9]{40}$/);
-    expect(suppressions.entries).toEqual([]);
+    expect(suppressions.entries).toHaveLength(15);
+    expect(new Set(suppressions.entries.map((entry) => entry.id)).size).toBe(15);
+    expect(
+      suppressions.entries.every(
+        (entry) =>
+          entry.path.includes(tooling.postgres.image) &&
+          entry.path.endsWith("/usr/local/bin/gosu") &&
+          entry.reviewOn <= entry.expiresOn,
+      ),
+    ).toBe(true);
+    const publicKey = await readFile(resolve(root, tooling.liteLlm.cosignPublicKey));
+    expect(createHash("sha256").update(publicKey).digest("hex")).toBe(
+      tooling.liteLlm.cosignPublicKeySha256,
+    );
     expect(licenses.requireDeclaredLicense).toBe(true);
   });
 
-  it("accepts the constrained Compose profile and rejects unsafe container configuration", () => {
+  it("accepts the constrained Compose profile and rejects unsafe container configuration", async () => {
+    const tooling = toolingSchema.parse(await json("security/tooling.json"));
     const safe = analyzeComposeConfig({
       services: {
         gateway: {
@@ -53,6 +71,20 @@ describe("supply-chain policy", () => {
       },
     });
     expect(safe).toEqual([]);
+    expect(
+      analyzeComposeConfig(
+        {
+          services: {
+            gateway: { image: tooling.liteLlm.image, build: { dockerfile: "Dockerfile.litellm" } },
+            database: { image: tooling.postgres.image },
+          },
+        },
+        {
+          expectedImages: { gateway: tooling.liteLlm.image, database: tooling.postgres.image },
+          locallyBuiltServices: ["gateway"],
+        },
+      ),
+    ).toEqual([]);
 
     const unsafe = analyzeComposeConfig({
       services: {
@@ -90,6 +122,14 @@ describe("supply-chain policy", () => {
   it("validates the sandbox Dockerfile against its pinned image policy", async () => {
     const tooling = toolingSchema.parse(await json("security/tooling.json"));
     await expect(analyzeSandboxDockerfile(root, tooling)).resolves.toEqual([]);
+    await expect(analyzeLiteLlmDockerfile(root, tooling)).resolves.toEqual([]);
+  });
+
+  it("enforces the LiteLLM security package version floors", () => {
+    expect(versionAtLeast("3.13.14-r2", "3.13.14-r2")).toBe(true);
+    expect(versionAtLeast("3.13.14-r1", "3.13.14-r2")).toBe(false);
+    expect(versionAtLeast("4.11.0", "4.8.2")).toBe(true);
+    expect(versionAtLeast("1.27.2", "1.28.1")).toBe(false);
   });
 });
 
@@ -100,11 +140,25 @@ describe("public supply-chain evidence", () => {
     );
     const html = await renderSupplyChainEvidence(root);
 
-    expect(summary.artifacts.filter((artifact) => artifact.kind === "SBOM")).toHaveLength(3);
+    expect(summary.artifacts.filter((artifact) => artifact.kind === "SBOM")).toHaveLength(5);
+    expect(summary.runtimeImages.map((image) => image.role).sort()).toEqual([
+      "litellm",
+      "postgresql",
+      "sandbox",
+    ]);
+    expect(
+      summary.runtimeImages.every((image) =>
+        summary.artifacts.some(
+          (artifact) => artifact.kind === "SBOM" && artifact.name === image.sbomArtifact,
+        ),
+      ),
+    ).toBe(true);
     expect(summary.controls.find((control) => control.id === "codeql")?.status).toBe(
       "CONFIGURED_NOT_RUN",
     );
     expect(html).toContain("Executed");
+    expect(html).toContain("Scanned digest");
+    for (const image of summary.runtimeImages) expect(html).toContain(image.scannedDigest);
     expect(html).toContain("Configured · not validated");
     expect(html).not.toContain('site-status--functional">Configured');
   });
