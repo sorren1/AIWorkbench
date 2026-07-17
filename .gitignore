@@ -53,3 +53,7 @@ venv/
 # Tooling artifacts
 .eslintcache
 .stylelintcache
+
+# Private local review notes (retain the tracked directory notice)
+private/*
+!private/README.md
