@@ -71,12 +71,17 @@ npm run model-gateway:generate
 npm run model-gateway:check
 npm run test:model-gateway:live
 npm run security:check
+npm run security:supply-chain
+npm run security:supply-chain:record
+npm run sbom:generate
 npm run demo:approval:start -- --scenario approval-required
 npm run demo:approve -- --request <request-id> --as synthetic-code-reviewer --reason "..."
 npm run demo:resume -- --run <run-id>
 ```
 
 `npm run check:all` must be the complete local CI-equivalent aggregate. `npm run check` is the deterministic prerequisite gate that excludes browser and Lighthouse runs. The lockfile is authoritative; use `npm ci` in CI and clean verification.
+
+The supply-chain gate requires full reachable Git history, Docker with Linux containers, and network access to the pinned scanner images and current advisory databases. Detailed SARIF, SBOM, license, and scanner reports belong only in gitignored `.security-reports/` or restricted CI artifacts. Missing scanners, databases, Docker, or history are blockers, never successful evidence. Refresh the small public summary only with `npm run security:supply-chain:record` after the complete gate succeeds.
 
 The Playwright commands run maintained Chromium, Firefox, and WebKit coverage. `npm run test:a11y` applies axe to the public routes and principal demo surfaces; `npm run test:e2e` also covers keyboard interaction, focus management, responsive layouts, security headers, and controlled screenshots. Install the pinned engines once per environment with `npx playwright install chromium firefox webkit`. `npm run check:all` is the complete release gate; `npm run check` is the non-Lighthouse, non-browser prerequisite gate.
 

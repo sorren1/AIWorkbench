@@ -63,7 +63,16 @@ npx playwright install chromium firefox webkit
 npm run check:all
 ```
 
-`npm run check:all` includes strict type checking, linting, formatting, coverage, evidence validation, the production build, internal-link and credential checks, dependency audit, Chromium/Firefox/WebKit tests, axe, controlled screenshots, bundle budgets, and desktop/mobile Lighthouse assertions. See [the quality system](docs/quality-system.md), [performance and static hosting](docs/performance-and-static-hosting.md), and [docs/contributor-commands.md](docs/contributor-commands.md).
+`npm run check:all` includes strict type checking, linting, formatting, coverage, evidence validation, the production build, internal-link and credential checks, reproducible secret/SAST/dependency/container/license/SBOM evidence, Chromium/Firefox/WebKit tests, axe, controlled screenshots, bundle budgets, and desktop/mobile Lighthouse assertions. See [the quality system](docs/quality-system.md), [release security evidence](docs/release-evidence.md), [performance and static hosting](docs/performance-and-static-hosting.md), and [docs/contributor-commands.md](docs/contributor-commands.md).
+
+Generate the detailed gitignored security reports, or refresh the sanitized public summary after a successful run, with:
+
+```bash
+npm run security:supply-chain
+npm run security:supply-chain:record
+```
+
+The command requires Docker and reachable scanner/advisory sources. It fails rather than claiming success when those dependencies are unavailable. Security reporting and assurance boundaries are documented in [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 Regenerate the versioned capability cards and sanitized local MCP evidence with:
 

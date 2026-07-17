@@ -2,7 +2,7 @@
 
 ## Measured budgets
 
-`quality/performance-budgets.json` is the policy and `quality/measurements/bundle.json` is the deterministic measurement of the current Vite production output using gzip level 9. `npm run performance:budgets` fails if the output exceeds policy or differs from the recorded measurement.
+`quality/performance-budgets.json` is the policy and `quality/measurements/bundle.json` is the deterministic measurement of the current Vite production output using gzip level 9. Before measuring case-study HTML, the script replaces only fixed-width generated timestamps, run IDs, and cryptographic identifiers with same-length placeholders. This keeps a fresh evidence run from changing compression noise while preserving the measured structure and byte lengths. `npm run performance:budgets` fails if the normalized output exceeds policy or differs from the recorded measurement.
 
 | Production asset boundary          |        Budget |
 | ---------------------------------- | ------------: |
@@ -15,7 +15,7 @@
 
 The case study, article, and 404 remain authored static HTML. React is emitted only for `/demo/`, so opening the case study does not download the workbench bundle. No syntax-highlighting dependency exists; code excerpts use static HTML and CSS, leaving no heavy highlighting code to defer.
 
-The current recorded output is 11,037 bytes gzip for case-study HTML, zero case-study executable scripts, 110,306 bytes gzip for the initial demo entry, 125,303 bytes gzip across all JavaScript chunks, and 14,271 bytes gzip across CSS. Architecture, Settings, Control Plane, and Run Trace are separate lazy chunks.
+The current recorded output is 11,489 bytes gzip for normalized case-study HTML, zero case-study executable scripts, 110,306 bytes gzip for the initial demo entry, 125,288 bytes gzip across all JavaScript chunks, and 14,400 bytes gzip across CSS. Architecture, Settings, Control Plane, and Run Trace are separate lazy chunks.
 
 `npm run performance:audit` runs local-only Lighthouse CI against production output in desktop and mobile profiles. The case-study gate requires at least 90 Performance and 95 Accessibility, Best Practices, and SEO. The deliberately richer demo requires 85 Performance, 95 Accessibility and Best Practices, and 90 SEO. Reports remain under gitignored `.lighthouseci/`; CI retains them as short-lived build artifacts and does not upload them to a hosted Lighthouse service.
 

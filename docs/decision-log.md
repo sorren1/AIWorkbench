@@ -408,3 +408,26 @@ Use one `check:all` release command and SHA-pinned GitHub Actions on pull reques
 - CI is slower because cross-browser and Lighthouse checks are intentional release gates.
 - Visual captures require human comparison; they avoid platform-font pixel brittleness.
 - A static host must honor the emitted headers or reproduce them at its edge before publication.
+
+## ADR-017 — Generate proportionate supply-chain evidence from one fail-closed gate
+
+- Status: Accepted
+- Date: 2026-07-17
+- Detailed records: [`docs/release-evidence.md`](release-evidence.md), [`SECURITY.md`](../SECURITY.md), and [`THREAT_MODEL.md`](../THREAT_MODEL.md)
+
+### Context
+
+The repository already enforced source quality, credential-pattern checks, npm advisories, and pull-request dependency review, but it did not bind secret-history scanning, SARIF, SBOMs, image findings, licenses, scanner versions, and exceptions into one reproducible release record. The general-purpose Node sandbox image also retained unused npm packages with high-severity advisories.
+
+### Decision
+
+Add a typed, fail-closed supply-chain orchestrator using immutable Gitleaks and Trivy images, the locked CycloneDX npm generator, ESLint, npm audit, and repository-specific container/language policy. Build a minimal sandbox runtime from a digest-pinned Node base, remove npm because fixed checks invoke Node directly, scan the exact built image ID, and generate CycloneDX records for production npm dependencies, the complete npm graph, and the image. Keep detailed reports gitignored/CI-retained and publish only a sanitized source-tree/result digest summary.
+
+Pin GitHub dependency review and CodeQL actions by commit SHA. Treat CodeQL as configured but unvalidated until hosted evidence exists. Centralize suppressions with exact scanner/rule/path matching, reviewer, review date, and expiry; missing tools, databases, history, Docker, or scan output fail rather than becoming a pass.
+
+### Consequences
+
+- Local and CI validation require Docker, full reachable Git history, scanner-image downloads, and current advisory databases.
+- All current high/critical thresholds apply to the complete inspected target, not only newly added findings.
+- Report hashes and source-tree digest provide integrity evidence but are not signed attestations or a SLSA claim.
+- Image signature/provenance verification and long-term immutable evidence retention remain release risks.

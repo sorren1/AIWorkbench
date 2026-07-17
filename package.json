@@ -26,6 +26,9 @@
     "security:output": "tsx scripts/check-secret-leaks.ts",
     "security:repository": "tsx scripts/check-repository-secrets.ts",
     "security:check": "npm run security:repository && npm run security:output",
+    "security:supply-chain": "tsx scripts/supply-chain/run.ts",
+    "security:supply-chain:record": "tsx scripts/supply-chain/run.ts --record",
+    "sbom:generate": "npm run security:supply-chain",
     "dependency:audit": "npm audit --audit-level=high",
     "links:check": "tsx scripts/check-links.ts",
     "performance:budgets": "tsx scripts/check-performance-budgets.ts",
@@ -51,7 +54,7 @@
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/e2e/accessibility.spec.ts",
     "test:visual": "playwright test --project=visual",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm run registry:check && npm run mcp:evidence:check && npm run sandbox:evidence:validate && npm run trace:check && npm run model-gateway:check && npm run model-gateway:evidence:validate && npm run test:coverage && npm run build && npm run links:check && npm run performance:budgets && npm run security:check && npm run dependency:audit",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run registry:check && npm run mcp:evidence:check && npm run sandbox:evidence:validate && npm run trace:check && npm run model-gateway:check && npm run model-gateway:evidence:validate && npm run test:coverage && npm run build && npm run links:check && npm run performance:budgets && npm run security:check && npm run security:supply-chain",
     "check:all": "npm run check && npm run test:e2e && npm run performance:audit"
   },
   "dependencies": {
@@ -69,6 +72,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "4.12.1",
+    "@cyclonedx/cyclonedx-npm": "6.0.0",
     "@eslint/js": "10.0.1",
     "@lhci/cli": "0.15.1",
     "@playwright/test": "1.61.1",

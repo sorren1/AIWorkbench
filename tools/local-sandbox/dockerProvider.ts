@@ -1,3 +1,5 @@
+import { resolve } from "node:path";
+
 import { sha256Bytes } from "./security";
 import { normalizeCapturedOutput, runProcess } from "./process";
 import type {
@@ -8,7 +10,8 @@ import type {
   LocalDockerAvailability,
 } from "./contracts";
 
-const DEFAULT_IMAGE = "node:22.18.0-alpine";
+const DEFAULT_IMAGE = "ai-delivery-workbench-sandbox:node-22.23.1";
+const SANDBOX_BUILD_CONTEXT = resolve(import.meta.dirname, "../../ops/sandbox");
 const CONTAINER_USER = "65532:65532";
 
 function safeName(value: string): string {
@@ -43,7 +46,13 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
     const [client = null, server = null] = normalizeCapturedOutput(version.stdout).split("|");
     const image = await runProcess({
       executable: "docker",
-      args: ["image", "inspect", this.image, "--format", "{{index .RepoDigests 0}}"],
+      args: [
+        "image",
+        "inspect",
+        this.image,
+        "--format",
+        "{{if .RepoDigests}}{{index .RepoDigests 0}}{{else}}{{.Id}}{{end}}",
+      ],
       timeoutMs: 10_000,
     });
     const imageDigest = image.exitCode === 0 ? normalizeCapturedOutput(image.stdout) : null;
@@ -56,7 +65,7 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
       imageDigest,
       detail:
         imageDigest === null
-          ? `Docker Engine is available, but ${this.image} is not cached.`
+          ? `Docker Engine is available, but ${this.image} has not been built.`
           : "Docker Engine and the exact sandbox image are available.",
     };
   }
@@ -64,16 +73,16 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
   async prepare(): Promise<LocalDockerAvailability> {
     const current = await this.inspect();
     if (current.available || current.dockerClientVersion === null) return current;
-    const pull = await runProcess({
+    const build = await runProcess({
       executable: "docker",
-      args: ["pull", this.image],
+      args: ["build", "--tag", this.image, SANDBOX_BUILD_CONTEXT],
       timeoutMs: 180_000,
       maxOutputBytes: 2 * 1024 * 1024,
     });
-    if (pull.exitCode !== 0) {
+    if (build.exitCode !== 0) {
       return {
         ...current,
-        detail: `Docker image preparation failed: ${normalizeCapturedOutput(pull.stderr || pull.stdout)}`,
+        detail: `Docker image build failed: ${normalizeCapturedOutput(build.stderr || build.stdout)}`,
       };
     }
     return this.inspect();

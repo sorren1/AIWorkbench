@@ -21,6 +21,7 @@ import {
 } from "./telemetry";
 
 const hashSchema = z.string().regex(/^[a-f0-9]{64}$/);
+const localImageDigestSchema = z.string().regex(/^(?:[a-z0-9._/-]+@)?sha256:[a-f0-9]{64}$/);
 const commandReceiptSchema = z.object({
   id: z.enum(["tool-versions", "pre-test", "build", "test"]),
   argv: z.array(z.string()).min(1),
@@ -39,7 +40,7 @@ const commandReceiptSchema = z.object({
 const localDockerExecutionSchema = z.object({
   provider: z.literal("LOCAL_DOCKER"),
   image: z.string().min(1),
-  imageDigest: z.string().regex(/^node@sha256:[a-f0-9]{64}$/),
+  imageDigest: localImageDigestSchema,
   networkMode: z.literal("none"),
   user: z.string().min(1),
   readOnlyRootFilesystem: z.literal(true),
@@ -170,7 +171,7 @@ const legacySandboxEvidenceSchema = z.object({
     dockerClientVersion: z.string().min(1),
     dockerServerVersion: z.string().min(1),
     image: z.string().min(1),
-    imageDigest: z.string().regex(/^node@sha256:[a-f0-9]{64}$/),
+    imageDigest: localImageDigestSchema,
     containerNodeVersion: z.string().min(1),
     containerNpmVersion: z.string().min(1),
     hostGitVersion: z.string().min(1),
@@ -188,7 +189,7 @@ const localDockerToolsSchema = z.object({
   dockerClientVersion: z.string().min(1),
   dockerServerVersion: z.string().min(1),
   image: z.string().min(1),
-  imageDigest: z.string().regex(/^node@sha256:[a-f0-9]{64}$/),
+  imageDigest: localImageDigestSchema,
   containerNodeVersion: z.string().min(1),
   containerNpmVersion: z.string().min(1),
   hostGitVersion: z.string().min(1),

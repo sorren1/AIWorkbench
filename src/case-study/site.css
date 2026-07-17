@@ -712,6 +712,53 @@ html {
   font: inherit;
 }
 
+.site-evidence-summary__facts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+}
+
+.site-evidence-summary__facts > div {
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-4);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  background: var(--surface-raised);
+}
+
+.site-evidence-summary__facts span,
+.site-evidence-summary__binding {
+  color: var(--text-secondary);
+}
+
+.site-evidence-summary__facts span {
+  font-size: var(--text-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.site-evidence-summary__facts strong {
+  font-size: var(--text-lg);
+}
+
+.site-evidence-summary__binding code {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 48rem) {
+  .site-evidence-summary__facts {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 28rem) {
+  .site-evidence-summary__facts {
+    grid-template-columns: 1fr;
+  }
+}
+
 .site-source-link {
   font-size: var(--text-sm);
   text-underline-offset: 3px;

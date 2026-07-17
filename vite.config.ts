@@ -41,7 +41,7 @@ export default defineConfig({
         "src/demo/control-plane/registry/{canonical,lifecycle,validation}.ts",
         "src/demo/exports/*.ts",
         "src/demo/utils/*.ts",
-        "src/site/{metadata,recordedSandboxEvidence,securityHeaders}.ts",
+        "src/site/{metadata,recordedSandboxEvidence,securityHeaders,supplyChainEvidence}.ts",
       ],
       thresholds: {
         statements: 75,

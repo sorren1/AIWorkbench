@@ -64,9 +64,9 @@ class FakeE2BFactory implements E2BSandboxFactory {
           if (command.includes("fetch('https://example.com'")) {
             return { exitCode: this.networkProbeExitCode, stdout: "", stderr: "" };
           }
-          const preTest = command.includes("'npm' 'test' '--silent'") && this.nextId === 2;
-          const stdout = command.includes("node --version")
-            ? "v22.18.0\n10.9.3"
+          const preTest = command.includes("'node' '--test'") && this.nextId === 2;
+          const stdout = command.includes("'node' '--version'")
+            ? "v22.23.1"
             : preTest
               ? "2 synthetic tests failed"
               : "synthetic command passed";

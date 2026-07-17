@@ -2,7 +2,7 @@
 
 ## Validation status
 
-- **Local Docker:** implemented and backed by the checked-in successful and failed real-run evidence.
+- **Local Docker:** implemented and backed by checked-in successful and failed real-run evidence. The release gate builds the minimal runtime image and scans its exact image ID before recording supply-chain status.
 - **E2B:** **implemented but not live-validated** in this revision because `E2B_API_KEY` was not available. Fake contract tests exercise the SDK boundary, upload manifest, normalized evidence, network-verification gate, and cleanup behavior. They are not cloud-run evidence.
 
 The optional provider uses the official `e2b` JavaScript SDK 2.34.0 and reads only the SDK's documented `E2B_API_KEY` environment variable. The key is never passed into the sandbox, written to evidence, or committed.
@@ -66,9 +66,9 @@ Every fixed command receives a fresh ephemeral container with:
 - all Linux capabilities dropped and `no-new-privileges` enabled;
 - 0.5 CPU, 256 MiB memory and swap, 64 processes, a 16 MiB temporary filesystem, and a 30-second host-side timeout;
 - no Docker socket, project root, credentials, or secrets; and
-- an exact Node 22.18.0 Alpine tag resolved to the locally inspected repository digest for execution and evidence.
+- a repository-owned minimal runtime built from the digest-pinned Node 22.23.1 Alpine 3.24 base, with unused npm tooling removed and a numeric non-root default user.
 
-The pre-patch tests must fail without timing out. After the patch, build and test receipts are recorded separately. A failed or timed-out post-patch check makes the run fail and the CLI exit non-zero.
+The fixed checks invoke the Node runtime directly; npm is intentionally absent from the sandbox image. The pre-patch tests must fail without timing out. After the patch, build and test receipts are recorded separately. A failed or timed-out post-patch check makes the run fail and the CLI exit non-zero.
 
 ### Optional E2B boundary
 
@@ -103,7 +103,7 @@ This slice is intentionally narrower than a production untrusted-code sandbox.
 
 - Docker Desktop and its Linux VM/kernel remain trusted. A container escape or daemon compromise is outside this prototype's assurance boundary.
 - E2B service availability, billing, account policy, template contents, SDK behavior, and provider isolation remain external trust dependencies. A successful future live test would validate only this fixed synthetic slice at that point in time.
-- The exact image tag is resolved to a digest at run time and recorded, but this phase does not add image signature verification or a container vulnerability gate. Supply-chain scanning remains a separate release control.
+- The release gate builds the declared Dockerfile, resolves the exact image ID, fails on unsuppressed Trivy high/critical findings, and generates a CycloneDX image SBOM. It does not verify an image signature or upstream build provenance.
 - Linux resource controls vary by Docker host. Evidence records the requested limits, not a claim that every kernel enforced them identically.
 - Host-side path validation cannot eliminate every time-of-check/time-of-use race against a malicious local account with write access. The owned fixture, temporary directory permissions, exact replacement, post-write checks, and disposable scope reduce the risk for this local demonstration.
 - The host controller applies the patch because the validation container's repository mount is deliberately read-only. Production systems handling untrusted generated patches would need a more isolated patch-application worker and stronger filesystem primitives.

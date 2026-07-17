@@ -578,8 +578,8 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
         uploads: sandboxUploads(repositoryBefore, artifacts),
         limits: DEFAULT_LIMITS,
         commands: [
-          { id: "tool-versions", argv: ["sh", "-c", "node --version && npm --version"] },
-          { id: "pre-test", argv: ["npm", "test", "--silent"] },
+          { id: "tool-versions", argv: ["node", "--version"] },
+          { id: "pre-test", argv: ["node", "--test"] },
         ],
       },
     });
@@ -652,8 +652,8 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
         uploads: sandboxUploads(repositoryAfter, artifacts),
         limits: DEFAULT_LIMITS,
         commands: [
-          { id: "build", argv: ["npm", "run", "build", "--silent"] },
-          { id: "test", argv: ["npm", "test", "--silent"] },
+          { id: "build", argv: ["node", "--check", "src/report.js"] },
+          { id: "test", argv: ["node", "--test"] },
         ],
       },
     });
@@ -786,8 +786,8 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
   }
   const budget = tracker.snapshot(budgetStopReason);
   const versions = prePatchExecution.commands.find((command) => command.id === "tool-versions");
-  const [containerNodeVersion = "unavailable", containerNpmVersion = "unavailable"] =
-    versions?.stdout.split("\n") ?? [];
+  const containerNodeVersion = versions?.stdout.split("\n")[0] ?? "unavailable";
+  const containerNpmVersion = "not-installed";
   const replacement =
     scenario === "successful-validation" ? SUCCESSFUL_REPLACEMENT : FAILED_REPLACEMENT;
   const evidenceSpan = telemetry.startSpan("evidence.finalize", stageSpan, {

@@ -17,7 +17,7 @@ Confirm Docker before the run:
 docker version
 ```
 
-Both client and server sections must be present. The first sandbox run pulls the exact `node:22.18.0-alpine` tag if it is not already cached; execution then uses its resolved digest with networking disabled.
+Both client and server sections must be present. The first sandbox run builds `ops/sandbox/Dockerfile` from its digest-pinned Node 22.23.1 Alpine 3.24 base. The resulting minimal local image contains Node but not npm, runs as numeric non-root by default, and executes with networking disabled.
 
 ## Successful vertical slice
 

@@ -30,7 +30,7 @@ import {
 } from "../tools/local-sandbox/security";
 
 const projectRoot = resolve(import.meta.dirname, "..");
-const imageDigest = `node@sha256:${"a".repeat(64)}`;
+const imageDigest = `sha256:${"a".repeat(64)}`;
 const temporaryPaths: string[] = [];
 
 class FixtureSandboxProvider implements SandboxProvider {
@@ -47,7 +47,7 @@ class FixtureSandboxProvider implements SandboxProvider {
       available: true,
       dockerClientVersion: "29.5.3-test",
       dockerServerVersion: "29.5.3-test",
-      image: "node:22.18.0-alpine",
+      image: "ai-delivery-workbench-sandbox:node-22.23.1",
       imageDigest,
       detail: "Synthetic provider receipt for unit testing.",
     });
@@ -69,7 +69,7 @@ class FixtureSandboxProvider implements SandboxProvider {
               : 0;
       const stdout =
         command.id === "tool-versions"
-          ? "v22.18.0\n10.9.3"
+          ? "v22.23.1"
           : command.id === "pre-test"
             ? "2 tests failed"
             : exitCode === 0
@@ -93,7 +93,7 @@ class FixtureSandboxProvider implements SandboxProvider {
     });
     return Promise.resolve({
       provider: "LOCAL_DOCKER",
-      image: "node:22.18.0-alpine",
+      image: "ai-delivery-workbench-sandbox:node-22.23.1",
       imageDigest,
       networkMode: "none",
       user: "65532:65532",

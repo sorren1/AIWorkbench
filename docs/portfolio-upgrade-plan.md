@@ -351,7 +351,7 @@ Suggested commit: `feat: add governed run evidence and traceability`
 
 ### Phase 7 — Quality gates, CI, security, and supply-chain evidence
 
-Status: The release-grade test, CI, browser, accessibility, static-header, dependency-review, secret-safety, and measured performance gates are complete in `test: add release-grade quality gates`. Normalized SAST/SBOM evidence and conditional container-scan evidence remain planned work; this phase is not marked complete until those distinct supply-chain artifacts exist.
+Status: Complete across `test: add release-grade quality gates` and `security: add supply-chain evidence and SBOM`. The repository now produces normalized SARIF, three validated CycloneDX SBOMs, scanner/version metadata, license inventory, suppression evidence, and a sanitized source-linked summary. GitHub CodeQL is configured but remains explicitly `configured · not validated` until a successful hosted run is observed.
 
 Scope: make the repository safe, predictable, and evidentiary for contributors.
 
@@ -360,7 +360,7 @@ Acceptance criteria:
 - CI runs install, format/lint, typecheck, unit, accessibility, end-to-end smoke, build, and dependency/security checks using the lockfile.
 - `npm run check` reproduces the required local checks.
 - Secret scanning, SAST, dependency scanning/review, and CycloneDX JSON SBOM generation produce retained, revision-linked evidence with pinned tool versions.
-- Container scanning is conditional on a produced image; with no initial-release image, the evidence is explicitly not applicable rather than passed or skipped without explanation.
+- The local sandbox now has a repository-owned minimal runtime image. The release gate builds it from a digest-pinned base, scans its exact image ID, and generates an image SBOM; an unavailable Docker/scanner dependency fails rather than becoming a pass.
 - Failure, threshold, exception, unavailable, and not-applicable states remain distinct in normalized evidence and in the UI.
 - Tests cover data generators, reducer transitions, routing, filters, overlays, registry/policy rules, approval journal, context digests, budgets, trace export, and the critical governed workflow.
 - No runtime third-party origins are required; production CSP can use a restrictive static policy.
@@ -368,7 +368,7 @@ Acceptance criteria:
 - Generated output and caches are ignored; source and public assets are intentional.
 - README commands are verified from a clean checkout-equivalent install.
 
-Suggested commit: `ci: enforce quality and supply-chain evidence`
+Implemented commits: `test: add release-grade quality gates`; `security: add supply-chain evidence and SBOM`.
 
 ### Phase 8 — Portfolio polish and final release
 

@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "allowedExpressions": [
+    "(Apache-2.0 AND BSD-3-Clause)",
+    "(BSD-2-Clause OR MIT OR Apache-2.0)",
+    "(MIT OR WTFPL)",
+    "0BSD",
+    "Apache-2.0",
+    "BlueOak-1.0.0",
+    "BSD",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "CC0-1.0",
+    "CC-BY-3.0",
+    "CC-BY-4.0",
+    "ISC",
+    "MIT",
+    "MIT-0",
+    "MPL-2.0"
+  ],
+  "deniedExpressions": ["AGPL-1.0", "AGPL-3.0", "SSPL-1.0"],
+  "requireDeclaredLicense": true
+}

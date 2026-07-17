@@ -1,0 +1,162 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-07-17T11:57:47.222Z",
+  "source": {
+    "baseCommit": "c7c3c39474dd3375cf005d653e181d1780a01076",
+    "revisionKind": "COMMIT",
+    "treeDigest": "0896f94d3d2babb8f62e8e9d9d33faa65e88703e7dcc1d05003e816ceb822624"
+  },
+  "controls": [
+    {
+      "id": "secret-scan",
+      "label": "Tracked files and Git history secret scan",
+      "status": "PASSED",
+      "scanner": "Gitleaks",
+      "version": "8.30.1",
+      "target": "289 source files plus reachable Git history",
+      "findingCount": 0,
+      "detail": "Redacted SARIF reports were generated for history and the tracked worktree snapshot."
+    },
+    {
+      "id": "static-analysis",
+      "label": "TypeScript, JavaScript, and container configuration static analysis",
+      "status": "PASSED",
+      "scanner": "ESLint + repository container policy",
+      "version": "10.7.0 / 1.0.0",
+      "target": "TypeScript/JavaScript sources, Compose configuration, and sandbox Dockerfile",
+      "findingCount": 0,
+      "detail": "Language coverage fails closed if unscanned Python, shell, PowerShell, or Dockerfile sources appear."
+    },
+    {
+      "id": "dependency-scan",
+      "label": "Locked npm dependency vulnerability scan",
+      "status": "PASSED",
+      "scanner": "npm audit",
+      "version": "npm/11.12.0",
+      "target": "package-lock.json",
+      "findingCount": 0,
+      "detail": "The release gate fails all unsuppressed high and critical findings."
+    },
+    {
+      "id": "container-scan",
+      "label": "Sandbox runtime container vulnerability scan",
+      "status": "PASSED",
+      "scanner": "Trivy",
+      "version": "0.70.0",
+      "target": "sha256:adae508da516a8ea332e1b2ed1177ae1b35960a7225d3db1c233b09a9408a8fa",
+      "findingCount": 0,
+      "detail": "The exact locally built image ID was scanned for high and critical findings."
+    },
+    {
+      "id": "sbom",
+      "label": "CycloneDX software bills of materials",
+      "status": "PASSED",
+      "scanner": "CycloneDX npm + Trivy",
+      "version": "6.0.0 / 0.70.0",
+      "target": "Locked npm production graph and sandbox runtime image",
+      "findingCount": 0,
+      "detail": "Validated CycloneDX JSON artifacts were generated and retained outside the repository."
+    },
+    {
+      "id": "license-policy",
+      "label": "Dependency license inventory and policy",
+      "status": "PASSED",
+      "scanner": "CycloneDX inventory + repository policy",
+      "version": "1.0.0",
+      "target": "605 npm components / 16 license expressions",
+      "findingCount": 0,
+      "detail": "Every inventoried npm component declared an allowed license expression."
+    },
+    {
+      "id": "codeql",
+      "label": "GitHub CodeQL JavaScript/TypeScript analysis",
+      "status": "CONFIGURED_NOT_RUN",
+      "scanner": "GitHub CodeQL",
+      "version": "v4 @ eec0bff2f6c1",
+      "target": "JavaScript/TypeScript",
+      "findingCount": null,
+      "detail": "The hosted workflow is configured, but no successful GitHub run was available to this local validation."
+    },
+    {
+      "id": "python-shell",
+      "label": "Python and shell source analysis",
+      "status": "NOT_APPLICABLE",
+      "scanner": "Language coverage policy",
+      "version": "1.0.0",
+      "target": "Tracked source inventory",
+      "findingCount": null,
+      "detail": "No tracked Python, shell, or PowerShell source files are present; adding one fails the gate until a scanner is configured."
+    }
+  ],
+  "artifacts": [
+    {
+      "kind": "SARIF",
+      "name": "gitleaks-history.sarif",
+      "sha256": "b7e0ac0f67d6781359a0d92cfbc5191f57b2574eeb1cc0249a4571c8685ac5f1"
+    },
+    {
+      "kind": "SARIF",
+      "name": "gitleaks-worktree.sarif",
+      "sha256": "b7e0ac0f67d6781359a0d92cfbc5191f57b2574eeb1cc0249a4571c8685ac5f1"
+    },
+    {
+      "kind": "SARIF",
+      "name": "eslint.sarif",
+      "sha256": "516a1579034d8f7b240c26059dc7dd7f316049dcae35d447afb22d8981bb2dac"
+    },
+    {
+      "kind": "SARIF",
+      "name": "container-policy.sarif",
+      "sha256": "d8389fdef92f3038d67b7b18efbd39b25cf1e34762e94e5856866dcbfd181a18"
+    },
+    {
+      "kind": "SARIF",
+      "name": "license-policy.sarif",
+      "sha256": "e90f55b22bf63eb6f83b223c465b9f4d3fab376dd07ba3baf7ed3040fc421b2f"
+    },
+    {
+      "kind": "SARIF",
+      "name": "sandbox-image.sarif",
+      "sha256": "d04e4980a11aec5215d1c1176f8a5c710b957af1f14c2567e03f1b1246de586d"
+    },
+    {
+      "kind": "SBOM",
+      "name": "npm-production.cdx.json",
+      "sha256": "5e5a645bd9355ae14b6ea3f2f4668f80c269c13c6f59dd2b6d2d98f5b5a53c82"
+    },
+    {
+      "kind": "SBOM",
+      "name": "npm-all.cdx.json",
+      "sha256": "3382cbcbac42f3e8214ef2335d81d3519184a432fcb99a5091d0dadb89864a97"
+    },
+    {
+      "kind": "SBOM",
+      "name": "sandbox-image.cdx.json",
+      "sha256": "1114b35a1722f11c8f2b394c673a6b51ca072c3d58ad634eb8377f5a7d86081f"
+    },
+    {
+      "kind": "INVENTORY",
+      "name": "license-inventory.json",
+      "sha256": "b1e4cec3756002f76f1768db6368f69058d451e81c077c4ae13bca6766b6d245"
+    },
+    {
+      "kind": "INVENTORY",
+      "name": "scanner-metadata.json",
+      "sha256": "ca931b69867f09ae1aa8248b458aeda007a53eebec14ee32b78a771f3853d7ce"
+    },
+    {
+      "kind": "INVENTORY",
+      "name": "suppression-report.json",
+      "sha256": "02379c286d795e280811da828f22d4a81cef0a1b1f7a9685f970f79eb5e7e23e"
+    },
+    {
+      "kind": "SUMMARY",
+      "name": "npm-audit.json",
+      "sha256": "6cfa9decd5294886e816637b9b9a6b2cc98159c9a3412f787f501defa6b35637"
+    }
+  ],
+  "suppressions": {
+    "active": 0,
+    "expired": 0
+  }
+}

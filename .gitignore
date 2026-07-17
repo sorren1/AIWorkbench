@@ -58,6 +58,7 @@ venv/
 playwright-report/
 test-results/
 .lighthouseci/
+.security-reports/
 .workbench/
 
 # Private local review notes (retain the tracked directory notice)

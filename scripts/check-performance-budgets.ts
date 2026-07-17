@@ -15,7 +15,7 @@ type Budgets = {
 type Measurements = Omit<Budgets, "schemaVersion">;
 type Report = {
   readonly schemaVersion: 1;
-  readonly method: "gzip-level-9-over-vite-production-output";
+  readonly method: "gzip-level-9-over-normalized-vite-production-output";
   readonly measurements: Measurements;
   readonly budgets: Measurements;
 };
@@ -36,6 +36,13 @@ async function files(path: string): Promise<readonly string[]> {
 
 function gzipBytes(contents: Buffer | string): number {
   return gzipSync(contents, { level: 9 }).byteLength;
+}
+
+function normalizeVolatileEvidence(contents: string): string {
+  return contents
+    .replaceAll(/\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z\b/g, "0000-00-00T00:00:00.000Z")
+    .replaceAll(/\bsandbox-\d{8}t\d{6}-[a-f0-9]{8}\b/g, "sandbox-00000000t000000-00000000")
+    .replaceAll(/\b[a-f0-9]{12,64}\b/g, (value) => "0".repeat(value.length));
 }
 
 function assetPath(htmlPath: string, reference: string): string {
@@ -69,7 +76,7 @@ const resourceReferences = [caseStudyHtml, demoHtml].flatMap((html) =>
   ),
 );
 const measurements: Measurements = {
-  caseStudyHtmlGzipBytes: gzipBytes(caseStudyHtml),
+  caseStudyHtmlGzipBytes: gzipBytes(normalizeVolatileEvidence(caseStudyHtml)),
   caseStudyExecutableScriptCount: [...caseStudyHtml.matchAll(/<script\b(?=[^>]*\bsrc=)[^>]*>/g)]
     .length,
   demoEntryJavaScriptGzipBytes,
@@ -111,7 +118,7 @@ if (failures.length > 0) {
 }
 const report: Report = {
   schemaVersion: 1,
-  method: "gzip-level-9-over-vite-production-output",
+  method: "gzip-level-9-over-normalized-vite-production-output",
   measurements,
   budgets: budgetValues,
 };

@@ -19,6 +19,7 @@ import {
   type PageKind,
 } from "./metadata";
 import { renderStaticHostHeaders } from "./securityHeaders";
+import { renderSupplyChainEvidence } from "./supplyChainEvidence";
 
 type Excerpt = {
   readonly sourcePath: string;
@@ -190,7 +191,8 @@ export function portfolioSitePlugin(root: string): Plugin {
         let withMetadata = html
           .replace("<!-- site:generated-head -->", renderMetadataTags(siteConfig, page))
           .replace("<!-- site:structured-data -->", renderStructuredData(siteConfig, kind, page))
-          .replace("<!-- site:model-gateway-status -->", renderModelGatewayStatus());
+          .replace("<!-- site:model-gateway-status -->", renderModelGatewayStatus())
+          .replace("<!-- site:supply-chain-evidence -->", await renderSupplyChainEvidence(root));
         if (withMetadata.includes("<!-- site:recorded-sandbox-evidence -->")) {
           recordedEvidence = await renderRecordedSandboxEvidence(root);
           withMetadata = withMetadata.replace(

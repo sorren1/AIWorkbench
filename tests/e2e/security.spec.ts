@@ -28,3 +28,14 @@ test("public and demo routes make no external runtime requests", async ({ page }
   await expect(page.getByRole("heading", { level: 1, name: "Work Queue" })).toBeVisible();
   expect(external).toEqual([]);
 });
+
+test("public supply-chain claims distinguish executed and unvalidated controls", async ({
+  page,
+}) => {
+  await page.goto("/#security-evidence");
+  const section = page.getByRole("region", { name: "Security and supply-chain evidence" });
+  await expect(section).toBeVisible();
+  await expect(section.getByText("Tracked files and Git history secret scan")).toBeVisible();
+  await expect(section.getByText("Configured · not validated")).toBeVisible();
+  await expect(section.getByText("Active suppressions").locator("..").getByText("0")).toBeVisible();
+});

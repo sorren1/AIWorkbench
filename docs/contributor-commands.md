@@ -32,6 +32,9 @@ The supported runtime is Node.js 22 LTS; `.nvmrc` pins the verified local versio
 | `npm run test:model-gateway:live`         | Run the explicitly enabled credential-gated live gateway test.       |
 | `npm run security:check`                  | Scan tracked files and public output without logging matched values. |
 | `npm run dependency:audit`                | Fail on high/critical advisories in the resolved dependency graph.   |
+| `npm run security:supply-chain`           | Generate and enforce detailed supply-chain evidence locally.         |
+| `npm run security:supply-chain:record`    | Gate, then refresh the sanitized public release summary.             |
+| `npm run sbom:generate`                   | Generate the same npm and sandbox CycloneDX evidence set.            |
 | `npm run links:check`                     | Validate production HTML links, assets, and fragments.               |
 | `npm run performance:budgets`             | Verify measured production output against recorded gzip budgets.     |
 | `npm run performance:audit`               | Run local desktop/mobile Lighthouse assertions on production output. |
@@ -48,6 +51,8 @@ The supported runtime is Node.js 22 LTS; `.nvmrc` pins the verified local versio
 | `npm run check:all`                       | Run the complete release gate, including browsers and Lighthouse.    |
 
 Install the pinned Playwright engines once per environment with `npx playwright install chromium firefox webkit`. Browser binaries are local tool-cache content and are not tracked. Browser tests build and serve the production output with the real preview security headers; they do not require a separately running development server.
+
+Supply-chain evidence generation requires full reachable Git history, Docker with Linux containers, and access to the immutable scanner images and current advisory databases. Detailed reports stay under gitignored `.security-reports/` and are uploaded as restricted CI artifacts. An unavailable prerequisite is a failed control, not a pass. See `docs/release-evidence.md` for retention, thresholds, and the suppression protocol.
 
 Registry generation validates the authored fixtures with JSON Schema and computes canonical SHA-256 hashes. MCP evidence generation requires local Git and uses the pinned official TypeScript SDK over stdio. It creates a temporary toy-repository copy, invokes only approved fixture tools, closes the child process, and removes the copy. Neither command contacts an external provider.
 

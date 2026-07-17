@@ -1,13 +1,13 @@
 {
   "schemaVersion": 2,
   "latest": {
-    "json": "sandbox-run-20260717t090427-fc778e57.json",
-    "markdown": "sandbox-run-20260717t090427-fc778e57.md",
-    "evidenceDigest": "51f9ca15374647f56a2b68c9c7c470a0305548541f328a1f71780899d9ca8f8f",
-    "sourceCommit": "f04ec39dbf906076307b2de2104d808388714873",
+    "json": "sandbox-run-20260717t113000-3a9c2170.json",
+    "markdown": "sandbox-run-20260717t113000-3a9c2170.md",
+    "evidenceDigest": "b1e5b880b2bde6efdacca6944200fa5dd644e18435cf8b9aef36065a186f7ba7",
+    "sourceCommit": "e4ded3e4737def137c989f625c57c14f2163d89c",
     "status": "SUCCEEDED",
-    "trace": "sandbox-trace-20260717t090427-fc778e57.json",
-    "traceId": "68d336eed9e4588ed96db6d0e12e17c3",
-    "traceArtifactSha256": "492f2d24b237feddc07c3df8b378ea3dd78776dc6f4e5fb609fc54827a73ec88"
+    "trace": "sandbox-trace-20260717t113000-3a9c2170.json",
+    "traceId": "8863552ff3dd34b7ae82bdaa3b9baacd",
+    "traceArtifactSha256": "f8bbc37ea5ae0c4799811ac0501c3f9a714a42a0d75aa25c1766f9b05a68b11f"
   }
 }
