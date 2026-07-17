@@ -24,7 +24,7 @@ import type { IconName } from "../../shared/Icon";
 export const meta: Meta = {
   product: "AI Delivery Workbench",
   subtitle: "A governed, human-in-the-loop control plane for AI-assisted software delivery.",
-  disclaimer: "Independent portfolio prototype · Synthetic fixtures",
+  disclaimer: "Demo mode · Synthetic data · No external writes",
   aboutNote:
     "Independent portfolio prototype. All code, copy, fixtures, workflows, and visuals in this project were created from scratch using synthetic data. No employer or client code, prompts, schemas, screenshots, repositories, internal documentation, or confidential information were used. External Jira, GitHub, AI, database, and MCP-style operations are simulated; the interactive UI and local workflow state machine are functional.",
   professionalContext:
@@ -170,7 +170,7 @@ export const issues: Issue[] = [
     reviewer: "Synthetic reviewer A",
     tester: "—",
     s: ["done", "done", "done", "done", "done", "fail", "none", "none"],
-    next: { label: "Retry implement", target: "issue" },
+    next: { label: "Retry simulated Implement", target: "issue" },
     flags: { failedVerification: true },
   },
   {
@@ -189,7 +189,7 @@ export const issues: Issue[] = [
     reviewer: "Synthetic reviewer A",
     tester: "Synthetic tester A",
     s: ["done", "done", "done", "done", "done", "done", "ready", "none"],
-    next: { label: "Run Verify", target: "issue" },
+    next: { label: "Simulate Verify", target: "issue" },
     flags: { hasPR: true, primary: true },
   },
   {
@@ -208,7 +208,7 @@ export const issues: Issue[] = [
     reviewer: "Synthetic reviewer B",
     tester: "—",
     s: ["done", "done", "done", "done", "done", "stale", "stale", "none"],
-    next: { label: "Re-run Implement", target: "issue" },
+    next: { label: "Re-run simulated Implement", target: "issue" },
     flags: { staleDownstream: true },
   },
   {
@@ -227,7 +227,7 @@ export const issues: Issue[] = [
     reviewer: "—",
     tester: "—",
     s: ["done", "done", "ready", "none", "none", "none", "none", "none"],
-    next: { label: "Generate Spec", target: "issue" },
+    next: { label: "Generate synthetic Spec", target: "issue" },
     flags: {},
   },
   {
@@ -284,7 +284,7 @@ export const issues: Issue[] = [
     reviewer: "—",
     tester: "—",
     s: ["done", "ready", "none", "none", "none", "none", "none", "none"],
-    next: { label: "Run Intake", target: "issue" },
+    next: { label: "Simulate Intake", target: "issue" },
     flags: {},
   },
   {
@@ -303,7 +303,7 @@ export const issues: Issue[] = [
     reviewer: "—",
     tester: "—",
     s: ["done", "none", "none", "none", "none", "none", "none", "none"],
-    next: { label: "Run Intake", target: "issue" },
+    next: { label: "Simulate Intake", target: "issue" },
     flags: {},
   },
 ];

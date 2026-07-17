@@ -1,10 +1,12 @@
 import { useState } from "react";
 
 import { validationFor } from "../data/content";
+import { createValidationEvidencePack, validationEvidenceDownload } from "../exports/validation";
 import { issues } from "../data/fixtures";
 import type { Tone, ValidationStatus } from "../data/types";
 import { useApp, useIssue } from "../state/store";
 import { Icon, type IconName } from "../../shared/Icon";
+import { downloadTextFile } from "../utils/browserActions";
 import {
   Avatar,
   Badge,
@@ -67,13 +69,14 @@ export function ValidationScreen() {
   const allPassed = scen.length > 0 && scen.every((s) => s.status === "Passed");
   const passedScenarioCount = scen.filter((s) => s.status === "Passed").length;
   const scenarioProgress = Math.round((passedScenarioCount / Math.max(1, scen.length)) * 100);
+  const evidencePack = createValidationEvidencePack(issue, base, ov);
 
   const setScenario = (name: string, status: Extract<ValidationStatus, "Passed" | "Failed">) => {
     actions.setVal(issue.key, { scenarios: { ...(ov.scenarios || {}), [name]: status } });
     actions.toast(
       status === "Passed" ? "success" : "error",
       "Test " + (status === "Passed" ? "passed" : "failed"),
-      name + " marked " + status + ".",
+      name + " marked " + status + " in browser-local demo state.",
     );
   };
   const start = () => {
@@ -82,7 +85,11 @@ export function ValidationScreen() {
       evidenceStatus: "In Progress",
       decision: "Pending",
     });
-    actions.toast("info", "Validation started", "Tester assigned · evidence set to In Progress.");
+    actions.toast(
+      "info",
+      "Demo validation started",
+      "Synthetic tester assigned · local evidence set to In Progress.",
+    );
   };
   const requestFixes = () => {
     actions.setVal(issue.key, { decision: "Blocked", evidenceStatus: "Blocked" });
@@ -90,7 +97,7 @@ export function ValidationScreen() {
     actions.toast(
       "warn",
       "Fixes requested",
-      "Routed back to implementation — downstream evidence held.",
+      "Browser-local state routed back to implementation; no external notification was sent.",
     );
   };
   const complete = () => {
@@ -127,6 +134,19 @@ export function ValidationScreen() {
       "Synthetic tester note added",
       "Appended to the browser-local evidence fixture.",
     );
+  };
+  const exportEvidence = (format: "json" | "markdown") => {
+    try {
+      const spec = validationEvidenceDownload(evidencePack, format);
+      downloadTextFile(spec);
+      actions.toast("success", "Evidence exported", spec.filename + " saved locally.");
+    } catch (error) {
+      actions.toast(
+        "error",
+        "Export failed",
+        error instanceof Error ? error.message : "The browser rejected the download operation.",
+      );
+    }
   };
 
   return (
@@ -179,14 +199,30 @@ export function ValidationScreen() {
           <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
             {!started && (
               <Btn size="sm" variant="primary" icon="play" onClick={start}>
-                Start validation
+                Start demo validation
               </Btn>
             )}
             <Btn size="sm" variant="danger" icon="rotate-ccw" onClick={requestFixes}>
-              Request fixes
+              Record demo fixes requested
             </Btn>
             <Btn size="sm" variant="primary" icon="shield-check" onClick={complete}>
-              Mark evidence complete
+              Mark demo evidence complete
+            </Btn>
+            <Btn
+              size="sm"
+              variant="secondary"
+              icon="download"
+              onClick={() => exportEvidence("json")}
+            >
+              Export JSON
+            </Btn>
+            <Btn
+              size="sm"
+              variant="secondary"
+              icon="download"
+              onClick={() => exportEvidence("markdown")}
+            >
+              Export Markdown
             </Btn>
           </div>
         </div>
@@ -267,13 +303,13 @@ export function ValidationScreen() {
                     <IconBtn
                       icon="check"
                       size="sm"
-                      title="Mark passed"
+                      title="Mark scenario passed"
                       onClick={() => setScenario(s.name, "Passed")}
                     />
                     <IconBtn
                       icon="x"
                       size="sm"
-                      title="Mark failed"
+                      title="Mark scenario failed"
                       onClick={() => setScenario(s.name, "Failed")}
                     />
                   </div>
@@ -346,7 +382,11 @@ export function ValidationScreen() {
           </div>
 
           <Card>
-            <CardHead icon="scroll-text" title="Tester notes" sub="Append-only evidence log" />
+            <CardHead
+              icon="scroll-text"
+              title="Tester notes"
+              sub="Browser-local freeform notes are excluded from downloads"
+            />
             <div className="wb-card-body wb-card-body--tight">
               {notes.length === 0 && (
                 <div style={{ padding: 16 }}>
@@ -442,7 +482,7 @@ export function ValidationScreen() {
               <div className="wb-between">
                 <span className="wb-text-sm wb-secondary">Environment readiness</span>
                 <Badge tone="safe" icon="check">
-                  Ready
+                  Ready · synthetic
                 </Badge>
               </div>
               <hr className="wb-divider" />
@@ -453,8 +493,9 @@ export function ValidationScreen() {
             </div>
           </Card>
           <Banner tone="neutral" icon="shield">
-            Validation evidence is recorded immutably and linked to the issue, the PR, and the
-            tested commit — so the audit trail stays intact after release.
+            This synthetic fixture models evidence linked to the issue, pull request, and tested
+            commit. Browser-local changes are resettable and are not an immutable enterprise audit
+            record.
           </Banner>
         </div>
       </div>

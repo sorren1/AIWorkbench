@@ -280,6 +280,44 @@ body {
   display: none;
 }
 
+.wb-demo-toolbar {
+  max-width: 1268px;
+  margin: 18px auto 0;
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-xs);
+}
+
+.wb-demo-scenario-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+
+.wb-demo-scenario-field > label {
+  color: var(--text-secondary);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-semibold);
+}
+
+.wb-demo-scenario-field .wb-select {
+  width: 238px;
+}
+
+.wb-demo-scenario-description {
+  max-width: 470px;
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: var(--text-xs);
+  line-height: var(--leading-normal);
+}
+
 .wb-walkthrough {
   max-width: 1268px;
   margin: 18px auto 0;
@@ -437,6 +475,16 @@ body {
 }
 
 @media (max-width: 1180px) {
+  .wb-demo-toolbar {
+    flex-wrap: wrap;
+  }
+
+  .wb-demo-scenario-description {
+    order: 3;
+    width: 100%;
+    max-width: none;
+  }
+
   .wb-walkthrough-layout {
     align-items: flex-start;
     flex-direction: column;

@@ -16,7 +16,7 @@ describe("workbench reducer", () => {
 
     expect(state.issues["FIN-1150"]?.s[stageIdx("implement")]).toBe("stale");
     expect(state.issues["FIN-1150"]?.flags.staleDownstream).toBe(true);
-    expect(state.issues["FIN-1150"]?.s[stageIdx("verify")]).toBe("ready");
+    expect(state.issues["FIN-1150"]?.s[stageIdx("verify")]).toBe("stale");
   });
 
   it("does not toggle a governance rule that is locked", () => {

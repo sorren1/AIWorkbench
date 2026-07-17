@@ -13,6 +13,7 @@ import { logsFor } from "../data/content";
 import { issues, meta, stageDefs } from "../data/fixtures";
 import type { Route } from "../data/types";
 import { useApp, type LogDrawer, type ToastKind, type WorkbenchModal } from "../state/store";
+import { readPreferences, writePreferences, type ThemePreference } from "../state/preferences";
 import { Icon, type IconName } from "../../shared/Icon";
 import { Avatar, Badge, Banner, Btn, IconBtn } from "./primitives";
 
@@ -134,14 +135,12 @@ export function Sidebar() {
   );
 }
 
-export type Theme = "light" | "dark";
+export type Theme = ThemePreference;
 export function useTheme(): readonly [Theme, Dispatch<SetStateAction<Theme>>] {
-  const [theme, setTheme] = useState<Theme>(() =>
-    localStorage.getItem("wb-theme") === "dark" ? "dark" : "light",
-  );
+  const [theme, setTheme] = useState<Theme>(() => readPreferences(localStorage).theme);
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
-    localStorage.setItem("wb-theme", theme);
+    writePreferences(localStorage, theme);
   }, [theme]);
   return [theme, setTheme];
 }
@@ -149,11 +148,9 @@ export function useTheme(): readonly [Theme, Dispatch<SetStateAction<Theme>>] {
 export function Header({
   theme,
   setTheme,
-  onOpenWalkthrough,
 }: {
   readonly theme: Theme;
   readonly setTheme: Dispatch<SetStateAction<Theme>>;
-  readonly onOpenWalkthrough: () => void;
 }) {
   const { state, actions } = useApp();
   const issue = state.issues[state.selectedKey];
@@ -180,13 +177,10 @@ export function Header({
 
       <div className="wb-disclaimer" title={meta.aboutNote}>
         <span className="wb-dot" aria-hidden="true" />
-        {meta.disclaimer}
+        Demo mode · Synthetic data · No external writes
       </div>
 
       <div className="wb-header-actions">
-        <Btn size="sm" variant="secondary" icon="workflow" onClick={onOpenWalkthrough}>
-          Guided tour
-        </Btn>
         <IconBtn
           icon={theme === "dark" ? "info" : "info"}
           size="sm"

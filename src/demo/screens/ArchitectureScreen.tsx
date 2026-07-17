@@ -1,7 +1,10 @@
 import { architecture } from "../data/fixtures";
+import { architectureDownload } from "../exports/architecture";
 import type { ArchitecturePlane } from "../data/types";
+import { useApp } from "../state/store";
+import { downloadTextFile } from "../utils/browserActions";
 import { Icon, type IconName } from "../../shared/Icon";
-import { Banner, Card, CardHead } from "../components/primitives";
+import { Badge, Banner, Btn, Card, CardHead } from "../components/primitives";
 
 /* ============================================================
    AI Delivery Workbench — Screen: Architecture
@@ -62,7 +65,21 @@ function PlaneCard({ plane }: { readonly plane: ArchitecturePlane }) {
 }
 
 export function ArchitectureScreen() {
+  const { actions } = useApp();
   const arch = architecture;
+  const exportSummary = (format: "json" | "markdown") => {
+    try {
+      const spec = architectureDownload(format);
+      downloadTextFile(spec);
+      actions.toast("success", "Architecture exported", spec.filename + " saved locally.");
+    } catch (error) {
+      actions.toast(
+        "error",
+        "Export failed",
+        error instanceof Error ? error.message : "The browser rejected the download operation.",
+      );
+    }
+  };
   const flow: { label: string; icon: IconName; desc: string }[] = [
     { label: "Suggestion", icon: "sparkles", desc: "AI proposes — never decides" },
     { label: "Implementation", icon: "git-branch", desc: "Drafted on a branch" },
@@ -82,6 +99,23 @@ export function ArchitectureScreen() {
             erodes control. Suggestion, implementation, review, and release stay distinct — with
             deterministic artifacts and human gates between them.
           </div>
+        </div>
+        <div className="wb-spacer" />
+        <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
+          <Badge tone="safe" icon="check">
+            Functional locally
+          </Badge>
+          <Btn
+            size="sm"
+            variant="secondary"
+            icon="download"
+            onClick={() => exportSummary("markdown")}
+          >
+            Export Markdown
+          </Btn>
+          <Btn size="sm" variant="secondary" icon="download" onClick={() => exportSummary("json")}>
+            Export JSON
+          </Btn>
         </div>
       </div>
 

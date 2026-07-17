@@ -1,6 +1,5 @@
-import { useState } from "react";
-
 import { mcpServers } from "../data/fixtures";
+import { SETTINGS_VIEWS } from "../state/deepLinks";
 import { useApp } from "../state/store";
 import { Icon } from "../../shared/Icon";
 import {
@@ -48,10 +47,19 @@ function FieldRO({
   );
 }
 
+export function isValidBranchPattern(pattern: string): boolean {
+  return (
+    pattern.startsWith("feature/") &&
+    pattern.includes("{issueKey}") &&
+    pattern.includes("{slug}") &&
+    !/\s/.test(pattern)
+  );
+}
+
 export function SettingsScreen() {
   const { state, actions } = useApp();
   const S = state.settings;
-  const [tab, setTab] = useState("jira");
+  const tab = SETTINGS_VIEWS.find((view) => view === state.subview) ?? "jira";
   const toast = (title: string, message: string) => actions.toast("success", title, message);
 
   const tabs: TabDefinition[] = [
@@ -103,7 +111,7 @@ export function SettingsScreen() {
           ariaLabel="Integration settings"
           tabs={tabs}
           active={tab}
-          onChange={setTab}
+          onChange={actions.setSubview}
         />
       </div>
 
@@ -220,14 +228,18 @@ export function SettingsScreen() {
                 <Btn
                   variant="secondary"
                   icon="check-circle"
-                  onClick={() =>
-                    toast(
-                      "Branch pattern valid",
-                      "Synthetic branch fixture: feature/FIN-1150-ai-variance-commentary.",
-                    )
-                  }
+                  onClick={() => {
+                    const valid = isValidBranchPattern(S.github.branchPattern);
+                    actions.toast(
+                      valid ? "success" : "error",
+                      valid ? "Branch pattern valid" : "Branch pattern invalid",
+                      valid
+                        ? "Local validation accepted feature/{issueKey}-{slug}."
+                        : "The local pattern must start with feature/ and contain {issueKey} and {slug} with no whitespace.",
+                    );
+                  }}
                 >
-                  Validate branch pattern
+                  Validate branch pattern locally
                 </Btn>
               </div>
             </div>

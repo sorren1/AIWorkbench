@@ -39,49 +39,49 @@ import {
 type StageProgress = { label: string; lifecycle: Lifecycle; next: StageId | null; msg: string };
 const STAGE_PROGRESS: Record<StageId, StageProgress> = {
   seed: {
-    label: "Run Seed",
+    label: "Simulate Seed",
     lifecycle: "Intake",
     next: "intake",
-    msg: "Workspace seeded · inputs.json captured.",
+    msg: "Synthetic workspace state seeded · inputs.json captured locally.",
   },
   intake: {
-    label: "Run Intake",
+    label: "Simulate Intake",
     lifecycle: "Spec",
     next: "spec",
-    msg: "intake.md generated with prompt provenance.",
+    msg: "Synthetic intake.md generated with prompt provenance.",
   },
   spec: {
-    label: "Generate Spec",
+    label: "Generate synthetic Spec",
     lifecycle: "Planning",
     next: "plan",
-    msg: "spec.md generated with acceptance criteria.",
+    msg: "Synthetic spec.md generated with acceptance criteria.",
   },
   plan: {
-    label: "Generate Plan",
+    label: "Generate synthetic Plan",
     lifecycle: "Planning",
     next: "targets",
-    msg: "plan.md generated.",
+    msg: "Synthetic plan.md generated locally.",
   },
   targets: {
-    label: "Generate Change Targets",
+    label: "Generate synthetic Change Targets",
     lifecycle: "Implementation",
     next: "implement",
-    msg: "change-targets.json + risk-review.md generated.",
+    msg: "Synthetic change-targets.json + risk-review.md generated locally.",
   },
   implement: {
-    label: "Run Implement",
+    label: "Simulate Implement",
     lifecycle: "Verification",
     next: "verify",
-    msg: "Draft code committed to the feature branch.",
+    msg: "Synthetic branch and commit state recorded locally; no repository was contacted.",
   },
   verify: {
-    label: "Run Verify",
+    label: "Simulate Verify",
     lifecycle: "Verification",
     next: "review",
     msg: "evidence.md generated · tests passed (simulated).",
   },
   review: {
-    label: "Mark Review Ready",
+    label: "Mark demo Review Ready",
     lifecycle: "Review Ready",
     next: null,
     msg: "Local human-review gate state is ready.",
@@ -171,7 +171,7 @@ function StageRow({
   };
   const retry = () => {
     actions.runStage(issue.key, id, {
-      doneMsg: def.name + " re-run succeeded (simulated).",
+      doneMsg: def.name + " simulation re-run succeeded in local state.",
       onDone: () => {
         const p = STAGE_PROGRESS[id];
         if (p && p.next) actions.setStage(issue.key, p.next, "ready");
@@ -183,13 +183,13 @@ function StageRow({
       title: "Redo " + def.name + "?",
       icon: "refresh-cw",
       tone: "warn",
-      confirmLabel: "Redo & mark downstream stale",
+      confirmLabel: "Simulate redo & mark downstream stale",
       cancelLabel: "Cancel",
       body: (
         <div>
-          Re-running <strong>{def.name}</strong> invalidates everything after it. Implement, Verify,
-          and PR Review will be marked <strong>Stale</strong> and must be re-run. This enforces
-          deterministic, in-order artifacts.
+          Re-running <strong>{def.name}</strong> invalidates downstream stages that already have
+          state. They will be marked <strong>Stale</strong>; not-started stages remain blocked. This
+          enforces deterministic, in-order artifacts.
         </div>
       ),
       onConfirm: () =>
@@ -200,7 +200,7 @@ function StageRow({
             actions.toast(
               "warn",
               "Downstream marked stale",
-              "Implement → Verify → PR Review must be re-run.",
+              "Existing Implement, Verify, and PR Review state must be re-run.",
             );
           },
         }),
@@ -211,7 +211,7 @@ function StageRow({
     actions.patchIssue(issue.key, { lifecycle: "Review Ready", flags: { needsReview: true } });
     actions.toast(
       "success",
-      "Marked Review Ready",
+      "Marked demo Review Ready",
       "Lifecycle → Review Ready. Human review gate is now open.",
     );
   };
@@ -297,17 +297,17 @@ function StageRow({
                     icon={id === "review" ? "shield-check" : "play"}
                     onClick={runReady}
                   >
-                    {id === "review" ? "Mark Review Ready" : STAGE_PROGRESS[id].label}
+                    {id === "review" ? "Mark demo Review Ready" : STAGE_PROGRESS[id].label}
                   </Btn>
                 )}
                 {status === "fail" && (
                   <Btn size="sm" variant="primary" icon="rotate-ccw" onClick={retry}>
-                    Retry {def.name}
+                    Retry simulated {def.name}
                   </Btn>
                 )}
                 {status === "stale" && (
                   <Btn size="sm" variant="primary" icon="refresh-cw" onClick={retry}>
-                    Re-run {def.name}
+                    Re-run simulated {def.name}
                   </Btn>
                 )}
                 {status === "run" && (
@@ -320,7 +320,7 @@ function StageRow({
                 )}
                 {status === "done" && (id === "plan" || id === "targets") && (
                   <Btn size="sm" variant="secondary" icon="refresh-cw" onClick={redo}>
-                    Redo {def.name}
+                    Simulate redo of {def.name}
                   </Btn>
                 )}
                 {status === "review" && (
@@ -389,12 +389,16 @@ export function IssueDetail() {
     const s = nextStage;
     if (s.status === "ready")
       return {
-        label: s.id === "review" ? "Mark Review Ready" : STAGE_PROGRESS[s.id].label,
+        label: s.id === "review" ? "Mark demo Review Ready" : STAGE_PROGRESS[s.id].label,
         icon: s.id === "review" ? "shield-check" : "play",
         run: () => triggerReady(s),
       };
     if (s.status === "fail")
-      return { label: "Retry " + s.name, icon: "rotate-ccw", run: () => triggerReady(s) };
+      return {
+        label: "Retry simulated " + s.name,
+        icon: "rotate-ccw",
+        run: () => triggerReady(s),
+      };
     if (s.status === "review")
       return {
         label: "Open human review",
@@ -402,7 +406,11 @@ export function IssueDetail() {
         run: () => actions.navigate("github", issue.key),
       };
     if (s.status === "stale")
-      return { label: "Re-run " + s.name, icon: "refresh-cw", run: () => triggerReady(s) };
+      return {
+        label: "Re-run simulated " + s.name,
+        icon: "refresh-cw",
+        run: () => triggerReady(s),
+      };
     return null;
   })();
 
@@ -413,7 +421,7 @@ export function IssueDetail() {
       actions.patchIssue(issue.key, { lifecycle: "Review Ready", flags: { needsReview: true } });
       actions.toast(
         "success",
-        "Marked Review Ready",
+        "Marked demo Review Ready",
         "Lifecycle → Review Ready. Human review gate is now open.",
       );
       return;
@@ -509,7 +517,7 @@ export function IssueDetail() {
               {nextStage && nextStage.status === "ready" && (
                 <>
                   This issue is ready to <strong>{primary.label.toLowerCase()}</strong>. Output is
-                  recorded as a reviewable artifact with prompt provenance.
+                  recorded as a synthetic reviewable artifact with prompt provenance.
                 </>
               )}
               {nextStage && nextStage.status === "review" && (
@@ -521,8 +529,8 @@ export function IssueDetail() {
               {nextStage && nextStage.status === "stale" && (
                 <>
                   A plan change marked downstream stages stale.{" "}
-                  <strong>Re-run {nextStage.name}</strong> to restore a consistent, in-order
-                  artifact chain.
+                  <strong>Re-run simulated {nextStage.name}</strong> to restore a consistent,
+                  in-order artifact chain.
                 </>
               )}
             </Banner>
@@ -791,7 +799,8 @@ export function IssueDetail() {
                 </div>
               ) : (
                 <EmptyState icon="git-pull-request" title="No PR yet">
-                  Run through Implement, then create a mock PR on the GitHub screen.
+                  Simulate through Implement, then create a mock PR in local state on the GitHub
+                  screen.
                 </EmptyState>
               )}
             </div>

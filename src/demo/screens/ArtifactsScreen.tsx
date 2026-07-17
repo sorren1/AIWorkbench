@@ -1,10 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { artifactsFor } from "../data/content";
 import { issues } from "../data/fixtures";
 import type { Artifact, Issue, Tone } from "../data/types";
 import { useApp, useIssue } from "../state/store";
 import { Icon } from "../../shared/Icon";
+import { artifactDownloadSpec, copyText, downloadTextFile } from "../utils/browserActions";
 import {
   Badge,
   Btn,
@@ -36,7 +37,6 @@ export function ArtifactsScreen() {
   const artifacts = artifactsFor(issue);
   const selName = state.selectedArtifact[issue.key];
   const selected = artifacts.find((a) => a.name === selName) || artifacts[0];
-  const [reviews, setReviews] = useState<Record<string, string>>({});
 
   useEffect(() => {
     if (selected && selName !== selected.name) actions.selectArtifact(issue.key, selected.name);
@@ -60,8 +60,8 @@ export function ArtifactsScreen() {
               </Btn>
             }
           >
-            Run the AI delivery workflow on this issue to generate intake, spec, plan, change
-            targets, and evidence artifacts.
+            Simulate the AI delivery workflow on this issue to generate synthetic intake, spec,
+            plan, change-target, and evidence artifacts locally.
           </EmptyState>
         </Card>
       </div>
@@ -69,18 +69,52 @@ export function ArtifactsScreen() {
   }
   if (!selected) return null;
 
-  const reviewState = (artifact: Artifact) => reviews[artifact.id] ?? artifact.reviewStatus;
+  const reviewState = (artifact: Artifact) =>
+    state.artifactReviews[artifact.id] ?? artifact.reviewStatus;
   const approve = () => {
-    setReviews((r) => ({ ...r, [selected.id]: "Approved" }));
-    actions.toast("success", "Artifact approved", selected.name + " marked approved (simulated).");
+    actions.setArtifactReview(selected.id, "Approved");
+    actions.toast(
+      "success",
+      "Demo artifact approved",
+      selected.name + " marked approved in browser-local state.",
+    );
   };
   const requestChanges = () => {
-    setReviews((r) => ({ ...r, [selected.id]: "Changes requested" }));
+    actions.setArtifactReview(selected.id, "Changes requested");
     actions.toast(
       "warn",
       "Changes requested",
-      "Reviewer decision recorded for " + selected.name + ".",
+      "Synthetic reviewer decision recorded locally for " + selected.name + ".",
     );
+  };
+  const copyArtifact = async () => {
+    try {
+      await copyText(selected.body);
+      actions.toast(
+        "success",
+        "Artifact copied",
+        selected.name + " contents copied to the clipboard.",
+      );
+    } catch (error) {
+      actions.toast(
+        "error",
+        "Copy failed",
+        error instanceof Error ? error.message : "The browser rejected the clipboard operation.",
+      );
+    }
+  };
+  const downloadArtifact = () => {
+    try {
+      const spec = artifactDownloadSpec(issue.key, selected);
+      downloadTextFile(spec);
+      actions.toast("success", "Artifact downloaded", spec.filename + " saved locally.");
+    } catch (error) {
+      actions.toast(
+        "error",
+        "Download failed",
+        error instanceof Error ? error.message : "The browser rejected the download operation.",
+      );
+    }
   };
 
   return (
@@ -201,18 +235,14 @@ export function ArtifactsScreen() {
               <IconBtn
                 icon="copy"
                 size="sm"
-                title="Copy (simulated)"
-                onClick={() =>
-                  actions.toast("info", "Copied to clipboard", selected.name + " (simulated).")
-                }
+                title="Copy artifact contents"
+                onClick={() => void copyArtifact()}
               />
               <IconBtn
                 icon="download"
                 size="sm"
-                title="Download (simulated)"
-                onClick={() =>
-                  actions.toast("info", "Download started", selected.name + " (simulated).")
-                }
+                title="Download synthetic artifact"
+                onClick={downloadArtifact}
                 style={{ marginLeft: 6 }}
               />
             </div>
@@ -283,7 +313,7 @@ export function ArtifactsScreen() {
                   className="wb-btn--block"
                   onClick={approve}
                 >
-                  Approve artifact
+                  Mark demo artifact approved
                 </Btn>
                 <Btn
                   size="sm"
@@ -292,7 +322,7 @@ export function ArtifactsScreen() {
                   className="wb-btn--block"
                   onClick={requestChanges}
                 >
-                  Request changes
+                  Record demo changes requested
                 </Btn>
               </div>
             </Card>

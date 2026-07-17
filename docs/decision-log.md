@@ -193,3 +193,28 @@ Use opaque semantic color tokens, explicit focus rings, and reduced-motion overr
 - Queue rows keep visual hover affordance while a predictable issue action in the first cell becomes the only navigation control.
 - The demo remains coherent on phones and at high zoom without pretending the dense workbench is a mobile product.
 - Automated Chromium and axe coverage is reproducible but does not replace release-phase testing with screen readers, multiple browser engines, or operating-system forced-color modes.
+
+## ADR-008 — Keep functional demo state ephemeral and exports browser-local
+
+- Status: Accepted
+- Date: 2026-07-16
+
+### Context
+
+The public demo needs credible local interactions without a backend or credentials. Toast-only copy/download controls, non-shareable reducer routes, unversioned preferences, and ambiguous provider-shaped labels weaken that boundary. Persisting synthetic review or approval state could also mislead a returning visitor into reading browser history as durable enterprise evidence.
+
+### Decision
+
+Implement safe utilities with browser platform APIs: Clipboard for artifact text and Blob/Object URL downloads for artifacts, architecture summaries, and synthetic validation evidence. All exported documents carry an explicit synthetic/public classification and deterministic content; no export includes credentials, private data, or live provider results.
+
+Encode only validated public fixture selections in URL parameters: major screen, known synthetic issue, known selected artifact, Settings subview, and named scenario seed. Scenario loading and confirmed reset always rebuild from the same typed baseline and cancel pending simulated transitions. Keep workflow, review, validation, scenario, note, and approval state in memory only. Persist only a versioned light/dark theme preference, with reset support.
+
+Use a persistent `Demo mode · Synthetic data · No external writes` indicator. External-system actions remain deterministic simulations and say so at the action or immediate context; browser-local decisions use `demo`, `synthetic`, or `locally` where a production-shaped verb might otherwise be ambiguous.
+
+### Consequences
+
+- Reloading a deep link restores navigation context but intentionally does not restore prior mutable demo decisions.
+- Clipboard access can be rejected by browser policy; the UI reports that failure instead of claiming success.
+- Downloads work entirely in the visitor's browser and require no backend, temporary server storage, or analytics call.
+- URLs remain safe to share because only allow-listed route and synthetic fixture identifiers are serialized.
+- A future durable approval journal must introduce its own clearly labeled storage and identity model; it cannot silently reuse this ephemeral demo state.

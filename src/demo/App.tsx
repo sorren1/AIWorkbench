@@ -10,6 +10,7 @@ import {
   useTheme,
 } from "./components/AppShell";
 import { GuidedWalkthrough } from "./components/GuidedWalkthrough";
+import { Btn } from "./components/primitives";
 import { meta } from "./data/fixtures";
 import { ArchitectureScreen } from "./screens/ArchitectureScreen";
 import { ArtifactsScreen } from "./screens/ArtifactsScreen";
@@ -19,6 +20,8 @@ import { SettingsScreen } from "./screens/SettingsScreen";
 import { ValidationScreen } from "./screens/ValidationScreen";
 import { WorkQueue } from "./screens/WorkQueueScreen";
 import { useApp } from "./state/store";
+import { clearPreferences } from "./state/preferences";
+import { DEMO_SCENARIOS, isDemoScenarioId, type DemoScenarioId } from "./state/scenarios";
 import { Icon } from "../shared/Icon";
 
 /* ============================================================
@@ -72,26 +75,122 @@ function Footer() {
   );
 }
 
-export function App() {
+function updateWalkthroughQuery(open: boolean): void {
+  const url = new URL(window.location.href);
+  if (open) url.searchParams.set("walkthrough", "1");
+  else url.searchParams.delete("walkthrough");
+  url.searchParams.delete("tour");
+  window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+}
+
+function DemoControls({
+  walkthroughOpen,
+  onOpenWalkthrough,
+  onApplyScenario,
+  onRequestReset,
+}: {
+  readonly walkthroughOpen: boolean;
+  readonly onOpenWalkthrough: () => void;
+  readonly onApplyScenario: (scenarioId: DemoScenarioId) => void;
+  readonly onRequestReset: () => void;
+}) {
   const { state } = useApp();
-  const [theme, setTheme] = useTheme();
-  const [walkthroughOpen, setWalkthroughOpen] = useState(
-    () => new URLSearchParams(window.location.search).get("walkthrough") === "1",
+  const selected =
+    DEMO_SCENARIOS.find((scenario) => scenario.id === state.scenarioId) ?? DEMO_SCENARIOS[0];
+  return (
+    <section className="wb-demo-toolbar" aria-label="Synthetic demo controls">
+      <div className="wb-demo-scenario-field">
+        <label htmlFor="demo-scenario-select">Scenario seed</label>
+        <div className="wb-select">
+          <select
+            id="demo-scenario-select"
+            value={state.scenarioId}
+            onChange={(event) => {
+              const scenarioId = event.currentTarget.value;
+              if (isDemoScenarioId(scenarioId)) onApplyScenario(scenarioId);
+            }}
+            aria-describedby="demo-scenario-description"
+          >
+            {DEMO_SCENARIOS.map((scenario) => (
+              <option key={scenario.id} value={scenario.id}>
+                {scenario.label}
+              </option>
+            ))}
+          </select>
+          <Icon name="chevrons-up-down" size={15} className="wb-select-ico" />
+        </div>
+      </div>
+      <p id="demo-scenario-description" className="wb-demo-scenario-description" aria-live="polite">
+        {selected?.description} Interactions may diverge from this deterministic starting point.
+      </p>
+      <div className="wb-spacer" />
+      <Btn size="sm" variant="secondary" icon="workflow" onClick={onOpenWalkthrough}>
+        {walkthroughOpen ? "Restart guided tour" : "Guided tour"}
+      </Btn>
+      <Btn size="sm" variant="ghost" icon="rotate-ccw" onClick={onRequestReset}>
+        Reset demo
+      </Btn>
+    </section>
   );
+}
+
+export function App() {
+  const { state, actions } = useApp();
+  const [theme, setTheme] = useTheme();
+  const [walkthroughOpen, setWalkthroughOpen] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("walkthrough") === "1" || params.get("tour") === "1";
+  });
+  const [walkthroughSession, setWalkthroughSession] = useState(0);
   const walkthroughReturnFocus = useRef<HTMLElement | null>(null);
   const applicationShellRef = useRef<HTMLDivElement>(null);
   const openWalkthrough = useCallback(() => {
     walkthroughReturnFocus.current =
       document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    updateWalkthroughQuery(true);
+    actions.navigate("queue", "FIN-1150");
+    setWalkthroughSession((session) => session + 1);
     setWalkthroughOpen(true);
-  }, []);
+  }, [actions]);
   const closeWalkthrough = useCallback(() => {
     setWalkthroughOpen(false);
+    updateWalkthroughQuery(false);
     const returnTarget = walkthroughReturnFocus.current;
     queueMicrotask(() => {
       if (returnTarget?.isConnected) returnTarget.focus();
     });
   }, []);
+  const applyScenario = useCallback(
+    (scenarioId: DemoScenarioId) => {
+      setWalkthroughOpen(false);
+      updateWalkthroughQuery(false);
+      actions.applyScenario(scenarioId);
+    },
+    [actions],
+  );
+  const resetDemo = useCallback(() => {
+    actions.openModal({
+      title: "Reset the synthetic demo?",
+      icon: "rotate-ccw",
+      tone: "danger",
+      confirmLabel: "Reset demo",
+      cancelLabel: "Keep current state",
+      body: (
+        <p>
+          This clears all browser-local workflow changes, filters, and scenario state; restores
+          harmless preferences to their defaults; and returns to the deterministic baseline queue.
+          No external system is contacted.
+        </p>
+      ),
+      onConfirm: () => {
+        setWalkthroughOpen(false);
+        updateWalkthroughQuery(false);
+        clearPreferences(localStorage);
+        setTheme("light");
+        actions.resetDemo();
+      },
+    });
+  }, [actions, setTheme]);
   const overlayOpen = Boolean(state.drawer || state.modal);
   useEffect(() => {
     if (applicationShellRef.current) applicationShellRef.current.inert = overlayOpen;
@@ -121,13 +220,21 @@ export function App() {
       <div ref={applicationShellRef} className="wb-application-shell">
         <Sidebar />
         <div className="wb-main">
-          <Header theme={theme} setTheme={setTheme} onOpenWalkthrough={openWalkthrough} />
+          <Header theme={theme} setTheme={setTheme} />
           <main id="workbench-main" className="wb-content cr-scroll" tabIndex={0}>
             <div className="wb-viewport-notice" role="note">
               Dense evidence tables scroll within their own panels at this width. At narrower
               widths, the demo provides a concise overview and a link back to the case study.
             </div>
-            {walkthroughOpen && <GuidedWalkthrough onClose={closeWalkthrough} />}
+            <DemoControls
+              walkthroughOpen={walkthroughOpen}
+              onOpenWalkthrough={openWalkthrough}
+              onApplyScenario={applyScenario}
+              onRequestReset={resetDemo}
+            />
+            {walkthroughOpen && (
+              <GuidedWalkthrough key={walkthroughSession} onClose={closeWalkthrough} />
+            )}
             <Screen />
             <Footer />
           </main>

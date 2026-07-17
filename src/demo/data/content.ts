@@ -503,7 +503,7 @@ export function prFor(issue: Issue): PullRequestData {
       ? "Synthetic PR summary for " +
         issue.key +
         ". Changed files are grounded in the issue's change-targets artifact."
-      : "No pull request has been created for this issue yet. Run the workflow through Implement, then create a mock PR.",
+      : "No pull request exists in the synthetic fixture. Simulate the workflow through Implement, then create a mock PR in local state.",
     checks: hasPR
       ? [
           {

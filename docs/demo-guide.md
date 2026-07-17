@@ -10,7 +10,11 @@ Functional locally:
 - work-queue search and filters;
 - light and dark themes;
 - reducer-backed stage transitions, stale cascades, review state, and validation state;
-- local artifact selection, review decisions, drawers, modals, and toasts.
+- local artifact selection, review decisions, drawers, modals, and toasts;
+- clipboard copy and issue-scoped artifact downloads;
+- architecture Markdown/JSON and validation-evidence Markdown/JSON exports;
+- validated deep links for screen, synthetic issue, artifact, and Settings subview;
+- five named deterministic synthetic scenario seeds and an explicitly confirmed reset.
 
 Synthetic fixtures:
 
@@ -40,7 +44,29 @@ npm run build
 npm run preview
 ```
 
-Open `/demo/?walkthrough=1` to start the in-app 5–8 minute walkthrough. The same guide is available from the `Guided tour` button in the demo header. It uses semantic buttons, announces progress, moves between the existing reducer-backed screens, and closes with the Escape key.
+Open `/demo/?walkthrough=1` to start the in-app 5–8 minute walkthrough. The same guide is available from the `Guided tour` button in the global demo controls. It uses semantic buttons, announces progress, moves between the existing reducer-backed screens, closes with Escape, and can be restarted without reloading.
+
+Deep links use validated public fixture identifiers. For example:
+
+```text
+/demo/?screen=artifacts&issue=FIN-1150&artifact=spec.md
+/demo/?screen=settings&view=gov
+/demo/?scenario=failed-verification
+```
+
+Unknown issue, artifact, scenario, and subview values are ignored. URLs never contain prompt bodies, artifact contents, notes, credentials, or private data.
+
+Validation exports deliberately exclude freeform browser-local tester-note text and report only the number excluded. This keeps downloadable evidence limited to authored synthetic fixtures even if a visitor types private text into the local note field.
+
+## Deterministic scenario seeds
+
+- **Baseline delivery queue** — the ten-issue starting state.
+- **Ready for human review** — FIN-1077 at the synthetic PR review gate.
+- **Failed verification** — FIN-1301 with failed synthetic validation evidence.
+- **Stale after upstream redo** — FIN-1198 with invalidated downstream stages.
+- **Clean end-to-end walkthrough** — FIN-1150 with a complete synthetic chain.
+
+Changing the scenario starts again from the same in-memory baseline. `Reset demo` requires confirmation, clears workflow changes, restores harmless preferences to their defaults, cancels pending simulated transitions, and returns to the baseline queue. Only the versioned theme preference is stored; synthetic workflow, review, validation, and approval state is not persisted across reloads.
 
 ## Suggested walkthrough
 
@@ -50,6 +76,4 @@ Open `/demo/?walkthrough=1` to start the in-app 5–8 minute walkthrough. The sa
 4. **GitHub / PR** — inspect synthetic files, checks, and reviewer state around the human-review gate.
 5. **Validation Evidence** — update synthetic scenarios and tester notes, then inspect the browser-local decision state.
 6. **Architecture** — review the control, execution, context, and validation responsibility boundaries.
-7. **Settings** — inspect the simulated adapters, illustrative reference stack, and governance configuration.
-
-Use the persistent prototype badge for the concise boundary and the About panel for full provenance and the separately labeled professional context.
+   Use the persistent prototype badge for the concise boundary and the About panel for full provenance and the separately labeled professional context.

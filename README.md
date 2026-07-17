@@ -20,7 +20,7 @@ The focused control-plane direction extends that workflow with typed domain seam
 
 Every visible value belongs to one category:
 
-- **Functional in this repository:** navigation, filters, theme preference, reducer-backed workflow transitions, stale-state propagation, local review decisions, validation state, deterministic artifact rendering, and the static production build.
+- **Functional in this repository:** navigation and shareable deep links, filters, versioned theme preference, deterministic scenario loading and reset, the guided tour, reducer-backed workflow transitions, stale-state propagation, local review decisions, artifact copy/download, architecture and validation-evidence exports, deterministic artifact rendering, and the static production build.
 - **Synthetic demo fixture:** every persona, issue, repository, branch, pull request, check, log, duration, test result, metric, external integration result, and provider response shown in the workbench.
 - **Professional context:** the single statement in the separate section below. It is not evidence about the public prototype.
 

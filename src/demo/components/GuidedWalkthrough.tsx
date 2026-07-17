@@ -6,6 +6,7 @@ import { Btn } from "./primitives";
 
 type WalkthroughStep = {
   readonly route: Route;
+  readonly issueKey?: string;
   readonly title: string;
   readonly duration: string;
   readonly show: string;
@@ -23,6 +24,7 @@ const STEPS: readonly WalkthroughStep[] = [
   },
   {
     route: "issue",
+    issueKey: "FIN-1150",
     title: "Follow the eight-stage chain of custody",
     duration: "70 sec",
     show: "Open FIN-1150, inspect stage artifacts, then redo a completed upstream stage.",
@@ -30,6 +32,7 @@ const STEPS: readonly WalkthroughStep[] = [
   },
   {
     route: "artifacts",
+    issueKey: "FIN-1150",
     title: "Inspect deterministic handoffs",
     duration: "50 sec",
     show: "Move between intake, specification, plan, targets, provenance, and evidence artifacts.",
@@ -38,6 +41,7 @@ const STEPS: readonly WalkthroughStep[] = [
   },
   {
     route: "github",
+    issueKey: "FIN-1150",
     title: "Keep the human review gate authoritative",
     duration: "80 sec",
     show: "Try approval before changed-file review, inspect expected versus unexpected files, then record review.",
@@ -46,6 +50,7 @@ const STEPS: readonly WalkthroughStep[] = [
   },
   {
     route: "validation",
+    issueKey: "FIN-1150",
     title: "Bind evidence to the proposed change",
     duration: "60 sec",
     show: "Inspect the commit reference, acceptance coverage, scenarios, and final tester decision.",
@@ -59,14 +64,6 @@ const STEPS: readonly WalkthroughStep[] = [
     show: "Compare control, execution, context, and validation responsibilities and adapter boundaries.",
     explain:
       "The focused control plane governs a coding-agent workflow without becoming a generic agent marketplace.",
-  },
-  {
-    route: "settings",
-    title: "End at policy and production boundaries",
-    duration: "40 sec",
-    show: "Review synthetic adapter settings and locked governance rules.",
-    explain:
-      "Local policy state is functional; provider connectivity, credentials, and production execution are simulated.",
   },
 ];
 
@@ -90,7 +87,7 @@ export function GuidedWalkthrough({ onClose }: { readonly onClose: () => void })
 
   if (!step) return null;
 
-  const openStep = () => actions.navigate(step.route);
+  const openStep = () => actions.navigate(step.route, step.issueKey);
   const previous = () => setStepIndex((current) => Math.max(0, current - 1));
   const next = () => {
     if (stepIndex === STEPS.length - 1) {
@@ -100,7 +97,7 @@ export function GuidedWalkthrough({ onClose }: { readonly onClose: () => void })
     const nextIndex = stepIndex + 1;
     const nextStep = STEPS[nextIndex];
     setStepIndex(nextIndex);
-    if (nextStep) actions.navigate(nextStep.route);
+    if (nextStep) actions.navigate(nextStep.route, nextStep.issueKey);
   };
 
   return (

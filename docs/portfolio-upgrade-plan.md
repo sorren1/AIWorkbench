@@ -309,12 +309,14 @@ Delivered commit: `fix: harden accessibility and responsive behavior`
 
 ### Phase 5 — Honest demo behavior and control-plane registry
 
+Status: Functional-demo portion complete (2026-07-16) in `feat: add functional demo actions and guided walkthrough`; the versioned agent/tool registry and policy engine remain in scope for a later focused commit.
+
 Scope: make the local/external boundary explicit and implement the narrow registry, capability cards, lifecycle, and persona policy model.
 
 Acceptance criteria:
 
 - A persistent demo disclosure distinguishes “Functional locally” from “Simulated external system.”
-- Local copy uses the Clipboard API with a fallback/error state; local artifact download creates a real client-side file. These are labeled functional.
+- Local copy uses the Clipboard API with explicit unavailable/error feedback; local artifact download creates a real client-side file. These are labeled functional.
 - Jira sync, connection tests, AI generation, repository/PR operations, Oracle/MCP access, test runs, review, merge, deployment, persona identity, and remote credentials remain deterministic simulations and are labeled at the action/result level.
 - Canned durations, test counts, “immutable,” “authenticated,” “opened,” “notified,” “environment ready,” and similar messages cannot be mistaken for observed external facts.
 - Versioned stage-agent/tool manifests, lifecycle state, immutable version selection, capability cards, and provenance digests are functional and covered by schema/type tests.

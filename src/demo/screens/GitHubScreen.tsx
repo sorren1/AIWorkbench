@@ -1,4 +1,4 @@
-import { prFor } from "../data/content";
+import { prFor, validationFor } from "../data/content";
 import { issues } from "../data/fixtures";
 import type { Issue, PullRequestFile, Tone } from "../data/types";
 import { useApp, useIssue } from "../state/store";
@@ -49,11 +49,14 @@ export function GitHubScreen() {
   const refresh = () =>
     actions.toast("info", "PR status refreshed", "Checks re-read from the simulated provider.");
   const markReviewed = () => {
-    actions.setPR(issue.key, { diffReviewed: true, checklistAll: true });
+    actions.setPR(issue.key, {
+      diffReviewed: true,
+      checklist: Object.fromEntries(base.checklist.map((item) => [item.label, true])),
+    });
     actions.toast(
       "success",
       "Diff marked reviewed",
-      "Changed-file review recorded against PR #" + base.number + ".",
+      "Changed-file review recorded in browser-local state for synthetic PR #" + base.number + ".",
     );
   };
   const requestChanges = () => {
@@ -62,7 +65,7 @@ export function GitHubScreen() {
     actions.toast(
       "warn",
       "Changes requested",
-      "Synthetic reviewer decision and notification state recorded locally.",
+      "Synthetic reviewer decision recorded locally; no notification was sent.",
     );
   };
   /* excerpt:start:human-approval-gate */
@@ -75,18 +78,26 @@ export function GitHubScreen() {
       );
       return;
     }
+    if (!base.checklist.every((item) => ov.checklist?.[item.label] ?? item.done)) {
+      actions.toast(
+        "warn",
+        "Complete the demo checklist",
+        "Every browser-local reviewer checklist item must be checked before validation approval.",
+      );
+      return;
+    }
     actions.setPR(issue.key, {
       status: "Approved — validation",
       reviewer: "approved",
       approvedForValidation: true,
     });
-    actions.patchIssue(issue.key, { prStatus: "Ready for review" });
+    actions.patchIssue(issue.key, { prStatus: "Approved for validation" });
     actions.toast(
       "success",
       "Approved for validation",
-      "Human review gate met. Routing to validation evidence.",
+      "Local human-review gate met. Routing to synthetic validation evidence.",
     );
-    window.setTimeout(() => actions.navigate("validation", issue.key), 700);
+    actions.navigate("validation", issue.key);
   };
   /* excerpt:end:human-approval-gate */
 
@@ -104,9 +115,9 @@ export function GitHubScreen() {
               </Btn>
             }
           >
-            This issue hasn't reached a pull request. Run the workflow through{" "}
-            <strong>Implement</strong>, then create a mock PR to start the human review gate. PRs
-            keep AI-assisted changes inside normal engineering controls.
+            This issue hasn't reached a pull request. Simulate the workflow through{" "}
+            <strong>Implement</strong>, then create a mock PR in local state to start the human
+            review gate. PRs keep AI-assisted changes inside normal engineering controls.
           </EmptyState>
         </Card>
       </div>
@@ -115,7 +126,11 @@ export function GitHubScreen() {
 
   const status = ov.status || base.status;
   const reviewerState = ov.reviewer || "pending";
-  const checklist = base.checklist.map((c) => ({ ...c, done: ov.checklistAll ? true : c.done }));
+  const checklist = base.checklist.map((item) => ({
+    ...item,
+    done: ov.checklist?.[item.label] ?? item.done,
+  }));
+  const checklistComplete = checklist.every((item) => item.done);
   const checksOpen = base.checks.filter((c) => c.status !== "pass").length;
   const groups: Record<string, PullRequestFile[]> = {};
   base.files.forEach((file) => {
@@ -124,7 +139,11 @@ export function GitHubScreen() {
     groups[file.category] = category;
   });
   const reviewMet = reviewerState === "approved";
-  const validationMet = false; // final validation gate intentionally still required
+  const validationBase = validationFor(issue);
+  const validationOverride = state.valState[issue.key];
+  const validationMet =
+    (validationOverride?.decision ?? validationBase.decision) === "Passed" &&
+    (validationOverride?.evidenceStatus ?? validationBase.evidenceStatus) === "Complete";
 
   const gates = [
     {
@@ -136,6 +155,11 @@ export function GitHubScreen() {
       label: "Changed-file review",
       met: !!ov.diffReviewed,
       detail: ov.diffReviewed ? "reviewed" : "not reviewed",
+    },
+    {
+      label: "Reviewer checklist",
+      met: checklistComplete,
+      detail: checklistComplete ? "complete" : "incomplete",
     },
     { label: "Human review gate", met: reviewMet, detail: reviewMet ? "approved" : "pending" },
     { label: "Final validation", met: validationMet, detail: "required before merge" },
@@ -211,13 +235,13 @@ export function GitHubScreen() {
                   onClick={markReviewed}
                   disabled={ov.diffReviewed}
                 >
-                  {ov.diffReviewed ? "Diff reviewed" : "Mark diff reviewed"}
+                  {ov.diffReviewed ? "Demo diff reviewed" : "Mark demo diff reviewed"}
                 </Btn>
                 <Btn size="sm" variant="danger" icon="rotate-ccw" onClick={requestChanges}>
-                  Request changes
+                  Record demo changes requested
                 </Btn>
                 <Btn size="sm" variant="primary" icon="shield-check" onClick={approveForValidation}>
-                  Approve for validation
+                  Approve demo for validation
                 </Btn>
               </div>
             </div>
@@ -444,7 +468,11 @@ export function GitHubScreen() {
                   <Check
                     on={c.done}
                     label={c.label}
-                    onChange={(checked) => actions.setPR(issue.key, { checklistAll: checked })}
+                    onChange={(checked) =>
+                      actions.setPR(issue.key, {
+                        checklist: { ...ov.checklist, [c.label]: checked },
+                      })
+                    }
                   />
                 </div>
               ))}
