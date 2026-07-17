@@ -2,9 +2,9 @@
 import type { RecordedWalkthroughEvidence } from "./contracts";
 
 export const recordedWalkthroughEvidence: RecordedWalkthroughEvidence | null = {
-  runId: "sandbox-20260717t113000-3a9c2170",
-  sourceCommit: "e4ded3e4737def137c989f625c57c14f2163d89c",
-  sourceWorkingTree: "MODIFIED",
+  runId: "sandbox-20260717t205034-9f48102b",
+  sourceCommit: "4d27eee7eafb9135a8529877d262d3e13ac523da",
+  sourceWorkingTree: "CLEAN",
   sandboxProvider: "LOCAL_DOCKER",
   approvalOutcome: "PREAPPROVED_SYNTHETIC_FIXTURE",
   change: {

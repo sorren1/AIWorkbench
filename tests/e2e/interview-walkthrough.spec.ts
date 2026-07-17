@@ -64,7 +64,7 @@ test("the full seven-minute principal path follows one deterministic control and
   await expect(tour).toHaveAttribute("data-tour-step", "sandbox-replay");
   await expect(page.getByRole("heading", { level: 1, name: "Run Trace" })).toBeVisible();
   await expect(tour).toContainText("LOCAL_DOCKER");
-  await expect(tour).toContainText("e4ded3e4737def137c989f625c57c14f2163d89c");
+  await expect(tour).toContainText("4d27eee7eafb9135a8529877d262d3e13ac523da");
 
   await next.click();
   await expect(tour).toHaveAttribute("data-tour-step", "approval-pause");

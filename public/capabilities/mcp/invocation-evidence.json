@@ -12,7 +12,7 @@
     {
       "toolId": "tool.repository.search",
       "registryVersion": "1.0.0",
-      "registryContentHash": "58efc9182f4b592249e514de7242607bca8506c1c952ec7331956bbe81b66aee",
+      "registryContentHash": "ee1a8ff4c18e4a9fd59fbebb95bd869db43c971414c7bb15426904ac761f9bd1",
       "stageId": "implement",
       "decision": "ALLOW",
       "reasonCode": "POLICY_ALLOW",
@@ -25,7 +25,7 @@
     {
       "toolId": "tool.repository.file.read",
       "registryVersion": "1.0.0",
-      "registryContentHash": "2256baff80d79b40ae1a095223ab73287aff9f95bb7400e93466e8cbee076c10",
+      "registryContentHash": "27150dac6ce643d6184f80b4edebd3f20481b533608f64c2b19a074335609fb5",
       "stageId": "implement",
       "decision": "ALLOW",
       "reasonCode": "POLICY_ALLOW",
@@ -38,7 +38,7 @@
     {
       "toolId": "tool.repository.patch.controlled",
       "registryVersion": "1.0.0",
-      "registryContentHash": "080618e56b066abdf555440943c063e12f5a3c34697a37786aabdb9920de5917",
+      "registryContentHash": "97fc9fad2a2281fd9c4198c572c38319adf203ee809cb114be7c9b3a57bce85a",
       "stageId": "implement",
       "decision": "ALLOW",
       "reasonCode": "BOUND_APPROVAL_CURRENT",
@@ -51,7 +51,7 @@
     {
       "toolId": "tool.repository.diff.inspect",
       "registryVersion": "1.0.0",
-      "registryContentHash": "620e4b73947a11e0f403368a9183fcea127a98cc26a22ed200b8e07ed8d8fe67",
+      "registryContentHash": "7f65435a3f37798a2505415527ddaeacaabd7b5b53cd3a86e30e7ad08b2c6b35",
       "stageId": "implement",
       "decision": "ALLOW",
       "reasonCode": "POLICY_ALLOW",
@@ -64,7 +64,7 @@
     {
       "toolId": "tool.sandbox.command",
       "registryVersion": "1.0.0",
-      "registryContentHash": "00a4522ef228a795c1626caf1ecb2717de2e93f666a36e81cbe77a7bd9ddc664",
+      "registryContentHash": "29ce03447de5816da5c1b0891fd67a873f3f4ef4ade3e5dfb7ca2d97319dd027",
       "stageId": "implement",
       "decision": "ALLOW",
       "reasonCode": "POLICY_NOTIFY",

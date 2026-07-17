@@ -8,8 +8,8 @@ The public browser is static. It can exercise the typed workflow reducer, determ
 
 The recorded Docker evidence identifies:
 
-- run `sandbox-20260717t113000-3a9c2170`;
-- source commit `e4ded3e4737def137c989f625c57c14f2163d89c` with the source working tree honestly labeled `MODIFIED`;
+- run `sandbox-20260717t205034-9f48102b`;
+- source commit `4d27eee7eafb9135a8529877d262d3e13ac523da` with the source working tree labeled `CLEAN`;
 - tested repository tree digest `03fdf54fb8de0e13baf450bbfccd611f778a05a0141fef6e1a0e0be8b4c72917`;
 - provider `LOCAL_DOCKER`;
 - outcome `SUCCEEDED`; and

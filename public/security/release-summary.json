@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-07-17T20:30:29.718Z",
+  "generatedAt": "2026-07-17T20:59:13.635Z",
   "source": {
-    "baseCommit": "f032903b9b9f840c7bc0f293852f7127d864ba51",
+    "baseCommit": "4d27eee7eafb9135a8529877d262d3e13ac523da",
     "revisionKind": "WORKTREE",
-    "treeDigest": "68556afee1d29f9839f79fc24a6f34f54533ece0236327c29c4a749990adda8e"
+    "treeDigest": "65cffbdf74a5816fe278620b8c9c1aec0031b7eb727b8da0bce146dd083339b5"
   },
   "controls": [
     {
@@ -13,7 +13,7 @@
       "status": "PASSED",
       "scanner": "Gitleaks",
       "version": "8.30.1",
-      "target": "320 source files plus reachable Git history",
+      "target": "321 source files plus reachable Git history",
       "findingCount": 0,
       "detail": "Redacted SARIF reports were generated for history and the tracked worktree snapshot."
     },
@@ -152,17 +152,17 @@
     {
       "kind": "SBOM",
       "name": "sandbox-image.cdx.json",
-      "sha256": "04c4f0e72e4391d03da6ea98ffac05af209313c51983820f9c78051ebff1514e"
+      "sha256": "16710ed175e86486859fb6ce71100dcf29ff845d78d12348bb0ce55a0a0492d0"
     },
     {
       "kind": "SBOM",
       "name": "litellm-image.cdx.json",
-      "sha256": "98311aeebf6fd3696c91704426d0a8f6854efce92af86530495c1cb453e3471a"
+      "sha256": "82ffc8fbc94489fc5ac45b94816cfad356c5cb4d77e6a52eb029f24c82cea835"
     },
     {
       "kind": "SBOM",
       "name": "postgres-image.cdx.json",
-      "sha256": "9e60a30f8047ad0d832c94a91175eabe1bd1bb5474eeb7132f5419a0af1e478a"
+      "sha256": "c22b25461d6bcc626a49e34a8a2c87a384fca22fd84d15c5a6175779be850bdb"
     },
     {
       "kind": "PROVENANCE",
@@ -177,7 +177,7 @@
     {
       "kind": "INVENTORY",
       "name": "scanner-metadata.json",
-      "sha256": "46e8240431bfe6011027f6f23365698d318ffa261512b70ac65fae5714ebba26"
+      "sha256": "27890ab2e64c98c19ab9834a2d822b70da8bb2d125fa349ac5fe970c77eb63a6"
     },
     {
       "kind": "INVENTORY",

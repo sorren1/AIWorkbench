@@ -113,9 +113,15 @@ const provenancePatterns = [
   /resolves to commit\s*`([a-f0-9]{40})/gimu,
 ] as const;
 const provenanceReferences = new Map<string, Set<string>>();
-const trackedPaths = git(["ls-files", "-z"]).split("\0").filter(Boolean);
+const trackedPaths = git(["ls-files", "-z", "--cached", "--others", "--exclude-standard"])
+  .split("\0")
+  .filter(Boolean);
 for (const relativePath of trackedPaths) {
-  const contents = await readFile(resolve(root, relativePath));
+  const contents = await readFile(resolve(root, relativePath)).catch((error: unknown) => {
+    if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
+    throw error;
+  });
+  if (!contents) continue;
   if (contents.includes(0)) continue;
   const text = contents.toString("utf8");
   for (const pattern of provenancePatterns) {
