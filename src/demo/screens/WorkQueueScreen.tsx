@@ -1,4 +1,4 @@
-import type { MouseEvent, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 import {
   issues as issueFixtures,
@@ -53,10 +53,15 @@ function QueueChip({
   readonly children: ReactNode;
 }) {
   return (
-    <div className={"wb-chip" + (active ? " is-active" : "")} onClick={onClick}>
+    <button
+      type="button"
+      className={"wb-chip" + (active ? " is-active" : "")}
+      aria-pressed={active}
+      onClick={onClick}
+    >
       <Icon name={icon} size={13} />
       {children}
-    </div>
+    </button>
   );
 }
 
@@ -87,8 +92,7 @@ export function WorkQueue() {
     stale: issues.filter((i) => i.s.includes("stale")).length,
   };
 
-  const nextActionClick = (e: MouseEvent<HTMLButtonElement>, it: Issue) => {
-    e.stopPropagation();
+  const nextActionClick = (it: Issue) => {
     const tgt = it.next.target;
     if (tgt === "issue") actions.openIssue(it.key);
     else actions.navigate(tgt, it.key);
@@ -104,7 +108,7 @@ export function WorkQueue() {
           <div className="eyebrow wb-mb-8">
             <Icon name="layout-grid" size={13} /> Synthetic delivery cockpit
           </div>
-          <div className="wb-page-title">Work Queue</div>
+          <h1 className="wb-page-title">Work Queue</h1>
           <div className="wb-page-desc">
             A deterministic queue for exploring governed delivery state. Every issue, persona,
             branch, status, timestamp, and count below is a synthetic demo fixture.
@@ -160,6 +164,7 @@ export function WorkQueue() {
         <div className="wb-search">
           <Icon name="search" size={16} />
           <input
+            aria-label="Search synthetic issues"
             placeholder="Search issues by key or title…"
             value={f.search}
             onChange={(e) => actions.setFilter({ search: e.target.value })}
@@ -167,6 +172,7 @@ export function WorkQueue() {
         </div>
         <div className="wb-select" style={{ width: 160 }}>
           <select
+            aria-label="Filter by lifecycle state"
             value={f.lifecycle}
             onChange={(e) => actions.setFilter({ lifecycle: e.target.value })}
           >
@@ -180,6 +186,7 @@ export function WorkQueue() {
         </div>
         <div className="wb-select" style={{ width: 150 }}>
           <select
+            aria-label="Filter by implementation surface"
             value={f.surface}
             onChange={(e) => actions.setFilter({ surface: e.target.value })}
           >
@@ -236,8 +243,10 @@ export function WorkQueue() {
           f.lifecycle ||
           f.surface ||
           f.search) && (
-          <div
+          <button
+            type="button"
             className="wb-chip"
+            aria-label="Clear all queue filters"
             onClick={() =>
               actions.setFilter({
                 search: "",
@@ -253,40 +262,60 @@ export function WorkQueue() {
           >
             <Icon name="x" size={13} />
             Clear
-          </div>
+          </button>
         )}
         <div className="wb-spacer" style={{ marginLeft: "auto" }} />
-        <span className="wb-text-sm wb-muted">
+        <span className="wb-text-sm wb-muted" aria-live="polite">
           {filtered.length} of {issues.length}
         </span>
       </div>
 
       <Card className="wb-card--flat" style={{ overflow: "hidden" }}>
-        <div className="wb-table-wrap cr-scroll">
+        <div
+          className="wb-table-wrap cr-scroll"
+          role="region"
+          aria-label="Synthetic work queue"
+          tabIndex={0}
+        >
           <table className="wb-table">
+            <caption className="wb-sr-only">
+              Synthetic issues. Use the Open issue button in the first column or the action in the
+              Next Action column.
+            </caption>
             <thead>
               <tr>
-                <th>Issue</th>
-                <th>Title</th>
-                <th>Domain</th>
-                <th>Surface</th>
-                <th>Lifecycle</th>
-                <th>Current AI Stage</th>
-                <th>Last Run</th>
-                <th style={{ textAlign: "center" }}>Artifacts</th>
-                <th>Branch</th>
-                <th style={{ textAlign: "center" }}>PR</th>
-                <th>Next Action</th>
-                <th>Risk</th>
+                <th scope="col">Issue</th>
+                <th scope="col">Title</th>
+                <th scope="col">Domain</th>
+                <th scope="col">Surface</th>
+                <th scope="col">Lifecycle</th>
+                <th scope="col">Current AI Stage</th>
+                <th scope="col">Last Run</th>
+                <th scope="col" style={{ textAlign: "center" }}>
+                  Artifacts
+                </th>
+                <th scope="col">Branch</th>
+                <th scope="col" style={{ textAlign: "center" }}>
+                  PR
+                </th>
+                <th scope="col">Next Action</th>
+                <th scope="col">Risk</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((it) => {
                 const cs = currentStage(it);
                 return (
-                  <tr key={it.key} onClick={() => actions.openIssue(it.key)}>
+                  <tr key={it.key}>
                     <td>
-                      <span className="wb-row-key">{it.key}</span>
+                      <button
+                        type="button"
+                        className="wb-row-key wb-row-link"
+                        aria-label={`Open issue ${it.key}: ${it.title}`}
+                        onClick={() => actions.openIssue(it.key)}
+                      >
+                        {it.key}
+                      </button>
                     </td>
                     <td style={{ minWidth: 210 }}>
                       <span className="wb-row-title">{it.title}</span>
@@ -338,7 +367,7 @@ export function WorkQueue() {
                         size="sm"
                         variant="secondary"
                         iconRight="arrow-right"
-                        onClick={(e) => nextActionClick(e, it)}
+                        onClick={() => nextActionClick(it)}
                       >
                         {it.next.label}
                       </Btn>

@@ -31,7 +31,7 @@
       </nav>
     </header>
 
-    <main id="main-content">
+    <main id="main-content" tabindex="-1">
       <section class="site-hero" aria-labelledby="case-study-title">
         <p class="eyebrow">Independent engineering case study</p>
         <h1 id="case-study-title">AI Delivery Workbench</h1>
@@ -278,6 +278,9 @@
           aria-label="Functional and simulated capability matrix"
         >
           <table class="site-matrix">
+            <caption class="site-sr-only">
+              Functional, simulated, and planned capabilities in the public prototype.
+            </caption>
             <thead>
               <tr>
                 <th scope="col">Capability</th>
@@ -345,7 +348,9 @@
           <article class="site-code-card">
             <h3>Typed state transitions</h3>
             <p>A discriminated action union limits the reducer to known state changes.</p>
-            <pre><code data-code-excerpt="typed-transitions">Generated from source at build time.</code></pre>
+            <pre
+              tabindex="0"
+            ><code data-code-excerpt="typed-transitions">Generated from source at build time.</code></pre>
             <a
               class="site-source-link"
               data-config-link="repository"
@@ -360,7 +365,9 @@
             <p>
               A re-run marks completed dependent stages stale and records the issue-level condition.
             </p>
-            <pre><code data-code-excerpt="stale-invalidation">Generated from source at build time.</code></pre>
+            <pre
+              tabindex="0"
+            ><code data-code-excerpt="stale-invalidation">Generated from source at build time.</code></pre>
             <a
               class="site-source-link"
               data-config-link="repository"
@@ -373,7 +380,9 @@
           <article class="site-code-card">
             <h3>Artifact provenance shape</h3>
             <p>Artifact metadata binds type, source stage, risk, timestamp, and review status.</p>
-            <pre><code data-code-excerpt="artifact-provenance">Generated from source at build time.</code></pre>
+            <pre
+              tabindex="0"
+            ><code data-code-excerpt="artifact-provenance">Generated from source at build time.</code></pre>
             <a
               class="site-source-link"
               data-config-link="repository"
@@ -386,7 +395,9 @@
           <article class="site-code-card">
             <h3>Changed-file classification</h3>
             <p>Every proposed file is categorized and compared with the expected change surface.</p>
-            <pre><code data-code-excerpt="changed-file-classification">Generated from source at build time.</code></pre>
+            <pre
+              tabindex="0"
+            ><code data-code-excerpt="changed-file-classification">Generated from source at build time.</code></pre>
             <a
               class="site-source-link"
               data-config-link="repository"
@@ -401,7 +412,9 @@
             <p>
               Approval for validation refuses to advance until a person records changed-file review.
             </p>
-            <pre><code data-code-excerpt="human-approval-gate">Generated from source at build time.</code></pre>
+            <pre
+              tabindex="0"
+            ><code data-code-excerpt="human-approval-gate">Generated from source at build time.</code></pre>
             <a
               class="site-source-link"
               data-config-link="repository"

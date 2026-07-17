@@ -59,10 +59,11 @@ npm run preview
 Run the current local CI-equivalent checks with:
 
 ```bash
+npx playwright install chromium
 npm run check
 ```
 
-The E2E and dedicated accessibility commands currently report that their harnesses are deferred. They are not included in `npm run check` and do not represent coverage. See [docs/contributor-commands.md](docs/contributor-commands.md) for the complete command reference.
+`npm run check` includes strict type checking, linting, formatting, unit tests, the production build, and Playwright browser tests. Run `npm run test:a11y` for the focused axe suite or `npm run test:e2e` for all keyboard, overlay, accessibility, and responsive browser checks. See [docs/contributor-commands.md](docs/contributor-commands.md) for the complete command reference.
 
 ## Project structure
 
@@ -83,7 +84,7 @@ src/demo/control-plane/            typed control-plane domain seams
 src/shared/                        local SVG icon system
 src/styles/tokens/                 shared semantic design tokens
 public/assets/                     local logo assets
-tests/                             unit and application smoke tests
+tests/                             unit, axe, keyboard, and responsive browser tests
 docs/                              audits, provenance, decisions, and upgrade plan
 ```
 

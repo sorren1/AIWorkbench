@@ -169,3 +169,27 @@ Null public configuration values are omission instructions. The build does not r
 - Social image and sitemap URLs become absolute automatically once a canonical URL is configured.
 - Public identity and contact details have one typed configuration boundary rather than component-level literals.
 - The custom generator is intentionally small; a larger content surface would justify revisiting an established static-site generator.
+
+## ADR-007 — Prefer native interaction semantics and a deliberate narrow-screen demo boundary
+
+- Status: Accepted
+- Date: 2026-07-16
+
+### Context
+
+The migrated workbench retained several prototype interaction patterns: clickable containers and rows, custom switches and checks, incomplete tabs, and overlays without focus containment. Its desktop shell also depended on a wide viewport. These patterns obscured keyboard affordances, produced inconsistent accessible names and states, and allowed content loss at narrow widths and high zoom.
+
+### Decision
+
+Use native buttons, links, checkboxes, switches, labels, table controls, and disclosure buttons wherever HTML already provides the required behavior. Reserve ARIA composite patterns for true tabs and modal/drawer dialogs. Dialog surfaces move focus inside, contain keyboard focus, close on Escape, make the application shell inert, and restore focus to their trigger. Status toasts use a non-blocking polite live region.
+
+Keep the full workbench as a desktop-optimized application at 901 CSS pixels and wider. Below that boundary, replace the dense application shell with a semantic, keyboard-usable overview that explains the constraint and links back to the responsive case study; do not render an unusable horizontally scrolling facsimile. Public case-study routes remain fully responsive.
+
+Use opaque semantic color tokens, explicit focus rings, and reduced-motion overrides across both themes. Treat Chromium Playwright tests with axe as a committed quality gate covering representative public and demo routes, keyboard paths, overlays, exact target widths, and a 200%-zoom-equivalent viewport.
+
+### Consequences
+
+- Interactive state and accessible names are exposed through platform semantics with less custom event code.
+- Queue rows keep visual hover affordance while a predictable issue action in the first cell becomes the only navigation control.
+- The demo remains coherent on phones and at high zoom without pretending the dense workbench is a mobile product.
+- Automated Chromium and axe coverage is reproducible but does not replace release-phase testing with screen readers, multiple browser engines, or operating-system forced-color modes.

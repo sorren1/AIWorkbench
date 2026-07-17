@@ -154,6 +154,8 @@ function StageRow({
   };
   const nodeIcon = nodeIcons[status];
   const firstArtifact = stage.artifacts[0];
+  const triggerId = `timeline-trigger-${issue.key}-${id}`;
+  const panelId = `timeline-panel-${issue.key}-${id}`;
 
   const runReady = () => {
     if (id === "review") return markReviewReady();
@@ -229,9 +231,16 @@ function StageRow({
       </div>
       <div className="wb-tl-body">
         <div className={"wb-tl-card" + (selected ? " is-selected" : "")}>
-          <div className="wb-tl-card-head" onClick={onToggle}>
-            <div style={{ minWidth: 0 }}>
-              <div className="wb-flex" style={{ gap: 9 }}>
+          <button
+            type="button"
+            className="wb-tl-card-head"
+            id={triggerId}
+            aria-expanded={selected}
+            aria-controls={panelId}
+            onClick={onToggle}
+          >
+            <span style={{ minWidth: 0 }}>
+              <span className="wb-flex" style={{ gap: 9 }}>
                 <span className="wb-tl-stage-name">{def.name}</span>
                 <StatusBadge status={status} />
                 {stage.reviewerActionRequired && (
@@ -239,8 +248,8 @@ function StageRow({
                     Reviewer action
                   </Badge>
                 )}
-              </div>
-              <div
+              </span>
+              <span
                 className="wb-tl-stage-meta wb-mt-8"
                 style={{ display: "flex", gap: 14, flexWrap: "wrap" }}
               >
@@ -260,17 +269,23 @@ function StageRow({
                     <Icon name="file-code" size={11} /> {stage.artifacts.join(", ")}
                   </span>
                 )}
-              </div>
-            </div>
-            <div className="wb-spacer" style={{ marginLeft: "auto" }} />
+              </span>
+            </span>
+            <span className="wb-spacer" style={{ marginLeft: "auto" }} />
             <Icon
               name={selected ? "chevron-down" : "chevron-right"}
               size={16}
               className="wb-muted"
             />
-          </div>
+          </button>
           {selected && (
-            <div className="wb-tl-detail" style={{ paddingTop: 12 }}>
+            <div
+              className="wb-tl-detail"
+              id={panelId}
+              role="region"
+              aria-labelledby={triggerId}
+              style={{ paddingTop: 12 }}
+            >
               <p className="wb-text-sm wb-secondary" style={{ marginBottom: 12 }}>
                 {def.desc}
               </p>
@@ -437,9 +452,9 @@ export function IssueDetail() {
               <LifecycleBadge value={issue.lifecycle} />
               <RiskBadge risk={issue.risk} />
             </div>
-            <div style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.01em", marginTop: 6 }}>
+            <h1 style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.01em", marginTop: 6 }}>
               {issue.title}
-            </div>
+            </h1>
             <div className="wb-text-sm wb-muted wb-mt-8 wb-flex" style={{ gap: 8 }}>
               <Icon name="circle-dot" size={13} /> Current stage:{" "}
               <strong className="wb-secondary">{cs.def.name}</strong>{" "}
@@ -678,9 +693,10 @@ export function IssueDetail() {
                 .slice(-4)
                 .reverse()
                 .map((a, i) => (
-                  <div
+                  <button
+                    type="button"
                     key={a.id}
-                    className="wb-flex wb-clickable"
+                    className="wb-flex wb-clickable wb-artifact-shortcut"
                     style={{
                       gap: 10,
                       padding: "10px 16px",
@@ -705,7 +721,7 @@ export function IssueDetail() {
                     <span className="wb-muted" style={{ fontSize: 11 }}>
                       {a.stage}
                     </span>
-                  </div>
+                  </button>
                 ))}
             </div>
           </Card>
@@ -799,6 +815,8 @@ export function IssueDetail() {
                     100,
                 )}
                 tone="safe"
+                label="Acceptance criteria completion"
+                valueText={`${val.acceptance.filter((a) => a.status === "Passed").length} of ${val.acceptance.length} criteria passed`}
               />
               <Btn
                 size="sm"

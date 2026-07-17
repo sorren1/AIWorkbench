@@ -30,7 +30,7 @@ function PlaneCard({ plane }: { readonly plane: ArchitecturePlane }) {
             <Icon name={plane.icon} size={20} />
           </span>
           <div>
-            <div style={{ fontSize: 15, fontWeight: 700 }}>{plane.name}</div>
+            <h2 style={{ fontSize: 15, fontWeight: 700 }}>{plane.name}</h2>
             <div className="wb-text-sm wb-muted" style={{ marginTop: 1 }}>
               {plane.tagline}
             </div>
@@ -43,6 +43,7 @@ function PlaneCard({ plane }: { readonly plane: ArchitecturePlane }) {
           {plane.items.map((it) => (
             <div key={it} className="wb-flex" style={{ gap: 8 }}>
               <span
+                aria-hidden="true"
                 style={{
                   width: 5,
                   height: 5,
@@ -75,7 +76,7 @@ export function ArchitectureScreen() {
           <div className="eyebrow wb-mb-8">
             <Icon name="network" size={13} /> Production design boundary
           </div>
-          <div className="wb-page-title">Architecture</div>
+          <h1 className="wb-page-title">Architecture</h1>
           <div className="wb-page-desc">
             A governed AI delivery system separates planes of responsibility so acceleration never
             erodes control. Suggestion, implementation, review, and release stay distinct — with
@@ -86,8 +87,16 @@ export function ArchitectureScreen() {
 
       {/* Separation-of-concerns flow */}
       <Card className="wb-mb-16">
-        <div className="wb-card-body">
+        <figure
+          className="wb-card-body wb-architecture-figure"
+          aria-labelledby="architecture-flow-caption"
+        >
+          <figcaption id="architecture-flow-caption" className="wb-sr-only">
+            Delivery responsibility moves from an AI suggestion, to branch-scoped implementation, to
+            human review with checks, and finally to a controlled, traceable release.
+          </figcaption>
           <div
+            aria-hidden="true"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(4, 1fr)",
@@ -134,7 +143,7 @@ export function ArchitectureScreen() {
               </div>
             ))}
           </div>
-        </div>
+        </figure>
       </Card>
 
       {/* Planes */}

@@ -271,6 +271,8 @@ Commit: `docs: reposition workbench as an independent portfolio project`
 
 ### Phase 3 — Semantic interaction and accessibility
 
+Status: Complete (2026-07-16). Delivered with Phase 4 in commit `fix: harden accessibility and responsive behavior`.
+
 Scope: meet keyboard and assistive-technology expectations without changing the product concept.
 
 Acceptance criteria:
@@ -285,23 +287,25 @@ Acceptance criteria:
 - Motion respects `prefers-reduced-motion`.
 - Automated axe coverage reports no serious or critical violations on representative screens, and manual keyboard/screen-reader-oriented checks pass.
 
-Suggested commit: `fix: make the workbench keyboard and screen-reader accessible`
+Delivered commit: `fix: harden accessibility and responsive behavior`
 
 ### Phase 4 — Responsive and resilient layout
+
+Status: Complete (2026-07-16). The public pages are verified at 320, 375, 768, 1024, and 1440 CSS pixels; the demo presents an accessible desktop-optimization overview below 901 CSS pixels.
 
 Scope: preserve the visual identity while supporting narrow, zoomed, and touch layouts.
 
 Acceptance criteria:
 
 - Shell, navigation, headers, disclosure, filters, stat tiles, detail rails, artifact viewer, architecture flow, settings, control-plane cards, approval details, trace waterfall, drawers, and tables adapt at documented breakpoints.
-- At 320, 390, 768, 1024, and 1440 CSS pixels, content is readable and primary actions remain available.
-- No page-level horizontal overflow at 320/390 px; intentional data-table/code/trace overflow remains scoped and labeled.
+- At 320, 375, 768, 1024, and 1440 CSS pixels, content is readable and primary actions remain available.
+- No page-level horizontal overflow at 320/375 px; intentional data-table/code/trace overflow remains scoped and labeled.
 - 200% zoom at a 1280 px viewport does not hide content or require two-dimensional page scrolling.
 - Touch targets meet the chosen WCAG target-size standard or have documented spacing exceptions.
 - Light and dark modes retain readable contrast; measured exceptions are fixed or documented.
 - Visual regression snapshots cover representative desktop and mobile states.
 
-Suggested commit: `fix: make the case study and demo responsive`
+Delivered commit: `fix: harden accessibility and responsive behavior`
 
 ### Phase 5 — Honest demo behavior and control-plane registry
 

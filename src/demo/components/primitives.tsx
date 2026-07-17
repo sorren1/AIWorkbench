@@ -1,8 +1,10 @@
 import {
   Fragment,
+  useRef,
   type ButtonHTMLAttributes,
   type HTMLAttributes,
   type InputHTMLAttributes,
+  type KeyboardEvent,
   type ReactNode,
   type SelectHTMLAttributes,
 } from "react";
@@ -36,7 +38,7 @@ export function Btn({
     .filter(Boolean)
     .join(" ");
   return (
-    <button className={cls} {...rest}>
+    <button type="button" className={cls} {...rest}>
       {icon && <Icon name={icon} size={size === "sm" ? 14 : 16} className="wb-ico" />}
       {children}
       {iconRight && <Icon name={iconRight} size={size === "sm" ? 14 : 16} className="wb-ico" />}
@@ -59,7 +61,7 @@ export function IconBtn({ icon, size, className = "", title, ...rest }: IconButt
     .filter(Boolean)
     .join(" ");
   return (
-    <button className={cls} title={title} aria-label={title} {...rest}>
+    <button type="button" className={cls} title={title} aria-label={title} {...rest}>
       <Icon name={icon} size={size === "sm" ? 15 : 17} />
     </button>
   );
@@ -159,10 +161,10 @@ export function CardHead({
   return (
     <div className="wb-card-head">
       <div>
-        <div className="wb-card-title">
+        <h2 className="wb-card-title">
           {icon && <Icon name={icon} size={16} className="wb-th-ico" />}
           {title}
-        </div>
+        </h2>
         {sub && (
           <div className="wb-card-sub" style={{ marginTop: 2 }}>
             {sub}
@@ -251,49 +253,55 @@ export function SelectField({ value, onChange, options, ...rest }: SelectFieldPr
 }
 export function Toggle({
   on,
-  onClick,
+  onChange,
   disabled,
   label,
 }: {
   readonly on: boolean;
-  readonly onClick?: () => void;
+  readonly onChange?: (checked: boolean) => void;
   readonly disabled?: boolean;
-  readonly label?: ReactNode;
+  readonly label: ReactNode;
 }) {
   return (
-    <div
-      className={"wb-toggle" + (on ? " is-on" : "") + (disabled ? " is-disabled" : "")}
-      onClick={disabled ? undefined : onClick}
-      role="switch"
-      aria-checked={on}
-    >
-      <span className="wb-toggle-track">
+    <label className={"wb-toggle" + (on ? " is-on" : "") + (disabled ? " is-disabled" : "")}>
+      <input
+        className="wb-control-input"
+        type="checkbox"
+        role="switch"
+        checked={on}
+        disabled={disabled}
+        onChange={(event) => onChange?.(event.currentTarget.checked)}
+      />
+      <span className="wb-toggle-track" aria-hidden="true">
         <span className="wb-toggle-knob" />
       </span>
-      {label && <span style={{ fontSize: 13 }}>{label}</span>}
-    </div>
+      <span className="wb-sr-only">{label}</span>
+    </label>
   );
 }
 export function Check({
   on,
-  onClick,
+  onChange,
   label,
   sub,
   disabled,
 }: {
   readonly on: boolean;
-  readonly onClick?: () => void;
+  readonly onChange?: (checked: boolean) => void;
   readonly label: ReactNode;
   readonly sub?: ReactNode;
   readonly disabled?: boolean;
 }) {
   return (
-    <div
-      className={"wb-check" + (on ? " is-on" : "")}
-      onClick={disabled ? undefined : onClick}
-      style={disabled ? { opacity: 0.55, cursor: "not-allowed" } : undefined}
-    >
-      <span className="wb-check-box">
+    <label className={"wb-check" + (on ? " is-on" : "") + (disabled ? " is-disabled" : "")}>
+      <input
+        className="wb-control-input"
+        type="checkbox"
+        checked={on}
+        disabled={disabled}
+        onChange={(event) => onChange?.(event.currentTarget.checked)}
+      />
+      <span className="wb-check-box" aria-hidden="true">
         <Icon name="check" size={13} strokeWidth={2.5} />
       </span>
       <span>
@@ -304,33 +312,66 @@ export function Check({
           </span>
         )}
       </span>
-    </div>
+    </label>
   );
 }
 
 /* ---------- Tabs ---------- */
 export type TabDefinition = { id: string; label: ReactNode; icon?: IconName; count?: number };
+export const tabDomId = (groupId: string, tabId: string) => `${groupId}-tab-${tabId}`;
+export const tabPanelDomId = (groupId: string) => `${groupId}-panel`;
+
 export function Tabs({
+  id,
+  ariaLabel,
   tabs,
   active,
   onChange,
 }: {
+  readonly id: string;
+  readonly ariaLabel: string;
   readonly tabs: readonly TabDefinition[];
   readonly active: string;
   readonly onChange: (id: string) => void;
 }) {
+  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
+  const moveFocus = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    const last = tabs.length - 1;
+    let nextIndex: number | null = null;
+    if (event.key === "ArrowRight") nextIndex = index === last ? 0 : index + 1;
+    if (event.key === "ArrowLeft") nextIndex = index === 0 ? last : index - 1;
+    if (event.key === "Home") nextIndex = 0;
+    if (event.key === "End") nextIndex = last;
+    if (nextIndex === null) return;
+    event.preventDefault();
+    const nextTab = tabs[nextIndex];
+    if (!nextTab) return;
+    onChange(nextTab.id);
+    tabRefs.current[nextIndex]?.focus();
+  };
+
   return (
-    <div className="wb-tabs">
-      {tabs.map((t) => (
-        <div
+    <div className="wb-tabs" role="tablist" aria-label={ariaLabel}>
+      {tabs.map((t, index) => (
+        <button
+          type="button"
           key={t.id}
+          ref={(element) => {
+            tabRefs.current[index] = element;
+          }}
+          id={tabDomId(id, t.id)}
+          role="tab"
           className={"wb-tab" + (active === t.id ? " is-active" : "")}
+          aria-selected={active === t.id}
+          aria-controls={tabPanelDomId(id)}
+          tabIndex={active === t.id ? 0 : -1}
           onClick={() => onChange(t.id)}
+          onKeyDown={(event) => moveFocus(event, index)}
         >
           {t.icon && <Icon name={t.icon} size={15} />}
           {t.label}
           {t.count != null && <span className="wb-tab-count">{t.count}</span>}
-        </div>
+        </button>
       ))}
     </div>
   );
@@ -395,12 +436,31 @@ export function Kv({ rows }: { readonly rows: readonly (readonly [ReactNode, Rea
     </dl>
   );
 }
-export function Progress({ value, tone }: { readonly value: number; readonly tone?: Tone }) {
+export function Progress({
+  value,
+  tone,
+  label,
+  valueText,
+}: {
+  readonly value: number;
+  readonly tone?: Tone;
+  readonly label: string;
+  readonly valueText?: string;
+}) {
+  const boundedValue = Math.max(0, Math.min(100, value));
   return (
-    <div className="wb-progress">
+    <div
+      className="wb-progress"
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={boundedValue}
+      aria-valuetext={valueText}
+    >
       <div
         className={"wb-progress-bar" + (tone ? " wb-progress-bar--" + tone : "")}
-        style={{ width: Math.max(0, Math.min(100, value)) + "%" }}
+        style={{ width: boundedValue + "%" }}
       />
     </div>
   );
@@ -450,6 +510,7 @@ function highlightJSON(src: string): string {
   return s;
 }
 export function CodeView({
+  name,
   lang,
   body,
 }: {
@@ -459,10 +520,20 @@ export function CodeView({
 }) {
   if (lang === "json") {
     return (
-      <div className="wb-code-body" dangerouslySetInnerHTML={{ __html: highlightJSON(body) }} />
+      <div
+        className="wb-code-body"
+        role="region"
+        aria-label={`${name} source`}
+        tabIndex={0}
+        dangerouslySetInnerHTML={{ __html: highlightJSON(body) }}
+      />
     );
   }
-  return <div className="wb-code-body">{body}</div>;
+  return (
+    <div className="wb-code-body" role="region" aria-label={`${name} source`} tabIndex={0}>
+      {body}
+    </div>
+  );
 }
 
 // minimal inline markdown -> react nodes
@@ -491,20 +562,20 @@ export function MarkdownView({ body }: { readonly body: string }) {
   while (i < lines.length) {
     const line = lines[i] ?? "";
     if (/^#\s/.test(line)) {
-      out.push(<h1 key={key++}>{inlineMd(line.slice(2), "h" + key)}</h1>);
+      out.push(<h2 key={key++}>{inlineMd(line.slice(2), "h" + key)}</h2>);
       i++;
       continue;
     }
     if (/^##\s/.test(line)) {
-      out.push(<h2 key={key++}>{inlineMd(line.slice(3), "h" + key)}</h2>);
+      out.push(<h3 key={key++}>{inlineMd(line.slice(3), "h" + key)}</h3>);
       i++;
       continue;
     }
     if (/^###\s/.test(line)) {
       out.push(
-        <h2 key={key++} style={{ fontSize: 13.5 }}>
+        <h4 key={key++} style={{ fontSize: 13.5 }}>
           {inlineMd(line.slice(4), "h" + key)}
-        </h2>,
+        </h4>,
       );
       i++;
       continue;
@@ -541,6 +612,9 @@ export function MarkdownView({ body }: { readonly body: string }) {
         <div
           key={key++}
           className="wb-table-wrap"
+          role="region"
+          aria-label="Artifact data table"
+          tabIndex={0}
           style={{
             margin: "4px 0 14px",
             border: "1px solid var(--border-subtle)",

@@ -13,6 +13,8 @@ import {
   Field,
   Tabs,
   Toggle,
+  tabDomId,
+  tabPanelDomId,
   type TabDefinition,
 } from "../components/primitives";
 
@@ -81,7 +83,7 @@ export function SettingsScreen() {
           <div className="eyebrow wb-mb-8">
             <Icon name="sliders" size={13} /> Enterprise integration console
           </div>
-          <div className="wb-page-title">Settings</div>
+          <h1 className="wb-page-title">Settings</h1>
           <div className="wb-page-desc">
             Vendor-neutral adapter boundaries shown through one illustrative Jira, GitHub, Angular,
             .NET, Oracle, and MCP-style reference stack. Every identifier, configuration value,
@@ -96,10 +98,22 @@ export function SettingsScreen() {
       </Banner>
 
       <div className="wb-mt-16">
-        <Tabs tabs={tabs} active={tab} onChange={setTab} />
+        <Tabs
+          id="settings"
+          ariaLabel="Integration settings"
+          tabs={tabs}
+          active={tab}
+          onChange={setTab}
+        />
       </div>
 
-      <div className="wb-mt-16">
+      <div
+        className="wb-mt-16"
+        id={tabPanelDomId("settings")}
+        role="tabpanel"
+        aria-labelledby={tabDomId("settings", tab)}
+        tabIndex={0}
+      >
         {tab === "jira" && (
           <Card style={{ maxWidth: 720 }}>
             <CardHead icon="scroll-text" title="Jira connection" actions={<SimBadge />} />
@@ -152,7 +166,11 @@ export function SettingsScreen() {
                 <FieldRO label="Branch pattern" value={S.github.branchPattern} mono />
                 <FieldRO label="Connection status" value={S.github.status} />
               </div>
-              <Field label="Repository map" hint={S.github.repos.length + " repos"}>
+              <div className="wb-field">
+                <div className="wb-label">
+                  Repository map
+                  <span className="wb-label-hint">{S.github.repos.length} repos</span>
+                </div>
                 <div className="wb-card wb-card--flat" style={{ overflow: "hidden" }}>
                   {S.github.repos.map((r, i) => (
                     <div
@@ -176,7 +194,7 @@ export function SettingsScreen() {
                     </div>
                   ))}
                 </div>
-              </Field>
+              </div>
               <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
                 <Btn
                   variant="primary"
@@ -246,7 +264,7 @@ export function SettingsScreen() {
                       </div>
                     </div>
                     <div className="wb-flex" style={{ gap: 8 }}>
-                      <Toggle on={on} disabled />
+                      <Toggle on={on} disabled label={label} />
                       <Icon name="lock" size={13} className="wb-muted" />
                     </div>
                   </div>
@@ -383,7 +401,7 @@ export function SettingsScreen() {
                     <Check
                       on={g.on}
                       label={g.label}
-                      onClick={() => actions.toggleGov(g.id)}
+                      onChange={() => actions.toggleGov(g.id)}
                       {...(g.locked === undefined ? {} : { disabled: g.locked })}
                     />
                   </div>

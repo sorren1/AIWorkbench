@@ -97,18 +97,21 @@ export function ArtifactsScreen() {
         {/* Left: artifact list */}
         <Card className="wb-card--flat" style={{ overflow: "hidden", position: "sticky", top: 0 }}>
           <div className="wb-card-head" style={{ padding: "12px 14px" }}>
-            <div className="wb-card-title" style={{ fontSize: 13 }}>
+            <h2 className="wb-card-title" style={{ fontSize: 13 }}>
               <Icon name="folder" size={15} className="wb-th-ico" />
               {artifacts.length} artifacts
-            </div>
+            </h2>
           </div>
           <div className="wb-card-body--tight">
             {artifacts.map((a) => {
-              const isSel = selected && a.id === selected.id;
+              const isSel = a.id === selected.id;
               const rs = reviewState(a);
               return (
-                <div
+                <button
+                  type="button"
                   key={a.id}
+                  className="wb-artifact-option"
+                  aria-pressed={isSel}
                   onClick={() => actions.selectArtifact(issue.key, a.name)}
                   style={{
                     display: "flex",
@@ -129,8 +132,8 @@ export function ArtifactsScreen() {
                       flex: "none",
                     }}
                   />
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div
+                  <span style={{ minWidth: 0, flex: 1 }}>
+                    <span
                       className="wb-mono"
                       style={{
                         fontSize: 12.5,
@@ -142,8 +145,8 @@ export function ArtifactsScreen() {
                       }}
                     >
                       {a.name}
-                    </div>
-                    <div className="wb-flex" style={{ gap: 6, marginTop: 4 }}>
+                    </span>
+                    <span className="wb-flex" style={{ gap: 6, marginTop: 4 }}>
                       <span className="wb-muted" style={{ fontSize: 10.5 }}>
                         {a.stage}
                       </span>
@@ -168,9 +171,9 @@ export function ArtifactsScreen() {
                       <span className="wb-muted" style={{ fontSize: 10.5 }}>
                         {rs}
                       </span>
-                    </div>
-                  </div>
-                </div>
+                    </span>
+                  </span>
+                </button>
               );
             })}
           </div>
@@ -216,6 +219,9 @@ export function ArtifactsScreen() {
             <div
               style={{ maxHeight: "calc(100vh - 220px)", overflow: "auto" }}
               className="cr-scroll"
+              role="region"
+              aria-label={`${selected.name} preview`}
+              tabIndex={0}
             >
               {selected.lang === "json" ? (
                 <div
@@ -305,17 +311,23 @@ function ArtifactsHead({ issue }: { readonly issue: Issue }) {
         <div className="eyebrow wb-mb-8">
           <Icon name="file-code" size={13} /> Reviewable AI output
         </div>
-        <div className="wb-page-title">Artifacts</div>
+        <h1 className="wb-page-title">Artifacts</h1>
         <div className="wb-page-desc">
           Deterministic synthetic artifacts show how AI output can become reviewable and traceable
           instead of remaining an opaque suggestion. Review decisions update local state only.
         </div>
       </div>
       <div className="wb-spacer" />
-      <div className="wb-flex" style={{ gap: 8 }}>
-        <span className="wb-text-sm wb-muted">Issue</span>
+      <div className="wb-flex wb-inline-field" style={{ gap: 8 }}>
+        <label className="wb-text-sm wb-muted" htmlFor="artifacts-issue-select">
+          Issue
+        </label>
         <div className="wb-select" style={{ width: 230 }}>
-          <select value={issue.key} onChange={(e) => actions.navigate("artifacts", e.target.value)}>
+          <select
+            id="artifacts-issue-select"
+            value={issue.key}
+            onChange={(e) => actions.navigate("artifacts", e.target.value)}
+          >
             {issues.map((item) => (
               <option key={item.key} value={item.key}>
                 {item.key} · {item.title}

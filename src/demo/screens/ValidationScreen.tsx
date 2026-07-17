@@ -65,6 +65,8 @@ export function ValidationScreen() {
   const evidence = ov.evidenceStatus || base.evidenceStatus;
   const started = ov.started || ["In Progress", "Passed", "Failed"].includes(base.evidenceStatus);
   const allPassed = scen.length > 0 && scen.every((s) => s.status === "Passed");
+  const passedScenarioCount = scen.filter((s) => s.status === "Passed").length;
+  const scenarioProgress = Math.round((passedScenarioCount / Math.max(1, scen.length)) * 100);
 
   const setScenario = (name: string, status: Extract<ValidationStatus, "Passed" | "Failed">) => {
     actions.setVal(issue.key, { scenarios: { ...(ov.scenarios || {}), [name]: status } });
@@ -134,7 +136,7 @@ export function ValidationScreen() {
           <div className="eyebrow wb-mb-8">
             <Icon name="flask" size={13} /> QA handoff &amp; audit trail
           </div>
-          <div className="wb-page-title">Validation Evidence</div>
+          <h1 className="wb-page-title">Validation Evidence</h1>
           <div className="wb-page-desc">
             Synthetic acceptance coverage, test scenarios, data assumptions, tester personas, and
             metrics demonstrate how evidence and a final human decision can travel with a change.
@@ -142,10 +144,13 @@ export function ValidationScreen() {
           </div>
         </div>
         <div className="wb-spacer" />
-        <div className="wb-flex" style={{ gap: 8 }}>
-          <span className="wb-text-sm wb-muted">Issue</span>
+        <div className="wb-flex wb-inline-field" style={{ gap: 8 }}>
+          <label className="wb-text-sm wb-muted" htmlFor="validation-issue-select">
+            Issue
+          </label>
           <div className="wb-select" style={{ width: 230 }}>
             <select
+              id="validation-issue-select"
               value={issue.key}
               onChange={(e) => actions.navigate("validation", e.target.value)}
             >
@@ -375,7 +380,11 @@ export function ValidationScreen() {
               ))}
             </div>
             <div className="wb-card-foot" style={{ gap: 8 }}>
+              <label className="wb-sr-only" htmlFor="tester-note-input">
+                Add a synthetic tester note
+              </label>
               <input
+                id="tester-note-input"
                 className="wb-input"
                 placeholder="Add a tester note…"
                 value={noteText}
@@ -412,11 +421,10 @@ export function ValidationScreen() {
             <CardHead icon="check-circle" title="Validation summary" />
             <div className="wb-card-body wb-stack-sm">
               <Progress
-                value={Math.round(
-                  (scen.filter((s) => s.status === "Passed").length / Math.max(1, scen.length)) *
-                    100,
-                )}
+                value={scenarioProgress}
                 tone={allPassed ? "safe" : "warn"}
+                label="Validation scenario completion"
+                valueText={`${passedScenarioCount} of ${scen.length} scenarios passed`}
               />
               <div className="wb-between">
                 <span className="wb-text-sm wb-secondary">Scenarios passed</span>

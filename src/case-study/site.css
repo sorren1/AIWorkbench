@@ -9,6 +9,28 @@ html {
   margin: 0;
   color: var(--text-primary);
   background: var(--bg-canvas);
+  overflow-wrap: anywhere;
+}
+
+.site-body :where(header, main, footer, section, article, aside, figure, div, li) {
+  min-width: 0;
+}
+
+.site-body img,
+.site-body svg {
+  max-width: 100%;
+}
+
+.site-sr-only {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 
 .site-skip-link {
@@ -17,7 +39,7 @@ html {
   top: 10px;
   left: 10px;
   padding: 10px 14px;
-  color: var(--text-on-accent);
+  color: var(--on-accent);
   background: var(--accent);
   border-radius: var(--radius-md);
   transform: translateY(-160%);
@@ -29,7 +51,8 @@ html {
 
 .site-body a:focus-visible,
 .site-body summary:focus-visible,
-.site-table-wrap:focus-visible {
+.site-table-wrap:focus-visible,
+.site-body main:focus-visible {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
 }
@@ -692,7 +715,6 @@ html {
 
 .site-final .eyebrow {
   color: inherit;
-  opacity: 0.8;
 }
 
 .site-final .site-primary-action {
@@ -919,6 +941,29 @@ html {
 }
 
 @media (max-width: 520px) {
+  .site-header,
+  .site-section,
+  .site-footer,
+  .site-provenance-note,
+  .site-hero,
+  .site-final,
+  .site-article,
+  .site-not-found {
+    width: min(100% - 32px, 1120px);
+  }
+
+  .site-header {
+    gap: 12px;
+  }
+
+  .site-brand > span {
+    display: none;
+  }
+
+  .site-nav {
+    gap: 12px;
+  }
+
   .site-grid--five {
     grid-template-columns: 1fr;
   }

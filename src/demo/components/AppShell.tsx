@@ -1,9 +1,18 @@
-import { Fragment, useEffect, useState, type Dispatch, type SetStateAction } from "react";
+import {
+  Fragment,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type Dispatch,
+  type RefObject,
+  type SetStateAction,
+} from "react";
 
 import { logsFor } from "../data/content";
 import { issues, meta, stageDefs } from "../data/fixtures";
 import type { Route } from "../data/types";
-import { useApp, type ToastKind } from "../state/store";
+import { useApp, type LogDrawer, type ToastKind, type WorkbenchModal } from "../state/store";
 import { Icon, type IconName } from "../../shared/Icon";
 import { Avatar, Badge, Banner, Btn, IconBtn } from "./primitives";
 
@@ -92,7 +101,7 @@ export function Sidebar() {
           <div className="wb-brand-sub">Human-in-the-loop control plane</div>
         </div>
       </div>
-      <nav className="wb-nav cr-scroll">
+      <nav className="wb-nav cr-scroll" aria-label="Workbench screens">
         {NAV.map((sec) => (
           <Fragment key={sec.group}>
             <div className="wb-nav-label">{sec.group}</div>
@@ -151,7 +160,7 @@ export function Header({
   const showIssue = ["issue", "artifacts", "github", "validation"].includes(state.route);
   return (
     <header className="wb-header">
-      <div className="wb-crumbs">
+      <nav className="wb-crumbs" aria-label="Breadcrumb">
         <span className="wb-crumb">Workbench</span>
         <span className="wb-crumb-sep">
           <Icon name="chevron-right" size={14} />
@@ -167,10 +176,10 @@ export function Header({
             <span className="wb-crumb is-current wb-mono">{issue.key}</span>
           </>
         )}
-      </div>
+      </nav>
 
       <div className="wb-disclaimer" title={meta.aboutNote}>
-        <span className="wb-dot" />
+        <span className="wb-dot" aria-hidden="true" />
         {meta.disclaimer}
       </div>
 
@@ -235,9 +244,14 @@ export function ToastHost() {
     error: "Error",
     info: "Working",
   };
-  if (!state.toasts.length) return null;
   return (
-    <div className="wb-toast-wrap">
+    <section
+      className="wb-toast-wrap"
+      aria-label="Notifications"
+      aria-live="polite"
+      aria-atomic="false"
+      aria-relevant="additions"
+    >
       {state.toasts.map((t) => (
         <div
           key={t.id}
@@ -253,15 +267,77 @@ export function ToastHost() {
             {t.msg && <div className="wb-toast-msg">{t.msg}</div>}
           </div>
           <button
+            type="button"
             className="wb-toast-close"
+            aria-label={`Dismiss ${t.title || titleMap[t.kind]} notification`}
             onClick={() => actions.dispatch({ type: "TOAST_REMOVE", id: t.id })}
           >
             <Icon name="x" size={15} />
           </button>
         </div>
       ))}
-    </div>
+    </section>
   );
+}
+
+const FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])',
+].join(",");
+
+function useDialogFocus(surfaceRef: RefObject<HTMLElement | null>, onClose: () => void) {
+  const returnFocusRef = useRef<HTMLElement | null>(
+    document.activeElement instanceof HTMLElement ? document.activeElement : null,
+  );
+
+  useEffect(() => {
+    const surface = surfaceRef.current;
+    if (!surface) return;
+    const returnTarget = returnFocusRef.current;
+    const focusables = () =>
+      Array.from(surface.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)).filter(
+        (element) =>
+          !element.hasAttribute("hidden") && element.getAttribute("aria-hidden") !== "true",
+      );
+    (focusables()[0] ?? surface).focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const elements = focusables();
+      if (!elements.length) {
+        event.preventDefault();
+        surface.focus();
+        return;
+      }
+      const first = elements[0];
+      const last = elements[elements.length - 1];
+      if (!first || !last) return;
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      queueMicrotask(() => {
+        if (returnTarget?.isConnected) returnTarget.focus();
+      });
+    };
+  }, [onClose, surfaceRef]);
 }
 
 /* ---------- Drawer host (logs) ---------- */
@@ -271,17 +347,40 @@ export function DrawerHost() {
   if (!d) return null;
   const issue = state.issues[d.key];
   if (!issue) return null;
+  return <LogDrawerDialog drawer={d} onClose={actions.closeDrawer} />;
+}
+
+function LogDrawerDialog({
+  drawer: d,
+  onClose,
+}: {
+  readonly drawer: LogDrawer;
+  readonly onClose: () => void;
+}) {
+  const { state } = useApp();
+  const issue = state.issues[d.key];
+  const surfaceRef = useRef<HTMLElement>(null);
+  const titleId = useId();
+  useDialogFocus(surfaceRef, onClose);
+  if (!issue) return null;
   const stageDef = stageDefs.find((stage) => stage.id === d.stageId);
   const lines = logsFor(issue, d.stageId);
   return (
     <>
-      <div className="wb-scrim" onClick={actions.closeDrawer} />
-      <div className="wb-drawer">
+      <div className="wb-scrim" aria-hidden="true" />
+      <aside
+        ref={surfaceRef}
+        className="wb-drawer"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+      >
         <div className="wb-drawer-head">
-          <div className="wb-drawer-title">
+          <h2 className="wb-drawer-title" id={titleId}>
             <Icon name="terminal" size={16} />
             Run logs — {stageDef ? stageDef.name : d.stageId}
-          </div>
+          </h2>
           <div className="wb-spacer" style={{ marginLeft: "auto" }} />
           <Badge tone="neutral" icon="hash">
             {issue.key}
@@ -289,8 +388,8 @@ export function DrawerHost() {
           <IconBtn
             icon="x"
             size="sm"
-            title="Close"
-            onClick={actions.closeDrawer}
+            title="Close logs drawer"
+            onClick={onClose}
             style={{ marginLeft: 8 }}
           />
         </div>
@@ -300,9 +399,13 @@ export function DrawerHost() {
             occurred.
           </Banner>
           <div className="wb-code wb-mt-12" style={{ border: "1px solid var(--border-subtle)" }}>
-            <div className="wb-code-body" style={{ whiteSpace: "pre-wrap" }}>
+            <pre
+              className="wb-code-body wb-log"
+              aria-label={`Synthetic ${stageDef ? stageDef.name : d.stageId} run logs`}
+              tabIndex={0}
+            >
               {lines.map((l, i) => (
-                <div
+                <span
                   key={i}
                   style={{
                     color: /FAIL|error|non-zero/.test(l)
@@ -315,12 +418,12 @@ export function DrawerHost() {
                   <span className="wb-muted">{String(i + 1).padStart(2, "0")}</span>
                   {"  "}
                   {l}
-                </div>
+                </span>
               ))}
-            </div>
+            </pre>
           </div>
         </div>
-      </div>
+      </aside>
     </>
   );
 }
@@ -330,16 +433,40 @@ export function ModalHost() {
   const { state, actions } = useApp();
   const m = state.modal;
   if (!m) return null;
+  return <ModalDialog modal={m} onClose={actions.closeModal} />;
+}
+
+function ModalDialog({
+  modal: m,
+  onClose,
+}: {
+  readonly modal: WorkbenchModal;
+  readonly onClose: () => void;
+}) {
+  const surfaceRef = useRef<HTMLDivElement>(null);
+  const titleId = useId();
+  useDialogFocus(surfaceRef, onClose);
   const onConfirm = () => {
     if (m.onConfirm) m.onConfirm();
-    actions.closeModal();
+    onClose();
   };
   return (
     <>
-      <div className="wb-scrim" onClick={actions.closeModal} />
-      <div className="wb-modal">
+      <div className="wb-scrim" aria-hidden="true" />
+      <div
+        ref={surfaceRef}
+        className="wb-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        tabIndex={-1}
+      >
         <div className="wb-modal-head">
-          <div className="wb-modal-title" style={{ display: "flex", alignItems: "center", gap: 9 }}>
+          <h2
+            className="wb-modal-title"
+            id={titleId}
+            style={{ display: "flex", alignItems: "center", gap: 9 }}
+          >
             {m.icon && (
               <Icon
                 name={m.icon}
@@ -348,12 +475,13 @@ export function ModalHost() {
               />
             )}
             {m.title}
-          </div>
+          </h2>
+          <IconBtn icon="x" size="sm" title="Close dialog" onClick={onClose} />
         </div>
         <div className="wb-modal-body">{m.body}</div>
         <div className="wb-modal-foot">
           {m.onConfirm && (
-            <Btn variant="ghost" onClick={actions.closeModal}>
+            <Btn variant="ghost" onClick={onClose}>
               {m.cancelLabel || "Cancel"}
             </Btn>
           )}

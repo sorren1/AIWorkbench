@@ -45,13 +45,16 @@ npm run dev
 npm run lint
 npm run typecheck
 npm run test
+npx playwright install chromium
+npm run test:a11y
+npm run test:e2e
 npm run build
 npm run check
 ```
 
 `npm run check` must be the local CI-equivalent aggregate. The lockfile is authoritative; use `npm ci` in CI and clean verification.
 
-`npm run test:a11y` and `npm run test:e2e` are explicit placeholders until their later phases. A successful placeholder exit does not constitute test coverage.
+The Playwright commands run maintained Chromium browser coverage. `npm run test:a11y` applies axe to the public routes and principal demo surfaces; `npm run test:e2e` also covers keyboard interaction, focus management, and responsive layouts. Install the pinned browser once per environment with `npx playwright install chromium`.
 
 ## Required phase report
 

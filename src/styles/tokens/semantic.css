@@ -16,15 +16,15 @@
 
   /* Borders / hairlines */
   --border-subtle: var(--slate-100);
-  --border-default: #d7dde6;
-  --border-strong: #c0c8d4;
+  --border-default: var(--slate-400);
+  --border-strong: var(--slate-500);
   --border-accent: var(--azure-600);
 
   /* Text */
   --text-primary: var(--slate-900);
   --text-secondary: var(--slate-500);
-  --text-tertiary: var(--slate-400);
-  --text-disabled: var(--slate-300);
+  --text-tertiary: var(--slate-500);
+  --text-disabled: var(--slate-500);
   --text-inverse: var(--white);
   --text-link: var(--azure-700);
 
@@ -38,13 +38,13 @@
   --on-accent: var(--white);
 
   /* Semantic — Verified / Safe */
-  --safe: var(--green-600);
+  --safe: var(--green-700);
   --safe-soft: var(--green-50);
   --safe-soft-border: var(--green-100);
   --safe-text: var(--green-700);
 
   /* Semantic — Caution */
-  --warn: var(--amber-600);
+  --warn: var(--amber-700);
   --warn-soft: var(--amber-50);
   --warn-soft-border: var(--amber-100);
   --warn-text: var(--amber-700);
@@ -60,7 +60,7 @@
   --secure-soft: var(--violet-50);
 
   /* Focus ring */
-  --ring: rgba(14, 111, 230, 0.45);
+  --ring: var(--azure-700);
   --ring-offset: var(--bg-surface);
 
   color-scheme: light;
@@ -78,15 +78,15 @@
 
   /* Borders */
   --border-subtle: #1e2532;
-  --border-default: var(--slate-800);
-  --border-strong: var(--slate-700);
+  --border-default: var(--slate-500);
+  --border-strong: var(--slate-400);
   --border-accent: var(--azure-500);
 
   /* Text */
   --text-primary: var(--slate-100);
   --text-secondary: var(--slate-300);
   --text-tertiary: var(--slate-400);
-  --text-disabled: var(--slate-600);
+  --text-disabled: var(--slate-400);
   --text-inverse: var(--slate-950);
   --text-link: var(--azure-400);
 
@@ -97,7 +97,7 @@
   --accent-soft: rgba(38, 132, 255, 0.14);
   --accent-soft-border: rgba(38, 132, 255, 0.28);
   --accent-text: var(--azure-300);
-  --on-accent: #051023;
+  --on-accent: #000;
 
   /* Semantic — Safe */
   --safe: var(--green-500);
@@ -122,7 +122,7 @@
   --secure-soft: rgba(110, 86, 207, 0.16);
 
   /* Focus ring */
-  --ring: rgba(38, 132, 255, 0.55);
+  --ring: var(--azure-400);
   --ring-offset: var(--bg-surface);
 
   color-scheme: dark;

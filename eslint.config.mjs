@@ -40,7 +40,7 @@ export default tseslint.config(
     files: ["**/*.{js,mjs,cjs}"],
   },
   {
-    files: ["vite.config.ts", "scripts/**/*.mjs"],
+    files: ["vite.config.ts", "playwright.config.ts", "scripts/**/*.mjs"],
     languageOptions: {
       globals: globals.node,
     },

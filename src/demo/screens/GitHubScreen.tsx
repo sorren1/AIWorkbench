@@ -444,7 +444,7 @@ export function GitHubScreen() {
                   <Check
                     on={c.done}
                     label={c.label}
-                    onClick={() => actions.setPR(issue.key, { checklistAll: true })}
+                    onChange={(checked) => actions.setPR(issue.key, { checklistAll: checked })}
                   />
                 </div>
               ))}
@@ -503,7 +503,7 @@ function GitHubHead({ issue }: { readonly issue: Issue }) {
         <div className="eyebrow wb-mb-8">
           <Icon name="git-pull-request" size={13} /> Normal engineering controls
         </div>
-        <div className="wb-page-title">GitHub / PR readiness</div>
+        <h1 className="wb-page-title">GitHub / PR readiness</h1>
         <div className="wb-page-desc">
           A synthetic repository, branch, pull request, author, commit history, check suite, and
           reviewer state demonstrate how AI-assisted changes stay inside ordinary engineering
@@ -511,10 +511,16 @@ function GitHubHead({ issue }: { readonly issue: Issue }) {
         </div>
       </div>
       <div className="wb-spacer" />
-      <div className="wb-flex" style={{ gap: 8 }}>
-        <span className="wb-text-sm wb-muted">Issue</span>
+      <div className="wb-flex wb-inline-field" style={{ gap: 8 }}>
+        <label className="wb-text-sm wb-muted" htmlFor="github-issue-select">
+          Issue
+        </label>
         <div className="wb-select" style={{ width: 230 }}>
-          <select value={issue.key} onChange={(e) => actions.navigate("github", e.target.value)}>
+          <select
+            id="github-issue-select"
+            value={issue.key}
+            onChange={(e) => actions.navigate("github", e.target.value)}
+          >
             {issues.map((item) => (
               <option key={item.key} value={item.key}>
                 {item.key} · {item.title}
