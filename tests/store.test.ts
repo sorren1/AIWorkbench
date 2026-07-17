@@ -19,6 +19,31 @@ describe("workbench reducer", () => {
     expect(state.issues["FIN-1150"]?.s[stageIdx("verify")]).toBe("stale");
   });
 
+  it("redoing Plan invalidates Change Targets, Implement, Verify, and Review when present", () => {
+    const initial = createInitialState();
+    const issue = initial.issues["FIN-1150"];
+    expect(issue).toBeDefined();
+    if (!issue) return;
+    initial.issues["FIN-1150"] = { ...issue, s: issue.s.map(() => "done") };
+
+    const state = reducer(initial, {
+      type: "INVALIDATE_DOWNSTREAM_AFTER_REDO",
+      key: "FIN-1150",
+      stageId: "plan",
+    });
+
+    expect(state.issues["FIN-1150"]?.s).toEqual([
+      "done",
+      "done",
+      "done",
+      "done",
+      "stale",
+      "stale",
+      "stale",
+      "stale",
+    ]);
+  });
+
   it("does not toggle a governance rule that is locked", () => {
     const initial = createInitialState();
     const locked = initial.settings.governance.find((setting) => setting.locked);
@@ -29,5 +54,12 @@ describe("workbench reducer", () => {
     expect(state.settings.governance.find((setting) => setting.id === locked?.id)?.on).toBe(
       locked?.on,
     );
+  });
+
+  it("reset restores an exact deterministic baseline", () => {
+    const initial = createInitialState();
+    const modified = reducer(initial, { type: "FILTER", patch: { failed: true } });
+    const routed = reducer(modified, { type: "ROUTE", route: "trace" });
+    expect(reducer(routed, { type: "RESET" })).toEqual(createInitialState());
   });
 });

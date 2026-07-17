@@ -385,3 +385,26 @@ The browser imports sanitized generated status only. A live catalog and validate
 - Provider egress and provider retention terms remain residual risks and are not described as network-isolated execution.
 - Model calls, fallback, usage, cost basis, budget outcomes, and safe credential alias metadata become traceable without prompt/response/key capture.
 - A configured second model is not called consensus or review evidence unless a distinct invocation appears in the trace.
+
+## ADR-016 — Gate releases on claim-oriented tests and measured static output
+
+- Status: Accepted
+- Date: 2026-07-17
+- Detailed records: [`docs/quality-system.md`](quality-system.md), [`docs/performance-and-static-hosting.md`](performance-and-static-hosting.md)
+
+### Context
+
+The repository had useful Chromium and axe coverage, but key readiness decisions remained inline in screens, browser coverage was single-engine, build size was unmeasured, and no pull-request quality workflow enforced evidence, dependency, link, CSP, or performance integrity.
+
+### Decision
+
+Move Verify, review, validation, and release-readiness decisions into pure typed guards used by both screens and tests. Enforce domain coverage plus stricter guard coverage. Run the production preview across Chromium, Firefox, and WebKit; keep axe as a blocking principal-screen check; and capture controlled, non-pixel-gated visual evidence for review.
+
+Use one `check:all` release command and SHA-pinned GitHub Actions on pull requests and `main`. Measure Vite assets against recorded gzip budgets and run local-only desktop/mobile Lighthouse assertions. Emit a static-host header manifest and serve the same CSP in preview. Keep analytics disabled with no provider implementation.
+
+### Consequences
+
+- The screens cannot silently diverge from the guard logic their tests exercise.
+- CI is slower because cross-browser and Lighthouse checks are intentional release gates.
+- Visual captures require human comparison; they avoid platform-font pixel brittleness.
+- A static host must honor the emitted headers or reproduce them at its edge before publication.

@@ -1,0 +1,46 @@
+name: Release-grade quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Build, test, inspect
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - name: Use supported Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Clean install
+        run: npm ci
+      - name: Install maintained browser engines
+        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Run the complete release gate
+        run: npm run check:all
+      - name: Retain local-only audit and visual artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: quality-evidence-${{ github.run_id }}
+          path: |
+            .lighthouseci/
+            coverage/
+            playwright-report/
+            test-results/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14

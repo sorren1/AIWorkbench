@@ -13,6 +13,7 @@ import {
   renderStructuredData,
 } from "../src/site/metadata";
 import { renderRecordedSandboxEvidence } from "../src/site/recordedSandboxEvidence";
+import { siteConfig } from "../src/site/config";
 
 const unconfigured: SiteConfig = {
   authorName: null,
@@ -31,6 +32,14 @@ const configured: SiteConfig = {
 };
 
 describe("static site metadata", () => {
+  it("keeps analytics disabled without provider scripts, cookies, or beacons", () => {
+    expect(siteConfig.analyticsOptIn).toBe(false);
+    const caseStudy = readFileSync(resolve(import.meta.dirname, "../index.html"), "utf8");
+    expect(caseStudy).not.toMatch(
+      /<script[^>]+(?:google-analytics|googletagmanager|plausible\.io|segment\.com|mixpanel\.com)/i,
+    );
+  });
+
   it("renders only validated checked-in sandbox evidence at build time", async () => {
     const rendered = await renderRecordedSandboxEvidence(resolve(import.meta.dirname, ".."));
     expect(rendered?.html).toContain("Failing before, passing after one allow-listed patch.");

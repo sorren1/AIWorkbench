@@ -45,11 +45,17 @@ npm run dev
 npm run lint
 npm run typecheck
 npm run test
-npx playwright install chromium
+npm run test:coverage
+npx playwright install chromium firefox webkit
 npm run test:a11y
 npm run test:e2e
+npm run test:visual
 npm run build
 npm run check
+npm run check:all
+npm run links:check
+npm run performance:budgets
+npm run performance:audit
 npm run demo:sandbox
 npm run demo:sandbox:e2b
 npm run sandbox:evidence:validate
@@ -70,9 +76,9 @@ npm run demo:approve -- --request <request-id> --as synthetic-code-reviewer --re
 npm run demo:resume -- --run <run-id>
 ```
 
-`npm run check` must be the local CI-equivalent aggregate. The lockfile is authoritative; use `npm ci` in CI and clean verification.
+`npm run check:all` must be the complete local CI-equivalent aggregate. `npm run check` is the deterministic prerequisite gate that excludes browser and Lighthouse runs. The lockfile is authoritative; use `npm ci` in CI and clean verification.
 
-The Playwright commands run maintained Chromium browser coverage. `npm run test:a11y` applies axe to the public routes and principal demo surfaces; `npm run test:e2e` also covers keyboard interaction, focus management, and responsive layouts. Install the pinned browser once per environment with `npx playwright install chromium`.
+The Playwright commands run maintained Chromium, Firefox, and WebKit coverage. `npm run test:a11y` applies axe to the public routes and principal demo surfaces; `npm run test:e2e` also covers keyboard interaction, focus management, responsive layouts, security headers, and controlled screenshots. Install the pinned engines once per environment with `npx playwright install chromium firefox webkit`. `npm run check:all` is the complete release gate; `npm run check` is the non-Lighthouse, non-browser prerequisite gate.
 
 ## Required phase report
 

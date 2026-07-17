@@ -5,6 +5,8 @@ html {
 }
 
 .site-body {
+  --text-xs: 13px;
+  --text-sm: 14px;
   min-height: 100%;
   margin: 0;
   color: var(--text-primary);
@@ -703,6 +705,11 @@ html {
   border-radius: var(--radius-md);
   font: 12px / 1.55 var(--font-mono);
   white-space: pre;
+}
+
+.site-code-card pre code,
+.site-recorded-run__diff pre code {
+  font: inherit;
 }
 
 .site-source-link {

@@ -2,6 +2,7 @@ import { useState } from "react";
 
 import { validationFor } from "../data/content";
 import { createValidationEvidencePack, validationEvidenceDownload } from "../exports/validation";
+import { evaluateValidationCompletion } from "../state/guards";
 import { issues } from "../data/fixtures";
 import type { Tone, ValidationStatus } from "../data/types";
 import { useApp, useIssue } from "../state/store";
@@ -104,27 +105,40 @@ export function ValidationScreen() {
     );
   };
   const complete = () => {
-    if (!state.prState[issue.key]?.approvedForValidation) {
+    const gate = evaluateValidationCompletion({
+      issue,
+      approvedForValidation: state.prState[issue.key]?.approvedForValidation === true,
+      personaCanApprove: canApproveValidation,
+      scenarioStatuses: scen.map((scenario) => scenario.status),
+    });
+    const blocker = gate.blockers[0];
+    if (blocker) {
+      const messages = {
+        VERIFY_NOT_PASSED: [
+          "Verification must pass",
+          "A failed, stale, or incomplete Verify stage blocks final validation evidence.",
+        ],
+        BOUND_APPROVAL_REQUIRED: [
+          "Bound release approval required",
+          "Resume an approved release-readiness request before recording the final validation decision.",
+        ],
+        VALIDATION_PERSONA_REQUIRED: [
+          "Validation decision blocked",
+          `The ${activePersona.shortName} persona lacks validation:approve; policy requires a distinct synthetic validator.`,
+        ],
+        VALIDATION_SCENARIOS_INCOMPLETE: [
+          "Tests not all passing",
+          "Every scenario must pass before evidence can be marked complete.",
+        ],
+        REQUIRED_CHECKS_NOT_PASSED: ["Checks incomplete", "Required checks remain open."],
+        DIFF_NOT_REVIEWED: ["Diff review required", "The changed-file review remains open."],
+        REVIEW_CHECKLIST_INCOMPLETE: ["Checklist incomplete", "Review items remain open."],
+        VALIDATION_EVIDENCE_INCOMPLETE: ["Evidence incomplete", "Evidence remains open."],
+      } as const;
       actions.toast(
-        "error",
-        "Bound release approval required",
-        "Resume an approved release-readiness request before recording the final validation decision.",
-      );
-      return;
-    }
-    if (!canApproveValidation) {
-      actions.toast(
-        "error",
-        "Validation decision blocked",
-        `The ${activePersona.shortName} persona lacks validation:approve; policy requires a distinct synthetic validator.`,
-      );
-      return;
-    }
-    if (!allPassed) {
-      actions.toast(
-        "warn",
-        "Tests not all passing",
-        "Every scenario must pass before evidence can be marked complete.",
+        blocker.code === "VALIDATION_SCENARIOS_INCOMPLETE" ? "warn" : "error",
+        messages[blocker.code][0],
+        messages[blocker.code][1],
       );
       return;
     }

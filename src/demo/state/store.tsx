@@ -130,6 +130,7 @@ export type Action =
   | { type: "SET_STAGE"; key: string; idx: number; status: StageStatus }
   | { type: "PATCH_ISSUE"; key: string; patch: IssuePatch }
   | { type: "STALE_FROM"; key: string; fromIdx: number }
+  | { type: "INVALIDATE_DOWNSTREAM_AFTER_REDO"; key: string; stageId: StageId }
   | { type: "TOAST_ADD"; toast: Toast }
   | { type: "TOAST_LEAVE"; id: string }
   | { type: "TOAST_REMOVE"; id: string }
@@ -258,6 +259,25 @@ export function reducer(state: WorkbenchState, action: Action): WorkbenchState {
       };
     }
     /* excerpt:end:stale-invalidation */
+    case "INVALIDATE_DOWNSTREAM_AFTER_REDO": {
+      const issue = state.issues[action.key];
+      if (!issue) return state;
+      const fromIdx = stageIdx(action.stageId) + 1;
+      const stages = issue.s.map((status, index) =>
+        index >= fromIdx && status !== "none" ? "stale" : status,
+      );
+      return {
+        ...state,
+        issues: {
+          ...state.issues,
+          [action.key]: {
+            ...issue,
+            s: stages,
+            flags: { ...issue.flags, staleDownstream: true },
+          },
+        },
+      };
+    }
     case "TOAST_ADD":
       return { ...state, toasts: [...state.toasts, action.toast] };
     case "TOAST_LEAVE":
@@ -347,6 +367,7 @@ export type WorkbenchActions = {
   runStage: (key: string, stageId: StageId, options?: RunStageOptions) => void;
   setStage: (key: string, stageId: StageId, status: StageStatus) => void;
   staleFrom: (key: string, stageId: StageId) => void;
+  invalidateAfterRedo: (key: string, stageId: StageId) => void;
   patchIssue: (key: string, patch: IssuePatch) => void;
   setPR: (key: string, patch: PullRequestOverride) => void;
   setVal: (key: string, patch: ValidationOverride) => void;
@@ -509,6 +530,11 @@ export function AppProvider({ children }: { readonly children: ReactNode }) {
       dispatch({ type: "STALE_FROM", key, fromIdx: stageIdx(stageId) }),
     [],
   );
+  const invalidateAfterRedo = useCallback(
+    (key: string, stageId: StageId) =>
+      dispatch({ type: "INVALIDATE_DOWNSTREAM_AFTER_REDO", key, stageId }),
+    [],
+  );
   const patchIssue = useCallback(
     (key: string, patch: IssuePatch) => dispatch({ type: "PATCH_ISSUE", key, patch }),
     [],
@@ -627,6 +653,7 @@ export function AppProvider({ children }: { readonly children: ReactNode }) {
     runStage,
     setStage,
     staleFrom,
+    invalidateAfterRedo,
     patchIssue,
     setPR,
     setVal,

@@ -30,17 +30,24 @@ The supported runtime is Node.js 22 LTS; `.nvmrc` pins the verified local versio
 | `npm run model-gateway:generate`          | Generate sanitized public gateway status from validated evidence.    |
 | `npm run model-gateway:check`             | Fail when the generated gateway status has drifted.                  |
 | `npm run test:model-gateway:live`         | Run the explicitly enabled credential-gated live gateway test.       |
-| `npm run security:check`                  | Scan public build and generated evidence for credential-shaped data. |
+| `npm run security:check`                  | Scan tracked files and public output without logging matched values. |
+| `npm run dependency:audit`                | Fail on high/critical advisories in the resolved dependency graph.   |
+| `npm run links:check`                     | Validate production HTML links, assets, and fragments.               |
+| `npm run performance:budgets`             | Verify measured production output against recorded gzip budgets.     |
+| `npm run performance:audit`               | Run local desktop/mobile Lighthouse assertions on production output. |
 | `npm run demo:approval:start`             | Start a gitignored local run that pauses for bounded-write approval. |
 | `npm run demo:approve`                    | Approve a bound request as an authorized synthetic reviewer.         |
 | `npm run demo:reject`                     | Reject a bound request as an authorized synthetic reviewer.          |
 | `npm run demo:resume`                     | Revalidate hashes and resume the exact approved local action.        |
 | `npm run test`                            | Run deterministic unit, MCP, and application tests once.             |
-| `npm run test:e2e`                        | Run axe, keyboard, overlay, and responsive checks in Chromium.       |
+| `npm run test:coverage`                   | Run domain tests with enforced coverage thresholds.                  |
+| `npm run test:e2e`                        | Run browser, axe, security, and responsive checks in three engines.  |
 | `npm run test:a11y`                       | Run the focused axe suite on public and principal demo surfaces.     |
-| `npm run check`                           | Run every required local check, including browser tests, in order.   |
+| `npm run test:visual`                     | Capture controlled principal-screen screenshots for human review.    |
+| `npm run check`                           | Run deterministic source, evidence, build, and supply-chain checks.  |
+| `npm run check:all`                       | Run the complete release gate, including browsers and Lighthouse.    |
 
-Install the pinned Playwright browser once per environment with `npx playwright install chromium`. The browser binary is a local tool cache and is not tracked. `npm run check` starts its own Vite server for the browser suite; it does not require a separately running development server.
+Install the pinned Playwright engines once per environment with `npx playwright install chromium firefox webkit`. Browser binaries are local tool-cache content and are not tracked. Browser tests build and serve the production output with the real preview security headers; they do not require a separately running development server.
 
 Registry generation validates the authored fixtures with JSON Schema and computes canonical SHA-256 hashes. MCP evidence generation requires local Git and uses the pinned official TypeScript SDK over stdio. It creates a temporary toy-repository copy, invokes only approved fixture tools, closes the child process, and removes the copy. Neither command contacts an external provider.
 

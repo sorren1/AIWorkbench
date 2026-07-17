@@ -23,7 +23,14 @@
     "model-gateway:generate": "tsx scripts/generate-model-gateway-status.ts",
     "model-gateway:check": "tsx scripts/generate-model-gateway-status.ts --check",
     "model-gateway:evidence:validate": "tsx tools/model-gateway/cli.ts validate",
-    "security:check": "tsx scripts/check-secret-leaks.ts",
+    "security:output": "tsx scripts/check-secret-leaks.ts",
+    "security:repository": "tsx scripts/check-repository-secrets.ts",
+    "security:check": "npm run security:repository && npm run security:output",
+    "dependency:audit": "npm audit --audit-level=high",
+    "links:check": "tsx scripts/check-links.ts",
+    "performance:budgets": "tsx scripts/check-performance-budgets.ts",
+    "performance:budgets:record": "tsx scripts/check-performance-budgets.ts --record",
+    "performance:audit": "tsx scripts/run-lighthouse.ts",
     "model-gateway:up": "docker compose -f ops/model-gateway/compose.yaml up -d --wait",
     "model-gateway:down": "docker compose -f ops/model-gateway/compose.yaml down",
     "demo:model-gateway": "tsx tools/model-gateway/cli.ts run",
@@ -38,11 +45,14 @@
     "demo:reject": "tsx tools/demo-sandbox/cli.ts reject",
     "demo:resume": "tsx tools/demo-sandbox/cli.ts resume",
     "test": "vitest run",
+    "test:coverage": "vitest run --coverage",
     "test:e2b:live": "vitest run tests/e2b-sandbox.live.test.ts",
     "test:model-gateway:live": "vitest run tests/model-gateway.live.test.ts",
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/e2e/accessibility.spec.ts",
-    "check": "npm run format:check && npm run lint && npm run typecheck && npm run registry:check && npm run mcp:evidence:check && npm run sandbox:evidence:validate && npm run trace:check && npm run model-gateway:check && npm run model-gateway:evidence:validate && npm run test && npm run build && npm run security:check && npm run test:e2e"
+    "test:visual": "playwright test --project=visual",
+    "check": "npm run format:check && npm run lint && npm run typecheck && npm run registry:check && npm run mcp:evidence:check && npm run sandbox:evidence:validate && npm run trace:check && npm run model-gateway:check && npm run model-gateway:evidence:validate && npm run test:coverage && npm run build && npm run links:check && npm run performance:budgets && npm run security:check && npm run dependency:audit",
+    "check:all": "npm run check && npm run test:e2e && npm run performance:audit"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.29.0",
@@ -58,15 +68,17 @@
     "zod": "4.4.3"
   },
   "devDependencies": {
-    "@axe-core/playwright": "^4.10.2",
+    "@axe-core/playwright": "4.12.1",
     "@eslint/js": "10.0.1",
-    "@playwright/test": "^1.61.1",
+    "@lhci/cli": "0.15.1",
+    "@playwright/test": "1.61.1",
     "@testing-library/jest-dom": "6.9.1",
     "@testing-library/react": "16.3.2",
     "@types/node": "22.18.13",
     "@types/react": "18.3.31",
     "@types/react-dom": "18.3.7",
     "@vitejs/plugin-react": "6.0.3",
+    "@vitest/coverage-v8": "4.1.10",
     "eslint": "10.7.0",
     "eslint-plugin-react-hooks": "7.1.1",
     "globals": "17.7.0",
@@ -77,5 +89,9 @@
     "typescript-eslint": "8.64.0",
     "vite": "8.1.5",
     "vitest": "4.1.10"
+  },
+  "overrides": {
+    "tmp": "0.2.7",
+    "uuid": "11.1.1"
   }
 }

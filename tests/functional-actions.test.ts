@@ -139,6 +139,18 @@ describe("deep links, scenarios, reset, and harmless preferences", () => {
         new URL("https://portfolio.invalid/demo/?screen=artifacts&issue=PRIVATE-1&artifact=x"),
       ),
     ).toEqual({ route: "artifacts" });
+    expect(
+      parseDemoDeepLink(
+        new URL(
+          "https://portfolio.invalid/demo/?screen=not-a-screen&issue=FIN-1150&artifact=spec.md&view=gov",
+        ),
+      ),
+    ).toEqual({});
+    expect(
+      parseDemoDeepLink(
+        new URL("https://portfolio.invalid/demo/?screen=queue&issue=FIN-1150&artifact=spec.md"),
+      ),
+    ).toEqual({ route: "queue" });
   });
 
   it("serializes only the current public demo selection", () => {

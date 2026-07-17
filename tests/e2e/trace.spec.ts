@@ -23,7 +23,7 @@ test("recorded Run Trace deep link exposes validated hierarchy, budgets, and evi
   await page.keyboard.press("Enter");
   await expect(runRow.getByText("delivery.run.id", { exact: true })).toBeVisible();
 
-  await page.reload();
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1, name: "Run Trace" })).toBeVisible();
 });
 

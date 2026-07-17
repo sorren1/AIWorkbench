@@ -1,0 +1,9 @@
+{
+  "schemaVersion": 1,
+  "caseStudyHtmlGzipBytes": 20000,
+  "caseStudyExecutableScriptCount": 0,
+  "demoEntryJavaScriptGzipBytes": 115000,
+  "totalJavaScriptGzipBytes": 140000,
+  "totalCssGzipBytes": 22000,
+  "externalRuntimeRequestCount": 0
+}

@@ -351,6 +351,8 @@ Suggested commit: `feat: add governed run evidence and traceability`
 
 ### Phase 7 — Quality gates, CI, security, and supply-chain evidence
 
+Status: The release-grade test, CI, browser, accessibility, static-header, dependency-review, secret-safety, and measured performance gates are complete in `test: add release-grade quality gates`. Normalized SAST/SBOM evidence and conditional container-scan evidence remain planned work; this phase is not marked complete until those distinct supply-chain artifacts exist.
+
 Scope: make the repository safe, predictable, and evidentiary for contributors.
 
 Acceptance criteria:

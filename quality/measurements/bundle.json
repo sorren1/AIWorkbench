@@ -1,0 +1,20 @@
+{
+  "schemaVersion": 1,
+  "method": "gzip-level-9-over-vite-production-output",
+  "measurements": {
+    "caseStudyHtmlGzipBytes": 11037,
+    "caseStudyExecutableScriptCount": 0,
+    "demoEntryJavaScriptGzipBytes": 110306,
+    "totalJavaScriptGzipBytes": 125303,
+    "totalCssGzipBytes": 14271,
+    "externalRuntimeRequestCount": 0
+  },
+  "budgets": {
+    "caseStudyHtmlGzipBytes": 20000,
+    "caseStudyExecutableScriptCount": 0,
+    "demoEntryJavaScriptGzipBytes": 115000,
+    "totalJavaScriptGzipBytes": 140000,
+    "totalCssGzipBytes": 22000,
+    "externalRuntimeRequestCount": 0
+  }
+}

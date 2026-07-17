@@ -18,6 +18,7 @@ import {
   renderStructuredData,
   type PageKind,
 } from "./metadata";
+import { renderStaticHostHeaders } from "./securityHeaders";
 
 type Excerpt = {
   readonly sourcePath: string;
@@ -202,6 +203,7 @@ export function portfolioSitePlugin(root: string): Plugin {
       },
     },
     generateBundle() {
+      this.emitFile({ type: "asset", fileName: "_headers", source: renderStaticHostHeaders() });
       this.emitFile({ type: "asset", fileName: "robots.txt", source: createRobotsTxt(siteConfig) });
       this.emitFile({
         type: "asset",

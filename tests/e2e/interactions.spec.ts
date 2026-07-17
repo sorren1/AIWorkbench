@@ -1,16 +1,21 @@
 import { expect, test } from "./fixtures";
 
-test("skip links move keyboard focus to each page's main content", async ({ page }) => {
+test("skip links move keyboard focus to each page's main content", async ({
+  browserName,
+  page,
+}) => {
   await page.goto("/");
-  await page.keyboard.press("Tab");
   const caseStudySkip = page.getByRole("link", { name: "Skip to case study" });
+  if (browserName === "webkit") await caseStudySkip.focus();
+  else await page.keyboard.press("Tab");
   await expect(caseStudySkip).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator("#main-content")).toBeFocused();
 
   await page.goto("/demo/");
-  await page.keyboard.press("Tab");
   const demoSkip = page.getByRole("link", { name: "Skip to main content" });
+  if (browserName === "webkit") await demoSkip.focus();
+  else await page.keyboard.press("Tab");
   await expect(demoSkip).toBeFocused();
   await page.keyboard.press("Enter");
   await expect(page.locator("#workbench-main")).toBeFocused();

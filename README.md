@@ -56,14 +56,14 @@ npm run build
 npm run preview
 ```
 
-Run the current local CI-equivalent checks with:
+Run the complete local release gate with:
 
 ```bash
-npx playwright install chromium
-npm run check
+npx playwright install chromium firefox webkit
+npm run check:all
 ```
 
-`npm run check` includes strict type checking, linting, formatting, unit tests, the production build, and Playwright browser tests. Run `npm run test:a11y` for the focused axe suite or `npm run test:e2e` for all keyboard, overlay, accessibility, and responsive browser checks. See [docs/contributor-commands.md](docs/contributor-commands.md) for the complete command reference.
+`npm run check:all` includes strict type checking, linting, formatting, coverage, evidence validation, the production build, internal-link and credential checks, dependency audit, Chromium/Firefox/WebKit tests, axe, controlled screenshots, bundle budgets, and desktop/mobile Lighthouse assertions. See [the quality system](docs/quality-system.md), [performance and static hosting](docs/performance-and-static-hosting.md), and [docs/contributor-commands.md](docs/contributor-commands.md).
 
 Regenerate the versioned capability cards and sanitized local MCP evidence with:
 

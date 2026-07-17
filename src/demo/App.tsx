@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { lazy, Suspense, useCallback, useEffect, useRef, useState } from "react";
 
 import {
   BrandMark,
@@ -12,51 +12,74 @@ import {
 import { GuidedWalkthrough } from "./components/GuidedWalkthrough";
 import { Btn } from "./components/primitives";
 import { meta } from "./data/fixtures";
-import { ArchitectureScreen } from "./screens/ArchitectureScreen";
 import { ArtifactsScreen } from "./screens/ArtifactsScreen";
 import { GitHubScreen } from "./screens/GitHubScreen";
 import { IssueDetail } from "./screens/IssueScreen";
-import { SettingsScreen } from "./screens/SettingsScreen";
 import { ValidationScreen } from "./screens/ValidationScreen";
 import { ApprovalInboxScreen } from "./screens/ApprovalInboxScreen";
-import { ControlPlaneScreen } from "./screens/ControlPlaneScreen";
 import { WorkQueue } from "./screens/WorkQueueScreen";
-import { RunTraceScreen } from "./screens/RunTraceScreen";
 import { useApp } from "./state/store";
 import { clearPreferences } from "./state/preferences";
 import { clearBrowserAuthorizationState } from "./authorization/browserStore";
 import { DEMO_SCENARIOS, isDemoScenarioId, type DemoScenarioId } from "./state/scenarios";
 import { Icon } from "../shared/Icon";
 
+const ArchitectureScreen = lazy(async () => ({
+  default: (await import("./screens/ArchitectureScreen")).ArchitectureScreen,
+}));
+const ControlPlaneScreen = lazy(async () => ({
+  default: (await import("./screens/ControlPlaneScreen")).ControlPlaneScreen,
+}));
+const RunTraceScreen = lazy(async () => ({
+  default: (await import("./screens/RunTraceScreen")).RunTraceScreen,
+}));
+const SettingsScreen = lazy(async () => ({
+  default: (await import("./screens/SettingsScreen")).SettingsScreen,
+}));
+
 /* ============================================================
    AI Delivery Workbench — Root app + router
    ============================================================ */
 function Screen() {
   const { state } = useApp();
+  let screen;
   switch (state.route) {
     case "queue":
-      return <WorkQueue />;
+      screen = <WorkQueue />;
+      break;
     case "issue":
-      return <IssueDetail />;
+      screen = <IssueDetail />;
+      break;
     case "artifacts":
-      return <ArtifactsScreen />;
+      screen = <ArtifactsScreen />;
+      break;
     case "github":
-      return <GitHubScreen />;
+      screen = <GitHubScreen />;
+      break;
     case "validation":
-      return <ValidationScreen />;
+      screen = <ValidationScreen />;
+      break;
     case "approvals":
-      return <ApprovalInboxScreen />;
+      screen = <ApprovalInboxScreen />;
+      break;
     case "control-plane":
-      return <ControlPlaneScreen />;
+      screen = <ControlPlaneScreen />;
+      break;
     case "trace":
-      return <RunTraceScreen />;
+      screen = <RunTraceScreen />;
+      break;
     case "architecture":
-      return <ArchitectureScreen />;
+      screen = <ArchitectureScreen />;
+      break;
     case "settings":
-      return <SettingsScreen />;
+      screen = <SettingsScreen />;
+      break;
     default:
-      return <WorkQueue />;
+      screen = <WorkQueue />;
   }
+  return (
+    <Suspense fallback={<div role="status">Loading local demo screen…</div>}>{screen}</Suspense>
+  );
 }
 
 function Footer() {

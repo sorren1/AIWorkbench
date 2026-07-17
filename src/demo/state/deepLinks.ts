@@ -37,8 +37,11 @@ export function parseDemoDeepLink(url: URL): DemoDeepLink {
   const artifactParam = url.searchParams.get("artifact");
   const viewParam = url.searchParams.get("view");
   const scenarioParam = url.searchParams.get("scenario");
-  const issue = issues.find((candidate) => candidate.key === issueParam);
   const route = isRoute(screen) ? screen : undefined;
+  const issue =
+    route && ISSUE_ROUTES.includes(route)
+      ? issues.find((candidate) => candidate.key === issueParam)
+      : undefined;
   const artifact =
     route === "artifacts" && issue && artifactParam
       ? artifactsFor(issue).find((candidate) => candidate.name === artifactParam)

@@ -1,0 +1,40 @@
+{
+  "schemaVersion": 1,
+  "measuredOn": "2026-07-17",
+  "environment": {
+    "node": "22.18.0",
+    "chromium": "149.0.7827.55",
+    "lighthouseCi": "0.15.1",
+    "runsPerPage": 1
+  },
+  "scores": {
+    "desktop": {
+      "caseStudy": {
+        "performance": 100,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "seo": 100
+      },
+      "demo": {
+        "performance": 100,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "seo": 100
+      }
+    },
+    "mobile": {
+      "caseStudy": {
+        "performance": 100,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "seo": 100
+      },
+      "demo": {
+        "performance": 99,
+        "accessibility": 100,
+        "bestPractices": 100,
+        "seo": 100
+      }
+    }
+  }
+}

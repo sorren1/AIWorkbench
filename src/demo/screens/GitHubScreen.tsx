@@ -8,6 +8,7 @@ import { personaById } from "../authorization/personas";
 import { sha256Hex } from "../control-plane/registry/canonical";
 import { registrySnapshot } from "../control-plane/registry/generated";
 import { buildContextPack } from "../context/runtime";
+import { evaluateReleaseReadiness, evaluateValidationApproval } from "../state/guards";
 import {
   Avatar,
   Badge,
@@ -102,20 +103,38 @@ export function GitHubScreen() {
   };
   /* excerpt:start:human-approval-gate */
   const approveForValidation = async () => {
-    if (!ov.diffReviewed) {
-      actions.toast(
-        "warn",
-        "Review the diff first",
-        "Mark the changed-file diff reviewed before approving for validation.",
-      );
-      return;
-    }
-    if (!base.checklist.every((item) => ov.checklist?.[item.label] ?? item.done)) {
-      actions.toast(
-        "warn",
-        "Complete the demo checklist",
-        "Every browser-local reviewer checklist item must be checked before validation approval.",
-      );
+    const gate = evaluateValidationApproval({ issue, pullRequest: base, override: ov });
+    const blocker = gate.blockers[0];
+    if (blocker) {
+      const message = {
+        VERIFY_NOT_PASSED: [
+          "Verification must pass",
+          "A failed, stale, or incomplete Verify stage blocks validation approval.",
+        ],
+        REQUIRED_CHECKS_NOT_PASSED: [
+          "Required checks must pass",
+          "Resolve every required automated check before requesting validation approval.",
+        ],
+        DIFF_NOT_REVIEWED: [
+          "Review the diff first",
+          "Mark the changed-file diff reviewed before approving for validation.",
+        ],
+        REVIEW_CHECKLIST_INCOMPLETE: [
+          "Complete the demo checklist",
+          "Every browser-local reviewer checklist item must be checked before validation approval.",
+        ],
+        BOUND_APPROVAL_REQUIRED: ["Bound approval required", "A bound approval is required."],
+        VALIDATION_PERSONA_REQUIRED: ["Validator required", "A distinct validator is required."],
+        VALIDATION_SCENARIOS_INCOMPLETE: [
+          "Validation incomplete",
+          "Validation scenarios remain open.",
+        ],
+        VALIDATION_EVIDENCE_INCOMPLETE: [
+          "Evidence incomplete",
+          "Validation evidence remains open.",
+        ],
+      } as const;
+      actions.toast("warn", message[blocker.code][0], message[blocker.code][1]);
       return;
     }
     const now = new Date().toISOString();
@@ -198,41 +217,24 @@ export function GitHubScreen() {
     ...item,
     done: ov.checklist?.[item.label] ?? item.done,
   }));
-  const checklistComplete = checklist.every((item) => item.done);
-  const checksOpen = base.checks.filter((c) => c.status !== "pass").length;
+  const checksOpen = base.checks.filter((check) => check.status !== "pass").length;
   const groups: Record<string, PullRequestFile[]> = {};
   base.files.forEach((file) => {
     const category = groups[file.category] ?? [];
     category.push(file);
     groups[file.category] = category;
   });
-  const reviewMet = reviewerState === "approved";
   const validationBase = validationFor(issue);
   const validationOverride = state.valState[issue.key];
-  const validationMet =
-    (validationOverride?.decision ?? validationBase.decision) === "Passed" &&
-    (validationOverride?.evidenceStatus ?? validationBase.evidenceStatus) === "Complete";
-
-  const gates = [
-    {
-      label: "Required checks",
-      met: checksOpen === 0,
-      detail: checksOpen === 0 ? "all passed" : checksOpen + " open",
-    },
-    {
-      label: "Changed-file review",
-      met: !!ov.diffReviewed,
-      detail: ov.diffReviewed ? "reviewed" : "not reviewed",
-    },
-    {
-      label: "Reviewer checklist",
-      met: checklistComplete,
-      detail: checklistComplete ? "complete" : "incomplete",
-    },
-    { label: "Human review gate", met: reviewMet, detail: reviewMet ? "approved" : "pending" },
-    { label: "Final validation", met: validationMet, detail: "required before merge" },
-  ];
-  const mergeReady = gates.every((g) => g.met);
+  const readiness = evaluateReleaseReadiness({
+    issue,
+    pullRequest: base,
+    pullRequestOverride: ov,
+    validation: validationBase,
+    ...(validationOverride ? { validationOverride } : {}),
+  });
+  const gates = readiness.gates;
+  const mergeReady = readiness.allowed;
 
   return (
     <div className="wb-page wb-page-wide">

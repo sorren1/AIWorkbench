@@ -5,7 +5,7 @@ import { App } from "../src/demo/App";
 import { AppProvider } from "../src/demo/state/store";
 
 describe("workbench application", () => {
-  it("renders the queue and navigates through the primary workflow screens", () => {
+  it("renders the queue and navigates through the primary workflow screens", async () => {
     render(
       <AppProvider>
         <App />
@@ -28,7 +28,7 @@ describe("workbench application", () => {
     expect(screen.getByText("Acceptance criteria coverage")).toBeVisible();
 
     fireEvent.click(screen.getByText("Control Plane", { selector: ".wb-nav-item span" }));
-    expect(screen.getByRole("heading", { level: 1, name: "Control Plane" })).toBeVisible();
+    expect(await screen.findByRole("heading", { level: 1, name: "Control Plane" })).toBeVisible();
     expect(screen.getByRole("heading", { level: 2, name: "Intake Agent" })).toBeVisible();
   });
 

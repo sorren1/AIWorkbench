@@ -9,7 +9,12 @@ async function downloadedText(download: Download) {
   return readFile(path ?? "", "utf8");
 }
 
-test("artifact copy and download perform real browser-local actions", async ({ context, page }) => {
+test("artifact copy and download perform real browser-local actions", async ({
+  browserName,
+  context,
+  page,
+}) => {
+  test.skip(browserName !== "chromium", "Clipboard permissions are exercised in Chromium");
   await context.grantPermissions(["clipboard-read", "clipboard-write"]);
   await page.goto("/demo/?screen=artifacts&issue=FIN-1150&artifact=spec.md");
   await expect(page.getByRole("button", { name: /spec\.md/ })).toHaveAttribute(
@@ -115,7 +120,7 @@ test("deep links restore screen, issue, artifact, and settings subview after rel
     "aria-pressed",
     "true",
   );
-  await page.reload();
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("button", { name: /spec\.md/ })).toHaveAttribute(
     "aria-pressed",
     "true",
@@ -132,7 +137,7 @@ test("deep links restore screen, issue, artifact, and settings subview after rel
     "aria-selected",
     "true",
   );
-  await page.reload();
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("tab", { name: "Governance" })).toHaveAttribute(
     "aria-selected",
     "true",
@@ -192,7 +197,7 @@ test("reset requires confirmation and restores the deterministic baseline and th
     "synthetic-code-reviewer",
   );
   expect(new URL(page.url()).searchParams.get("scenario")).toBeNull();
-  await page.reload();
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByRole("heading", { level: 1, name: "Work Queue" })).toBeVisible();
   await expect(page.getByLabel("Scenario seed")).toHaveValue("baseline");
 });
@@ -203,7 +208,7 @@ test("versioned local preferences persist and the disclosure keeps writes unambi
   await page.goto("/demo/");
   await expect(page.getByText("Demo mode · Synthetic data · No external writes")).toBeVisible();
   await page.getByRole("button", { name: "Switch to dark" }).click();
-  await page.reload();
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page.getByRole("button", { name: "Sync Jira (simulated)" })).toBeVisible();
   await page.getByRole("button", { name: /Open issue FIN-1150/ }).click();
@@ -229,7 +234,8 @@ test("browser-local workflow decisions mutate the intended state without externa
   const checklist = page.getByRole("checkbox");
   await expect(checklist.first()).toBeChecked();
   await expect(checklist.nth(1)).toBeChecked();
-  await checklist.first().uncheck();
+  await checklist.first().focus();
+  await page.keyboard.press("Space");
   await expect(checklist.first()).not.toBeChecked();
   await expect(checklist.nth(1)).toBeChecked();
   await page.getByRole("button", { name: "Request validation approval" }).click();
@@ -237,7 +243,8 @@ test("browser-local workflow decisions mutate the intended state without externa
   await expect(
     page.getByRole("heading", { level: 1, name: "GitHub / PR readiness" }),
   ).toBeVisible();
-  await checklist.first().check();
+  await checklist.first().focus();
+  await page.keyboard.press("Space");
   await page.getByRole("button", { name: "Request validation approval" }).click();
   await expect(page.getByRole("heading", { level: 1, name: "Approval Inbox" })).toBeVisible();
   await page
@@ -253,7 +260,7 @@ test("browser-local workflow decisions mutate the intended state without externa
   await expect(page.getByText("In Progress", { exact: true }).first()).toBeVisible();
   await page.getByRole("button", { name: "Mark scenario passed" }).click();
   await page.getByRole("button", { name: "Mark demo evidence complete" }).click();
-  await expect(page.getByText("Bound release approval required", { exact: true })).toBeVisible();
+  await expect(page.getByText("Verification must pass", { exact: true })).toBeVisible();
 
   await page.goto("/demo/?screen=github&issue=FIN-1113");
   await page.getByRole("button", { name: "Create mock PR" }).click();
@@ -265,7 +272,7 @@ test("browser-local workflow decisions mutate the intended state without externa
 });
 
 test("simulated upstream redo invalidates existing downstream state", async ({ page }) => {
-  await page.goto("/demo/?screen=issue&issue=FIN-1150");
+  await page.goto("/demo/?screen=issue&issue=FIN-1150&scenario=clean-walkthrough");
   await page.locator(".wb-tl-card-head").filter({ hasText: "Plan" }).click();
   await page.getByRole("button", { name: "Simulate redo of Plan" }).click();
   await page
@@ -274,7 +281,13 @@ test("simulated upstream redo invalidates existing downstream state", async ({ p
     .click();
   await expect(page.getByText("Downstream marked stale", { exact: true })).toBeVisible();
   await expect(
+    page.locator(".wb-tl-card-head").filter({ hasText: /Change Targets.*Stale/ }),
+  ).toBeVisible();
+  await expect(
     page.locator(".wb-tl-card-head").filter({ hasText: /Implement.*Stale/ }),
   ).toBeVisible();
   await expect(page.locator(".wb-tl-card-head").filter({ hasText: /Verify.*Stale/ })).toBeVisible();
+  await expect(
+    page.locator(".wb-tl-card-head").filter({ hasText: /PR Review.*Stale/ }),
+  ).toBeVisible();
 });

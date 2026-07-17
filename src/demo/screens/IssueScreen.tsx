@@ -212,11 +212,11 @@ function StageRow({
         actions.runStage(issue.key, id, {
           doneMsg: def.name + " re-run · downstream marked stale.",
           onDone: () => {
-            actions.staleFrom(issue.key, "implement");
+            actions.invalidateAfterRedo(issue.key, id);
             actions.toast(
               "warn",
               "Downstream marked stale",
-              "Existing Implement, Verify, and PR Review state must be re-run.",
+              "Existing downstream artifacts and stage state must be re-run.",
             );
           },
         }),
