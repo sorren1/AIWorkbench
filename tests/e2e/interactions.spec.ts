@@ -108,7 +108,7 @@ test("the complete guided walkthrough advances using only the keyboard", async (
   const walkthrough = page.locator(".wb-walkthrough");
   await expect(walkthrough).toBeFocused();
   await page.keyboard.press("Tab");
-  await expect(page.getByRole("button", { name: "Open this screen" })).toBeFocused();
+  await expect(page.getByRole("button", { name: "Open this step" })).toBeFocused();
   await page.keyboard.press("Tab");
   const next = page.getByRole("button", { name: "Next" });
   await expect(page.getByRole("button", { name: "Copy step link" })).toBeFocused();
