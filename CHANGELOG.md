@@ -2,9 +2,9 @@
 
 All notable changes to AI Delivery Workbench are recorded here. The project follows [Semantic Versioning](https://semver.org/) for public release labels.
 
-## [1.0.0] — Unreleased
+## [1.0.0] — 2026-07-17
 
-Status: release-candidate documentation is prepared, but no deployment or `1.0.0` Git tag is claimed in this phase.
+Status: independently audited local release. No deployment, push, or hosted-CI success is claimed.
 
 ### Added
 
@@ -22,6 +22,11 @@ Status: release-candidate documentation is prepared, but no deployment or `1.0.0
 - repositioned all public copy as an independent portfolio prototype and separated functional, synthetic, measured, estimated, and professional-context claims;
 - refactored interaction semantics, overlays, keyboard navigation, focus handling, contrast, motion, and responsive behavior;
 - curated the active branch around one maintained UI implementation and the latest validated evidence snapshot.
+
+### Fixed
+
+- enforced LF checkouts through `.gitattributes` so a clean Windows clone with `core.autocrlf=true` passes the reproducible formatting gate.
+- removed a lazy-screen integration-test race by giving the asynchronous Control Plane assertion an explicit bounded wait.
 
 ### Removed
 

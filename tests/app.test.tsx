@@ -28,7 +28,9 @@ describe("workbench application", () => {
     expect(screen.getByText("Acceptance criteria coverage")).toBeVisible();
 
     fireEvent.click(screen.getByText("Control Plane", { selector: ".wb-nav-item span" }));
-    expect(await screen.findByRole("heading", { level: 1, name: "Control Plane" })).toBeVisible();
+    expect(
+      await screen.findByRole("heading", { level: 1, name: "Control Plane" }, { timeout: 5_000 }),
+    ).toBeVisible();
     expect(screen.getByRole("heading", { level: 2, name: "Intake Agent" })).toBeVisible();
   });
 
