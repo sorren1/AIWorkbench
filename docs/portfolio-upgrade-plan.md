@@ -7,26 +7,34 @@ Expanded: 2026-07-16 to include the focused agent control plane
 
 ## Outcome
 
-The finished repository will be a static-host-compatible public project with two deliberate surfaces:
+The finished repository will be a static-host-compatible public project with two deliberate product surfaces plus supporting static routes:
 
 1. `/` — a semantic, statically rendered case study that explains the problem, boundaries, architecture, decisions, controls, and lessons without requiring JavaScript.
 2. `/demo/` — the existing AI Delivery Workbench, migrated to strict TypeScript and conventional React modules, with deterministic local interactions and explicit simulated/functional labeling.
+
+The supporting routes are a substantive technical article at `/writing/governing-ai-assisted-delivery/` and a custom static-host-compatible `404.html`. They share the case-study presentation without loading React.
 
 The workbench will include a focused, vendor-neutral agent control plane for its existing coding-delivery stages. Its thesis is narrow: generation alone is not sufficient evidence. The demo should make authorization decisions, selected context, tool boundaries, human approvals, model/runtime policy, budgets, traces, and supply-chain evidence inspectable for a governed coding-agent run.
 
 This is not a generic agent-management product. The control-plane features stay attached to the workbench's stage workflow, issue runs, artifacts, and evidence. The public release remains a static application with no required backend and no anonymous model or tool endpoint.
 
-Vite will build both HTML entries and fingerprint their local assets. The case study will use plain HTML and CSS with optional progressive enhancement; React will load only on the demo route. No backend is part of the initial public release.
+Vite will build all four HTML entries and fingerprint their local assets. The case study, article, and 404 page use plain semantic HTML and CSS; React loads only on the demo route. No backend is part of the initial public release.
 
 ## Architecture target
 
 ```text
 index.html                         static public case study source
+404.html                           static not-found entry
 demo/index.html                    demo entry document
+writing/governing-ai-assisted-delivery/index.html
+                                   static technical article
 src/
   case-study/
-    case-study.css                 case-study-only layout and responsive rules
-    enhance.ts                     optional theme/navigation enhancement
+    site.css                       case-study/article layout and responsive rules
+  site/
+    config.ts                      typed optional public identity, links, canonical, analytics opt-in
+    metadata.ts                    pure metadata, structured-data, robots, sitemap generators
+    vitePlugin.ts                  build-time links and synchronized source excerpts
   demo/
     main.tsx                       React mount
     App.tsx                        workbench shell
@@ -61,10 +69,12 @@ tests/
 
 Build properties:
 
-- Vite multi-page application with `index.html` and `demo/index.html` inputs.
+- Vite multi-page application with case-study, article, demo, and 404 inputs.
 - Relative or repository-subpath-safe asset URLs so the output works on a Git-backed static host.
 - Strict TypeScript with `noEmit`, React JSX compilation, and no ambient `window` application globals.
 - React production bundle only on `/demo/`; the root case study remains useful with scripts blocked.
+- Build-time configuration omits unset public links and canonical-dependent tags; no dead placeholder or invented deployment URL is rendered.
+- Marker-bounded source excerpts are read from the active TypeScript implementation during the build so drift fails loudly.
 - Local assets only at runtime. Font files may be self-hosted only after their license and attribution are recorded; otherwise use the existing system fallbacks.
 - No client router dependency is required. Demo screen state can remain reducer-driven because `/demo/` is the public route boundary.
 - No server is required for the public demo. Browser persistence is limited to disclosed local preferences and the local approval journal.
@@ -394,6 +404,8 @@ Suggested commit: `release: publish portfolio case study`
 | `_adherence.oxlintrc.json`             | Delete or replace with real lint config                                           | Generated configuration has no installed runner or documented command.                                                                    |
 | `.gitignore`                           | `.gitignore`                                                                      | Keep; add Node/build/test artifacts and private-note rules as tooling lands.                                                              |
 | `private/README.md`                    | `private/README.md`                                                               | Keep tracked as the notice; ignore every other private note.                                                                              |
+| New public narrative routes            | `index.html`, `writing/governing-ai-assisted-delivery/index.html`, `404.html`     | Keep substantive content static and isolate the React bundle to `/demo/`.                                                                 |
+| New public configuration and metadata  | `src/site/`                                                                       | Centralize optional public identity/links and generate canonical-aware metadata, discovery files, and synchronized source excerpts.       |
 
 ## Cross-phase verification policy
 

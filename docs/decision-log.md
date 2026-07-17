@@ -146,3 +146,26 @@ Keep a concise persistent prototype badge, one detailed About/clean-room explana
 - Metrics cannot move between categories: synthetic test counts are not repository measurements, and professional outcomes are not prototype outcomes.
 - New fixtures require synthetic context; new functional claims require runnable evidence; new professional claims are prohibited unless the operating rules change explicitly.
 - The public copy remains concise while the detailed development boundary stays auditable in `docs/clean-room-and-provenance.md` and `docs/semantic-distance-review.md`.
+
+## ADR-006 — Generate public metadata and source evidence at build time
+
+- Status: Accepted
+- Date: 2026-07-16
+
+### Context
+
+The public case study needs configuration-driven outbound links, canonical-aware discovery files, social and structured metadata, and implementation excerpts that cannot silently drift from the real TypeScript source. Adding a client-rendered site shell or a full static-site framework would weaken the accepted no-JavaScript content boundary and add complexity disproportionate to three static public entries.
+
+### Decision
+
+Keep the case study, technical article, and 404 content as authored semantic HTML. Use a small local Vite build plugin to inject only build-time concerns: optional public links from `src/site/config.ts`, page metadata, JSON-LD, synchronized marker-bounded source excerpts, `robots.txt`, and `sitemap.xml`. Keep React and the full demo bundle isolated to `/demo/`.
+
+Null public configuration values are omission instructions. The build does not render dead contact, résumé, author, or canonical values, and it does not invent a deployment URL. The known repository remote may drive source links. A canonical public URL must be supplied only after the deployment target is known; until then the sitemap remains a valid empty URL set and canonical-dependent tags are omitted.
+
+### Consequences
+
+- Searchable case-study and article content remains available without a client JavaScript bundle.
+- The build fails if a documented implementation excerpt loses its source marker.
+- Social image and sitemap URLs become absolute automatically once a canonical URL is configured.
+- Public identity and contact details have one typed configuration boundary rather than component-level literals.
+- The custom generator is intentionally small; a larger content surface would justify revisiting an established static-site generator.

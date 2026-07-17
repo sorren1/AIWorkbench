@@ -134,6 +134,7 @@ export type GeneratedStage = StageDefinition & {
   reviewerActionRequired: boolean;
 };
 
+/* excerpt:start:artifact-provenance */
 export type ArtifactType = "JSON" | "Markdown";
 export type ArtifactMeta = { type: ArtifactType; stage: StageId; risk: Risk };
 export type Artifact = {
@@ -148,7 +149,9 @@ export type Artifact = {
   lang: "json" | "md";
   body: string;
 };
+/* excerpt:end:artifact-provenance */
 
+/* excerpt:start:changed-file-classification */
 export type PullRequestFile = {
   path: string;
   category: string;
@@ -156,6 +159,7 @@ export type PullRequestFile = {
   del: number;
   status: "expected" | "unexpected";
 };
+/* excerpt:end:changed-file-classification */
 export type PullRequestCheck = { name: string; status: string; detail: string };
 export type PullRequestReviewer = { name: string; role: string; state: string };
 export type PullRequestChecklistItem = { label: string; done: boolean };

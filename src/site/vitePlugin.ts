@@ -1,0 +1,139 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
+import type { Plugin } from "vite";
+
+import { siteConfig, type SiteConfig } from "./config";
+import {
+  createRobotsTxt,
+  createSitemapXml,
+  PAGE_METADATA,
+  renderMetadataTags,
+  renderStructuredData,
+  type PageKind,
+} from "./metadata";
+
+type Excerpt = {
+  readonly sourcePath: string;
+  readonly marker: string;
+};
+
+const EXCERPTS: Record<string, Excerpt> = {
+  "typed-transitions": {
+    sourcePath: "src/demo/state/store.tsx",
+    marker: "typed-transitions",
+  },
+  "stale-invalidation": {
+    sourcePath: "src/demo/state/store.tsx",
+    marker: "stale-invalidation",
+  },
+  "artifact-provenance": {
+    sourcePath: "src/demo/data/types.ts",
+    marker: "artifact-provenance",
+  },
+  "changed-file-classification": {
+    sourcePath: "src/demo/data/types.ts",
+    marker: "changed-file-classification",
+  },
+  "human-approval-gate": {
+    sourcePath: "src/demo/screens/GitHubScreen.tsx",
+    marker: "human-approval-gate",
+  },
+};
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;");
+}
+
+function readExcerpt(root: string, excerpt: Excerpt): string {
+  const source = readFileSync(resolve(root, excerpt.sourcePath), "utf8");
+  const startToken = `excerpt:start:${excerpt.marker}`;
+  const endToken = `excerpt:end:${excerpt.marker}`;
+  const start = source.indexOf(startToken);
+  const end = source.indexOf(endToken);
+  if (start < 0 || end < 0 || end <= start) {
+    throw new Error(`Missing synchronized excerpt markers for ${excerpt.marker}`);
+  }
+  const contentStart = source.indexOf("\n", start);
+  if (contentStart < 0) throw new Error(`Malformed excerpt marker for ${excerpt.marker}`);
+  return source.slice(contentStart + 1, end).trim();
+}
+
+function pageKindFromHtml(html: string): PageKind {
+  const match = /<body[^>]*data-page="(case-study|article|demo|not-found)"/.exec(html);
+  switch (match?.[1]) {
+    case "case-study":
+    case "article":
+    case "demo":
+    case "not-found":
+      return match[1];
+    default:
+      throw new Error("Every HTML entry must declare a supported data-page value");
+  }
+}
+
+function replaceConfigLinks(html: string, config: SiteConfig): string {
+  const links: Record<"repository" | "resume" | "contact", string | null> = {
+    repository: config.repositoryUrl,
+    resume: config.resumeUrl,
+    contact: config.contactUrl,
+  };
+  const pattern =
+    /<a\b([^>]*\bdata-config-link="(repository|resume|contact)"[^>]*)>([\s\S]*?)<\/a\s*>/g;
+
+  return html.replace(pattern, (_match: string, attrs: string, key: string, label: string) => {
+    if (key !== "repository" && key !== "resume" && key !== "contact") return "";
+    const configuredUrl = links[key];
+    if (!configuredUrl) return "";
+    const sourcePathMatch = /\bdata-source-path="([^"]+)"/.exec(attrs);
+    const destination = sourcePathMatch?.[1]
+      ? `${configuredUrl.replace(/\/$/, "")}/blob/main/${sourcePathMatch[1]}`
+      : configuredUrl;
+    const cleanAttributes = attrs
+      .replace(/\s*data-config-link="[^"]+"/, "")
+      .replace(/\s*data-source-path="[^"]+"/, "")
+      .replace(/\s+hidden\b/, "");
+    return `<a${cleanAttributes} href="${escapeHtml(destination)}" rel="noopener noreferrer">${label}</a>`;
+  });
+}
+
+function replaceExcerpts(html: string, root: string): string {
+  return html.replace(
+    /<code\b([^>]*\bdata-code-excerpt="([^"]+)"[^>]*)>[\s\S]*?<\/code>/g,
+    (_match: string, attrs: string, key: string) => {
+      const excerpt = EXCERPTS[key];
+      if (!excerpt) throw new Error(`Unknown source excerpt: ${key}`);
+      const cleanAttributes = attrs.replace(/\s*data-code-excerpt="[^"]+"/, "");
+      return `<code${cleanAttributes}>${escapeHtml(readExcerpt(root, excerpt))}</code>`;
+    },
+  );
+}
+
+export function portfolioSitePlugin(root: string): Plugin {
+  return {
+    name: "portfolio-site-generator",
+    transformIndexHtml: {
+      order: "pre",
+      handler(html) {
+        const kind = pageKindFromHtml(html);
+        const page = PAGE_METADATA[kind];
+        const withMetadata = html
+          .replace("<!-- site:generated-head -->", renderMetadataTags(siteConfig, page))
+          .replace("<!-- site:structured-data -->", renderStructuredData(siteConfig, kind, page));
+        return replaceConfigLinks(replaceExcerpts(withMetadata, root), siteConfig);
+      },
+    },
+    generateBundle() {
+      this.emitFile({ type: "asset", fileName: "robots.txt", source: createRobotsTxt(siteConfig) });
+      this.emitFile({
+        type: "asset",
+        fileName: "sitemap.xml",
+        source: createSitemapXml(siteConfig),
+      });
+    },
+  };
+}

@@ -1,4 +1,7 @@
+import { useCallback, useState } from "react";
+
 import { DrawerHost, Header, ModalHost, Sidebar, ToastHost, useTheme } from "./components/AppShell";
+import { GuidedWalkthrough } from "./components/GuidedWalkthrough";
 import { meta } from "./data/fixtures";
 import { ArchitectureScreen } from "./screens/ArchitectureScreen";
 import { ArtifactsScreen } from "./screens/ArtifactsScreen";
@@ -63,12 +66,25 @@ function Footer() {
 
 export function App() {
   const [theme, setTheme] = useTheme();
+  const [walkthroughOpen, setWalkthroughOpen] = useState(
+    () => new URLSearchParams(window.location.search).get("walkthrough") === "1",
+  );
+  const closeWalkthrough = useCallback(() => setWalkthroughOpen(false), []);
   return (
     <div className="wb-app">
       <Sidebar />
       <div className="wb-main">
-        <Header theme={theme} setTheme={setTheme} />
+        <Header
+          theme={theme}
+          setTheme={setTheme}
+          onOpenWalkthrough={() => setWalkthroughOpen(true)}
+        />
         <div className="wb-content cr-scroll">
+          <div className="wb-viewport-notice" role="note">
+            The complete workbench is desktop-optimized. On a smaller screen, horizontal space is
+            preserved so dense evidence tables remain inspectable.
+          </div>
+          {walkthroughOpen && <GuidedWalkthrough onClose={closeWalkthrough} />}
           <Screen />
           <Footer />
         </div>

@@ -1,0 +1,23 @@
+{
+  "name": "AI Delivery Workbench",
+  "short_name": "Delivery Workbench",
+  "description": "A governed, human-in-the-loop control plane for AI-assisted software delivery.",
+  "start_url": "./",
+  "display": "browser",
+  "background_color": "#f7f8fa",
+  "theme_color": "#335cff",
+  "icons": [
+    {
+      "src": "./assets/logo-mark.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/logo-mark-mono.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "monochrome"
+    }
+  ]
+}

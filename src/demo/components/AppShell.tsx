@@ -97,15 +97,17 @@ export function Sidebar() {
           <Fragment key={sec.group}>
             <div className="wb-nav-label">{sec.group}</div>
             {sec.items.map((it) => (
-              <div
+              <button
+                type="button"
                 key={it.id}
                 className={"wb-nav-item" + (state.route === it.id ? " is-active" : "")}
                 onClick={() => actions.navigate(it.id)}
+                aria-current={state.route === it.id ? "page" : undefined}
               >
                 <Icon name={it.icon} size={17} className="wb-nav-ico" />
                 <span>{it.label}</span>
                 {counts[it.id] != null && <span className="wb-nav-count">{counts[it.id]}</span>}
-              </div>
+              </button>
             ))}
           </Fragment>
         ))}
@@ -138,9 +140,11 @@ export function useTheme(): readonly [Theme, Dispatch<SetStateAction<Theme>>] {
 export function Header({
   theme,
   setTheme,
+  onOpenWalkthrough,
 }: {
   readonly theme: Theme;
   readonly setTheme: Dispatch<SetStateAction<Theme>>;
+  readonly onOpenWalkthrough: () => void;
 }) {
   const { state, actions } = useApp();
   const issue = state.issues[state.selectedKey];
@@ -171,6 +175,9 @@ export function Header({
       </div>
 
       <div className="wb-header-actions">
+        <Btn size="sm" variant="secondary" icon="workflow" onClick={onOpenWalkthrough}>
+          Guided tour
+        </Btn>
         <IconBtn
           icon={theme === "dark" ? "info" : "info"}
           size="sm"

@@ -4,7 +4,7 @@
 
 AI Delivery Workbench is an independent engineering portfolio project about the controls around coding agents: authorization, context selection, tool boundaries, human approval, workflow state, budgets, traceability, and evidence. The repository pairs a statically rendered case study with a separate interactive React demo.
 
-[Open the case study](./index.html) · [Read the interactive demo guide](docs/demo-guide.md) · [Review the architecture decisions](docs/decision-log.md)
+[Open the case study](./index.html) · [Read the technical article](writing/governing-ai-assisted-delivery/index.html) · [Read the interactive demo guide](docs/demo-guide.md) · [Review the architecture decisions](docs/decision-log.md)
 
 ## What this project demonstrates
 
@@ -47,6 +47,7 @@ npm run dev
 ```
 
 Open the URL printed by Vite. The static case study is at `/`; the interactive portfolio prototype is at `/demo/`.
+Append `?walkthrough=1` to `/demo/` to open the accessible 5–8 minute guided walkthrough.
 
 Create and inspect the production build with:
 
@@ -67,8 +68,13 @@ The E2E and dedicated accessibility commands currently report that their harness
 
 ```text
 index.html                         statically rendered public case study
+404.html                           static-host-compatible not-found page
 demo/index.html                    interactive React demo entry
+writing/                           statically rendered technical article
 src/case-study/                    case-study presentation
+src/site/config.ts                 typed public identity, link, canonical, and analytics configuration
+src/site/metadata.ts               metadata, structured-data, robots, and sitemap generation
+src/site/vitePlugin.ts             build-time link and synchronized-excerpt generation
 src/demo/components/               workbench shell and UI primitives
 src/demo/screens/                  delivery workflow screens
 src/demo/state/                    typed reducer and local actions
@@ -81,7 +87,7 @@ tests/                             unit and application smoke tests
 docs/                              audits, provenance, decisions, and upgrade plan
 ```
 
-The project uses React 18, strict TypeScript, and a static Vite multi-page build. It has no browser-side Babel, development CDN, runtime font request, backend, analytics, or credential input.
+The project uses React 18, strict TypeScript, and a static Vite multi-page build. The case study, article, and 404 page contain their substantive content without a client JavaScript bundle; React loads only on `/demo/`. Build-time generation injects configuration-driven public links, metadata, structured data, synchronized source excerpts, `robots.txt`, and `sitemap.xml`. A canonical URL, author, résumé, and contact link are intentionally omitted until public values are set in `src/site/config.ts`. The project has no browser-side Babel, development CDN, runtime font request, backend, analytics, or credential input.
 
 ## Clean-room disclosure
 

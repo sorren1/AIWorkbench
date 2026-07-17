@@ -65,6 +65,7 @@ export function GitHubScreen() {
       "Synthetic reviewer decision and notification state recorded locally.",
     );
   };
+  /* excerpt:start:human-approval-gate */
   const approveForValidation = () => {
     if (!ov.diffReviewed) {
       actions.toast(
@@ -87,6 +88,7 @@ export function GitHubScreen() {
     );
     window.setTimeout(() => actions.navigate("validation", issue.key), 700);
   };
+  /* excerpt:end:human-approval-gate */
 
   if (!hasPR) {
     return (

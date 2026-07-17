@@ -93,6 +93,7 @@ export type WorkbenchState = {
 
 export type IssuePatch = Partial<Omit<Issue, "flags" | "s">> & { flags?: IssueFlags };
 
+/* excerpt:start:typed-transitions */
 export type Action =
   | { type: "ROUTE"; route: Route; key?: string }
   | { type: "SELECT_ISSUE"; key: string; route?: Route }
@@ -110,6 +111,7 @@ export type Action =
   | { type: "BUSY"; id: string; on: boolean }
   | { type: "FILTER"; patch: Partial<QueueFilters> }
   | { type: "TOGGLE_GOV"; id: string };
+/* excerpt:end:typed-transitions */
 
 function cloneIssues(): Record<string, Issue> {
   const cloned: Record<string, Issue> = {};
@@ -176,6 +178,7 @@ export function reducer(state: WorkbenchState, action: Action): WorkbenchState {
         },
       };
     }
+    /* excerpt:start:stale-invalidation */
     case "STALE_FROM": {
       const issue = state.issues[action.key];
       if (!issue) return state;
@@ -194,6 +197,7 @@ export function reducer(state: WorkbenchState, action: Action): WorkbenchState {
         },
       };
     }
+    /* excerpt:end:stale-invalidation */
     case "TOAST_ADD":
       return { ...state, toasts: [...state.toasts, action.toast] };
     case "TOAST_LEAVE":

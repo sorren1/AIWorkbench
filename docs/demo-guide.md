@@ -40,6 +40,8 @@ npm run build
 npm run preview
 ```
 
+Open `/demo/?walkthrough=1` to start the in-app 5–8 minute walkthrough. The same guide is available from the `Guided tour` button in the demo header. It uses semantic buttons, announces progress, moves between the existing reducer-backed screens, and closes with the Escape key.
+
 ## Suggested walkthrough
 
 1. **Work Queue** — inspect synthetic queue counts and filter for review, verification failure, or stale downstream work.

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="A technical essay about authorization, bounded context, human approval, invalidation, and commit-bound evidence in coding-agent workflows."
+    />
+    <meta name="theme-color" content="#f7f8fa" />
+    <!-- site:generated-head -->
+    <link rel="icon" href="../../assets/logo-mark.svg" type="image/svg+xml" />
+    <link rel="mask-icon" href="../../assets/logo-mark-mono.svg" color="#335cff" />
+    <link rel="manifest" href="../../site.webmanifest" />
+    <link rel="stylesheet" href="../../src/case-study/site.css" />
+    <title>Governing AI-assisted delivery — AI Delivery Workbench</title>
+    <!-- site:structured-data -->
+  </head>
+  <body class="site-body" data-page="article">
+    <a class="site-skip-link" href="#article-content">Skip to article</a>
+    <header class="site-header">
+      <a class="site-brand" href="../../" aria-label="AI Delivery Workbench home">
+        <img src="../../assets/logo-mark.svg" width="32" height="32" alt="" />
+        <span>AI Delivery Workbench</span>
+      </a>
+      <nav class="site-nav" aria-label="Article">
+        <a href="../../">Case study</a>
+        <a class="site-demo-link" href="../../demo/">Open demo</a>
+      </nav>
+    </header>
+
+    <main id="article-content" class="site-article">
+      <header class="site-article-hero">
+        <p class="eyebrow">Technical article · architecture and tradeoffs</p>
+        <h1>Governing AI-assisted delivery</h1>
+        <p class="site-article-deck">
+          Coding agents need more than a prompt and a repository token. They need an execution
+          contract that makes authority, context, evidence, and human responsibility explicit.
+        </p>
+      </header>
+
+      <aside class="site-article-note" aria-label="Article scope">
+        This article describes the design thesis behind an independent portfolio prototype. External
+        providers and execution results shown in the demo are simulated.
+      </aside>
+
+      <article class="site-article-body">
+        <h2>Start with the failure boundary, not the model</h2>
+        <p>
+          A model can return useful code and still leave the delivery system in an unsafe state. The
+          patch might have been produced from an obsolete specification. A tool may have written to
+          a repository the caller was allowed to read but not modify. A green test result may refer
+          to a different commit. Or the same agent may have generated, checked, and accepted its own
+          work. None of those failures is solved by a more articulate model response.
+        </p>
+        <p>
+          The control-plane view starts by asking a different set of questions: who authorized this
+          stage, which immutable inputs were selected, what tools and destinations were in scope,
+          what budget applied, and which independent evidence permits the next transition? The model
+          is one replaceable runtime inside that contract.
+        </p>
+
+        <h2>Artifacts create a reviewable chain of custody</h2>
+        <p>
+          Chat is useful for exploration but weak as the only system of record. It mixes intent,
+          intermediate guesses, tool output, and final decisions in a transcript whose meaning
+          depends on position. A staged workflow instead emits named artifacts: normalized intake,
+          acceptance criteria, a plan, an expected change surface, a patch, and validation evidence.
+          Each artifact can carry a schema version, provenance references, a content digest, review
+          state, and the identity of the transition that accepted it.
+        </p>
+        <p>
+          Determinism here does not mean forcing the model to produce identical text. It means
+          making the handoff deterministic enough for the system to compare, invalidate, and govern.
+          The artifact identity and contract are stable even when the draft content is
+          probabilistic.
+        </p>
+
+        <h2>Context should be a manifest, not an ambient privilege</h2>
+        <p>
+          More context is not automatically better. Large, implicit context raises cost, dilutes
+          relevant instructions, and makes provenance hard to inspect. A context pack should declare
+          the included sources and revisions, their freshness, deliberate exclusions, selection
+          reason, and a digest over the manifest. A stage consumes that pack rather than inheriting
+          every source the platform can access.
+        </p>
+        <p>
+          Freshness also has to influence state. If a specification changes after implementation,
+          the implementation and validation do not remain valid merely because they were once green.
+          The safest default is downstream invalidation: mark dependent stages stale, preserve the
+          old evidence for audit, and require an explicit re-run or human override.
+        </p>
+
+        <h2>Authorization belongs at the tool boundary</h2>
+        <p>
+          Prompt instructions such as “do not merge” are not authorization controls. The enforcement
+          point is the tool gateway. A capability card can declare a stage agent’s accepted inputs,
+          emitted outputs, allowed tools, context policy, model/runtime policy, and budgets. The
+          active registry version and caller persona then determine whether a specific call is
+          allowed.
+        </p>
+        <p>
+          This creates useful separation: reading a branch, writing a bounded patch, opening a pull
+          request, changing a protected setting, and deploying are different capabilities. Risky
+          calls can produce a durable approval request containing the exact proposed action,
+          normalized parameters, affected resource, expiry, and policy reason. Approval authorizes
+          that request; it does not mint a reusable blanket permission.
+        </p>
+
+        <h2>Human-in-the-loop is a protocol, not a button</h2>
+        <p>
+          A confirmation dialog is easy to add and easy to overclaim. A durable approval workflow
+          must survive process restarts, bind the decision to the proposed action, record who was
+          eligible to decide, enforce separation of duties, and make cancellation or expiry
+          unambiguous. The person approving needs enough context to understand scope and evidence
+          without replaying an entire agent transcript.
+        </p>
+        <p>
+          Human review also has a cost: it adds latency and can become ceremonial under excessive
+          load. The design tradeoff is therefore risk-based gating. Low-risk, reversible reads may
+          proceed automatically within budget; writes outside an expected file set, credential
+          changes, or release actions should stop. The policy should make that line visible and
+          versioned.
+        </p>
+
+        <h2>Validation must travel with the change</h2>
+        <p>
+          “Tests passed” is insufficient evidence unless the result is bound to a commit,
+          environment, command or scenario, tool version, and timestamp. An evidence envelope can
+          collect those references along with acceptance-criterion coverage, human review state,
+          known assumptions, and unresolved findings. Normal branch protections and pull-request
+          rules remain the final engineering authority; the agent workflow supplies evidence into
+          that path rather than replacing it.
+        </p>
+
+        <h2>Budgets are policy, and estimates must look like estimates</h2>
+        <p>
+          Token, cost, iteration, and elapsed-time limits constrain blast radius as well as spend. A
+          stage should check budget before starting and before expensive or privileged tool calls.
+          Provider-reported usage is measured evidence; token counts inferred before execution and
+          prices derived from a configured rate card are estimates. Mixing those labels creates
+          false precision, so the trace and UI should preserve the distinction.
+        </p>
+
+        <h2>Trace the decision path, not only the model call</h2>
+        <p>
+          OpenTelemetry-compatible spans can connect a workflow run to context selection, model
+          calls, tool policy decisions, approval waits, retries, validation, and the resulting
+          artifacts. A useful waterfall makes waiting and blocking visible rather than presenting a
+          decorative activity chart. Trace identifiers belong in the evidence envelope so an
+          operator can move from a review decision to the relevant execution history.
+        </p>
+
+        <h2>The static prototype keeps the boundary honest</h2>
+        <p>
+          This repository implements the local state model and interface with deterministic
+          synthetic fixtures. That makes invalidation, review gates, artifacts, and navigation
+          inspectable without pretending to provide production identity, durable approval storage,
+          isolated runtimes, or live provider adapters. The next engineering step would be to
+          implement those boundaries one at a time and attach real, reproducible evidence before
+          changing any claim from simulated to functional.
+        </p>
+      </article>
+
+      <footer class="site-article-footer">
+        <p>Continue with the working interface or return to the architecture overview.</p>
+        <div class="site-actions">
+          <a class="site-primary-action" href="../../demo/?walkthrough=1"
+            >Start guided walkthrough</a
+          >
+          <a class="site-secondary-action" href="../../">Back to case study</a>
+          <a class="site-secondary-action" data-config-link="repository" hidden target="_blank"
+            >View source</a
+          >
+        </div>
+      </footer>
+    </main>
+  </body>
+</html>

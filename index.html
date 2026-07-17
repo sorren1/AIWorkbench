@@ -5,26 +5,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="AI Delivery Workbench — A governed, human-in-the-loop control plane for AI-assisted software delivery."
+      content="A governed, human-in-the-loop control plane for AI-assisted software delivery, presented as an independent case study and interactive prototype."
     />
+    <meta name="theme-color" content="#f7f8fa" />
+    <!-- site:generated-head -->
     <link rel="icon" href="./assets/logo-mark.svg" type="image/svg+xml" />
+    <link rel="mask-icon" href="./assets/logo-mark-mono.svg" color="#335cff" />
+    <link rel="manifest" href="./site.webmanifest" />
     <link rel="stylesheet" href="./src/case-study/site.css" />
     <title>AI Delivery Workbench — Governed AI-assisted delivery</title>
+    <!-- site:structured-data -->
   </head>
-  <body class="site-body">
+  <body class="site-body" data-page="case-study">
+    <a class="site-skip-link" href="#main-content">Skip to case study</a>
     <header class="site-header">
       <a class="site-brand" href="./" aria-label="AI Delivery Workbench home">
         <img src="./assets/logo-mark.svg" width="32" height="32" alt="" />
         <span>AI Delivery Workbench</span>
       </a>
       <nav class="site-nav" aria-label="Case study">
+        <a href="#workflow">Workflow</a>
         <a href="#architecture">Architecture</a>
-        <a href="#boundaries">Boundaries</a>
-        <a class="site-demo-link" href="./demo/">Open interactive demo</a>
+        <a href="./writing/governing-ai-assisted-delivery/">Writing</a>
+        <a class="site-demo-link" href="./demo/">Open demo</a>
       </nav>
     </header>
 
-    <main>
+    <main id="main-content">
       <section class="site-hero" aria-labelledby="case-study-title">
         <p class="eyebrow">Independent engineering case study</p>
         <h1 id="case-study-title">AI Delivery Workbench</h1>
@@ -32,12 +39,18 @@
           A governed, human-in-the-loop control plane for AI-assisted software delivery.
         </p>
         <p class="site-lede">
-          The case study examines authorization, bounded context, review gates, workflow state, and
-          evidence around an eight-stage coding-agent delivery loop.
+          An inspectable delivery workflow for deciding what coding agents may do, which context
+          they may use, when people must intervene, and what evidence must accompany a proposed
+          change.
         </p>
-        <div class="site-actions">
-          <a class="site-primary-action" href="./demo/">Explore the interactive workbench</a>
-          <a class="site-secondary-action" href="#architecture">Read the engineering approach</a>
+        <div class="site-actions" aria-label="Project links">
+          <a class="site-primary-action" href="./demo/">Open interactive prototype</a>
+          <a class="site-secondary-action" data-config-link="repository" hidden target="_blank"
+            >View source</a
+          >
+          <a class="site-text-action" href="./demo/?walkthrough=1">
+            Start guided walkthrough <span aria-hidden="true">·</span> 5–8 min
+          </a>
         </div>
       </section>
 
@@ -51,177 +64,430 @@
       </aside>
 
       <section class="site-section" aria-labelledby="problem-title">
-        <div class="site-section-heading">
-          <p class="eyebrow">Engineering thesis</p>
-          <h2 id="problem-title">Generation is the easy part. Control is the product.</h2>
+        <div class="site-section-heading site-section-heading--split">
+          <div>
+            <p class="eyebrow">The problem</p>
+            <h2 id="problem-title">Generation alone is not a delivery system.</h2>
+          </div>
           <p>
-            A credible coding-agent system must explain what was authorized, which context was
-            selected, where tools may act, when a human must decide, and which evidence supports the
-            result.
+            A coding agent can produce a plausible patch while the surrounding process remains
+            unsafe, stale, or impossible to audit. The workbench treats those control failures as
+            first-class product problems.
           </p>
         </div>
-        <div class="site-grid site-grid--five">
+        <div class="site-grid site-grid--three">
           <article class="site-card">
             <p class="site-card-index">01</p>
-            <h3>Authorization</h3>
-            <p>Stage-scoped capabilities and lifecycle gates should define what may run.</p>
+            <h3>Nondeterministic output</h3>
+            <p>
+              Equivalent prompts can produce materially different plans, patches, and explanations.
+            </p>
           </article>
           <article class="site-card">
             <p class="site-card-index">02</p>
-            <h3>Context</h3>
-            <p>
-              Explicit manifests can make provenance, freshness, exclusions, and digests reviewable.
-            </p>
+            <h3>Stale or excessive context</h3>
+            <p>Old decisions and unbounded repository data can quietly distort the next stage.</p>
           </article>
           <article class="site-card">
             <p class="site-card-index">03</p>
-            <h3>Tool boundaries</h3>
-            <p>Read, bounded-write, and privileged operations require distinct policy treatment.</p>
+            <h3>Unsafe direct writes</h3>
+            <p>
+              Broad credentials collapse suggestion, execution, and authorization into one action.
+            </p>
           </article>
           <article class="site-card">
             <p class="site-card-index">04</p>
-            <h3>Human approval</h3>
-            <p>Risky actions should stop at an explicit human decision point.</p>
+            <h3>Weak provenance</h3>
+            <p>
+              Without inputs, versions, and digests, an artifact cannot explain how it came to be.
+            </p>
           </article>
           <article class="site-card">
             <p class="site-card-index">05</p>
-            <h3>Evidence</h3>
+            <h3>Detached validation</h3>
             <p>
-              Artifacts, review state, validation, budgets, and trace data should travel with the
-              change.
+              Evidence that is not bound to the tested commit can outlive the code it actually
+              covered.
             </p>
+          </article>
+          <article class="site-card">
+            <p class="site-card-index">06</p>
+            <h3>Self-approval</h3>
+            <p>An AI system must not be the sole authority that accepts its own risky work.</p>
           </article>
         </div>
       </section>
 
-      <section class="site-section site-section--inset" aria-labelledby="workflow-title">
+      <section class="site-section site-section--inset" aria-labelledby="principles-title">
         <div class="site-section-heading">
-          <p class="eyebrow">Inspectable workflow</p>
-          <h2 id="workflow-title">Eight stages, one governed chain of custody.</h2>
+          <p class="eyebrow">Design principles</p>
+          <h2 id="principles-title">Make control visible in the workflow.</h2>
         </div>
-        <ol class="site-workflow">
-          <li><span>01</span><strong>Seed</strong><small>Pin issue and revision</small></li>
-          <li><span>02</span><strong>Intake</strong><small>Normalize bounded context</small></li>
-          <li><span>03</span><strong>Spec</strong><small>Define acceptance criteria</small></li>
-          <li><span>04</span><strong>Plan</strong><small>Sequence work and risk</small></li>
-          <li><span>05</span><strong>Targets</strong><small>Declare change surface</small></li>
-          <li><span>06</span><strong>Implement</strong><small>Draft on a branch</small></li>
-          <li><span>07</span><strong>Verify</strong><small>Attach validation evidence</small></li>
-          <li><span>08</span><strong>Review</strong><small>Require a human decision</small></li>
+        <ol class="site-principles">
+          <li>
+            <strong>Prefer deterministic artifacts over transient chat.</strong
+            ><span>Each stage emits a durable, reviewable handoff.</span>
+          </li>
+          <li>
+            <strong>Invalidate downstream work after upstream changes.</strong
+            ><span>Stale state is explicit; previous success is not silently reused.</span>
+          </li>
+          <li>
+            <strong>Bound context and tool permissions.</strong
+            ><span>Inputs and actions are selected for the stage, not granted globally.</span>
+          </li>
+          <li>
+            <strong>Keep branch and pull-request controls authoritative.</strong
+            ><span>Agent output enters the same engineering control path as other changes.</span>
+          </li>
+          <li>
+            <strong>Put people in control of transitions.</strong
+            ><span>Risky actions wait for an explicit human decision with scoped authority.</span>
+          </li>
+          <li>
+            <strong>Attach validation evidence to the tested commit.</strong
+            ><span>Review can verify which code, checks, and assumptions support a decision.</span>
+          </li>
         </ol>
       </section>
 
-      <section id="architecture" class="site-section" aria-labelledby="architecture-title">
+      <section id="workflow" class="site-section" aria-labelledby="workflow-title">
+        <div class="site-section-heading site-section-heading--split">
+          <div>
+            <p class="eyebrow">System workflow</p>
+            <h2 id="workflow-title">Eight stages, one chain of custody.</h2>
+          </div>
+          <p>
+            A stage advances only when its required input, review state, and policy gates agree. A
+            revised upstream artifact marks dependent work stale instead of pretending the old
+            result remains valid.
+          </p>
+        </div>
+        <ol class="site-workflow site-workflow--detailed">
+          <li>
+            <span>01</span><strong>Seed</strong><small>Emits a pinned issue and revision.</small
+            ><em>Blocks on missing source identity.</em>
+          </li>
+          <li>
+            <span>02</span><strong>Intake</strong
+            ><small>Emits normalized scope and constraints.</small
+            ><em>Blocks on ambiguity or excluded context.</em>
+          </li>
+          <li>
+            <span>03</span><strong>Spec</strong><small>Emits acceptance criteria and risks.</small
+            ><em>Blocks on incomplete human review.</em>
+          </li>
+          <li>
+            <span>04</span><strong>Plan</strong><small>Emits ordered work and dependencies.</small
+            ><em>Blocks on unresolved design choices.</em>
+          </li>
+          <li>
+            <span>05</span><strong>Change Targets</strong
+            ><small>Emits the expected file surface.</small
+            ><em>Blocks on disallowed or unclear targets.</em>
+          </li>
+          <li>
+            <span>06</span><strong>Implement</strong
+            ><small>Emits a branch patch and provenance.</small
+            ><em>Blocks on tool, policy, or budget limits.</em>
+          </li>
+          <li>
+            <span>07</span><strong>Verify</strong><small>Emits commit-bound test evidence.</small
+            ><em>Blocks on failed or incomplete checks.</em>
+          </li>
+          <li>
+            <span>08</span><strong>PR Review</strong><small>Emits a human-owned decision.</small
+            ><em>Blocks on scope drift or missing evidence.</em>
+          </li>
+        </ol>
+      </section>
+
+      <section
+        id="architecture"
+        class="site-section site-section--inset"
+        aria-labelledby="architecture-title"
+      >
         <div class="site-section-heading site-section-heading--split">
           <div>
             <p class="eyebrow">Architecture</p>
             <h2 id="architecture-title">Separate steering from execution.</h2>
           </div>
           <p>
-            Four responsibility planes keep local product behavior, simulated adapters, and future
-            production infrastructure conceptually distinct.
+            Four responsibility planes keep workflow policy, runtime activity, selected context, and
+            validation evidence independently inspectable.
           </p>
         </div>
-        <div class="site-grid site-grid--four">
-          <article class="site-card site-card--accent">
-            <h3>Control plane</h3>
-            <p>Workflow state, registry policy, approvals, budgets, and audit references.</p>
-          </article>
-          <article class="site-card">
-            <h3>Execution plane</h3>
-            <p>Isolated workspaces, stage runtimes, model adapters, and bounded tool calls.</p>
-          </article>
-          <article class="site-card">
-            <h3>Context plane</h3>
-            <p>Issue, repository, documentation, schema, and prior-decision context packs.</p>
-          </article>
-          <article class="site-card">
-            <h3>Validation plane</h3>
-            <p>Acceptance coverage, review decisions, evidence envelopes, and release gates.</p>
-          </article>
-        </div>
+        <figure class="site-architecture" aria-labelledby="architecture-title architecture-caption">
+          <div class="site-plane site-plane--control">
+            <strong>Control Plane</strong><span>State · policy · approvals · budgets</span>
+          </div>
+          <div class="site-architecture-flow" aria-hidden="true">
+            <span>authorizes</span><span>selects</span><span>requires</span>
+          </div>
+          <div class="site-plane-grid">
+            <div class="site-plane">
+              <strong>Execution Plane</strong
+              ><span>Stage runtimes · bounded tools · workspaces</span>
+            </div>
+            <div class="site-plane">
+              <strong>Context Plane</strong
+              ><span>Manifests · provenance · freshness · exclusions</span>
+            </div>
+            <div class="site-plane">
+              <strong>Validation Plane</strong
+              ><span>Checks · review decisions · evidence envelopes</span>
+            </div>
+          </div>
+          <figcaption id="architecture-caption">
+            The control plane authorizes execution, selects bounded context, and requires validation
+            evidence before a human-controlled transition.
+          </figcaption>
+          <details class="site-text-alternative">
+            <summary>Architecture diagram text alternative</summary>
+            <p>
+              The Control Plane owns workflow state, agent and tool policy, approvals, and budgets.
+              It authorizes the Execution Plane to run a stage with bounded tools; selects a
+              manifest from the Context Plane; and requires the Validation Plane to attach check
+              results and human decisions to the change. Execution does not approve its own output.
+            </p>
+          </details>
+        </figure>
         <div class="site-reference-stack">
           <p class="eyebrow">Illustrative adapter set</p>
           <p>
-            Jira, GitHub, Angular, .NET, and Oracle provide one technically specific reference stack
-            behind vendor-neutral issue, repository, UI, service, and database boundaries. They are
-            synthetic configuration examples, not a prescribed environment.
+            Jira, GitHub, Angular, .NET, and Oracle are one synthetic reference stack behind
+            vendor-neutral issue, repository, UI, service, and database boundaries. They are not a
+            required environment and no external adapter is contacted by the demo.
           </p>
         </div>
       </section>
 
-      <section
-        id="boundaries"
-        class="site-section site-section--inset"
-        aria-labelledby="boundary-title"
-      >
+      <section id="boundaries" class="site-section" aria-labelledby="boundary-title">
         <div class="site-section-heading">
-          <p class="eyebrow">Evidence boundary</p>
-          <h2 id="boundary-title">Know what works and what is represented.</h2>
+          <p class="eyebrow">Functional versus simulated</p>
+          <h2 id="boundary-title">Claims follow observable evidence.</h2>
+          <p>
+            The matrix distinguishes repository behavior from synthetic representations and future
+            work.
+          </p>
         </div>
-        <div class="site-boundary-grid">
-          <article class="site-boundary-card">
-            <p class="site-kicker site-kicker--functional">Functional in this repository</p>
-            <h3>Browser-local product behavior</h3>
-            <ul>
-              <li>Strictly typed reducer and state transitions</li>
-              <li>Navigation, filters, themes, review decisions, and validation state</li>
-              <li>Deterministic artifact and evidence rendering</li>
-              <li>Static production build with no runtime service dependency</li>
-            </ul>
+        <div
+          class="site-table-wrap"
+          tabindex="0"
+          role="region"
+          aria-label="Functional and simulated capability matrix"
+        >
+          <table class="site-matrix">
+            <thead>
+              <tr>
+                <th scope="col">Capability</th>
+                <th scope="col">Classification</th>
+                <th scope="col">Evidence boundary</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Case-study navigation and demo routing</th>
+                <td><span class="site-status site-status--functional">Functional</span></td>
+                <td>
+                  Static routes and browser-local navigation; walkthrough query link is shareable.
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">Workflow transitions, retry, redo, and stale behavior</th>
+                <td><span class="site-status site-status--functional">Functional</span></td>
+                <td>Typed reducer state, reset on reload, deterministic fixtures.</td>
+              </tr>
+              <tr>
+                <th scope="row">Artifact, pull-request, and validation views</th>
+                <td><span class="site-status site-status--functional">Functional UI</span></td>
+                <td>
+                  Viewing and local review state work; all displayed records and metrics are
+                  synthetic.
+                </td>
+              </tr>
+              <tr>
+                <th scope="row">
+                  Jira, GitHub, LLM, database, MCP-style, review, and deployment operations
+                </th>
+                <td><span class="site-status site-status--simulated">Simulated</span></td>
+                <td>No provider credentials, writes, or live data calls exist.</td>
+              </tr>
+              <tr>
+                <th scope="row">Test logs and hosted sandbox execution</th>
+                <td><span class="site-status site-status--simulated">Simulated</span></td>
+                <td>Logs are deterministic fixtures; no hosted sandbox is claimed.</td>
+              </tr>
+              <tr>
+                <th scope="row">Copy, download, export, persistent reset, and state deep links</th>
+                <td><span class="site-status site-status--planned">Planned</span></td>
+                <td>
+                  Not presented as functional until implemented and verified in a later phase.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="site-section site-section--inset" aria-labelledby="implementation-title">
+        <div class="site-section-heading site-section-heading--split">
+          <div>
+            <p class="eyebrow">Selected implementation details</p>
+            <h2 id="implementation-title">The controls are represented in code.</h2>
+          </div>
+          <p>
+            These excerpts are extracted from marker-bounded source at build time, so the case study
+            fails its build if an excerpt drifts away from its implementation.
+          </p>
+        </div>
+        <div class="site-code-grid">
+          <article class="site-code-card">
+            <h3>Typed state transitions</h3>
+            <p>A discriminated action union limits the reducer to known state changes.</p>
+            <pre><code data-code-excerpt="typed-transitions">Generated from source at build time.</code></pre>
+            <a
+              class="site-source-link"
+              data-config-link="repository"
+              data-source-path="src/demo/state/store.tsx"
+              hidden
+              target="_blank"
+              >Open <code>store.tsx</code></a
+            >
           </article>
-          <article class="site-boundary-card">
-            <p class="site-kicker site-kicker--simulated">Synthetic demo fixtures</p>
-            <h3>External-system behavior</h3>
-            <ul>
-              <li>
-                Personas, issues, repositories, branches, pull requests, checks, logs, and metrics
-              </li>
-              <li>
-                Jira, GitHub, model, database, MCP-style, test, review, and deployment operations
-              </li>
-              <li>
-                Enterprise identity, shared audit durability, credentials, and production execution
-              </li>
-            </ul>
+          <article class="site-code-card">
+            <h3>Stale downstream invalidation</h3>
+            <p>
+              A re-run marks completed dependent stages stale and records the issue-level condition.
+            </p>
+            <pre><code data-code-excerpt="stale-invalidation">Generated from source at build time.</code></pre>
+            <a
+              class="site-source-link"
+              data-config-link="repository"
+              data-source-path="src/demo/state/store.tsx"
+              hidden
+              target="_blank"
+              >Open <code>store.tsx</code></a
+            >
+          </article>
+          <article class="site-code-card">
+            <h3>Artifact provenance shape</h3>
+            <p>Artifact metadata binds type, source stage, risk, timestamp, and review status.</p>
+            <pre><code data-code-excerpt="artifact-provenance">Generated from source at build time.</code></pre>
+            <a
+              class="site-source-link"
+              data-config-link="repository"
+              data-source-path="src/demo/data/types.ts"
+              hidden
+              target="_blank"
+              >Open <code>types.ts</code></a
+            >
+          </article>
+          <article class="site-code-card">
+            <h3>Changed-file classification</h3>
+            <p>Every proposed file is categorized and compared with the expected change surface.</p>
+            <pre><code data-code-excerpt="changed-file-classification">Generated from source at build time.</code></pre>
+            <a
+              class="site-source-link"
+              data-config-link="repository"
+              data-source-path="src/demo/data/types.ts"
+              hidden
+              target="_blank"
+              >Open <code>types.ts</code></a
+            >
+          </article>
+          <article class="site-code-card site-code-card--wide">
+            <h3>Human approval gate</h3>
+            <p>
+              Approval for validation refuses to advance until a person records changed-file review.
+            </p>
+            <pre><code data-code-excerpt="human-approval-gate">Generated from source at build time.</code></pre>
+            <a
+              class="site-source-link"
+              data-config-link="repository"
+              data-source-path="src/demo/screens/GitHubScreen.tsx"
+              hidden
+              target="_blank"
+              >Open <code>GitHubScreen.tsx</code></a
+            >
           </article>
         </div>
       </section>
 
-      <section class="site-section" aria-labelledby="tradeoffs-title">
-        <div class="site-section-heading">
-          <p class="eyebrow">Deliberate tradeoffs</p>
-          <h2 id="tradeoffs-title">Small enough to inspect. Explicit about what comes next.</h2>
+      <section class="site-section" aria-labelledby="production-title">
+        <div class="site-section-heading site-section-heading--split">
+          <div>
+            <p class="eyebrow">Productionization plan</p>
+            <h2 id="production-title">A credible prototype names its missing infrastructure.</h2>
+          </div>
+          <p>These are design requirements, not capabilities attributed to the public demo.</p>
         </div>
-        <div class="site-grid site-grid--four">
+        <div class="site-grid site-grid--three">
           <article class="site-card">
-            <h3>Static by design</h3>
+            <h3>Identity and authorization</h3>
             <p>
-              A Vite multi-page build keeps hosting simple and the public narrative readable without
-              JavaScript.
+              Map people and service principals to scoped personas, approvals, and
+              separation-of-duties policy.
             </p>
           </article>
           <article class="site-card">
-            <h3>Deterministic by design</h3>
+            <h3>Secrets and credentials</h3>
             <p>
-              Fixtures make state transitions reproducible, but do not stand in for integration or
-              model reliability.
+              Issue short-lived, per-agent credentials; never place reusable provider secrets in
+              prompts or browsers.
             </p>
           </article>
           <article class="site-card">
-            <h3>Focused by design</h3>
+            <h3>Isolated execution</h3>
             <p>
-              The registry and policy model govern delivery-stage agents rather than becoming a
-              generic agent catalog.
+              Run tools in disposable workspaces with resource limits, network policy, and explicit
+              egress.
             </p>
           </article>
           <article class="site-card">
-            <h3>Production boundary</h3>
+            <h3>Idempotency and retries</h3>
             <p>
-              Identity, secrets, isolated execution, durable storage, telemetry collection, and
-              provider adapters remain future infrastructure.
+              Give actions stable identities, distinguish safe retries, and reconcile ambiguous
+              provider outcomes.
             </p>
           </article>
+          <article class="site-card">
+            <h3>Durable state and evidence</h3>
+            <p>
+              Persist approvals and immutable evidence envelopes separately from mutable workflow
+              projections.
+            </p>
+          </article>
+          <article class="site-card">
+            <h3>Observability and cost controls</h3>
+            <p>
+              Export OpenTelemetry-compatible traces and enforce measured-versus-estimated token,
+              cost, time, and iteration budgets.
+            </p>
+          </article>
+          <article class="site-card">
+            <h3>Rollback and incident handling</h3>
+            <p>
+              Support revocation, kill switches, recovery playbooks, evidence retention, and
+              post-incident review.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="site-section site-section--inset" aria-labelledby="writing-title">
+        <div class="site-editorial-card">
+          <div>
+            <p class="eyebrow">Technical writing</p>
+            <h2 id="writing-title">Governing AI-assisted delivery</h2>
+            <p>
+              Failure modes, policy boundaries, invalidation, and the tradeoff between autonomy and
+              evidence.
+            </p>
+          </div>
+          <a class="site-secondary-action" href="./writing/governing-ai-assisted-delivery/"
+            >Read the technical article</a
+          >
         </div>
       </section>
 
@@ -241,7 +507,7 @@
       <section class="site-section" aria-labelledby="clean-room-title">
         <div class="site-clean-room-panel">
           <div>
-            <p class="eyebrow">About / clean-room boundary</p>
+            <p class="eyebrow">Clean-room disclosure</p>
             <h2 id="clean-room-title">Independent by design.</h2>
           </div>
           <div class="site-clean-room-copy">
@@ -255,10 +521,27 @@
             </p>
             <p>
               Public design influences and independent-development decisions are documented in the
-              repository. The demo intentionally favors inspectable local mechanics over unsupported
-              claims of production infrastructure.
+              repository. Functional measurements, synthetic fixtures, and the professional-context
+              statement remain three separate evidence categories.
             </p>
           </div>
+        </div>
+      </section>
+
+      <section class="site-final" aria-labelledby="final-title">
+        <p class="eyebrow">Inspect the workflow</p>
+        <h2 id="final-title">Follow the evidence from intake to human review.</h2>
+        <div class="site-actions">
+          <a class="site-primary-action" href="./demo/">Open interactive prototype</a>
+          <a class="site-secondary-action" href="./demo/?walkthrough=1"
+            >Start 5–8 minute walkthrough</a
+          >
+          <a class="site-secondary-action" data-config-link="repository" hidden target="_blank"
+            >View source</a
+          >
+          <a class="site-secondary-action" data-config-link="contact" hidden target="_blank"
+            >Contact</a
+          >
         </div>
       </section>
     </main>
