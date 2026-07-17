@@ -1,4 +1,9 @@
 import type { StageId } from "../../data/types";
+import type {
+  ContextRecordType,
+  ContextSensitivity,
+  ContextSourceType,
+} from "../../context/contracts";
 
 export const REGISTRY_STATUSES = [
   "DRAFT",
@@ -125,14 +130,18 @@ export type MemoryPolicy = {
   readonly version: string;
   readonly description: string;
   readonly status: RegistryStatus;
-  readonly allowedRecordTypes: readonly string[];
-  readonly sourceScopes: readonly string[];
+  readonly allowedRecordTypes: readonly ContextRecordType[];
+  readonly allowedSourceTypes: readonly ContextSourceType[];
+  readonly allowedSensitivities: readonly ContextSensitivity[];
   readonly freshness: {
     readonly maximumAgeSeconds: number;
-    readonly staleBehavior: "EXCLUDE" | "FLAG_FOR_REVIEW";
+    readonly staleBehavior: "EXCLUDE";
   };
   readonly maximumContextBytes: number;
+  readonly maximumEstimatedTokens: number;
   readonly priorRunEpisodicMemoryPermitted: boolean;
+  readonly retrievalMode: "DETERMINISTIC_RULES";
+  readonly selectionRuleVersion: string;
   readonly sourceCommit: string;
   readonly contentHash: string;
   readonly createdAt: string;
@@ -185,7 +194,7 @@ export type RegistryResourceSource =
   AgentCardSource | ToolDescriptorSource | ModelPolicySource | MemoryPolicySource;
 
 export type RegistrySnapshot = {
-  readonly schemaVersion: 2;
+  readonly schemaVersion: 3;
   readonly generatedAt: string;
   readonly classification: "SYNTHETIC_PUBLIC_PORTFOLIO_FIXTURE";
   readonly agents: readonly AgentCard[];
@@ -208,6 +217,7 @@ export type StageExecutionManifest = {
   readonly tools: readonly RegistryReference[];
   readonly modelPolicy: RegistryReference;
   readonly memoryPolicy: RegistryReference;
+  readonly contextPackDigest: string;
   readonly resolvedAt: string;
 };
 

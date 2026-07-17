@@ -1359,6 +1359,77 @@ textarea.wb-input {
   margin-top: 0;
 }
 
+.wb-context-manifest {
+  display: grid;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 14px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-md);
+  background: var(--bg-surface);
+}
+.wb-context-manifest h3 {
+  margin: 0 0 3px;
+  font-size: 13.5px;
+}
+.wb-context-manifest p {
+  margin: 3px 0;
+  line-height: 1.5;
+}
+.wb-context-summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0;
+}
+.wb-context-summary > div {
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-hover);
+}
+.wb-context-summary dt {
+  color: var(--text-tertiary);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.wb-context-summary dd {
+  margin: 4px 0 0;
+  overflow-wrap: anywhere;
+  font-size: 12px;
+}
+.wb-context-records {
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 9px;
+}
+.wb-context-records summary {
+  cursor: pointer;
+  font-weight: var(--weight-semibold);
+  font-size: 12.5px;
+}
+.wb-context-records ul {
+  display: grid;
+  gap: 8px;
+  margin: 9px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.wb-context-records li {
+  padding: 9px;
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  background: var(--bg-canvas);
+  font-size: 12px;
+}
+
+@media (max-width: 760px) {
+  .wb-context-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 /* ---------- Drawer ---------- */
 .wb-scrim {
   position: fixed;

@@ -412,10 +412,11 @@ export const mcpServers: McpServer[] = [
     disallowed: ["execute_query", "read_rows", "run_ddl"],
   },
   {
-    name: "Business Rules Memory MCP",
+    name: "Governed Context Records MCP",
     icon: "shield",
     status: "Simulated",
-    purpose: "Holds durable domain rules (e.g. variance thresholds, elimination logic) as memory.",
+    purpose:
+      "Serves versioned domain-rule records with stage allow-lists, TTL, provenance, and content hashes.",
     boundary: "Approved rules only. Versioned and human-curated.",
     allowed: ["read_rule", "list_rules"],
     disallowed: ["write_rule", "auto_learn"],
@@ -479,9 +480,9 @@ export const architecture: Architecture = {
         "Jira context server",
         "GitHub / repo context server",
         "Documentation context server",
-        "Business rules memory server",
+        "Governed context-record server",
         "Oracle schema context server",
-        "Prior decisions / evidence memory server",
+        "Policy-permitted prior failure/fix record server",
       ],
     },
     {

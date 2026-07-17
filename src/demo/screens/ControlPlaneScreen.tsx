@@ -38,7 +38,7 @@ const RESOURCE_TABS: readonly TabDefinition[] = [
   },
   {
     id: "memory",
-    label: "Memory policies",
+    label: "Context policies",
     icon: "database",
     count: registrySnapshot.memoryPolicies.length,
   },
@@ -135,7 +135,7 @@ function AgentDetail({ agent }: { readonly agent: AgentCard }) {
       </div>
       <div className="wb-control-policy-strip" aria-label="Declared agent policies and budgets">
         <span>Model: {agent.modelPolicyId}</span>
-        <span>Memory: {agent.memoryPolicyId}</span>
+        <span>Context policy: {agent.memoryPolicyId}</span>
         <span>{agent.maxToolCalls} tool calls</span>
         <span>{agent.maxRepairAttempts} repair attempts</span>
         <span>{agent.maxDurationMs / 1000}s maximum</span>
@@ -221,7 +221,7 @@ function ModelDetail({ policy }: { readonly policy: ModelPolicy }) {
   );
 }
 
-function MemoryDetail({ policy }: { readonly policy: MemoryPolicy }) {
+function ContextPolicyDetail({ policy }: { readonly policy: MemoryPolicy }) {
   return (
     <div className="wb-control-detail-grid">
       <section>
@@ -229,8 +229,13 @@ function MemoryDetail({ policy }: { readonly policy: MemoryPolicy }) {
         <DetailList items={policy.allowedRecordTypes} />
       </section>
       <section>
-        <h3>Source scopes</h3>
-        <DetailList items={policy.sourceScopes} />
+        <h3>Source and sensitivity limits</h3>
+        <DetailList
+          items={[
+            ...policy.allowedSourceTypes.map((source) => `Source: ${source}`),
+            ...policy.allowedSensitivities.map((level) => `Sensitivity: ${level}`),
+          ]}
+        />
       </section>
       <section>
         <h3>Freshness</h3>
@@ -246,7 +251,9 @@ function MemoryDetail({ policy }: { readonly policy: MemoryPolicy }) {
         <DetailList
           items={[
             `Maximum bytes: ${policy.maximumContextBytes}`,
-            `Prior-run episodic memory: ${policy.priorRunEpisodicMemoryPermitted ? "permitted" : "denied"}`,
+            `Maximum estimated tokens: ${policy.maximumEstimatedTokens}`,
+            `Prior failure/fix records: ${policy.priorRunEpisodicMemoryPermitted ? "explicitly permitted" : "denied"}`,
+            `Retrieval: ${policy.retrievalMode} · ${policy.selectionRuleVersion}`,
           ]}
         />
       </section>
@@ -263,7 +270,7 @@ function ResourceDetail({ resource }: { readonly resource: RegistryResource }) {
     case "ModelPolicy":
       return <ModelDetail policy={resource} />;
     case "MemoryPolicy":
-      return <MemoryDetail policy={resource} />;
+      return <ContextPolicyDetail policy={resource} />;
   }
 }
 
@@ -345,6 +352,8 @@ export function ControlPlaneScreen() {
 
       <div className="wb-control-links wb-mt-12" aria-label="Generated public registry evidence">
         <a href="../capabilities/agents/index.json">Capability-card index</a>
+        <a href="../capabilities/context/records.json">Context-record registry</a>
+        <a href="../capabilities/context/packs.json">Representative context packs</a>
         <a href="../capabilities/mcp/discovery.json">Local MCP discovery snapshot</a>
         <a href="../capabilities/mcp/invocation-evidence.json">Local MCP invocation evidence</a>
         <a href="../capabilities/schemas/approval-policy.schema.json">Approval policy schema</a>

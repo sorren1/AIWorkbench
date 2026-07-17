@@ -106,6 +106,7 @@ export async function resolveStageExecutionManifest(
   snapshot: RegistrySnapshot,
   stageId: Exclude<StageId, "seed">,
   requestedToolIds: readonly string[],
+  contextPackDigest: string,
   resolvedAt: string,
 ): Promise<RegistryDecision> {
   const agent = snapshot.agents.find((candidate) => candidate.stageId === stageId);
@@ -145,6 +146,7 @@ export async function resolveStageExecutionManifest(
     tools: tools.map(reference),
     modelPolicy: reference(model),
     memoryPolicy: reference(memory),
+    contextPackDigest,
     resolvedAt,
   };
   return { allowed: true, reasonCode: "APPROVED_MANIFEST_RESOLVED", manifest };
@@ -153,7 +155,9 @@ export async function resolveStageExecutionManifest(
 export async function isExecutionManifestCurrent(
   manifest: StageExecutionManifest,
   snapshot: RegistrySnapshot,
+  currentContextPackDigest: string,
 ): Promise<boolean> {
+  if (manifest.contextPackDigest !== currentContextPackDigest) return false;
   const resources = [
     ...snapshot.agents,
     ...snapshot.tools,

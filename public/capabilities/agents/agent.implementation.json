@@ -6,7 +6,7 @@
   "inputSchema": { "$ref": "/capabilities/schemas/stage-input.schema.json" },
   "outputSchema": { "$ref": "/capabilities/schemas/stage-output.schema.json" },
   "modelPolicyId": "model.policy.delivery-balanced",
-  "memoryPolicyId": "memory.policy.issue-bounded",
+  "memoryPolicyId": "memory.policy.implementation-episodic",
   "approvalPolicyIds": [
     "policy.registry.separation-of-duties",
     "policy.write.approved-targets",
@@ -17,9 +17,9 @@
   "maxRepairAttempts": 2,
   "tokenBudget": { "maxInputTokens": 9000, "maxOutputTokens": 3000, "basis": "ESTIMATED" },
   "costBudget": { "maxEstimatedUsd": 0.35, "basis": "ESTIMATED" },
-  "sourceCommit": "7bc813df452e9ac255a087cfcaa4ae70474d4c42",
+  "sourceCommit": "cd86f65ceb0bd1b668324e7d523d5a49568461c7",
   "createdAt": "2026-07-16T18:00:00.000Z",
-  "updatedAt": "2026-07-16T18:00:00.000Z",
+  "updatedAt": "2026-07-17T18:00:00.000Z",
   "approval": {
     "approvedBy": "Synthetic control reviewer",
     "approvedAt": "2026-07-16T19:00:00.000Z",
@@ -41,5 +41,5 @@
     "tool.evidence.write"
   ],
   "allowedWritePaths": ["src/**", "browser-local://evidence/**"],
-  "contentHash": "e699f8b90fe63d81888a7179e06dbfaae53f197a1cd9462f43b46f576afc9624"
+  "contentHash": "803bb2ce8708aa25a4f1b61236a5a37a56cf4cb739b6c4243ae8fde0ef49491f"
 }

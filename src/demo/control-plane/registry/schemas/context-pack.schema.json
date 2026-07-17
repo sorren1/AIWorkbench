@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.invalid/schemas/registry/context-pack.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "classification",
+    "packId",
+    "runId",
+    "stageId",
+    "agentCard",
+    "memoryPolicy",
+    "selection",
+    "includedRecords",
+    "excludedRecords",
+    "freshnessResults",
+    "estimate",
+    "truncation",
+    "packDigest",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "classification": { "const": "SYNTHETIC_PUBLIC_CONTEXT_PACK" },
+    "packId": { "$ref": "common.schema.json#/$defs/identifier" },
+    "runId": { "$ref": "common.schema.json#/$defs/identifier" },
+    "stageId": {
+      "enum": ["seed", "intake", "spec", "plan", "targets", "implement", "verify", "review"]
+    },
+    "agentCard": {
+      "oneOf": [{ "$ref": "common.schema.json#/$defs/registryReference" }, { "type": "null" }]
+    },
+    "agentNotApplicableReason": { "const": "HUMAN_SELECTED_SEED_STAGE" },
+    "memoryPolicy": { "$ref": "common.schema.json#/$defs/registryReference" },
+    "selection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["strategy", "ruleVersion", "query", "candidateRecordIds", "ordering"],
+      "properties": {
+        "strategy": { "const": "DETERMINISTIC_RULES" },
+        "ruleVersion": { "type": "string", "minLength": 1 },
+        "query": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["requiredTags", "tagMatch", "personaId", "grantedScopes"],
+          "properties": {
+            "requiredTags": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
+            "tagMatch": { "const": "ANY" },
+            "personaId": { "$ref": "common.schema.json#/$defs/persona" },
+            "grantedScopes": {
+              "type": "array",
+              "items": { "$ref": "common.schema.json#/$defs/scope" },
+              "uniqueItems": true
+            }
+          }
+        },
+        "candidateRecordIds": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/identifier" },
+          "uniqueItems": true
+        },
+        "ordering": { "const": "PRIORITY_DESC_UPDATED_DESC_ID_ASC" }
+      }
+    },
+    "includedRecords": { "type": "array", "items": { "$ref": "#/$defs/inclusion" } },
+    "excludedRecords": { "type": "array", "items": { "$ref": "#/$defs/exclusion" } },
+    "freshnessResults": { "type": "array", "items": { "$ref": "#/$defs/freshness" } },
+    "estimate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["characters", "utf8Bytes", "estimatedTokens", "tokenEstimateBasis"],
+      "properties": {
+        "characters": { "type": "integer", "minimum": 0 },
+        "utf8Bytes": { "type": "integer", "minimum": 0 },
+        "estimatedTokens": { "type": "integer", "minimum": 0 },
+        "tokenEstimateBasis": { "const": "CEILING_CHARACTERS_DIVIDED_BY_FOUR" }
+      }
+    },
+    "truncation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["occurred", "excludedRecordIds", "reason"],
+      "properties": {
+        "occurred": { "type": "boolean" },
+        "excludedRecordIds": {
+          "type": "array",
+          "items": { "$ref": "common.schema.json#/$defs/identifier" },
+          "uniqueItems": true
+        },
+        "reason": { "type": ["string", "null"] }
+      }
+    },
+    "packDigest": { "$ref": "common.schema.json#/$defs/contentHash" },
+    "createdAt": { "$ref": "common.schema.json#/$defs/timestamp" }
+  },
+  "$defs": {
+    "freshness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "recordId",
+        "status",
+        "evaluatedAt",
+        "ageSeconds",
+        "effectiveTtlSeconds",
+        "explanation"
+      ],
+      "properties": {
+        "recordId": { "$ref": "common.schema.json#/$defs/identifier" },
+        "status": { "enum": ["FRESH", "STALE", "REVOKED"] },
+        "evaluatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+        "ageSeconds": { "type": "integer", "minimum": 0 },
+        "effectiveTtlSeconds": { "type": ["integer", "null"], "minimum": 0 },
+        "explanation": { "type": "string", "minLength": 1 }
+      }
+    },
+    "decisionBase": {
+      "type": "object",
+      "required": [
+        "record",
+        "reasonCode",
+        "reason",
+        "freshness",
+        "estimatedCharacters",
+        "estimatedTokens"
+      ],
+      "properties": {
+        "record": { "$ref": "context-record.schema.json" },
+        "reasonCode": { "type": "string", "minLength": 1 },
+        "reason": { "type": "string", "minLength": 1 },
+        "freshness": { "$ref": "#/$defs/freshness" },
+        "estimatedCharacters": { "type": "integer", "minimum": 0 },
+        "estimatedTokens": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "inclusion": {
+      "allOf": [
+        { "$ref": "#/$defs/decisionBase" },
+        {
+          "type": "object",
+          "properties": { "reasonCode": { "const": "SELECTED" } }
+        }
+      ]
+    },
+    "exclusion": {
+      "allOf": [
+        { "$ref": "#/$defs/decisionBase" },
+        {
+          "type": "object",
+          "properties": {
+            "reasonCode": {
+              "enum": [
+                "CONTENT_HASH_INVALID",
+                "REVOKED",
+                "STALE",
+                "SENSITIVITY_DENIED",
+                "RECORD_TYPE_DENIED",
+                "SOURCE_TYPE_DENIED",
+                "STAGE_INCOMPATIBLE",
+                "PERSONA_DENIED",
+                "AGENT_DENIED",
+                "SCOPE_DENIED",
+                "EPISODIC_MEMORY_DENIED",
+                "TAG_MISMATCH",
+                "OVER_BUDGET"
+              ]
+            }
+          }
+        }
+      ]
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "agentCard": { "type": "null" } }, "required": ["agentCard"] },
+      "then": {
+        "required": ["agentNotApplicableReason"],
+        "properties": { "agentNotApplicableReason": { "const": "HUMAN_SELECTED_SEED_STAGE" } }
+      }
+    }
+  ]
+}

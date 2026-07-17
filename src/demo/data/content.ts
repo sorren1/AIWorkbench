@@ -316,13 +316,28 @@ a prompt version, an input hash, and a review status.
 > Clean-room synthetic content — not a real artifact.`;
 }
 
-export function artifactsFor(issue: Issue): Artifact[] {
+function bindArtifactBody(body: string, lang: "json" | "md", contextPackDigest?: string): string {
+  if (!contextPackDigest) return body;
+  if (lang === "json") {
+    const parsed: unknown = JSON.parse(body);
+    if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) return body;
+    return JSON.stringify({ ...parsed, contextPackDigest }, null, 2);
+  }
+  return `${body}\n\n---\n\n**Context pack digest:** \`${contextPackDigest}\``;
+}
+
+export function artifactsFor(
+  issue: Issue,
+  contextPackDigests?: ReadonlyMap<StageId, string>,
+): Artifact[] {
   const stages = buildStages(issue);
   const out: Artifact[] = [];
   stages.forEach((st) => {
     (st.artifacts || []).forEach((name) => {
       const meta = getArtifactMeta(name);
       const rich = issue.key === "FIN-1150" ? A1150[name] : null;
+      const lang = rich ? rich.lang : meta.type === "JSON" ? "json" : "md";
+      const contextPackDigest = contextPackDigests?.get(st.id);
       out.push({
         id: issue.key + "::" + name,
         name,
@@ -332,8 +347,13 @@ export function artifactsFor(issue: Issue): Artifact[] {
         timestamp: st.completedAt !== "—" ? st.completedAt : st.startedAt,
         reviewStatus: REVIEW_STATUS[name] || "Recorded",
         risk: meta.risk,
-        lang: rich ? rich.lang : meta.type === "JSON" ? "json" : "md",
-        body: rich ? rich.body : genericBody(issue, name),
+        lang,
+        body: bindArtifactBody(
+          rich ? rich.body : genericBody(issue, name),
+          lang,
+          contextPackDigest,
+        ),
+        ...(contextPackDigest ? { contextPackDigest } : {}),
       });
     });
   });
@@ -341,7 +361,7 @@ export function artifactsFor(issue: Issue): Artifact[] {
 }
 
 // expose the would-be evidence artifact (added when Verify runs)
-export function evidenceArtifact(issue: Issue): Artifact {
+export function evidenceArtifact(issue: Issue, contextPackDigest?: string): Artifact {
   const rich = issue.key === "FIN-1150" ? A1150["evidence.md"] : null;
   return {
     id: issue.key + "::evidence.md",
@@ -353,7 +373,12 @@ export function evidenceArtifact(issue: Issue): Artifact {
     reviewStatus: "Pending",
     risk: "Low",
     lang: "md",
-    body: rich ? rich.body : genericBody(issue, "evidence.md"),
+    body: bindArtifactBody(
+      rich ? rich.body : genericBody(issue, "evidence.md"),
+      "md",
+      contextPackDigest,
+    ),
+    ...(contextPackDigest ? { contextPackDigest } : {}),
   };
 }
 

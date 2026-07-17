@@ -6,7 +6,10 @@ import { promisify } from "node:util";
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import { validateApprovalStore } from "../src/demo/control-plane/registry/validation";
+import {
+  validateApprovalStore,
+  validateContextPack,
+} from "../src/demo/control-plane/registry/validation";
 
 const execFileAsync = promisify(execFile);
 const cli = resolve(import.meta.dirname, "../tools/demo-sandbox/cli.ts");
@@ -22,6 +25,10 @@ async function command(args: readonly string[]) {
   return execFileAsync(process.execPath, ["--import", "tsx", cli, ...args], {
     cwd: resolve(import.meta.dirname, ".."),
   });
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 afterEach(async () => {
@@ -46,6 +53,10 @@ describe("durable local sandbox approval CLI", () => {
       requestId: "approval.run.test.cli.patch",
       status: "WAITING_FOR_APPROVAL",
     });
+    const persistedPack: unknown = JSON.parse(
+      await readFile(resolve(runRoot, "run.test.cli/context-pack.json"), "utf8"),
+    );
+    expect(validateContextPack(persistedPack).valid).toBe(true);
 
     await expect(
       command([
@@ -79,14 +90,70 @@ describe("durable local sandbox approval CLI", () => {
     const evidence: unknown = JSON.parse(
       await readFile(resolve(runRoot, "run.test.cli/execution-evidence.json"), "utf8"),
     );
-    expect(evidence).toMatchObject({
-      classification: "SYNTHETIC_LOCAL_APPROVAL_EVIDENCE",
-      result: { changed: true, path: "src/report.js" },
-      externalNetworkCalls: 0,
+    if (!isRecord(evidence)) throw new Error("Execution evidence is not an object.");
+    expect(evidence.classification).toBe("SYNTHETIC_LOCAL_APPROVAL_EVIDENCE");
+    expect(evidence.contextPackDigest).toMatch(/^[a-f0-9]{64}$/);
+    expect(evidence.contextPack).toMatchObject({
+      classification: "SYNTHETIC_PUBLIC_CONTEXT_PACK",
     });
+    expect(evidence.stageExecutionManifest).toMatchObject({
+      contextPackDigest: evidence.contextPackDigest,
+    });
+    expect(evidence.result).toMatchObject({ changed: true, path: "src/report.js" });
+    expect(evidence.externalNetworkCalls).toBe(0);
     await expect(
       command(["resume", "--run", "run.test.cli", "--run-root", runRoot]),
     ).rejects.toThrow();
+  }, 20_000);
+
+  it("rejects resume when the persisted context pack no longer matches", async () => {
+    const runRoot = await root();
+    await command([
+      "start",
+      "--scenario",
+      "approval-required",
+      "--run",
+      "run.test.context-mismatch",
+      "--run-root",
+      runRoot,
+    ]);
+    await command([
+      "approve",
+      "--request",
+      "approval.run.test.context-mismatch.patch",
+      "--as",
+      "synthetic-code-reviewer",
+      "--reason",
+      "Original synthetic context and patch reviewed.",
+      "--run-root",
+      runRoot,
+    ]);
+    const packPath = resolve(runRoot, "run.test.context-mismatch/context-pack.json");
+    const packValidation = validateContextPack(JSON.parse(await readFile(packPath, "utf8")));
+    if (!packValidation.valid) throw new Error("Persisted context fixture is invalid.");
+    const pack = packValidation.value;
+    const first = pack.includedRecords[0];
+    if (!first) throw new Error("Persisted context fixture has no selected record.");
+    const tamperedPack = {
+      ...pack,
+      includedRecords: [
+        {
+          ...first,
+          record: { ...first.record, content: `${first.record.content} tampered` },
+        },
+        ...pack.includedRecords.slice(1),
+      ],
+    };
+    await writeFile(packPath, `${JSON.stringify(tamperedPack, null, 2)}\n`, "utf8");
+
+    await expect(
+      command(["resume", "--run", "run.test.context-mismatch", "--run-root", runRoot]),
+    ).rejects.toThrow();
+    const run: unknown = JSON.parse(
+      await readFile(resolve(runRoot, "run.test.context-mismatch/run.json"), "utf8"),
+    );
+    if (!isRecord(run)) throw new Error("Run record is not an object.");
+    expect(run.status).toBe("BLOCKED");
   }, 20_000);
 
   it("invalidates an approval when proposed arguments change before resume", async () => {

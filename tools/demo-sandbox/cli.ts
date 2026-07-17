@@ -20,7 +20,10 @@ import {
   validateApprovalEvent,
   validateApprovalRequest,
   validateApprovalStore,
+  validateContextPack,
 } from "../../src/demo/control-plane/registry/validation";
+import { buildContextPack, contextSelectionInput } from "../../src/demo/context/runtime";
+import { includedContextRemainsFresh, isContextPackCurrent } from "../../src/demo/context/selector";
 import { startToyMcpSession } from "../toy-repo-mcp/client";
 import { initializeToyRepository } from "../toy-repo-mcp/workspace";
 
@@ -29,7 +32,7 @@ const fixtureRoot = resolve(projectRoot, "fixtures/toy-repository");
 const DEFAULT_RUN_ROOT = resolve(projectRoot, ".workbench/runs");
 
 const runRecordSchema = z.object({
-  schemaVersion: z.literal(1),
+  schemaVersion: z.literal(2),
   runId: z.string().regex(/^[a-z][a-z0-9._-]+$/),
   scenario: z.literal("approval-required"),
   status: z.enum(["WAITING_FOR_APPROVAL", "COMPLETED", "BLOCKED"]),
@@ -38,6 +41,7 @@ const runRecordSchema = z.object({
   requesterPersonaId: z.literal("synthetic-implementer"),
   requestId: z.string(),
   workspace: z.literal("workspace"),
+  contextPackPath: z.literal("context-pack.json"),
   action: z.object({
     toolId: z.literal("tool.repository.patch.controlled"),
     arguments: z.object({ path: z.string(), expected: z.string(), replacement: z.string() }),
@@ -145,11 +149,11 @@ async function startRun(): Promise<void> {
   };
   const approvedChangeTargets = ["src/**"];
   const changeTargetDigest = await sha256Hex(approvedChangeTargets);
-  const contextPackDigest = await sha256Hex({
-    fixture: "toy-repository",
-    classification: "SYNTHETIC_PUBLIC_FIXTURE",
-    exclusions: ["network", "secrets", "external repositories"],
+  const contextPack = await buildContextPack("synthetic-toy-repository", "implement", {
+    runId,
+    createdAt,
   });
+  const contextPackDigest = contextPack.packDigest;
   const persona = personaById("synthetic-implementer");
   const context = await authorizeRegistryAction({
     snapshot: registrySnapshot,
@@ -195,7 +199,7 @@ async function startRun(): Promise<void> {
   }
   assertValidStore(store);
   const run: RunRecord = {
-    schemaVersion: 1,
+    schemaVersion: 2,
     runId,
     scenario: "approval-required",
     status: "WAITING_FOR_APPROVAL",
@@ -204,6 +208,7 @@ async function startRun(): Promise<void> {
     requesterPersonaId: "synthetic-implementer",
     requestId,
     workspace: "workspace",
+    contextPackPath: "context-pack.json",
     action: {
       toolId: "tool.repository.patch.controlled",
       arguments: actionArguments,
@@ -214,6 +219,7 @@ async function startRun(): Promise<void> {
     },
   };
   await writeJson(resolve(directory, "run.json"), run);
+  await writeJson(resolve(directory, run.contextPackPath), contextPack);
   await writeJson(resolve(directory, "approval-request.json"), created.request);
   await writeJson(resolve(directory, "approval-state.json"), store);
   await writeFile(
@@ -281,6 +287,44 @@ async function resumeRun(): Promise<void> {
   );
   if (!policy) throw new Error("The run's bound policy is no longer current.");
   const now = new Date().toISOString();
+  const contextPackValidation = validateContextPack(
+    await readJson(resolve(directory, run.contextPackPath)).catch(() => null),
+  );
+  const denyContextMismatch = async (detail: string): Promise<never> => {
+    const invalidated = await transitionApprovalRequest({
+      store,
+      requestId: request.requestId,
+      status: "INVALIDATED",
+      actor: run.requesterPersonaId,
+      reason: detail,
+      timestamp: now,
+    });
+    assertValidStore(invalidated);
+    await appendNewEvents(eventsPath, store.events.length, invalidated.events);
+    await writeJson(statePath, invalidated);
+    await writeJson(runPath, { ...run, status: "BLOCKED" });
+    throw new Error(`Resume denied: CONTEXT_MISMATCH (${detail})`);
+  };
+  if (!contextPackValidation.valid) {
+    return denyContextMismatch(
+      `Persisted context pack is absent or invalid: ${contextPackValidation.errors.join("; ")}`,
+    );
+  }
+  const contextPack = contextPackValidation.value;
+  const currentContextInput = contextSelectionInput("synthetic-toy-repository", run.stage, {
+    runId: run.runId,
+    createdAt: contextPack.createdAt,
+  });
+  const memoryPolicy = currentContextInput.memoryPolicy;
+  if (
+    contextPack.packDigest !== run.action.contextPackDigest ||
+    !(await isContextPackCurrent(contextPack, currentContextInput)) ||
+    !includedContextRemainsFresh(contextPack, memoryPolicy.freshness.maximumAgeSeconds, now)
+  ) {
+    await denyContextMismatch(
+      "The persisted pack digest, selected records, policy binding, or freshness no longer matches the current deterministic selection.",
+    );
+  }
   const context = await authorizeRegistryAction({
     snapshot: registrySnapshot,
     persona: personaById(run.requesterPersonaId),
@@ -359,6 +403,9 @@ async function resumeRun(): Promise<void> {
         version: result.evidence.registryVersion,
         contentHash: result.evidence.registryContentHash,
       },
+      contextPackDigest: contextPack.packDigest,
+      contextPack,
+      stageExecutionManifest: session.executionManifest,
       result: { changed: result.payload.changed === true, path: result.payload.path },
       externalNetworkCalls: 0,
     });

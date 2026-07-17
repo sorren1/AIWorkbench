@@ -11,6 +11,7 @@ import { hasValidContentHash } from "../../src/demo/control-plane/registry/canon
 import type { StageId } from "../../src/demo/data/types";
 import { registrySnapshot } from "../../src/demo/control-plane/registry/generated";
 import { resolveStageExecutionManifest } from "../../src/demo/control-plane/registry/lifecycle";
+import type { StageExecutionManifest } from "../../src/demo/control-plane/registry/contracts";
 import {
   validateApprovalRequest,
   validateToolDescriptor,
@@ -61,6 +62,7 @@ export type InvocationPolicyEvidence = {
   readonly approvalPolicyId: string | null;
   readonly initiatingActor: PersonaId;
   readonly policyDecisionId: string;
+  readonly contextPackDigest: string;
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -115,6 +117,7 @@ function pathAllowed(requestedPath: string, patterns: readonly string[]): boolea
 export type ToyMcpSession = {
   readonly pid: number;
   readonly discoveredTools: readonly DiscoveredTool[];
+  readonly executionManifest: StageExecutionManifest;
   callApprovedTool: (
     toolId: string,
     args: Record<string, unknown>,
@@ -144,6 +147,7 @@ export async function startToyMcpSession(options: {
     registrySnapshot,
     options.stageId,
     options.approvedToolIds,
+    options.authorization.contextPackDigest,
     "2026-07-16T20:00:00.000Z",
   );
   if (!manifestDecision.allowed) {
@@ -190,6 +194,7 @@ export async function startToyMcpSession(options: {
     return {
       pid,
       discoveredTools,
+      executionManifest: manifestDecision.manifest,
       callApprovedTool: async (toolId, args) => {
         const discovered = discoveredTools.find((tool) => tool.name === toolId);
         if (!discovered) throw new Error(`MCP tool was not discovered: ${toolId}`);
@@ -303,6 +308,7 @@ export async function startToyMcpSession(options: {
             approvalPolicyId: approvedDescriptor.approvalPolicyId,
             initiatingActor: options.authorization.personaId,
             policyDecisionId: action.decision.decisionId,
+            contextPackDigest: options.authorization.contextPackDigest,
           },
         };
       },

@@ -108,7 +108,7 @@ test("the complete guided walkthrough advances using only the keyboard", async (
   const next = page.getByRole("button", { name: "Next" });
   await expect(next).toBeFocused();
 
-  for (let step = 2; step <= 6; step += 1) {
+  for (let step = 2; step <= 7; step += 1) {
     await page.keyboard.press("Enter");
     await expect(page.getByRole("progressbar", { name: "Walkthrough progress" })).toHaveAttribute(
       "aria-valuenow",

@@ -6,6 +6,7 @@ import type { Artifact, Issue, Tone } from "../data/types";
 import { useApp, useIssue } from "../state/store";
 import { Icon } from "../../shared/Icon";
 import { artifactDownloadSpec, copyText, downloadTextFile } from "../utils/browserActions";
+import { useContextPacks } from "../context/useContextPacks";
 import {
   Badge,
   Btn,
@@ -34,7 +35,11 @@ const REVIEW_TONE: Record<string, Tone> = {
 export function ArtifactsScreen() {
   const { state, actions } = useApp();
   const issue = useIssue(state.selectedKey);
-  const artifacts = artifactsFor(issue);
+  const { packs: contextPacks, error: contextError } = useContextPacks(issue.key);
+  const contextPackDigests = new Map(
+    [...contextPacks].map(([stageId, pack]) => [stageId, pack.packDigest] as const),
+  );
+  const artifacts = artifactsFor(issue, contextPackDigests);
   const selName = state.selectedArtifact[issue.key];
   const selected = artifacts.find((a) => a.name === selName) || artifacts[0];
 
@@ -279,8 +284,19 @@ export function ArtifactsScreen() {
                     ["Stage", selected.stage],
                     ["Generated", <span className="wb-mono wb-text-sm">{selected.timestamp}</span>],
                     ["Risk", <RiskBadge risk={selected.risk} />],
+                    [
+                      "Context pack",
+                      selected.contextPackDigest ? (
+                        <span className="wb-mono wb-text-sm" title={selected.contextPackDigest}>
+                          {selected.contextPackDigest.slice(0, 12)}…
+                        </span>
+                      ) : (
+                        <Badge tone="warn">Binding pending</Badge>
+                      ),
+                    ],
                   ]}
                 />
+                {contextError && <p className="wb-text-sm wb-danger">{contextError}</p>}
               </div>
             </Card>
             <Card>

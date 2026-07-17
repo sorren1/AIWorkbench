@@ -264,3 +264,27 @@ Version and hash approval policies. Bind approval requests to canonical argument
 - Persona switching is functional policy exploration but remains synthetic identity.
 - Browser/CLI durability is local and inspectable, not authenticated, shared, or tamper-resistant.
 - A production adapter must replace the envelope/store with OIDC/OAuth2 on-behalf-of credentials, server-side authorization, transactional single-use decisions, and immutable audit retention.
+
+## ADR-011 — Replace opaque agent memory with deterministic governed context packs
+
+- Status: Accepted
+- Date: 2026-07-17
+- Detailed records: [`docs/context-pack-and-memory-governance.md`](context-pack-and-memory-governance.md), [`docs/adr/deterministic-context-retrieval.md`](adr/deterministic-context-retrieval.md)
+
+### Context
+
+The registry declared a memory policy and the approval protocol accepted a context digest, but neither proved which records were selected or why. The earlier placeholder types and ad hoc hashes could not support TTL, revocation, authorization, replay, or artifact provenance. A semantic retrieval claim would also be unsupported because the public repository has no embedding model or vector index.
+
+### Decision
+
+Define versioned `ContextRecord` and `ContextPack` TypeScript/JSON Schema contracts. Use one hash-valid approved context policy per agent. Select checked-in public/synthetic candidates with stable tag, stage, sensitivity, persona, agent, scope, freshness, source/type, priority, recency, episodic-permission, and budget rules. Record all inclusion/exclusion reasons, honest character/byte/token estimates, truncation, exact agent/policy references, and a canonical SHA-256 digest.
+
+Bind artifacts, approvals, local MCP stage manifests, and sandbox evidence to the digest. Persist the full pack in a local run and reject resume if schema, digest, current selection, policy/record hashes, or freshness differs. Keep semantic retrieval as an unimplemented optional adapter governed by the same final policy filter.
+
+### Consequences
+
+- Every stage exposes an inspectable Context Manifest in the primary workflow and guided tour.
+- Selected-record or policy changes produce a new digest and stale the affected stage chain.
+- Prior failures/fixes are available only under the Implementation Agent's explicit episodic policy.
+- Estimates are not presented as measured provider token usage.
+- The repository proves deterministic context governance, not semantic search, autonomous learning, external memory ingestion, or production data isolation.

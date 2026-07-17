@@ -15,7 +15,7 @@ Functional locally:
 - architecture Markdown/JSON and validation-evidence Markdown/JSON exports;
 - validated deep links for screen, synthetic issue, artifact, and Settings subview;
 - five named deterministic synthetic scenario seeds and an explicitly confirmed reset;
-- generated, schema-validated agent/tool/model/memory/approval-policy registry inspection and JSON export;
+- generated, schema-validated agent/tool/model/context/approval-policy registry inspection and JSON export;
 - synthetic persona switching, pure local scope enforcement, and a versioned browser-local approval inbox;
 - explicit approval pause/decision/resume bound to arguments, versions, change targets, and context;
 - optional local MCP discovery and bounded toy-repository invocation through repository commands.
@@ -80,7 +80,8 @@ Changing the scenario starts again from the same deterministic workflow baseline
 3. **Artifacts** — inspect deterministic synthetic outputs and record a local review decision.
 4. **GitHub / PR** — inspect synthetic files, checks, and reviewer state around the human-review gate.
 5. **Validation Evidence** — update synthetic scenarios and tester notes, then inspect the browser-local decision state.
-6. **Architecture** — review the control, execution, context, and validation responsibility boundaries.
+6. **Context Manifest** — expand a stage on the Issue screen and inspect included/excluded records, TTL, provenance, estimated tokens, policy, and digest; optionally simulate a selected-record revision to show stale invalidation.
+7. **Architecture** — review the control, execution, context, and validation responsibility boundaries.
    Use the persistent prototype badge for the concise boundary and the About panel for full provenance and the separately labeled professional context.
 
-The separate **Control Plane** destination provides a focused registry inspection path when time permits. It shows exact versions, lifecycle, content hashes, capabilities, schemas, tool/write boundaries, model/memory policies, and estimated budgets without expanding the guided workflow into a generic admin tour. **Approval Inbox** demonstrates persona scope reasons, durable local decisions, separation of duties, and exact hash-bound resume.
+The separate **Control Plane** destination provides a focused registry inspection path when time permits. It shows exact versions, lifecycle, content hashes, capabilities, schemas, tool/write boundaries, model/context policies, and estimated budgets without expanding the guided workflow into a generic admin tour. **Approval Inbox** demonstrates persona scope reasons, durable local decisions, separation of duties, and exact hash-bound resume.

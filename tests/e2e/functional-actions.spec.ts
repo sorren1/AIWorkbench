@@ -30,6 +30,27 @@ test("artifact copy and download perform real browser-local actions", async ({ c
   expect(await downloadedText(download)).toContain("# Specification — FIN-1150");
 });
 
+test("stage context manifests expose decisions and invalidate dependent work on revision", async ({
+  page,
+}) => {
+  await page.goto("/demo/?screen=issue&issue=FIN-1150");
+  const manifest = page.getByRole("region", { name: "Context Manifest" });
+  await expect(manifest).toBeVisible();
+  await expect(manifest.getByText(/Deterministic selection/)).toBeVisible();
+  await expect(manifest.getByText(/^\d+ tokens · \d+ characters$/)).toBeVisible();
+  await expect(manifest.getByText("Included records and selection reasons")).toBeVisible();
+  await manifest.getByText("Excluded candidates and rationale").click();
+  await expect(manifest.getByText("Revoked synthetic prompt-injection sample")).toBeVisible();
+
+  await manifest.getByRole("button", { name: "Simulate selected context revision" }).click();
+  await expect(page.getByText("Context binding invalidated", { exact: true })).toBeVisible();
+  await expect(manifest.getByText("A selected context record changed")).toBeVisible();
+  await expect(manifest.getByText("Stale binding", { exact: true })).toBeVisible();
+  await expect(
+    page.locator(".wb-tl-card.is-selected").getByText("Stale", { exact: true }),
+  ).toBeVisible();
+});
+
 test("artifact copy reports a browser clipboard failure honestly", async ({ page }) => {
   await page.addInitScript(() => {
     Object.defineProperty(navigator, "clipboard", {

@@ -156,6 +156,7 @@ export type Artifact = {
   risk: Risk;
   lang: "json" | "md";
   body: string;
+  contextPackDigest?: string;
 };
 /* excerpt:end:artifact-provenance */
 

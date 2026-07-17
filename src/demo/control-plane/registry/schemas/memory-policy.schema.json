@@ -11,10 +11,14 @@
     "description",
     "status",
     "allowedRecordTypes",
-    "sourceScopes",
+    "allowedSourceTypes",
+    "allowedSensitivities",
     "freshness",
     "maximumContextBytes",
+    "maximumEstimatedTokens",
     "priorRunEpisodicMemoryPermitted",
+    "retrievalMode",
+    "selectionRuleVersion",
     "sourceCommit",
     "contentHash",
     "createdAt",
@@ -27,19 +31,59 @@
     "version": { "$ref": "common.schema.json#/$defs/semanticVersion" },
     "description": { "type": "string", "minLength": 1 },
     "status": { "$ref": "common.schema.json#/$defs/status" },
-    "allowedRecordTypes": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
-    "sourceScopes": { "$ref": "common.schema.json#/$defs/nonEmptyStrings" },
+    "allowedRecordTypes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "ARCHITECTURE_DECISION",
+          "ENGINEERING_CONVENTION",
+          "DOMAIN_RULE",
+          "ISSUE_EVIDENCE",
+          "PRIOR_FAILURE",
+          "PRIOR_FIX",
+          "USER_PREFERENCE",
+          "CUSTOM"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "allowedSourceTypes": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "REPOSITORY",
+          "ISSUE_FIXTURE",
+          "DOCUMENTATION",
+          "EVIDENCE",
+          "USER_CONFIGURATION",
+          "PRIOR_RUN",
+          "CUSTOM"
+        ]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "allowedSensitivities": {
+      "type": "array",
+      "items": { "enum": ["PUBLIC", "SYNTHETIC", "RESTRICTED_SYNTHETIC", "SECRET"] },
+      "minItems": 1,
+      "uniqueItems": true
+    },
     "freshness": {
       "type": "object",
       "additionalProperties": false,
       "required": ["maximumAgeSeconds", "staleBehavior"],
       "properties": {
         "maximumAgeSeconds": { "type": "integer", "minimum": 0 },
-        "staleBehavior": { "enum": ["EXCLUDE", "FLAG_FOR_REVIEW"] }
+        "staleBehavior": { "const": "EXCLUDE" }
       }
     },
     "maximumContextBytes": { "type": "integer", "minimum": 1024 },
+    "maximumEstimatedTokens": { "type": "integer", "minimum": 128 },
     "priorRunEpisodicMemoryPermitted": { "type": "boolean" },
+    "retrievalMode": { "const": "DETERMINISTIC_RULES" },
+    "selectionRuleVersion": { "type": "string", "minLength": 1 },
     "sourceCommit": { "$ref": "common.schema.json#/$defs/sourceCommit" },
     "contentHash": { "$ref": "common.schema.json#/$defs/contentHash" },
     "createdAt": { "$ref": "common.schema.json#/$defs/timestamp" },

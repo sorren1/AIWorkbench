@@ -31,6 +31,15 @@ const STEPS: readonly WalkthroughStep[] = [
     explain: "A redo invalidates downstream work instead of allowing stale success to survive.",
   },
   {
+    route: "issue",
+    issueKey: "FIN-1150",
+    title: "Audit the context before trusting the artifact",
+    duration: "60 sec",
+    show: "Expand a stage and inspect its Context Manifest: inclusions, exclusions, TTL, policy, estimate, and digest.",
+    explain:
+      "Deterministic rules make context selection replayable. A selected-record revision changes the digest and marks dependent work stale.",
+  },
+  {
     route: "artifacts",
     issueKey: "FIN-1150",
     title: "Inspect deterministic handoffs",

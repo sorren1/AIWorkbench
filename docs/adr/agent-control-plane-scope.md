@@ -29,10 +29,11 @@ The original domain model will include:
 
 - `StageAgentVersion`: immutable stage binding, purpose, lifecycle, capability-card reference, version/digest, provenance, and supersession.
 - `ToolVersion`: immutable tool contract, risk class, input/output references, boundary, approval rule, version/digest, and provenance.
-- `CapabilityCard`: input/output, allowed/denied/gated tools, memory/context policy, model/runtime policy, budgets, approval requirements, and provenance.
+- `CapabilityCard`: input/output, allowed/denied/gated tools, context-selection policy, model/runtime policy, budgets, approval requirements, and provenance.
 - `PolicyDecision`: actor/persona, resource/action, effect, stable reason code, policy version, inputs digest, and timestamp.
 - `ApprovalRequest` plus `ApprovalEvent`: risky call envelope and append-only lifecycle history.
-- `ContextPackManifest`: included/excluded resources, provenance, freshness, redactions, canonical digest, and policy version.
+- `ContextRecord`: versioned public/synthetic content with source, hash, sensitivity, stage/persona/agent/scope authorization, TTL/state, priority, tags, and evidence references.
+- `ContextPack`: run/stage, exact agent and context-policy references, deterministic query/rules, included/excluded records with reasons, freshness, estimates, truncation, canonical digest, and creation time.
 - `RuntimeReceipt`: selected model alias/runtime class/credential reference, fallback decision, usage basis, and simulated/provider status.
 - `BudgetLedger`: limits, consumption, measurement bases, and stop reason.
 - `TraceRecord`: OpenTelemetry-compatible span hierarchy and project governance attributes.
@@ -78,7 +79,9 @@ For the static public release, a small versioned local-storage record provides b
 
 ### Context selection and provenance
 
-Each stage assembles a deterministic context-pack manifest from synthetic resources. The manifest records revisions/digests, origin, retrieval and modification times, maximum age/freshness, trust classification, inclusion reasons, explicit exclusion reasons, and redactions. Canonical JSON is hashed with browser Web Crypto SHA-256. The digest is linked to the approval request, trace, and evidence.
+Each stage assembles a deterministic context pack from versioned public/synthetic records. The pack records record hashes and sources, created/updated times, effective TTL/freshness, sensitivity and authorization checks, inclusion reasons, explicit exclusion reasons, token/character estimates, truncation, and the exact selection-policy version/hash. Canonical JSON is hashed with Web Crypto SHA-256. The digest is linked to artifacts, approval requests, stage execution manifests, and local sandbox evidence.
+
+Deterministic tag/stage/scope/recency/priority rules are the only implemented retrieval mode. A future semantic candidate adapter is optional and must remain behind the same final authorization/freshness/budget gate; the initial release makes no vector-retrieval claim.
 
 Resource bodies and prompts are not recorded in telemetry by default. No feature accepts non-public organization context or private files in the public release.
 

@@ -108,6 +108,7 @@ describe("versioned agent and tool registry", () => {
       registrySnapshot,
       "implement",
       ["tool.repository.file.read", "tool.repository.diff.inspect"],
+      "c".repeat(64),
       "2026-07-16T21:00:00.000Z",
     );
     expect(decision.allowed).toBe(true);
@@ -130,6 +131,7 @@ describe("versioned agent and tool registry", () => {
       blockedSnapshot,
       "implement",
       [blockedTool.id],
+      "c".repeat(64),
       "2026-07-16T21:00:00.000Z",
     );
     expect(blocked).toMatchObject({ allowed: false, reasonCode: "TOOL_NOT_APPROVED" });
@@ -140,6 +142,7 @@ describe("versioned agent and tool registry", () => {
       registrySnapshot,
       "spec",
       ["tool.issue.read"],
+      "c".repeat(64),
       "2026-07-16T21:00:00.000Z",
     );
     expect(decision.allowed).toBe(true);
@@ -162,13 +165,14 @@ describe("versioned agent and tool registry", () => {
       ...registrySnapshot,
       agents: registrySnapshot.agents.map((agent) => (agent.id === revised.id ? revised : agent)),
     };
-    await expect(isExecutionManifestCurrent(decision.manifest, revisedSnapshot)).resolves.toBe(
-      false,
-    );
+    await expect(
+      isExecutionManifestCurrent(decision.manifest, revisedSnapshot, "c".repeat(64)),
+    ).resolves.toBe(false);
     const rerun = await resolveStageExecutionManifest(
       revisedSnapshot,
       "spec",
       ["tool.issue.read"],
+      "c".repeat(64),
       "2026-07-16T22:00:00.000Z",
     );
     expect(rerun).toMatchObject({ allowed: false, reasonCode: "AGENT_NOT_APPROVED" });

@@ -1,0 +1,136 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://portfolio.invalid/schemas/registry/context-record.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "id",
+    "recordType",
+    "title",
+    "content",
+    "source",
+    "contentHash",
+    "sensitivity",
+    "allowedStages",
+    "allowedPersonas",
+    "allowedAgents",
+    "requiredScopes",
+    "priority",
+    "createdAt",
+    "updatedAt",
+    "freshnessPolicy",
+    "state",
+    "tags"
+  ],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "id": { "$ref": "common.schema.json#/$defs/identifier" },
+    "recordType": {
+      "enum": [
+        "ARCHITECTURE_DECISION",
+        "ENGINEERING_CONVENTION",
+        "DOMAIN_RULE",
+        "ISSUE_EVIDENCE",
+        "PRIOR_FAILURE",
+        "PRIOR_FIX",
+        "USER_PREFERENCE",
+        "CUSTOM"
+      ]
+    },
+    "title": { "type": "string", "minLength": 1, "maxLength": 160 },
+    "content": { "type": "string", "minLength": 1, "maxLength": 8000 },
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type", "classification", "reference"],
+      "properties": {
+        "type": {
+          "enum": [
+            "REPOSITORY",
+            "ISSUE_FIXTURE",
+            "DOCUMENTATION",
+            "EVIDENCE",
+            "USER_CONFIGURATION",
+            "PRIOR_RUN",
+            "CUSTOM"
+          ]
+        },
+        "classification": { "enum": ["PUBLIC", "SYNTHETIC"] },
+        "reference": { "type": "string", "minLength": 1 },
+        "sourceCommit": { "$ref": "common.schema.json#/$defs/sourceCommit" },
+        "sourceVersion": { "type": "string", "minLength": 1 }
+      }
+    },
+    "contentHash": { "$ref": "common.schema.json#/$defs/contentHash" },
+    "sensitivity": {
+      "enum": ["PUBLIC", "SYNTHETIC", "RESTRICTED_SYNTHETIC", "SECRET"]
+    },
+    "allowedStages": {
+      "type": "array",
+      "items": {
+        "enum": ["seed", "intake", "spec", "plan", "targets", "implement", "verify", "review"]
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "allowedPersonas": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/persona" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "allowedAgents": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/identifier" },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "requiredScopes": {
+      "type": "array",
+      "items": { "$ref": "common.schema.json#/$defs/scope" },
+      "uniqueItems": true
+    },
+    "priority": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "createdAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "updatedAt": { "$ref": "common.schema.json#/$defs/timestamp" },
+    "freshnessPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["mode"],
+      "properties": {
+        "mode": { "enum": ["TTL", "NEVER_EXPIRES"] },
+        "ttlSeconds": { "type": "integer", "minimum": 0 }
+      },
+      "allOf": [
+        {
+          "if": { "properties": { "mode": { "const": "TTL" } }, "required": ["mode"] },
+          "then": {
+            "required": ["ttlSeconds"],
+            "properties": { "ttlSeconds": { "type": "integer", "minimum": 0 } }
+          }
+        }
+      ]
+    },
+    "state": { "enum": ["ACTIVE", "STALE", "REVOKED"] },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "uniqueItems": true
+    },
+    "citations": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["label", "reference"],
+        "properties": {
+          "label": { "type": "string", "minLength": 1 },
+          "reference": { "type": "string", "minLength": 1 }
+        }
+      },
+      "uniqueItems": true
+    }
+  }
+}

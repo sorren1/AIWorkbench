@@ -330,7 +330,7 @@ Suggested commit: `feat: add the governed stage-agent registry`
 
 ### Phase 6 — Approval, context, runtime, budgets, and trace evidence
 
-Status: Scoped authorization and durable approval protocol complete in `feat: enforce scoped authorization and durable approvals`; context manifests, runtime gateway, budgets, and traces remain.
+Status: Scoped authorization and durable approval protocol complete in `feat: enforce scoped authorization and durable approvals`. Deterministic governed context packs are complete in `feat: add governed context packs and memory policies`; runtime gateway, budgets, and traces remain.
 
 Scope: make a governed run explainable end to end without introducing a live external integration.
 
@@ -338,7 +338,7 @@ Acceptance criteria:
 
 - Risky tool requests create durable browser-local approval envelopes and append-only state transitions; reload, expiry, separation of duties, CLI single-use execution, and reset are tested. Browser approval export/import remains intentionally deferred.
 - The approval UI says that storage and identity are local/simulated and does not imply tamper resistance or shared enterprise durability.
-- Context-pack manifests record inclusions, exclusions, provenance, freshness, redactions, and a deterministic SHA-256 digest; digest tampering/invalidation tests pass.
+- Context-pack manifests record inclusions, exclusions, provenance, freshness, deterministic selection rules, measured-versus-estimated size labels, and a SHA-256 digest; browser and sandbox tampering/invalidation tests pass. Complete.
 - The provider-neutral gateway contract enforces agent/model/runtime/credential-reference scope locally while all provider execution remains simulated and no secret-entry UI or live endpoint exists.
 - Budget preflight and iteration enforcement cover tokens, estimated cost, iterations, tool calls, retries, and time; every displayed quantity carries its measurement basis.
 - Traces link workflow, policy, context, model, approval, tool, and evidence spans; deterministic fixtures export as pinned OTLP/HTTP JSON-compatible documents.

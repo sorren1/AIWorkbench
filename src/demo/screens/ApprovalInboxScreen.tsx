@@ -15,6 +15,7 @@ import { registrySnapshot } from "../control-plane/registry/generated";
 import { useApp } from "../state/store";
 import { Icon } from "../../shared/Icon";
 import { Badge, Banner, Btn, Card } from "../components/primitives";
+import { buildContextPack } from "../context/runtime";
 
 type StatusFilter = "ALL" | ApprovalStatus;
 
@@ -108,6 +109,20 @@ export function ApprovalInboxScreen() {
       selected.decisionActor && isPersonaId(selected.decisionActor)
         ? personaById(selected.decisionActor)
         : null;
+    const currentContextPack = await buildContextPack(selected.effectiveSubject, selected.stage);
+    if (currentContextPack.packDigest !== selected.binding.contextPackDigest) {
+      const approvalStore = await transitionApprovalRequest({
+        store: state.approvalStore,
+        requestId: selected.requestId,
+        status: "INVALIDATED",
+        actor: state.personaId,
+        reason: "The deterministic context pack no longer matches the approval binding.",
+        timestamp: new Date().toISOString(),
+      });
+      actions.setApprovalStore(approvalStore);
+      actions.toast("error", "Resume denied", "The bound context pack changed; create a new run.");
+      return;
+    }
     const result = validateApprovalForResume({
       request: selected,
       binding: selected.binding,

@@ -7,6 +7,8 @@ import approvalEventSchema from "./schemas/approval-event.schema.json";
 import approvalRequestSchema from "./schemas/approval-request.schema.json";
 import approvalStoreSchema from "./schemas/approval-store.schema.json";
 import commonSchema from "./schemas/common.schema.json";
+import contextPackSchema from "./schemas/context-pack.schema.json";
+import contextRecordSchema from "./schemas/context-record.schema.json";
 import delegatedIdentityEnvelopeSchema from "./schemas/delegated-identity-envelope.schema.json";
 import memoryPolicySchema from "./schemas/memory-policy.schema.json";
 import modelPolicySchema from "./schemas/model-policy.schema.json";
@@ -22,10 +24,12 @@ import type {
   ToolDescriptor,
 } from "./contracts";
 import type { ApprovalEvent, ApprovalRequest, ApprovalStore } from "../../authorization/contracts";
+import type { ContextPack, ContextRecord } from "../../context/contracts";
 
 const ajv = new Ajv2020({ allErrors: true, strict: true });
 addFormats(ajv);
 ajv.addSchema(commonSchema);
+ajv.addSchema(contextRecordSchema);
 ajv.addSchema(stageInputSchema);
 ajv.addSchema(stageOutputSchema);
 ajv.addSchema(delegatedIdentityEnvelopeSchema);
@@ -34,7 +38,8 @@ ajv.addSchema(approvalEventSchema);
 
 const approvalRequestValidator = ajv.getSchema<ApprovalRequest>(approvalRequestSchema.$id);
 const approvalEventValidator = ajv.getSchema<ApprovalEvent>(approvalEventSchema.$id);
-if (!approvalRequestValidator || !approvalEventValidator) {
+const contextRecordValidator = ajv.getSchema<ContextRecord>(contextRecordSchema.$id);
+if (!approvalRequestValidator || !approvalEventValidator || !contextRecordValidator) {
   throw new Error("Approval protocol schemas failed to register.");
 }
 
@@ -47,6 +52,8 @@ const validators = {
   ApprovalRequest: approvalRequestValidator,
   ApprovalEvent: approvalEventValidator,
   ApprovalStore: ajv.compile<ApprovalStore>(approvalStoreSchema),
+  ContextRecord: contextRecordValidator,
+  ContextPack: ajv.compile<ContextPack>(contextPackSchema),
 };
 
 export type SchemaValidationResult<T> =
@@ -101,6 +108,14 @@ export function validateApprovalEvent(value: unknown): SchemaValidationResult<Ap
 
 export function validateApprovalStore(value: unknown): SchemaValidationResult<ApprovalStore> {
   return validateWith(validators.ApprovalStore, value);
+}
+
+export function validateContextRecord(value: unknown): SchemaValidationResult<ContextRecord> {
+  return validateWith(validators.ContextRecord, value);
+}
+
+export function validateContextPack(value: unknown): SchemaValidationResult<ContextPack> {
+  return validateWith(validators.ContextPack, value);
 }
 
 export function validateRegistryResource(value: unknown): SchemaValidationResult<RegistryResource> {

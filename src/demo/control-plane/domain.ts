@@ -55,7 +55,7 @@ export type CapabilityCard = VersionReference & {
   allowedTools: VersionReference[];
   deniedTools: VersionReference[];
   gatedTools: VersionReference[];
-  memoryScope: "run" | "issue" | "none";
+  contextScope: "run" | "issue" | "none";
   contextPolicyRef: string;
   modelAliases: string[];
   runtimeClasses: string[];
@@ -102,30 +102,6 @@ export type ApprovalRequest = {
   expiresAt: string;
   traceId: string;
   events: ApprovalEvent[];
-};
-
-export type ContextResource = {
-  id: string;
-  resourceType: string;
-  revision: string;
-  digest: string;
-  origin: string;
-  retrievedAt: string;
-  modifiedAt: string | null;
-  maximumAgeSeconds: number;
-  freshness: "fresh" | "stale" | "unknown";
-  trust: "trusted_fixture" | "untrusted_external";
-  inclusionReason: string | null;
-  exclusionReason: string | null;
-  redactions: string[];
-};
-
-export type ContextPackManifest = {
-  id: string;
-  policyVersion: string;
-  resources: ContextResource[];
-  canonicalDigest: string;
-  createdAt: string;
 };
 
 export type RuntimeReceipt = {

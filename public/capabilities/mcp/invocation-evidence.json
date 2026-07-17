@@ -19,6 +19,7 @@
       "approvalPolicyId": null,
       "initiatingActor": "synthetic-implementer",
       "policyDecisionId": "decision.run.generated.mcp-evidence.tool-repository-search",
+      "contextPackDigest": "86a49a7c70f55c630f3bd7e06940f9ff1cea56300dc3e6d6ef540d5dc101cbaa",
       "sanitizedResult": { "matchCount": 3 }
     },
     {
@@ -31,6 +32,7 @@
       "approvalPolicyId": null,
       "initiatingActor": "synthetic-implementer",
       "policyDecisionId": "decision.run.generated.mcp-evidence.tool-repository-file-read",
+      "contextPackDigest": "86a49a7c70f55c630f3bd7e06940f9ff1cea56300dc3e6d6ef540d5dc101cbaa",
       "sanitizedResult": { "path": "src/report.js", "contentIncluded": false }
     },
     {
@@ -43,6 +45,7 @@
       "approvalPolicyId": "policy.write.approved-targets",
       "initiatingActor": "synthetic-implementer",
       "policyDecisionId": "decision.run.generated.mcp-evidence.tool-repository-patch-controlled",
+      "contextPackDigest": "86a49a7c70f55c630f3bd7e06940f9ff1cea56300dc3e6d6ef540d5dc101cbaa",
       "sanitizedResult": { "path": "src/report.js", "changed": true }
     },
     {
@@ -55,6 +58,7 @@
       "approvalPolicyId": null,
       "initiatingActor": "synthetic-implementer",
       "policyDecisionId": "decision.run.generated.mcp-evidence.tool-repository-diff-inspect",
+      "contextPackDigest": "86a49a7c70f55c630f3bd7e06940f9ff1cea56300dc3e6d6ef540d5dc101cbaa",
       "sanitizedResult": { "changedPaths": ["src/report.js"], "diffBodyIncluded": false }
     },
     {
@@ -67,6 +71,7 @@
       "approvalPolicyId": "policy.sandbox.validation-notify",
       "initiatingActor": "synthetic-implementer",
       "policyDecisionId": "decision.run.generated.mcp-evidence.tool-sandbox-command",
+      "contextPackDigest": "86a49a7c70f55c630f3bd7e06940f9ff1cea56300dc3e6d6ef540d5dc101cbaa",
       "sanitizedResult": { "exitCode": 0, "outputIncluded": false }
     }
   ],

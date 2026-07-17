@@ -2,7 +2,7 @@
 
 ## Purpose
 
-The registry makes the workbench's stage authorization inputs inspectable. For every executable delivery stage it records the exact approved agent version and content hash, declared tools and write paths, input/output schemas, model and memory policy, approval policies, and execution budgets.
+The registry makes the workbench's stage authorization inputs inspectable. For every executable delivery stage it records the exact approved agent version and content hash, declared tools and write paths, input/output schemas, model and context-selection policy, approval policies, and execution budgets.
 
 This is a deterministic synthetic portfolio fixture. It does not represent remotely deployed agents, authenticated users, live model calls, or a production control-plane service.
 
@@ -46,7 +46,8 @@ The digest covers declarative identity and policy content, not lifecycle/approva
 3. `APPROVED` agent lifecycle;
 4. every requested tool to be declared by that agent;
 5. valid, hash-valid, `APPROVED` tool records allowed for that stage; and
-6. valid, hash-valid, `APPROVED` model and memory policies.
+6. valid, hash-valid, `APPROVED` model and context-selection policies;
+7. the exact current context-pack digest supplied by the deterministic selector.
 
 The resulting manifest records exact ID, version, and content-hash references. `isExecutionManifestCurrent` fails when any current resource no longer matches or is no longer approved. Deprecated records remain visible as evidence but are ineligible for a new manifest.
 

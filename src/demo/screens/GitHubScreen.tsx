@@ -7,6 +7,7 @@ import { authorizeRegistryAction } from "../authorization/authorizeAction";
 import { personaById } from "../authorization/personas";
 import { sha256Hex } from "../control-plane/registry/canonical";
 import { registrySnapshot } from "../control-plane/registry/generated";
+import { buildContextPack } from "../context/runtime";
 import {
   Avatar,
   Badge,
@@ -150,15 +151,7 @@ export function GitHubScreen() {
       return;
     }
     const changeTargetDigest = await sha256Hex(base.files.map((file) => file.path).sort());
-    const contextPackDigest = await sha256Hex({
-      issueKey: issue.key,
-      testedCommit: validation.commitSha,
-      diffReviewed: ov.diffReviewed,
-      checklist: base.checklist.map((item) => [
-        item.label,
-        ov.checklist?.[item.label] ?? item.done,
-      ]),
-    });
+    const contextPackDigest = (await buildContextPack(issue.key, "review")).packDigest;
     const request = await actions.queueApproval({
       context,
       argumentsValue,

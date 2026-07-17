@@ -28,6 +28,16 @@ import {
   StatusBadge,
   SurfaceBadge,
 } from "../components/primitives";
+import { ContextManifest } from "../components/ContextManifest";
+import type { ContextPack } from "../context/contracts";
+import {
+  contextRecordHashInput,
+  isContextPackCurrent,
+  selectContextPack,
+} from "../context/selector";
+import { contextRecordsForSubject, contextSelectionInput } from "../context/runtime";
+import { useContextPacks } from "../context/useContextPacks";
+import { sha256Hex } from "../control-plane/registry/canonical";
 
 /* ============================================================
    AI Delivery Workbench — Screen: Issue Detail
@@ -122,11 +132,17 @@ function StageRow({
   stage,
   selected,
   onToggle,
+  contextPack,
+  invalidatedByDigest,
+  onReviseContext,
 }: {
   readonly issue: Issue;
   readonly stage: GeneratedStage;
   readonly selected: boolean;
   readonly onToggle: () => void;
+  readonly contextPack: ContextPack | undefined;
+  readonly invalidatedByDigest: string | undefined;
+  readonly onReviseContext: (pack: ContextPack) => void;
 }) {
   const { actions } = useApp();
   const id = stage.id,
@@ -357,6 +373,17 @@ function StageRow({
                   </Btn>
                 )}
               </div>
+              {contextPack ? (
+                <ContextManifest
+                  pack={contextPack}
+                  invalidatedByDigest={invalidatedByDigest}
+                  onRevise={() => onReviseContext(contextPack)}
+                />
+              ) : (
+                <p className="wb-text-sm wb-muted wb-mt-12" role="status">
+                  Assembling the deterministic context manifest…
+                </p>
+              )}
             </div>
           )}
         </div>
@@ -377,6 +404,50 @@ export function IssueDetail() {
   const pr = prFor(issue);
   const artifacts = artifactsFor(issue);
   const [open, setOpen] = useState<StageId | null>(cs.def.id);
+  const { packs: contextPacks, error: contextError } = useContextPacks(issue.key);
+  const [invalidatedPacks, setInvalidatedPacks] = useState<Readonly<Record<string, string>>>({});
+
+  async function simulateContextRevision(stageId: StageId, boundPack: ContextPack) {
+    const selectedRecord = boundPack.includedRecords[0]?.record;
+    if (!selectedRecord) {
+      actions.toast(
+        "error",
+        "Context revision unavailable",
+        "The bound pack has no selected record.",
+      );
+      return;
+    }
+    const updatedAt = "2026-07-17T17:59:00.000Z";
+    const changedContent = `${selectedRecord.content} Synthetic revision marker: context-v2.`;
+    const changedRecordWithoutNewHash = {
+      ...selectedRecord,
+      content: changedContent,
+      updatedAt,
+    };
+    const changedRecord = {
+      ...changedRecordWithoutNewHash,
+      contentHash: await sha256Hex(contextRecordHashInput(changedRecordWithoutNewHash)),
+    };
+    const candidates = contextRecordsForSubject(issue.key).map((record) =>
+      record.id === selectedRecord.id ? changedRecord : record,
+    );
+    const revisedInput = contextSelectionInput(issue.key, stageId, { candidates });
+    const revisedPack = await selectContextPack(revisedInput);
+    if (await isContextPackCurrent(boundPack, revisedInput)) {
+      actions.toast("error", "Context invariant failed", "The context change was not detected.");
+      return;
+    }
+    setInvalidatedPacks((current) => ({
+      ...current,
+      [`${issue.key}:${stageId}`]: revisedPack.packDigest,
+    }));
+    actions.staleFrom(issue.key, stageId);
+    actions.toast(
+      "warn",
+      "Context binding invalidated",
+      `${stageId} and dependent completed stages were marked stale; start a new run to bind ${revisedPack.packDigest.slice(0, 12)}…`,
+    );
+  }
 
   // primary next action
   const nextStage =
@@ -620,6 +691,11 @@ export function IssueDetail() {
               }
             />
             <div className="wb-card-body">
+              {contextError && (
+                <Banner tone="danger" title="Context manifests unavailable">
+                  {contextError}
+                </Banner>
+              )}
               <div className="wb-timeline">
                 {stages.map((s) => (
                   <StageRow
@@ -628,6 +704,9 @@ export function IssueDetail() {
                     stage={s}
                     selected={open === s.id}
                     onToggle={() => setOpen(open === s.id ? null : s.id)}
+                    contextPack={contextPacks.get(s.id)}
+                    invalidatedByDigest={invalidatedPacks[`${issue.key}:${s.id}`]}
+                    onReviseContext={(pack) => void simulateContextRevision(s.id, pack)}
                   />
                 ))}
               </div>
