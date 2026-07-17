@@ -55,6 +55,7 @@
     "test:model-gateway:live": "vitest run tests/model-gateway.live.test.ts",
     "test:e2e": "playwright test",
     "test:a11y": "playwright test tests/e2e/accessibility.spec.ts",
+    "test:deployment": "playwright test tests/e2e/deployment.spec.ts --project=deployment",
     "test:visual": "playwright test --project=visual",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm run registry:check && npm run mcp:evidence:check && npm run sandbox:evidence:validate && npm run trace:check && npm run model-gateway:check && npm run model-gateway:evidence:validate && npm run test:coverage && npm run build && tsx scripts/generate-public-screenshots.ts --check && npm run links:check && npm run performance:budgets && npm run security:check && npm run security:supply-chain",
     "check:all": "npm run check && npm run test:e2e && npm run performance:audit"

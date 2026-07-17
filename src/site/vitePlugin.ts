@@ -5,7 +5,7 @@ import type { Plugin } from "vite";
 
 import { modelGatewayStatus } from "../demo/model-gateway/generated";
 import type { ModelGatewayPublicStatus } from "../demo/model-gateway/status";
-import { siteConfig, type SiteConfig } from "./config";
+import type { SiteConfig } from "./config";
 import {
   renderRecordedSandboxEvidence,
   type RecordedSandboxEvidenceRender,
@@ -136,7 +136,7 @@ function renderModelGatewayStatus(): string {
   </tr>`;
 }
 
-export function portfolioSitePlugin(root: string): Plugin {
+export function portfolioSitePlugin(root: string, siteConfig: SiteConfig): Plugin {
   let recordedEvidence: RecordedSandboxEvidenceRender | null = null;
   return {
     name: "portfolio-site-generator",

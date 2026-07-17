@@ -3,7 +3,7 @@ import { resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-import type { SiteConfig } from "../src/site/config";
+import { createSiteConfig, type SiteConfig } from "../src/site/config";
 import {
   absoluteSiteUrl,
   createRobotsTxt,
@@ -61,6 +61,25 @@ describe("static site metadata", () => {
     expect(tags).not.toContain('property="og:url"');
     expect(createRobotsTxt(unconfigured)).not.toContain("Sitemap:");
     expect(createSitemapXml(unconfigured)).not.toContain("<loc>");
+  });
+
+  it("loads and normalizes a custom canonical domain from the build environment", () => {
+    expect(
+      createSiteConfig({ SITE_CANONICAL_URL: " https://workbench.example.net/case-study " })
+        .canonicalUrl,
+    ).toBe("https://workbench.example.net/case-study/");
+  });
+
+  it.each([
+    "http://workbench.example.net",
+    "https://user:secret@workbench.example.net",
+    "https://workbench.example.net:8443",
+    "https://workbench.example.net?preview=true",
+    "https://workbench.example.net/#section",
+    "https://ai-workbench.vercel.app",
+    "https://vercel.app",
+  ])("rejects an unsafe or ephemeral canonical URL: %s", (canonicalUrl) => {
+    expect(() => createSiteConfig({ SITE_CANONICAL_URL: canonicalUrl })).toThrow();
   });
 
   it("generates subpath-safe canonical, social, robots, and sitemap URLs when configured", () => {

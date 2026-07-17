@@ -23,9 +23,9 @@ The recorded 2026-07-17 local baseline used Node 22.18.0, Chromium 149.0.7827.55
 
 ## Security headers
 
-The Vite production preview and emitted `_headers` file use the same typed policy from `src/site/securityHeaders.ts`. The deployment profile is a Git-backed static host or edge in front of it that supports `_headers`-style response configuration. The policy denies framing, objects, workers, media, external connections, and non-local scripts; it includes Referrer-Policy, nosniff, Permissions-Policy, and cross-origin opener isolation. It does not permit `unsafe-eval`.
+The Vite production preview, emitted `_headers` file, and committed Vercel edge configuration use the same policy from `src/site/securityHeaders.ts`; a unit test prevents the Vercel values from drifting. The policy denies framing, objects, workers, media, external connections, and non-local scripts; it includes Referrer-Policy, nosniff, Permissions-Policy, and cross-origin opener isolation. It does not permit `unsafe-eval`.
 
-Inline styles remain allowed because the established React workbench uses typed React style properties extensively. Scripts remain local-only. Hosts that ignore `_headers`, including a bare GitHub Pages origin, require an equivalent CDN/edge header configuration before release; a file in the build cannot create HTTP response headers by itself.
+Inline styles remain allowed because the established React workbench uses typed React style properties extensively. Scripts remain local-only. Vite-generated hashed code is emitted below `/assets/immutable/` for an explicit immutable cache rule; unhashed images and HTML remain revalidation-safe. Hosts that ignore `_headers`, including a bare GitHub Pages origin, require an equivalent CDN/edge header configuration before release; a file in the build cannot create HTTP response headers by itself.
 
 ## Privacy switch
 

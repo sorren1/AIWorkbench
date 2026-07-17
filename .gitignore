@@ -60,6 +60,7 @@ test-results/
 .lighthouseci/
 .security-reports/
 .workbench/
+.vercel/
 
 # Private local review notes (retain the tracked directory notice)
 private/*
