@@ -1,11 +1,12 @@
 # Vercel deployment verification
 
-- Status: Configuration ready; hosted Preview deployment pending
+- Status: Preview verified; GitHub automation blocked on account connection; Production deferred
 - Review date: 2026-07-17
 - Git branch: `codex/vercel-deployment`
 - Release baseline: `v1.0.0` at `bd4c8613bf0f1accce8a4ae5c703b5f659852b30`
+- Deployment configuration commit: `e469ff03d473be0cfbd4a15d612aba44a7fc5294`
 - Source repository: <https://github.com/sorren1/AIWorkbench>
-- Preview URL: Not created yet. Authenticated Vercel CLI access is available; the configuration must be committed before it is deployed.
+- Preview URL: <https://ai-delivery-workbench-1828w6v09-workbench1.vercel.app>
 - Production URL: Not created. No custom domain has been selected or verified.
 
 This record distinguishes tracked readiness from provider evidence. A local build, a `vercel.json` file, or an account dashboard is not a deployed preview and is not evidence of edge headers, DNS, TLS, or route behavior.
@@ -39,6 +40,8 @@ This record distinguishes tracked readiness from provider evidence. A local buil
 
 `vercel.json` contains no rewrites, functions, or Vercel-specific application runtime. The conventional static `404.html` is the custom not-found document.
 
+The Vercel project setting uses Node 22.x, matching the tracked Node 22 engine and `.nvmrc`. Preview Deployment Protection was disabled so an external browser and automation could audit the static public artifact. The repository contains no protection bypass credential.
+
 ## Preview-first procedure
 
 1. Push `codex/vercel-deployment` to the configured GitHub origin.
@@ -60,19 +63,29 @@ This record distinguishes tracked readiness from provider evidence. A local buil
 
 ## Preview evidence
 
-| Check                                   | Result  | Evidence                                                        |
-| --------------------------------------- | ------- | --------------------------------------------------------------- |
-| Git-backed Preview deployment           | NOT RUN | Requires the committed configuration to be pushed and deployed. |
-| Smoke and direct refresh                | NOT RUN | Requires a real Preview URL.                                    |
-| Custom 404 and status code              | NOT RUN | Requires a real Preview URL.                                    |
-| Hosted axe checks                       | NOT RUN | Requires a real Preview URL.                                    |
-| Keyboard and responsive browser review  | NOT RUN | Requires a real Preview URL.                                    |
-| Metadata and preview canonical omission | NOT RUN | Requires a real Preview URL.                                    |
-| Security headers and CSP                | NOT RUN | Requires a real Preview URL.                                    |
-| HTML and immutable-asset caching        | NOT RUN | Requires a real Preview URL.                                    |
-| Internal/source links                   | NOT RUN | Requires a real Preview URL.                                    |
-| External-request inspection             | NOT RUN | Requires a real Preview URL.                                    |
-| Desktop/mobile Lighthouse               | NOT RUN | Requires a real Preview URL.                                    |
+| Check                                      | Result                           | Evidence                                                                                                                                                                                                                                                                        |
+| ------------------------------------------ | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Preview deployment of pushed commit        | PASS                             | Vercel deployment `dpl_6q5rfAAib27w7ga6c7TtMAvvAgpW` reached Ready from branch `codex/vercel-deployment` at commit `e469ff03d473be0cfbd4a15d612aba44a7fc5294`.                                                                                                                  |
+| Automatic branch and pull-request previews | BLOCKED                          | `vercel git connect` returned HTTP 400 because the new Vercel account does not yet have a GitHub login connection. No claim of automatic Git previews is made until the owner connects GitHub and a subsequent branch push is observed.                                         |
+| Smoke and direct refresh                   | PASS                             | Hosted Playwright returned 200 for `/`, `/demo/`, and `/writing/governing-ai-assisted-delivery/`. The external browser opened the case study, guided-demo entry, and article directly.                                                                                          |
+| Custom 404 and status code                 | PASS                             | A nonexistent route returned HTTP 404 and the authored `Page not found` content in automation and the external browser.                                                                                                                                                         |
+| Hosted axe checks                          | PASS                             | Root and principal demo screen had zero critical or serious findings.                                                                                                                                                                                                           |
+| Keyboard and responsive browser review     | PASS                             | The hosted guided walkthrough exposed correct focusable controls and an active Next control; the full keyboard and width matrix had already passed the same production artifact locally.                                                                                        |
+| Metadata and preview canonical omission    | PASS                             | Preview HTML omitted canonical and `og:url`; `robots.txt` omitted a Sitemap line and `sitemap.xml` contained no locations. The temporary Vercel URL was not promoted to canonical.                                                                                              |
+| Security headers and CSP                   | PASS                             | Observed CSP matched the typed local-only policy, including `frame-ancestors 'none'`; Referrer-Policy, nosniff, Permissions-Policy, and Cross-Origin-Opener-Policy were present.                                                                                                |
+| HTML and immutable-asset caching           | PASS                             | HTML returned `public, max-age=0, must-revalidate`; hashed CSS under `/assets/immutable/` returned `public, max-age=31536000, immutable`.                                                                                                                                       |
+| Internal/source links                      | PASS                             | Hosted route checks and the configured GitHub source link passed; external source links use safe opener attributes.                                                                                                                                                             |
+| External-request inspection                | PASS WITH PROVIDER NOTE          | Application requests were same-origin when automation sent Vercel's documented `x-vercel-skip-toolbar` header. Ordinary Preview browsing may load Vercel's injected `vercel.live` toolbar; that provider request is not present on the local build and is not application code. |
+| Desktop Lighthouse                         | PASS WITH PREVIEW SEO LIMITATION | Root and demo scored 100 Performance, 100 Accessibility, and 100 Best Practices. SEO scored 66/63 only because Vercel adds `X-Robots-Tag: noindex` to Preview responses.                                                                                                        |
+| Mobile Lighthouse                          | PASS WITH PREVIEW SEO LIMITATION | Root scored 96/100/100 and demo 100/100/100 for Performance/Accessibility/Best Practices. SEO again scored 66/63 because of the provider Preview noindex header. Production SEO thresholds remain unchanged and unverified.                                                     |
+
+## Provider observations during Preview creation
+
+- On an empty project, Vercel CLI 56.3.1 classified the first explicit `--target preview` invocation as Production and assigned only a generated `vercel.app` alias. That deployment was removed immediately, before audit. It had no custom domain and canonical metadata remained absent.
+- A subsequent default `vercel deploy` created the expected Preview target. This is the deployment recorded above.
+- The project initially defaulted to Node 24.x despite the repository's Node 22 contract. The project setting was corrected to Node 22.x and the recorded Preview was rebuilt after that correction.
+- Standard Preview Protection initially redirected automation to Vercel's login page. It was disabled for this public portfolio Preview; the hosted suite was rerun only after direct public access was confirmed.
+- Vercel adds `X-Robots-Tag: noindex` to Preview responses. This correctly prevents indexing but lowers hosted Preview Lighthouse SEO. The production SEO gate still requires the repository thresholds on a real custom domain.
 
 ## Production promotion and verification
 
@@ -107,6 +120,7 @@ After all Preview checks pass:
 
 ## Provider-specific limitations
 
-- Vercel project creation, GitHub integration, Preview creation, Production Branch selection, custom-domain DNS, TLS, and redirects are provider state and cannot be proven from tracked files.
-- Vercel's Preview authentication setting can block public automated checks. If enabled, use an owner-controlled verification session; never commit or print a bypass token.
+- GitHub integration and automatic branch/pull-request previews remain blocked until the owner adds a GitHub login connection to the Vercel account.
+- Production Branch selection, custom-domain DNS, TLS, canonical environment configuration, and alternate-domain redirects remain unverified provider state.
+- Preview authentication is currently disabled for public auditability. If it is re-enabled later, use an owner-controlled verification session; never commit or print a bypass token.
 - The project deliberately does not derive canonical metadata from `VERCEL_URL` or `VERCEL_PROJECT_PRODUCTION_URL`, because those values can resolve to temporary `vercel.app` hostnames.

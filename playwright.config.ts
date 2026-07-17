@@ -46,6 +46,7 @@ export default defineConfig({
             use: {
               ...devices["Desktop Chrome"],
               baseURL: deploymentBaseUrl,
+              extraHTTPHeaders: { "x-vercel-skip-toolbar": "1" },
               viewport: { width: 1440, height: 1000 },
             },
             testMatch: /deployment\.spec\.ts/,
