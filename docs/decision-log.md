@@ -1,5 +1,11 @@
 # Decision log
 
+## 2026-07-17 — Make public-history privacy and provenance reachability release gates
+
+- **Decision:** Add a deterministic history gate that requires the intended GitHub noreply identity for every reachable commit and annotated tag, rejects the retired organization token across all reachable refs, and verifies generated source-commit provenance resolves within the rewritten graph.
+- **Why:** A working-tree secret scan cannot prove that rewritten public history, tags, or generated provenance are safe after commit hashes change.
+- **Boundary:** The private pre-public `git bundle --all` archive remains outside the repository and is never referenced or copied into public history.
+
 This file records durable architecture and product-boundary decisions. Add a new numbered entry when a decision materially changes build, hosting, runtime, data boundaries, disclosures, or contributor workflow.
 
 ## ADR-001 — Use a static multi-page Vite build with React isolated to the demo

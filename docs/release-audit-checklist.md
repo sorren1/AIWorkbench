@@ -17,6 +17,9 @@ Complete this checklist against the candidate commit before publication or taggi
 - [ ] `.github/workflows/quality.yml`, dependency review, and CodeQL completed successfully for the candidate commit.
 - [ ] `.security-reports/security-summary.md` identifies the candidate source state and expected scanner versions.
 - [ ] Gitleaks scanned both tracked files and complete fetched Git history with zero unsuppressed findings.
+- [ ] `npm run security:history` verified every reachable commit and annotated tag uses the intended GitHub noreply address.
+- [ ] A fresh mirror clone has no retired organization token in ref names, messages, paths, or reachable blobs.
+- [ ] Every generated source-commit provenance value resolves to a commit reachable from the rewritten public refs.
 - [ ] ESLint, CodeQL, Compose/Dockerfile policy, and language-coverage status are reviewed.
 - [ ] npm and all three runtime-image unsuppressed HIGH/CRITICAL counts are zero.
 - [ ] Production npm, complete npm, sandbox, LiteLLM, and PostgreSQL CycloneDX SBOMs exist and their hashes match `release-summary.json`.
