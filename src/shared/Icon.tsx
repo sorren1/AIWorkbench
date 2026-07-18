@@ -1,4 +1,4 @@
-import type { CSSProperties, ReactNode } from "react";
+import type { ReactNode } from "react";
 
 /* ============================================================
    AI Delivery Workbench — Icon set
@@ -445,15 +445,13 @@ type IconProps = {
   readonly size?: number;
   readonly strokeWidth?: number;
   readonly className?: string;
-  readonly style?: CSSProperties;
 };
 
-export function Icon({ name, size = 18, strokeWidth = 1.75, className = "", style }: IconProps) {
+export function Icon({ name, size = 18, strokeWidth = 1.75, className = "" }: IconProps) {
   const node = ICONS[name];
   return (
     <svg
       className={className}
-      style={style}
       width={size}
       height={size}
       viewBox="0 0 24 24"

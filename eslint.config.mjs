@@ -42,6 +42,14 @@ export default tseslint.config(
       "@typescript-eslint/prefer-string-starts-ends-with": "off",
       "@typescript-eslint/restrict-plus-operands": "off",
       "@typescript-eslint/restrict-template-expressions": ["error", { allowNumber: true }],
+      "no-restricted-syntax": [
+        "error",
+        {
+          selector: "JSXAttribute[name.name='style']",
+          message:
+            "Inline JSX styles violate the deployed style-src 'self' policy; use a tracked CSS class.",
+        },
+      ],
     },
   },
   {

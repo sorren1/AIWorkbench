@@ -297,7 +297,7 @@ export function ToastHost() {
             size={18}
             className={"wb-toast-ico" + (t.kind === "info" ? "" : "")}
           />
-          <div style={{ minWidth: 0 }}>
+          <div className="wb-u-min-w-0">
             <div className="wb-toast-title">{t.title || titleMap[t.kind]}</div>
             {t.msg && <div className="wb-toast-msg">{t.msg}</div>}
           </div>
@@ -416,7 +416,7 @@ function LogDrawerDialog({
             <Icon name="terminal" size={16} />
             Run logs — {stageDef ? stageDef.name : d.stageId}
           </h2>
-          <div className="wb-spacer" style={{ marginLeft: "auto" }} />
+          <div className="wb-spacer wb-u-ml-auto" />
           <Badge tone="neutral" icon="hash">
             {issue.key}
           </Badge>
@@ -425,7 +425,7 @@ function LogDrawerDialog({
             size="sm"
             title="Close logs drawer"
             onClick={onClose}
-            style={{ marginLeft: 8 }}
+            className="wb-u-ml-8px"
           />
         </div>
         <div className="wb-drawer-body cr-scroll">
@@ -433,7 +433,7 @@ function LogDrawerDialog({
             Synthetic log fixture for the interactive portfolio prototype. No external execution
             occurred.
           </Banner>
-          <div className="wb-code wb-mt-12" style={{ border: "1px solid var(--border-subtle)" }}>
+          <div className="wb-code wb-mt-12 wb-u-border-1px-solid-border-subtle">
             <pre
               className="wb-code-body wb-log"
               aria-label={`Synthetic ${stageDef ? stageDef.name : d.stageId} run logs`}
@@ -442,13 +442,13 @@ function LogDrawerDialog({
               {lines.map((l, i) => (
                 <span
                   key={i}
-                  style={{
-                    color: /FAIL|error|non-zero/.test(l)
-                      ? "var(--danger)"
+                  className={
+                    /FAIL|error|non-zero/.test(l)
+                      ? "wb-tone--danger"
                       : /audit|done|exit: 0|complete/.test(l)
-                        ? "var(--safe)"
-                        : "var(--text-secondary)",
-                  }}
+                        ? "wb-tone--safe"
+                        : "wb-tone--secondary"
+                  }
                 >
                   <span className="wb-muted">{String(i + 1).padStart(2, "0")}</span>
                   {"  "}
@@ -498,16 +498,11 @@ function ModalDialog({
       >
         <div className="wb-modal-head">
           <h2
-            className="wb-modal-title"
+            className="wb-modal-title wb-u-display-flex wb-u-items-center wb-u-gap-9px"
             id={titleId}
-            style={{ display: "flex", alignItems: "center", gap: 9 }}
           >
             {m.icon && (
-              <Icon
-                name={m.icon}
-                size={19}
-                style={{ color: m.tone ? "var(--" + m.tone + ")" : "var(--accent)" }}
-              />
+              <Icon name={m.icon} size={19} className={`wb-tone--${m.tone ?? "accent"}`} />
             )}
             {m.title}
           </h2>

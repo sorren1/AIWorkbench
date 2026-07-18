@@ -482,18 +482,25 @@ body {
 }
 
 .wb-walkthrough-progress {
+  appearance: none;
+  display: block;
+  width: 100%;
   height: 3px;
   margin-top: 15px;
   overflow: hidden;
+  border: 0;
   background: var(--accent-soft-border);
   border-radius: var(--radius-pill);
 }
 
-.wb-walkthrough-progress span {
-  height: 100%;
-  display: block;
+.wb-walkthrough-progress::-webkit-progress-bar {
+  background: var(--accent-soft-border);
+}
+
+.wb-walkthrough-progress::-webkit-progress-value,
+.wb-walkthrough-progress::-moz-progress-bar {
   background: var(--accent);
-  transition: width var(--dur-fast) var(--ease-standard);
+  border-radius: var(--radius-pill);
 }
 
 @media (max-width: 1100px) {
@@ -1934,22 +1941,39 @@ textarea.wb-input {
   font-size: 10px;
 }
 .wb-progress {
+  appearance: none;
+  display: block;
+  width: 100%;
   height: 6px;
+  border: 0;
   border-radius: var(--radius-pill);
   background: var(--bg-inset);
   overflow: hidden;
 }
-.wb-progress-bar {
-  height: 100%;
+
+.wb-progress::-webkit-progress-bar {
+  background: var(--bg-inset);
+}
+
+.wb-progress::-webkit-progress-value,
+.wb-progress::-moz-progress-bar {
   border-radius: var(--radius-pill);
   background: var(--accent);
-  transition: width var(--dur-slow) var(--ease-standard);
 }
-.wb-progress-bar--safe {
+
+.wb-progress--safe::-webkit-progress-value,
+.wb-progress--safe::-moz-progress-bar {
   background: var(--safe);
 }
-.wb-progress-bar--warn {
+
+.wb-progress--warn::-webkit-progress-value,
+.wb-progress--warn::-moz-progress-bar {
   background: var(--warn);
+}
+
+.wb-progress--danger::-webkit-progress-value,
+.wb-progress--danger::-moz-progress-bar {
+  background: var(--danger);
 }
 
 /* ---------- Recorded run trace ---------- */
@@ -1968,6 +1992,30 @@ textarea.wb-input {
   font-family: var(--font-mono);
   font-size: 11.5px;
 }
+.wb-trace-operation--depth-1 {
+  padding-inline-start: 18px;
+}
+.wb-trace-operation--depth-2 {
+  padding-inline-start: 36px;
+}
+.wb-trace-operation--depth-3 {
+  padding-inline-start: 54px;
+}
+.wb-trace-operation--depth-4 {
+  padding-inline-start: 72px;
+}
+.wb-trace-operation--depth-5 {
+  padding-inline-start: 90px;
+}
+.wb-trace-operation--depth-6 {
+  padding-inline-start: 108px;
+}
+.wb-trace-operation--depth-7 {
+  padding-inline-start: 126px;
+}
+.wb-trace-operation--depth-8 {
+  padding-inline-start: 144px;
+}
 .wb-trace-waterfall {
   width: 240px;
   height: 12px;
@@ -1977,20 +2025,16 @@ textarea.wb-input {
   box-shadow: inset 0 0 0 1px var(--border-subtle);
 }
 .wb-trace-bar {
-  display: block;
-  min-width: 3px;
-  height: 100%;
-  border-radius: var(--radius-xs);
-  background: var(--accent);
+  fill: var(--accent);
 }
 .wb-trace-bar--ok {
-  background: var(--safe);
+  fill: var(--safe);
 }
 .wb-trace-bar--error {
-  background: var(--danger);
+  fill: var(--danger);
 }
 .wb-trace-bar--unset {
-  background: var(--text-tertiary);
+  fill: var(--text-tertiary);
 }
 .wb-trace-details {
   min-width: 180px;
@@ -2143,6 +2187,45 @@ textarea.wb-input {
   border: 0;
   font: inherit;
   text-align: left;
+}
+
+.wb-artifact-option {
+  display: flex;
+  gap: 10px;
+  padding: 11px 14px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-subtle);
+  border-left: 2px solid transparent;
+  background: transparent;
+}
+
+.wb-artifact-option[aria-pressed="true"] {
+  border-left-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.wb-artifact-option__icon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--text-tertiary);
+}
+
+.wb-artifact-option__name {
+  display: block;
+  overflow: hidden;
+  color: var(--text-primary);
+  font-size: 12.5px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.wb-artifact-option[aria-pressed="true"] .wb-artifact-option__icon {
+  color: var(--accent);
+}
+
+.wb-artifact-option[aria-pressed="true"] .wb-artifact-option__name {
+  color: var(--accent-text);
 }
 
 .wb-artifact-option:hover,

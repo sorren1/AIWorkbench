@@ -255,8 +255,8 @@ function StageRow({
             aria-controls={panelId}
             onClick={onToggle}
           >
-            <span style={{ minWidth: 0 }}>
-              <span className="wb-flex" style={{ gap: 9 }}>
+            <span className="wb-u-min-w-0">
+              <span className="wb-flex wb-u-gap-9px">
                 <span className="wb-tl-stage-name">{def.name}</span>
                 <StatusBadge status={status} />
                 {stage.reviewerActionRequired && (
@@ -265,10 +265,7 @@ function StageRow({
                   </Badge>
                 )}
               </span>
-              <span
-                className="wb-tl-stage-meta wb-mt-8"
-                style={{ display: "flex", gap: 14, flexWrap: "wrap" }}
-              >
+              <span className="wb-tl-stage-meta wb-mt-8 wb-u-display-flex wb-u-gap-14px wb-u-wrap-wrap">
                 <span>
                   <Icon name="sparkles" size={11} /> {stage.promptVersion}
                 </span>
@@ -287,7 +284,7 @@ function StageRow({
                 )}
               </span>
             </span>
-            <span className="wb-spacer" style={{ marginLeft: "auto" }} />
+            <span className="wb-spacer wb-u-ml-auto" />
             <Icon
               name={selected ? "chevron-down" : "chevron-right"}
               size={16}
@@ -296,16 +293,13 @@ function StageRow({
           </button>
           {selected && (
             <div
-              className="wb-tl-detail"
+              className="wb-tl-detail wb-u-pt-12px"
               id={panelId}
               role="region"
               aria-labelledby={triggerId}
-              style={{ paddingTop: 12 }}
             >
-              <p className="wb-text-sm wb-secondary" style={{ marginBottom: 12 }}>
-                {def.desc}
-              </p>
-              <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
+              <p className="wb-text-sm wb-secondary wb-u-mb-12px">{def.desc}</p>
+              <div className="wb-flex wb-wrap wb-u-gap-8px">
                 {status === "ready" && (
                   <Btn
                     size="sm"
@@ -328,7 +322,7 @@ function StageRow({
                 )}
                 {status === "run" && (
                   <Btn size="sm" variant="secondary" disabled icon="loader">
-                    <span className="wb-spin" style={{ display: "inline-flex" }}>
+                    <span className="wb-spin wb-u-display-inline-flex">
                       <Icon name="loader" size={13} />
                     </span>
                     Running…
@@ -531,28 +525,26 @@ export function IssueDetail() {
   return (
     <div className="wb-page wb-page-wide">
       {/* Contextual action bar */}
-      <Card className="wb-mb-16" style={{ position: "sticky", top: 0, zIndex: 5 }}>
-        <div className="wb-card-body wb-between wb-wrap" style={{ gap: 14 }}>
-          <div style={{ minWidth: 0 }}>
-            <div className="wb-flex" style={{ gap: 10 }}>
-              <span className="wb-row-key" style={{ fontSize: 14 }}>
-                {issue.key}
-              </span>
+      <Card className="wb-mb-16 wb-u-position-sticky wb-u-top-0 wb-u-z-5">
+        <div className="wb-card-body wb-between wb-wrap wb-u-gap-14px">
+          <div className="wb-u-min-w-0">
+            <div className="wb-flex wb-u-gap-10px">
+              <span className="wb-row-key wb-u-text-14px">{issue.key}</span>
               <Badge tone="neutral">Synthetic issue fixture</Badge>
               <LifecycleBadge value={issue.lifecycle} />
               <RiskBadge risk={issue.risk} />
             </div>
-            <h1 style={{ fontSize: 18, fontWeight: 700, letterSpacing: "-0.01em", marginTop: 6 }}>
+            <h1 className="wb-u-text-18px wb-u-weight-700 wb-u-tracking-zero-01em wb-u-mt-6px">
               {issue.title}
             </h1>
-            <div className="wb-text-sm wb-muted wb-mt-8 wb-flex" style={{ gap: 8 }}>
+            <div className="wb-text-sm wb-muted wb-mt-8 wb-flex wb-u-gap-8px">
               <Icon name="circle-dot" size={13} /> Current stage:{" "}
               <strong className="wb-secondary">{cs.def.name}</strong>{" "}
               <StatusBadge status={cs.status} />
             </div>
           </div>
-          <div className="wb-spacer" style={{ marginLeft: "auto" }} />
-          <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
+          <div className="wb-spacer wb-u-ml-auto" />
+          <div className="wb-flex wb-wrap wb-u-gap-8px">
             <Btn
               variant="secondary"
               icon="git-pull-request"
@@ -569,14 +561,7 @@ export function IssueDetail() {
         </div>
       </Card>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0,1.7fr) minmax(0,1fr)",
-          gap: 16,
-          alignItems: "start",
-        }}
-      >
+      <div className="wb-u-display-grid wb-u-cols-minmax-zero-1-7fr-minmax-zero-1fr wb-u-gap-16px wb-u-items-start">
         {/* Left column */}
         <div className="wb-stack">
           {primary && (
@@ -621,10 +606,8 @@ export function IssueDetail() {
           <Card>
             <CardHead icon="file-text" title="Business context" />
             <div className="wb-card-body">
-              <p className="wb-secondary" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
-                {ctx.summary}
-              </p>
-              <div className="wb-md" style={{ marginTop: 6 }}>
+              <p className="wb-secondary wb-u-text-13-5px wb-u-leading-1-6">{ctx.summary}</p>
+              <div className="wb-md wb-u-mt-6px">
                 <ul>
                   {ctx.business.map((b, i) => (
                     <li key={i}>{b}</li>
@@ -635,7 +618,7 @@ export function IssueDetail() {
                 <Icon name="shield-alert" size={16} className="wb-banner-ico" />
                 <div>
                   <span className="wb-banner-title">Risk notes</span>
-                  <div style={{ marginTop: 2 }}>{ctx.riskNotes}</div>
+                  <div className="wb-u-mt-2px">{ctx.riskNotes}</div>
                 </div>
               </div>
             </div>
@@ -653,24 +636,12 @@ export function IssueDetail() {
               }
             />
             <div className="wb-card-body wb-card-body--tight">
-              {val.acceptance.map((a, i) => (
-                <div
-                  key={a.id}
-                  className="wb-flex"
-                  style={{
-                    gap: 10,
-                    padding: "10px 16px",
-                    borderBottom:
-                      i < val.acceptance.length - 1 ? "1px solid var(--border-subtle)" : "none",
-                  }}
-                >
-                  <span
-                    className="wb-mono wb-muted"
-                    style={{ fontSize: 11.5, flex: "none", width: 34 }}
-                  >
+              {val.acceptance.map((a) => (
+                <div key={a.id} className="wb-flex wb-divided-row wb-u-gap-10px wb-u-p-10px-16px">
+                  <span className="wb-mono wb-muted wb-u-text-11-5px wb-u-flex-none wb-u-w-34px">
                     {a.id}
                   </span>
-                  <span style={{ fontSize: 13, flex: 1 }}>{a.text}</span>
+                  <span className="wb-u-text-13px wb-u-flex-1">{a.text}</span>
                   <Badge
                     tone={valTone[a.status] || "neutral"}
                     icon={
@@ -736,7 +707,7 @@ export function IssueDetail() {
                   ["Surface", <SurfaceBadge value={issue.surface} />],
                   [
                     "Branch",
-                    <span className="wb-mono wb-text-sm" style={{ color: "var(--accent-text)" }}>
+                    <span className="wb-mono wb-text-sm wb-u-color-accent-text">
                       {issue.branch}
                     </span>,
                   ],
@@ -744,19 +715,17 @@ export function IssueDetail() {
                 ]}
               />
               <hr className="wb-divider" />
-              <div className="wb-flex-col" style={{ gap: 10 }}>
+              <div className="wb-flex-col wb-u-gap-10px">
                 {[
                   { role: "Owner", name: issue.assignee },
                   { role: "Reviewer", name: issue.reviewer },
                   { role: "Tester", name: issue.tester },
                 ].map((person) => (
-                  <div key={person.role} className="wb-flex" style={{ gap: 10 }}>
+                  <div key={person.role} className="wb-flex wb-u-gap-10px">
                     <Avatar name={person.name} sm />
                     <div>
                       <div className="wb-text-sm wb-strong">{person.name}</div>
-                      <div className="wb-muted" style={{ fontSize: 11.5 }}>
-                        {person.role}
-                      </div>
+                      <div className="wb-muted wb-u-text-11-5px">{person.role}</div>
                     </div>
                   </div>
                 ))}
@@ -781,7 +750,7 @@ export function IssueDetail() {
             />
             <div className="wb-card-body wb-card-body--tight">
               {artifacts.length === 0 && (
-                <div style={{ padding: 16 }}>
+                <div className="wb-u-p-16px">
                   <span className="wb-muted wb-text-sm">
                     No artifacts yet — run the workflow to generate them.
                   </span>
@@ -790,19 +759,11 @@ export function IssueDetail() {
               {artifacts
                 .slice(-4)
                 .reverse()
-                .map((a, i) => (
+                .map((a) => (
                   <button
                     type="button"
                     key={a.id}
-                    className="wb-flex wb-clickable wb-artifact-shortcut"
-                    style={{
-                      gap: 10,
-                      padding: "10px 16px",
-                      borderBottom:
-                        i < Math.min(4, artifacts.length) - 1
-                          ? "1px solid var(--border-subtle)"
-                          : "none",
-                    }}
+                    className="wb-flex wb-clickable wb-artifact-shortcut wb-divided-row wb-u-gap-10px wb-u-p-10px-16px"
                     onClick={() => {
                       actions.selectArtifact(issue.key, a.name);
                       actions.navigate("artifacts", issue.key);
@@ -813,12 +774,8 @@ export function IssueDetail() {
                       size={15}
                       className="wb-muted"
                     />
-                    <span className="wb-mono wb-text-sm" style={{ flex: 1 }}>
-                      {a.name}
-                    </span>
-                    <span className="wb-muted" style={{ fontSize: 11 }}>
-                      {a.stage}
-                    </span>
+                    <span className="wb-mono wb-text-sm wb-u-flex-1">{a.name}</span>
+                    <span className="wb-muted wb-u-text-11px">{a.stage}</span>
                   </button>
                 ))}
             </div>
@@ -831,9 +788,7 @@ export function IssueDetail() {
                 <div className="wb-stack-sm">
                   <div className="wb-between">
                     <span className="wb-text-sm wb-secondary">Pull request</span>
-                    <span className="wb-mono wb-strong" style={{ color: "var(--accent-text)" }}>
-                      #{issue.pr}
-                    </span>
+                    <span className="wb-mono wb-strong wb-u-color-accent-text">#{issue.pr}</span>
                   </div>
                   <div className="wb-between">
                     <span className="wb-text-sm wb-secondary">Status</span>
@@ -850,11 +805,11 @@ export function IssueDetail() {
                   <div className="wb-between">
                     <span className="wb-text-sm wb-secondary">Checks</span>
                     <span className="wb-text-sm">
-                      <span style={{ color: "var(--safe)" }}>
+                      <span className="wb-u-color-safe">
                         {pr.checks.filter((c) => c.status === "pass").length} pass
                       </span>
                       {pr.checks.some((c) => c.status === "fail") ? (
-                        <span style={{ color: "var(--danger)" }}>
+                        <span className="wb-u-color-danger">
                           {" "}
                           · {pr.checks.filter((c) => c.status === "fail").length} fail
                         </span>
@@ -862,7 +817,7 @@ export function IssueDetail() {
                         ""
                       )}
                       {pr.checks.some((c) => c.status === "pending" || c.status === "required") ? (
-                        <span style={{ color: "var(--warn)" }}>
+                        <span className="wb-u-color-warn">
                           {" "}
                           ·{" "}
                           {

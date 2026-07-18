@@ -700,3 +700,26 @@ Publish `/.well-known/security.txt` with the deployed site as its canonical URI,
 - Researchers receive a private, structured disclosure channel without exposing personal contact data.
 - The expiry intentionally becomes release-blocking if the contact record is not reviewed before it becomes stale.
 - Changing the production domain, repository owner/name, reporting setting, or policy location requires updating and redeploying this record.
+
+## ADR-032 — Remove production toolbar injection and inline-style CSP exceptions
+
+- Status: Accepted
+- Date: 2026-07-18
+- Detailed record: [`docs/deployment-verification.md`](deployment-verification.md)
+
+### Context
+
+Vercel's Toolbar can inject a provider-hosted script into otherwise static pages, while the demo's React `style` props required `style-src 'unsafe-inline'`. The provider script was not an application dependency, and allowing either exception would weaken a public portfolio site's same-origin policy.
+
+### Decision
+
+Set the Vercel Toolbar to **Off** for both pre-production and production deployments in the `ai-delivery-workbench` project. Keep `script-src 'self'` and do not add `vercel.live`. Move all React presentation into tracked stylesheets, represent dynamic progress with native `<progress>` values, and render trace geometry with SVG attributes. Set `style-src 'self'` with no inline exception and make JSX `style` attributes a lint error.
+
+Hosted verification now sends ordinary requests without `x-vercel-skip-toolbar` as the primary test path and retains a separate explicit skip-header test. Both paths must verify every public HTML route, the final CSP, absence of toolbar markers, absence of inline style elements/attributes, and same-origin runtime requests.
+
+### Consequences
+
+- Vercel Comments and Toolbar UI are intentionally unavailable on public and preview deployments of this project.
+- A new deployment is required before the saved provider setting and tightened repository policy can be observed together; no dashboard redeploy was triggered during this change.
+- Re-enabling the Toolbar is an architecture and security-policy change, not an incidental provider toggle. It would require an explicit review of provider origins, data flow, CSP, and deployment tests.
+- Dynamic layout values remain constrained by typed tone classes, native element attributes, or SVG presentation attributes instead of reopening inline CSS.

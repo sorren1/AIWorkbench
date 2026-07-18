@@ -9,11 +9,14 @@ import {
 } from "../src/site/securityHeaders";
 
 describe("static-host security policy", () => {
-  it("denies framing and unsafe script evaluation while allowing only local runtime assets", () => {
+  it("denies framing and inline code while allowing only local runtime assets", () => {
     expect(CONTENT_SECURITY_POLICY).toContain("default-src 'self'");
     expect(CONTENT_SECURITY_POLICY).toContain("frame-ancestors 'none'");
     expect(CONTENT_SECURITY_POLICY).toContain("script-src 'self'");
+    expect(CONTENT_SECURITY_POLICY).toContain("style-src 'self'");
     expect(CONTENT_SECURITY_POLICY).not.toContain("unsafe-eval");
+    expect(CONTENT_SECURITY_POLICY).not.toContain("unsafe-inline");
+    expect(CONTENT_SECURITY_POLICY).not.toContain("vercel.live");
     expect(STATIC_SECURITY_HEADERS).toMatchObject({
       "Referrer-Policy": "no-referrer",
       "X-Content-Type-Options": "nosniff",

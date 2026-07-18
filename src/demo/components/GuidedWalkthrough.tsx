@@ -173,18 +173,13 @@ export function GuidedWalkthrough({
           <a href="../#clean-room">clean-room/provenance statement</a>.
         </p>
       )}
-      <div
+      <progress
         className="wb-walkthrough-progress"
-        role="progressbar"
         aria-label="Walkthrough progress"
-        aria-valuemin={1}
-        aria-valuemax={PRINCIPAL_WALKTHROUGH_STEPS.length}
+        max={PRINCIPAL_WALKTHROUGH_STEPS.length}
+        value={stepIndex + 1}
         aria-valuenow={stepIndex + 1}
-      >
-        <span
-          style={{ width: `${((stepIndex + 1) / PRINCIPAL_WALKTHROUGH_STEPS.length) * 100}%` }}
-        />
-      </div>
+      />
     </section>
   );
 }

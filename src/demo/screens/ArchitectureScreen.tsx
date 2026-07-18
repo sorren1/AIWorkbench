@@ -13,48 +13,22 @@ import { Badge, Banner, Btn, Card, CardHead } from "../components/primitives";
    ============================================================ */
 function PlaneCard({ plane }: { readonly plane: ArchitecturePlane }) {
   return (
-    <Card style={{ overflow: "hidden" }}>
-      <div style={{ height: 3, background: "var(--" + plane.tone + ")" }} />
+    <Card className="wb-u-overflow-hidden">
+      <div className={`wb-plane-strip wb-bg-tone--${plane.tone}`} />
       <div className="wb-card-body">
-        <div className="wb-flex" style={{ gap: 11 }}>
-          <span
-            style={{
-              width: 38,
-              height: 38,
-              borderRadius: "var(--radius-md)",
-              background: "var(--" + plane.tone + "-soft, var(--bg-inset))",
-              color: "var(--" + plane.tone + ")",
-              display: "inline-flex",
-              alignItems: "center",
-              justifyContent: "center",
-              flex: "none",
-            }}
-          >
+        <div className="wb-flex wb-u-gap-11px">
+          <span className={`wb-plane-icon wb-plane-icon--${plane.tone}`}>
             <Icon name={plane.icon} size={20} />
           </span>
           <div>
-            <h2 style={{ fontSize: 15, fontWeight: 700 }}>{plane.name}</h2>
-            <div className="wb-text-sm wb-muted" style={{ marginTop: 1 }}>
-              {plane.tagline}
-            </div>
+            <h2 className="wb-u-text-15px wb-u-weight-700">{plane.name}</h2>
+            <div className="wb-text-sm wb-muted wb-u-mt-1px">{plane.tagline}</div>
           </div>
         </div>
-        <div
-          className="wb-mt-16"
-          style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "7px 14px" }}
-        >
+        <div className="wb-mt-16 wb-u-display-grid wb-u-cols-1fr-1fr wb-u-gap-7px-14px">
           {plane.items.map((it) => (
-            <div key={it} className="wb-flex" style={{ gap: 8 }}>
-              <span
-                aria-hidden="true"
-                style={{
-                  width: 5,
-                  height: 5,
-                  borderRadius: "50%",
-                  background: "var(--" + plane.tone + ")",
-                  flex: "none",
-                }}
-              />
+            <div key={it} className="wb-flex wb-u-gap-8px">
+              <span className={`wb-plane-dot wb-bg-tone--${plane.tone}`} aria-hidden="true" />
               <span className="wb-text-sm wb-secondary">{it}</span>
             </div>
           ))}
@@ -101,7 +75,7 @@ export function ArchitectureScreen() {
           </div>
         </div>
         <div className="wb-spacer" />
-        <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
+        <div className="wb-flex wb-wrap wb-u-gap-8px">
           <Badge tone="safe" icon="check">
             Local exports functional
           </Badge>
@@ -131,46 +105,23 @@ export function ArchitectureScreen() {
           </figcaption>
           <div
             aria-hidden="true"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(4, 1fr)",
-              gap: 0,
-              alignItems: "stretch",
-            }}
+            className="wb-u-display-grid wb-u-cols-repeat-4-1fr wb-u-gap-0 wb-u-items-stretch"
           >
             {flow.map((f, i) => (
-              <div key={f.label} className="wb-flex" style={{ gap: 12 }}>
-                <div style={{ flex: 1 }}>
-                  <div className="wb-flex" style={{ gap: 9 }}>
-                    <span
-                      style={{
-                        width: 34,
-                        height: 34,
-                        borderRadius: "var(--radius-md)",
-                        background: "var(--accent-soft)",
-                        color: "var(--accent)",
-                        display: "inline-flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flex: "none",
-                      }}
-                    >
+              <div key={f.label} className="wb-flex wb-u-gap-12px">
+                <div className="wb-u-flex-1">
+                  <div className="wb-flex wb-u-gap-9px">
+                    <span className="wb-u-w-34px wb-u-h-34px wb-u-radius-radius-md wb-u-bg-accent-soft wb-u-color-accent wb-u-display-inline-flex wb-u-items-center wb-u-justify-center wb-u-flex-none">
                       <Icon name={f.icon} size={17} />
                     </span>
                     <div>
-                      <div className="wb-strong" style={{ fontSize: 13.5 }}>
-                        {f.label}
-                      </div>
-                      <div className="wb-muted" style={{ fontSize: 11.5 }}>
-                        {f.desc}
-                      </div>
+                      <div className="wb-strong wb-u-text-13-5px">{f.label}</div>
+                      <div className="wb-muted wb-u-text-11-5px">{f.desc}</div>
                     </div>
                   </div>
                 </div>
                 {i < flow.length - 1 && (
-                  <span
-                    style={{ alignSelf: "center", color: "var(--border-strong)", paddingRight: 6 }}
-                  >
+                  <span className="wb-u-self-center wb-u-color-border-strong wb-u-pr-6px">
                     <Icon name="chevron-right" size={18} />
                   </span>
                 )}
@@ -187,26 +138,18 @@ export function ArchitectureScreen() {
         ))}
       </div>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0,1.5fr) minmax(0,1fr)",
-          gap: 16,
-          alignItems: "start",
-        }}
-      >
+      <div className="wb-u-display-grid wb-u-cols-minmax-zero-1-5fr-minmax-zero-1fr wb-u-gap-16px wb-u-items-start">
         <Banner tone="warn" title="Production hardening" icon="lock">
           {arch.productionNote}
         </Banner>
         <Card>
           <CardHead icon="cpu" title="Engineering review topics" />
           <div className="wb-card-body">
-            <div className="wb-flex wb-wrap" style={{ gap: 7 }}>
+            <div className="wb-flex wb-wrap wb-u-gap-7px">
               {arch.reviewTopics.map((t) => (
                 <span
                   key={t}
-                  className="wb-badge wb-badge--neutral"
-                  style={{ fontFamily: "var(--font-sans)", fontSize: 12 }}
+                  className="wb-badge wb-badge--neutral wb-u-font-font-sans wb-u-text-12px"
                 >
                   {t}
                 </span>

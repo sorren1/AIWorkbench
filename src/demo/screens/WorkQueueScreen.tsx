@@ -170,7 +170,7 @@ export function WorkQueue() {
             onChange={(e) => actions.setFilter({ search: e.target.value })}
           />
         </div>
-        <div className="wb-select" style={{ width: 160 }}>
+        <div className="wb-select wb-u-w-160px">
           <select
             aria-label="Filter by lifecycle state"
             value={f.lifecycle}
@@ -184,7 +184,7 @@ export function WorkQueue() {
           </select>
           <Icon name="chevrons-up-down" size={15} className="wb-select-ico" />
         </div>
-        <div className="wb-select" style={{ width: 150 }}>
+        <div className="wb-select wb-u-w-150px">
           <select
             aria-label="Filter by implementation surface"
             value={f.surface}
@@ -264,13 +264,13 @@ export function WorkQueue() {
             Clear
           </button>
         )}
-        <div className="wb-spacer" style={{ marginLeft: "auto" }} />
+        <div className="wb-spacer wb-u-ml-auto" />
         <span className="wb-text-sm wb-muted" aria-live="polite">
           {filtered.length} of {issues.length}
         </span>
       </div>
 
-      <Card className="wb-card--flat" style={{ overflow: "hidden" }}>
+      <Card className="wb-card--flat wb-u-overflow-hidden">
         <div
           className="wb-table-wrap cr-scroll"
           role="region"
@@ -291,11 +291,11 @@ export function WorkQueue() {
                 <th scope="col">Lifecycle</th>
                 <th scope="col">Current AI Stage</th>
                 <th scope="col">Last Run</th>
-                <th scope="col" style={{ textAlign: "center" }}>
+                <th scope="col" className="wb-u-text-align-center">
                   Artifacts
                 </th>
                 <th scope="col">Branch</th>
-                <th scope="col" style={{ textAlign: "center" }}>
+                <th scope="col" className="wb-u-text-align-center">
                   PR
                 </th>
                 <th scope="col">Next Action</th>
@@ -317,7 +317,7 @@ export function WorkQueue() {
                         {it.key}
                       </button>
                     </td>
-                    <td style={{ minWidth: 210 }}>
+                    <td className="wb-u-min-w-210px">
                       <span className="wb-row-title">{it.title}</span>
                     </td>
                     <td className="wb-secondary wb-nowrap">{it.domain}</td>
@@ -328,36 +328,21 @@ export function WorkQueue() {
                       <LifecycleBadge value={it.lifecycle} />
                     </td>
                     <td className="wb-nowrap">
-                      <div className="wb-flex" style={{ gap: 7 }}>
-                        <span className="wb-secondary" style={{ fontSize: 12.5 }}>
-                          {cs.def.name}
-                        </span>
+                      <div className="wb-flex wb-u-gap-7px">
+                        <span className="wb-secondary wb-u-text-12-5px">{cs.def.name}</span>
                         <StatusBadge status={cs.status} />
                       </div>
                     </td>
-                    <td className="wb-mono wb-muted wb-nowrap" style={{ fontSize: 12 }}>
-                      {it.lastRun}
-                    </td>
-                    <td style={{ textAlign: "center" }}>
+                    <td className="wb-mono wb-muted wb-nowrap wb-u-text-12px">{it.lastRun}</td>
+                    <td className="wb-u-text-align-center">
                       <span className="wb-mono">{it.artifacts}</span>
                     </td>
-                    <td
-                      className="wb-mono wb-muted"
-                      style={{
-                        fontSize: 11.5,
-                        maxWidth: 150,
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
+                    <td className="wb-mono wb-muted wb-u-text-11-5px wb-u-max-w-150px wb-u-overflow-hidden wb-u-text-overflow-ellipsis wb-u-whitespace-nowrap">
                       {it.branch}
                     </td>
-                    <td style={{ textAlign: "center" }}>
+                    <td className="wb-u-text-align-center">
                       {it.pr ? (
-                        <span className="wb-mono wb-strong" style={{ color: "var(--accent-text)" }}>
-                          #{it.pr}
-                        </span>
+                        <span className="wb-mono wb-strong wb-u-color-accent-text">#{it.pr}</span>
                       ) : (
                         <span className="wb-muted">—</span>
                       )}

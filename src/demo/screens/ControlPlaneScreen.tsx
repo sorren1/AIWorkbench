@@ -496,7 +496,7 @@ export function ControlPlaneScreen() {
               <div className="wb-card-body wb-stack">
                 <div className="wb-between wb-control-detail-head">
                   <div>
-                    <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
+                    <div className="wb-flex wb-wrap wb-u-gap-8px">
                       <h2>{selected.name}</h2>
                       <Badge tone={statusTone(selected.status)}>{selected.status}</Badge>
                     </div>

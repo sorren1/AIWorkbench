@@ -16,7 +16,7 @@ export function ContextManifest({
 }) {
   return (
     <section className="wb-context-manifest" aria-labelledby={`context-title-${pack.stageId}`}>
-      <div className="wb-between wb-wrap" style={{ gap: 8 }}>
+      <div className="wb-between wb-wrap wb-u-gap-8px">
         <div>
           <h3 id={`context-title-${pack.stageId}`}>Context Manifest</h3>
           <p className="wb-muted wb-text-sm">
@@ -25,7 +25,7 @@ export function ContextManifest({
               sha256:{pack.memoryPolicy.contentHash.slice(0, 10)}…
             </code>
           </p>
-          <p className="wb-muted" style={{ fontSize: 11.5 }}>
+          <p className="wb-muted wb-u-text-11-5px">
             {pack.agentCard ? (
               <>
                 Agent {pack.agentCard.id}@{pack.agentCard.version} ·{" "}
@@ -73,7 +73,7 @@ export function ContextManifest({
           </dd>
         </div>
       </dl>
-      <p className="wb-muted" style={{ fontSize: 11.5 }}>
+      <p className="wb-muted wb-u-text-11-5px">
         Token count is an honest estimate: ceiling(characters ÷ 4). It is not provider-measured
         usage. Pack created {pack.createdAt}.
       </p>
@@ -83,7 +83,7 @@ export function ContextManifest({
         <ul>
           {pack.includedRecords.map(({ record, reason, freshness, estimatedTokens }) => (
             <li key={record.id}>
-              <div className="wb-between wb-wrap" style={{ gap: 6 }}>
+              <div className="wb-between wb-wrap wb-u-gap-6px">
                 <strong>{record.title}</strong>
                 <Badge tone="safe">{freshness.status}</Badge>
               </div>
@@ -108,7 +108,7 @@ export function ContextManifest({
         <ul>
           {pack.excludedRecords.map(({ record, reason, reasonCode, freshness }) => (
             <li key={record.id}>
-              <div className="wb-between wb-wrap" style={{ gap: 6 }}>
+              <div className="wb-between wb-wrap wb-u-gap-6px">
                 <strong>{record.title}</strong>
                 <Badge tone={freshness.status === "FRESH" ? "neutral" : "warn"}>{reasonCode}</Badge>
               </div>

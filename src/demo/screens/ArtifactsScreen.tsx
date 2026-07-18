@@ -125,18 +125,11 @@ export function ArtifactsScreen() {
   return (
     <div className="wb-page wb-page-wide">
       <ArtifactsHead issue={issue} />
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "300px minmax(0,1fr)",
-          gap: 16,
-          alignItems: "start",
-        }}
-      >
+      <div className="wb-u-display-grid wb-u-cols-300px-minmax-zero-1fr wb-u-gap-16px wb-u-items-start">
         {/* Left: artifact list */}
-        <Card className="wb-card--flat" style={{ overflow: "hidden", position: "sticky", top: 0 }}>
-          <div className="wb-card-head" style={{ padding: "12px 14px" }}>
-            <h2 className="wb-card-title" style={{ fontSize: 13 }}>
+        <Card className="wb-card--flat wb-u-overflow-hidden wb-u-position-sticky wb-u-top-0">
+          <div className="wb-card-head wb-u-p-12px-14px">
+            <h2 className="wb-card-title wb-u-text-13px">
               <Icon name="folder" size={15} className="wb-th-ico" />
               {artifacts.length} artifacts
             </h2>
@@ -152,64 +145,20 @@ export function ArtifactsScreen() {
                   className="wb-artifact-option"
                   aria-pressed={isSel}
                   onClick={() => actions.selectArtifact(issue.key, a.name)}
-                  style={{
-                    display: "flex",
-                    gap: 10,
-                    padding: "11px 14px",
-                    cursor: "pointer",
-                    borderBottom: "1px solid var(--border-subtle)",
-                    background: isSel ? "var(--accent-soft)" : "transparent",
-                    borderLeft: "2px solid " + (isSel ? "var(--accent)" : "transparent"),
-                  }}
                 >
                   <Icon
                     name={a.type === "JSON" ? "file-code" : "file-text"}
                     size={16}
-                    style={{
-                      color: isSel ? "var(--accent)" : "var(--text-tertiary)",
-                      marginTop: 1,
-                      flex: "none",
-                    }}
+                    className="wb-artifact-option__icon"
                   />
-                  <span style={{ minWidth: 0, flex: 1 }}>
-                    <span
-                      className="wb-mono"
-                      style={{
-                        fontSize: 12.5,
-                        fontWeight: 600,
-                        color: isSel ? "var(--accent-text)" : "var(--text-primary)",
-                        overflow: "hidden",
-                        textOverflow: "ellipsis",
-                        whiteSpace: "nowrap",
-                      }}
-                    >
-                      {a.name}
-                    </span>
-                    <span className="wb-flex" style={{ gap: 6, marginTop: 4 }}>
-                      <span className="wb-muted" style={{ fontSize: 10.5 }}>
-                        {a.stage}
-                      </span>
+                  <span className="wb-u-min-w-0 wb-u-flex-1">
+                    <span className="wb-mono wb-artifact-option__name">{a.name}</span>
+                    <span className="wb-flex wb-u-gap-6px wb-u-mt-4px">
+                      <span className="wb-muted wb-u-text-10-5px">{a.stage}</span>
                       <span
-                        className="wb-badge-dot"
-                        style={{
-                          width: 5,
-                          height: 5,
-                          borderRadius: "50%",
-                          background:
-                            "var(--" +
-                            (REVIEW_TONE[rs] === "safe"
-                              ? "safe"
-                              : REVIEW_TONE[rs] === "danger"
-                                ? "danger"
-                                : REVIEW_TONE[rs] === "warn"
-                                  ? "warn"
-                                  : "border-strong") +
-                            ")",
-                        }}
+                        className={`wb-review-dot wb-bg-tone--${REVIEW_TONE[rs] ?? "neutral"}`}
                       />
-                      <span className="wb-muted" style={{ fontSize: 10.5 }}>
-                        {rs}
-                      </span>
+                      <span className="wb-muted wb-u-text-10-5px">{rs}</span>
                     </span>
                   </span>
                 </button>
@@ -219,16 +168,9 @@ export function ArtifactsScreen() {
         </Card>
 
         {/* Right: preview + metadata */}
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "minmax(0,1fr) 240px",
-            gap: 16,
-            alignItems: "start",
-          }}
-        >
-          <Card className="wb-card--flat" style={{ overflow: "hidden" }}>
-            <div className="wb-code-head" style={{ position: "static", borderRadius: 0 }}>
+        <div className="wb-u-display-grid wb-u-cols-minmax-zero-1fr-240px wb-u-gap-16px wb-u-items-start">
+          <Card className="wb-card--flat wb-u-overflow-hidden">
+            <div className="wb-code-head wb-u-position-static wb-u-radius-0">
               <Icon
                 name={selected.type === "JSON" ? "file-code" : "file-text"}
                 size={15}
@@ -236,7 +178,7 @@ export function ArtifactsScreen() {
               />
               <span className="wb-code-name wb-strong">{selected.name}</span>
               <Badge tone="neutral">{selected.type}</Badge>
-              <div className="wb-spacer" style={{ marginLeft: "auto" }} />
+              <div className="wb-spacer wb-u-ml-auto" />
               <IconBtn
                 icon="copy"
                 size="sm"
@@ -248,25 +190,21 @@ export function ArtifactsScreen() {
                 size="sm"
                 title="Download synthetic artifact"
                 onClick={downloadArtifact}
-                style={{ marginLeft: 6 }}
+                className="wb-u-ml-6px"
               />
             </div>
             <div
-              style={{ maxHeight: "calc(100vh - 220px)", overflow: "auto" }}
-              className="cr-scroll"
+              className="cr-scroll wb-u-max-h-calc-100vh-220px wb-u-overflow-auto"
               role="region"
               aria-label={`${selected.name} preview`}
               tabIndex={0}
             >
               {selected.lang === "json" ? (
-                <div
-                  className="wb-code"
-                  style={{ border: "none", borderRadius: 0, background: "var(--bg-inset)" }}
-                >
+                <div className="wb-code wb-u-border-none wb-u-radius-0 wb-u-bg-bg-inset">
                   <CodeView name={selected.name} lang="json" body={selected.body} />
                 </div>
               ) : (
-                <div style={{ padding: "18px 22px" }}>
+                <div className="wb-u-p-18px-22px">
                   <MarkdownView body={selected.body} />
                 </div>
               )}
@@ -274,7 +212,7 @@ export function ArtifactsScreen() {
           </Card>
 
           {/* Metadata + review */}
-          <div className="wb-stack" style={{ position: "sticky", top: 0 }}>
+          <div className="wb-stack wb-u-position-sticky wb-u-top-0">
             <Card>
               <CardHead icon="info" title="Metadata" />
               <div className="wb-card-body">
@@ -317,7 +255,7 @@ export function ArtifactsScreen() {
                     {reviewState(selected)}
                   </Badge>
                 </div>
-                <p className="wb-text-sm wb-muted" style={{ lineHeight: 1.5 }}>
+                <p className="wb-text-sm wb-muted wb-u-leading-1-5">
                   {selected.name === "change-targets.json"
                     ? "Verify the file allow-list matches the diff before approving."
                     : "Deterministic artifact — review for correctness and scope."}
@@ -364,11 +302,11 @@ function ArtifactsHead({ issue }: { readonly issue: Issue }) {
         </div>
       </div>
       <div className="wb-spacer" />
-      <div className="wb-flex wb-inline-field" style={{ gap: 8 }}>
+      <div className="wb-flex wb-inline-field wb-u-gap-8px">
         <label className="wb-text-sm wb-muted" htmlFor="artifacts-issue-select">
           Issue
         </label>
-        <div className="wb-select" style={{ width: 230 }}>
+        <div className="wb-select wb-u-w-230px">
           <select
             id="artifacts-issue-select"
             value={issue.key}

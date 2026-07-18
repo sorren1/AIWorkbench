@@ -276,7 +276,7 @@ export function ApprovalInboxScreen() {
             <div className="wb-card-body wb-stack">
               <div className="wb-between wb-wrap">
                 <div>
-                  <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
+                  <div className="wb-flex wb-wrap wb-u-gap-8px">
                     <h2>Approval request</h2>
                     <Badge tone={statusTone(selected.status)}>{selected.status}</Badge>
                     {principalReplay && selected.status === "PENDING" && (
@@ -352,7 +352,7 @@ export function ApprovalInboxScreen() {
 
               {principalReplay && recordedWalkthroughEvidence && (
                 <section className="wb-approval-diff" aria-labelledby="approval-diff-title">
-                  <div className="wb-between wb-wrap" style={{ gap: 8 }}>
+                  <div className="wb-between wb-wrap wb-u-gap-8px">
                     <h3 id="approval-diff-title">Synthetic proposed diff replay</h3>
                     <Badge tone="warn">HIGH risk · bounded write</Badge>
                   </div>
@@ -364,7 +364,7 @@ export function ApprovalInboxScreen() {
                   <pre className="wb-code cr-scroll">
                     {recordedWalkthroughEvidence.change.unifiedDiff}
                   </pre>
-                  <p className="wb-mono wb-muted" style={{ fontSize: 11.5 }}>
+                  <p className="wb-mono wb-muted wb-u-text-11-5px">
                     diff sha256:{recordedWalkthroughEvidence.change.unifiedDiffSha256}
                   </p>
                 </section>
@@ -428,7 +428,7 @@ export function ApprovalInboxScreen() {
                       onChange={(event) => setReason(event.currentTarget.value)}
                     />
                   </label>
-                  <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
+                  <div className="wb-flex wb-wrap wb-u-gap-8px">
                     <Btn
                       variant="primary"
                       icon="shield-check"

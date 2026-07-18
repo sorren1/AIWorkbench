@@ -1,31 +1,55 @@
 import { expect, test } from "./fixtures";
 
-test("production preview applies the static-host security policy without CSP violations", async ({
-  page,
-}) => {
-  const response = await page.goto("/");
-  expect(response).not.toBeNull();
-  const headers = response?.headers() ?? {};
-  expect(headers["content-security-policy"]).toContain("frame-ancestors 'none'");
-  expect(headers["content-security-policy"]).toContain("script-src 'self'");
-  expect(headers["content-security-policy"]).not.toContain("unsafe-eval");
-  expect(headers["referrer-policy"]).toBe("no-referrer");
-  expect(headers["x-content-type-options"]).toBe("nosniff");
-  expect(headers["permissions-policy"]).toContain("camera=()");
-  await expect(
-    page.getByRole("heading", { level: 1, name: "AI Delivery Workbench" }),
-  ).toBeVisible();
+const publicHtmlRoutes = [
+  { path: "/", heading: "AI Delivery Workbench" },
+  { path: "/demo/", heading: "Work Queue" },
+  { path: "/writing/governing-ai-assisted-delivery/", heading: "Governing AI-assisted delivery" },
+  { path: "/404.html", heading: "This page is outside the expected change surface." },
+] as const;
+
+test("every public HTML route satisfies the final CSP without inline styles", async ({ page }) => {
+  const cspViolations: string[] = [];
+  page.on("console", (message) => {
+    if (
+      /content security policy|violates the following.*style-src|refused to apply inline style/iu.test(
+        message.text(),
+      )
+    ) {
+      cspViolations.push(message.text());
+    }
+  });
+
+  for (const route of publicHtmlRoutes) {
+    const response = await page.goto(route.path);
+    expect(response, `${route.path} should return a document response`).not.toBeNull();
+    const headers = response?.headers() ?? {};
+    const policy = headers["content-security-policy"] ?? "";
+    expect(policy).toContain("frame-ancestors 'none'");
+    expect(policy).toContain("script-src 'self'");
+    expect(policy).toContain("style-src 'self'");
+    expect(policy).not.toContain("unsafe-eval");
+    expect(policy).not.toContain("unsafe-inline");
+    expect(policy).not.toContain("vercel.live");
+    expect(headers["referrer-policy"]).toBe("no-referrer");
+    expect(headers["x-content-type-options"]).toBe("nosniff");
+    expect(headers["permissions-policy"]).toContain("camera=()");
+    await expect(page.getByRole("heading", { level: 1, name: route.heading })).toBeVisible();
+    await expect(page.locator("[style]")).toHaveCount(0);
+    await expect(page.locator("style")).toHaveCount(0);
+    expect(cspViolations, `CSP violations observed after loading ${route.path}`).toEqual([]);
+  }
 });
 
-test("public and demo routes make no external runtime requests", async ({ page }) => {
+test("public routes make no external runtime requests", async ({ page }) => {
   const external: string[] = [];
   page.on("request", (request) => {
     const url = new URL(request.url());
     if (url.hostname !== "127.0.0.1") external.push(`${request.resourceType()}: ${url.origin}`);
   });
-  await page.goto("/");
-  await page.goto("/demo/");
-  await expect(page.getByRole("heading", { level: 1, name: "Work Queue" })).toBeVisible();
+  for (const route of publicHtmlRoutes) {
+    await page.goto(route.path);
+    await expect(page.getByRole("heading", { level: 1, name: route.heading })).toBeVisible();
+  }
   expect(external).toEqual([]);
 });
 
