@@ -19,10 +19,19 @@ const executable = resolve(
 
 async function runProfile(profile: "desktop" | "mobile"): Promise<void> {
   const config = resolve(root, `quality/lighthouse/${profile}.json`);
+  const environment: NodeJS.ProcessEnv = {
+    ...process.env,
+    CHROME_PATH: chromium.executablePath(),
+  };
+  if (process.env.CI) {
+    // GitHub-hosted runners block the downloaded Chromium sandbox with AppArmor.
+    // The browser audits only this repository's trusted, local static build.
+    environment.LHCI_COLLECT__SETTINGS__CHROME_FLAGS = "--no-sandbox --disable-setuid-sandbox";
+  }
   await new Promise<void>((accept, reject) => {
     const child = spawn(executable, ["autorun", "--config", config], {
       cwd: root,
-      env: { ...process.env, CHROME_PATH: chromium.executablePath() },
+      env: environment,
       stdio: "inherit",
       shell: process.platform === "win32",
     });

@@ -30,7 +30,7 @@ test("approval inbox persists a bound request and enforces distinct validator ap
     page.getByText("Decision unavailable for this persona", { exact: true }),
   ).toBeVisible();
 
-  await page.reload();
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(page.getByText("approval.browser.1", { exact: true }).first()).toBeVisible();
   await page
     .getByLabel("View authorization as synthetic persona")
@@ -44,7 +44,7 @@ test("approval inbox persists a bound request and enforces distinct validator ap
       .first(),
   ).toBeVisible();
 
-  await page.reload();
+  await page.reload({ waitUntil: "domcontentloaded" });
   await expect(
     page
       .locator(".wb-badge")

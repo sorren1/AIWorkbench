@@ -577,15 +577,17 @@ Generate and enforce exact public-screenshot pixels on Linux, the hosted release
 
 ### Context
 
-The complete hosted release gate runs cold container builds, vulnerability scans, SBOM generation, three browser engines, and Lighthouse on one bounded runner. Two concurrent browser workers became CPU-starved after the cold container workload, producing navigation and action timeouts that did not reproduce locally. The dark-theme accessibility check could also sample foreground transitions before they reached their final contrast-safe tokens.
+The complete hosted release gate runs cold container builds, vulnerability scans, SBOM generation, three browser engines, and Lighthouse on one bounded runner. Two concurrent browser workers became CPU-starved after the cold container workload, producing navigation and action timeouts that did not reproduce locally. Waiting for a page's nonessential `load` event also produced Firefox timeouts after navigation and `DOMContentLoaded` had completed. The dark-theme accessibility check could sample foreground transitions before they reached their final contrast-safe tokens. GitHub runner AppArmor does not permit the downloaded Playwright Chromium to start its user-namespace sandbox when Lighthouse launches it directly.
 
 ### Decision
 
-Run Playwright with one worker and a 45-second default test timeout in CI while retaining two workers and the 30-second timeout locally. Apply a theme-token change atomically in a layout effect: mark the document as switching, disable transitions for that frame, update the theme, and remove the marker on the next animation frame. Before auditing dark-theme contrast, require the target theme and the removal of that marker. Keep retries visible and release-blocking; do not suppress Axe rules or browser failures.
+Run Playwright with one worker and a 45-second default test timeout in CI while retaining two workers and the 30-second timeout locally. Reload the static app only through `DOMContentLoaded`, then assert the application-specific ready state. Apply a theme-token change atomically in a layout effect: mark the document as switching, disable transitions for that frame, update the theme, and remove the marker on the next animation frame. Before auditing dark-theme contrast, require the target theme and the removal of that marker. Launch the pinned Chromium with `--no-sandbox --disable-setuid-sandbox` only for Lighthouse on the ephemeral CI runner, where it visits only the repository's trusted local static build. Keep retries visible and release-blocking; do not suppress Axe rules or browser failures.
 
 ### Consequences
 
 - Hosted browser coverage takes longer but avoids contention between heavyweight engines on the release runner.
+- Reload checks no longer depend on fonts, images, or another nonessential resource completing before application assertions begin.
 - Visitors never see the intermediate low-contrast foreground/background combinations that a gradual custom-property transition can produce.
 - The contrast assertion evaluates the stable UI state and still fails if the final token is below the required ratio.
+- The CI-only Lighthouse browser has no Chromium process sandbox; the surrounding ephemeral runner remains the isolation boundary and the audited origin is local and repository-controlled.
 - Local parallelism remains fast, and all three maintained browser engines continue to run in both environments.
