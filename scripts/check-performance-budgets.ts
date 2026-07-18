@@ -138,7 +138,7 @@ if (process.argv.includes("--record")) {
     }
 
     const argumentCount = process.argv.length;
-    process.argv.push("--require", "--require-tag");
+    process.argv.push("--require");
     try {
       await import("./check-release-evidence");
     } finally {

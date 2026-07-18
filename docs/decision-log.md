@@ -2,9 +2,9 @@
 
 ## 2026-07-18 — Keep performance policy valid across the evidence-only child
 
-- **Decision:** Record deterministic bundle measurements on the audited source commit. On its direct evidence child, continue enforcing every gzip, script-count, and external-request budget, but permit the expected HTML measurement difference only after the release-evidence validator proves the commit is annotated-tagged and changes only `public/security/release-summary.json`.
+- **Decision:** Record deterministic bundle measurements on the audited source commit. On its direct evidence child, continue enforcing every gzip, script-count, and external-request budget, but permit the expected HTML measurement difference only after the release-evidence validator proves the commit changes only `public/security/release-summary.json` and binds to its direct parent.
 - **Why:** The public case study renders the generated summary. Requiring its HTML bytes to equal a parent that intentionally has no summary makes a valid evidence-only commit fail by construction; recording the changed measurement in the child would violate the one-file evidence boundary.
-- **Boundary:** This exception does not relax a performance ceiling or cover JavaScript, CSS, source, or any other path. An absent tag, an unreachable/mismatched parent, nonzero CodeQL result, or second changed path remains release-blocking.
+- **Boundary:** This exception does not relax a performance ceiling or cover JavaScript, CSS, source, or any other path. An unreachable/mismatched parent, nonzero CodeQL result, or second changed path remains release-blocking. The evidence pull request may run before tag creation, but the separate deployment gate still requires an annotated release tag pointing to the final evidence commit.
 
 ## 2026-07-18 — Separate audited source, release evidence, and deployment identity
 
