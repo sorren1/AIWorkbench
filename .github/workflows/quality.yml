@@ -54,7 +54,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        browser: [chromium, firefox, webkit]
+        browser: [chromium, webkit]
     container:
       image: mcr.microsoft.com/playwright@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48
       options: --user 1001 --init --ipc=host
@@ -86,9 +86,42 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
+  firefox:
+    name: Browser controls (firefox)
+    needs: core
+    runs-on: windows-2025
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+      - name: Use supported Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Clean install
+        run: npm ci
+      - name: Install pinned Firefox engine
+        run: npx playwright install firefox
+      - name: Run isolated Firefox release gate
+        run: npx playwright test --project=firefox
+      - name: Retain Firefox artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: quality-firefox-evidence-${{ github.run_id }}
+          path: |
+            playwright-report/
+            test-results/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
+
   performance:
     name: Performance controls
-    needs: browser
+    needs: [browser, firefox]
     runs-on: ubuntu-latest
     timeout-minutes: 15
     container:
