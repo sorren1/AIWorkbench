@@ -47,10 +47,14 @@ jobs:
           retention-days: 14
 
   browser:
-    name: Browser and performance controls
+    name: Browser controls (${{ matrix.browser }})
     needs: core
     runs-on: ubuntu-latest
     timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
     container:
       image: mcr.microsoft.com/playwright@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48
       options: --user 1001 --init --ipc=host
@@ -68,19 +72,50 @@ jobs:
         run: npm ci
       - name: Verify pinned browser engines
         run: npx playwright install --list
-      - name: Run cross-browser release gate
-        run: npm run test:e2e
-      - name: Run Lighthouse release gate
-        run: npm run performance:audit
-      - name: Retain browser and performance artifacts
+      - name: Run isolated browser release gate
+        run: npx playwright test --project="${{ matrix.browser }}"
+      - name: Retain browser artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: quality-browser-evidence-${{ github.run_id }}
+          name: quality-${{ matrix.browser }}-evidence-${{ github.run_id }}
           path: |
-            .lighthouseci/
             playwright-report/
             test-results/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
+
+  performance:
+    name: Performance controls
+    needs: browser
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    container:
+      image: mcr.microsoft.com/playwright@sha256:5b8f294aff9041b7191c34a4bab3ac270157a28774d4b0660e9743297b697e48
+      options: --user 1001 --init --ipc=host
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+      - name: Use supported Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Clean install
+        run: npm ci
+      - name: Verify pinned browser engines
+        run: npx playwright install --list
+      - name: Run Lighthouse release gate
+        run: npm run performance:audit
+      - name: Retain performance artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: quality-performance-evidence-${{ github.run_id }}
+          path: .lighthouseci/
           include-hidden-files: true
           if-no-files-found: warn
           retention-days: 14
