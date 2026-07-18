@@ -157,14 +157,24 @@ async function dockerRun(
   image: string,
   args: readonly string[],
   mounts: readonly string[] = [],
+  runtimeArgs: readonly string[] = [],
 ): Promise<CommandResult> {
   return command("docker", [
     "run",
     "--rm",
+    ...runtimeArgs,
     ...mounts.flatMap((mount) => ["--volume", mount]),
     image,
     ...args,
   ]);
+}
+
+function hostUserDockerArgs(): readonly string[] {
+  const uid = process.getuid?.();
+  const gid = process.getgid?.();
+  return process.platform === "linux" && uid !== undefined && gid !== undefined
+    ? ["--user", `${uid}:${gid}`]
+    : [];
 }
 
 async function runGitleaks(
@@ -192,6 +202,7 @@ async function runGitleaks(
       source,
     ],
     [`${sourceMount}:${source}:ro`, `${reportsRoot}:/reports`],
+    hostUserDockerArgs(),
   );
   if (![0, 1].includes(result.exitCode)) {
     throw new Error(`Gitleaks ${mode} scan could not complete.`);

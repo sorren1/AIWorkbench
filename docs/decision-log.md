@@ -545,6 +545,7 @@ Derive the local LiteLLM runtime from signed `v1.94.0-dev.3`, which supplies Pyt
 ### Consequences
 
 - The complete release gate now requires container registries, PyPI for one hash-locked wheel, Sigstore verification, current Trivy databases, and more CI time.
+- On Linux, scanners that write to host-mounted report directories run with the host UID/GID so the non-root release process retains ownership of the SARIF it must sanitize and validate.
 - The LiteLLM runtime is a local derivative, so the vendor signature applies to its exact upstream base, not to the derived content ID. The Dockerfile, wheel hash, package floors, non-root user, scan, and SBOM bind the derivative.
 - A pre-release LiteLLM base is a temporary compatibility risk. Replace it with the next signed stable non-root digest that meets every package floor.
 - PostgreSQL exceptions fail if the digest/path/CVE stops matching and expire on 2026-08-15; a maintained rebuild is required if the official image is not fixed and reachability can no longer justify the exception.
