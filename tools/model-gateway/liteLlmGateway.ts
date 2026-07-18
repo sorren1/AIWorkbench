@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
@@ -72,6 +73,25 @@ function positiveInteger(value: unknown): number | null {
   return parsed !== null && Number.isInteger(parsed) && parsed > 0 ? parsed : null;
 }
 
+function masterKeyFromEnvironment(): string {
+  const filePath = process.env.LITELLM_MASTER_KEY_FILE;
+  const directValue = process.env.LITELLM_MASTER_KEY;
+  if (filePath && directValue) {
+    throw new Error(
+      "Set exactly one of LITELLM_MASTER_KEY_FILE or LITELLM_MASTER_KEY for the explicit live profile.",
+    );
+  }
+  if (filePath) {
+    const value = readFileSync(resolve(filePath), "utf8").trim();
+    if (!value) throw new Error("LITELLM_MASTER_KEY_FILE is empty.");
+    return value;
+  }
+  if (directValue) return directValue;
+  throw new Error(
+    "LITELLM_MASTER_KEY_FILE or an OS-secret-manager-injected LITELLM_MASTER_KEY is required for the explicit live profile.",
+  );
+}
+
 function catalogEntry(value: unknown): ModelCatalogEntry | null {
   const root = object(value);
   if (!root) return null;
@@ -116,12 +136,9 @@ export class LiteLlmModelGateway implements ModelGateway {
   }
 
   static fromEnvironment(root: string): LiteLlmModelGateway {
-    const masterKey = process.env.LITELLM_MASTER_KEY;
-    if (!masterKey)
-      throw new Error("LITELLM_MASTER_KEY is required for the explicit live profile.");
     return new LiteLlmModelGateway({
       baseUrl: process.env.MODEL_GATEWAY_BASE_URL ?? "http://127.0.0.1:4000",
-      masterKey,
+      masterKey: masterKeyFromEnvironment(),
       stateRoot: resolve(root, ".workbench/model-gateway/leases"),
     });
   }

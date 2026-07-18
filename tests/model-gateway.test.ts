@@ -2,7 +2,7 @@ import { mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
 
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 
 import type { ModelPolicy } from "../src/demo/control-plane/registry/contracts";
 import { registrySnapshot } from "../src/demo/control-plane/registry/generated";
@@ -25,6 +25,7 @@ import { runModelGateway } from "../tools/model-gateway/runner";
 const temporaryDirectories: string[] = [];
 
 afterEach(async () => {
+  vi.unstubAllEnvs();
   await Promise.all(temporaryDirectories.splice(0).map((path) => rm(path, { recursive: true })));
 });
 
@@ -224,6 +225,19 @@ describe("provider-neutral model gateway contract", () => {
 });
 
 describe("LiteLLM local adapter", () => {
+  it("loads the administrator key from a secret file and rejects ambiguous sources", async () => {
+    const root = await mkdtemp(resolve(tmpdir(), "workbench-gateway-secret-"));
+    temporaryDirectories.push(root);
+    const secretPath = resolve(root, "litellm-master-key");
+    await writeFile(secretPath, "sk-master-sentinel-never-emit\n", { mode: 0o600 });
+    vi.stubEnv("LITELLM_MASTER_KEY_FILE", secretPath);
+    vi.stubEnv("LITELLM_MASTER_KEY", "");
+    expect(LiteLlmModelGateway.fromEnvironment(root)).toBeInstanceOf(LiteLlmModelGateway);
+
+    vi.stubEnv("LITELLM_MASTER_KEY", "sk-second-master-sentinel");
+    expect(() => LiteLlmModelGateway.fromEnvironment(root)).toThrow("exactly one");
+  });
+
   it("reconciles, invokes, and revokes virtual keys without leaking key values", async () => {
     const stateRoot = await mkdtemp(resolve(tmpdir(), "workbench-gateway-"));
     temporaryDirectories.push(stateRoot);

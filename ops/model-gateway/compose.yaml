@@ -3,15 +3,25 @@ name: ai-delivery-workbench-model-gateway
 services:
   database:
     image: postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193
+    user: "70:70"
     environment:
       POSTGRES_DB: litellm
       POSTGRES_USER: litellm
-      POSTGRES_PASSWORD: ${LITELLM_DB_PASSWORD:?Set LITELLM_DB_PASSWORD in the local .env file}
+      POSTGRES_PASSWORD_FILE: /run/secrets/litellm_db_password
+    secrets:
+      - source: litellm_db_password
+        target: litellm_db_password
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U litellm -d litellm"]
       interval: 5s
       timeout: 3s
       retries: 12
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=32m,mode=1777
+      - /var/run/postgresql:rw,noexec,nosuid,nodev,size=16m,mode=3777,uid=70,gid=70
     networks: [gateway-internal]
     volumes:
       - gateway-database:/var/lib/postgresql/data
@@ -22,20 +32,68 @@ services:
       context: .
       dockerfile: Dockerfile.litellm
       pull: true
-    image: ai-delivery-workbench-litellm:v1.94.0-dev.3-mcp1.28.1
-    command: ["--config", "/app/config.yaml", "--port", "4000", "--num_workers", "1"]
+    image: ai-delivery-workbench-litellm:v1.94.0-dev.3-database-mcp1.28.1
+    user: "65534:65534"
+    entrypoint:
+      - /bin/sh
+      - -ec
+      - |
+        export DATABASE_URL="$$(cat "$$DATABASE_URL_FILE")"
+        export LITELLM_MASTER_KEY="$$(cat "$$LITELLM_MASTER_KEY_FILE")"
+        export LITELLM_SALT_KEY="$$(cat "$$LITELLM_SALT_KEY_FILE")"
+        export MODEL_GATEWAY_UPSTREAM_API_KEY="$$(cat "$$MODEL_GATEWAY_UPSTREAM_API_KEY_FILE")"
+        exec /app/docker/prod_entrypoint.sh "$$@"
+      - --
+    command:
+      [
+        "--config",
+        "/app/config.yaml",
+        "--port",
+        "4000",
+        "--num_workers",
+        "1",
+        "--use_v2_migration_resolver",
+      ]
     depends_on:
       database:
         condition: service_healthy
     environment:
-      DATABASE_URL: postgresql://litellm:${LITELLM_DB_PASSWORD}@database:5432/litellm
-      LITELLM_MASTER_KEY: ${LITELLM_MASTER_KEY:?Set LITELLM_MASTER_KEY in the local .env file}
-      LITELLM_SALT_KEY: ${LITELLM_SALT_KEY:?Set LITELLM_SALT_KEY in the local .env file}
-      MODEL_GATEWAY_UPSTREAM_API_KEY: ${MODEL_GATEWAY_UPSTREAM_API_KEY:?Set an upstream key in the local .env file}
+      DATABASE_URL_FILE: /run/secrets/litellm_database_url
+      LITELLM_MASTER_KEY_FILE: /run/secrets/litellm_master_key
+      LITELLM_SALT_KEY_FILE: /run/secrets/litellm_salt_key
+      LITELLM_UI_PATH: /app/.venv/lib/python3.13/site-packages/litellm/proxy/_experimental/out
+      DISABLE_ADMIN_UI: "true"
+      MODEL_GATEWAY_UPSTREAM_API_KEY_FILE: /run/secrets/model_gateway_upstream_api_key
       MODEL_GATEWAY_UPSTREAM_BASE_URL: ${MODEL_GATEWAY_UPSTREAM_BASE_URL:-}
       MODEL_GATEWAY_PRIMARY_MODEL: ${MODEL_GATEWAY_PRIMARY_MODEL:?Set a LiteLLM provider/model identifier}
       MODEL_GATEWAY_FALLBACK_MODEL: ${MODEL_GATEWAY_FALLBACK_MODEL:?Set a fallback provider/model identifier}
       MODEL_GATEWAY_REVIEW_MODEL: ${MODEL_GATEWAY_REVIEW_MODEL:?Set a distinct review provider/model identifier}
+    secrets:
+      - source: litellm_database_url
+        target: litellm_database_url
+      - source: litellm_master_key
+        target: litellm_master_key
+      - source: litellm_salt_key
+        target: litellm_salt_key
+      - source: model_gateway_upstream_api_key
+        target: model_gateway_upstream_api_key
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python",
+          "-c",
+          "import urllib.request; urllib.request.urlopen('http://127.0.0.1:4000/health/readiness', timeout=2)",
+        ]
+      interval: 5s
+      timeout: 3s
+      retries: 18
+      start_period: 30s
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,nodev,size=64m,mode=1777
     ports:
       - "127.0.0.1:4000:4000"
     networks: [gateway-internal, provider-egress]
@@ -51,3 +109,15 @@ networks:
 
 volumes:
   gateway-database: {}
+
+secrets:
+  litellm_db_password:
+    file: ${LITELLM_DB_PASSWORD_FILE:?Set LITELLM_DB_PASSWORD_FILE to a secret file}
+  litellm_database_url:
+    file: ${LITELLM_DATABASE_URL_FILE:?Set LITELLM_DATABASE_URL_FILE to a secret file}
+  litellm_master_key:
+    file: ${LITELLM_MASTER_KEY_FILE:?Set LITELLM_MASTER_KEY_FILE to a secret file}
+  litellm_salt_key:
+    file: ${LITELLM_SALT_KEY_FILE:?Set LITELLM_SALT_KEY_FILE to a secret file}
+  model_gateway_upstream_api_key:
+    file: ${MODEL_GATEWAY_UPSTREAM_API_KEY_FILE:?Set MODEL_GATEWAY_UPSTREAM_API_KEY_FILE to a secret file}

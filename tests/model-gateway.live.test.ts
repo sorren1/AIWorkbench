@@ -10,7 +10,7 @@ import { runModelGateway } from "../tools/model-gateway/runner";
 
 const enabled =
   process.env.MODEL_GATEWAY_LIVE_TEST === "1" &&
-  Boolean(process.env.LITELLM_MASTER_KEY) &&
+  Boolean(process.env.LITELLM_MASTER_KEY_FILE || process.env.LITELLM_MASTER_KEY) &&
   Boolean(process.env.MODEL_GATEWAY_BASE_URL);
 
 describe.skipIf(!enabled)("LiteLLM opt-in live integration", () => {

@@ -4,12 +4,12 @@ The model gateway is an optional local control-plane adapter. It demonstrates ho
 
 ## Runtime boundaries
 
-| Surface                          | Default behavior                                  | Network and credential boundary                                                             |
-| -------------------------------- | ------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| Public case study and React demo | Reads checked-in sanitized status only            | No gateway client, provider call, credential entry, or live catalog request                 |
-| `offline` CLI profile            | Deterministic `OfflineModelGateway`               | No network; in-memory opaque lease; no live-validation evidence                             |
-| `live` CLI profile               | `LiteLlmModelGateway` over loopback               | Explicit invocation; administrator and upstream secrets remain in local environment/Compose |
-| LiteLLM container                | Routes allowed aliases to the configured provider | Loopback admin/API port; provider egress is required and documented                         |
+| Surface                          | Default behavior                                  | Network and credential boundary                                                          |
+| -------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| Public case study and React demo | Reads checked-in sanitized status only            | No gateway client, provider call, credential entry, or live catalog request              |
+| `offline` CLI profile            | Deterministic `OfflineModelGateway`               | No network; in-memory opaque lease; no live-validation evidence                          |
+| `live` CLI profile               | `LiteLlmModelGateway` over loopback               | Explicit invocation; administrator secret comes from a file or OS-injected process value |
+| LiteLLM container                | Routes allowed aliases to the configured provider | Loopback admin/API port; provider egress is required and documented                      |
 
 The local Docker code-validation sandbox and the model gateway are separate systems. The sandbox remains deterministic and network-disabled. The gateway is not imported into `demo:sandbox` and cannot execute repository writes.
 
@@ -45,7 +45,7 @@ An independent-review model is invoked only when `independentReview.required` is
 
 ## Credential and secret handling
 
-The administrator credential is read from `LITELLM_MASTER_KEY`. The upstream provider credential is read by the LiteLLM container from `MODEL_GATEWAY_UPSTREAM_API_KEY`. Neither belongs in source, browser configuration, command output, trace attributes, evidence, or UI.
+Compose receives only paths to Docker secret source files. The LiteLLM master key, stable salt, PostgreSQL password/URL, and upstream provider key are mounted below `/run/secrets` and converted to process environment only by the gateway entrypoint. The Node client reads `LITELLM_MASTER_KEY_FILE`, or accepts `LITELLM_MASTER_KEY` only when an OS secret manager injects it directly into that one process. Neither values nor materialized files belong in source, `.env`, browser configuration, command output, trace attributes, evidence, or UI.
 
 The credential alias is deterministic and non-personal:
 
@@ -66,6 +66,8 @@ Token and cost labels preserve their source:
 - zero cost in the deterministic offline profile, without a live-provider claim.
 
 Pricing metadata identifies the response header or catalog version and its retrieval time. The system does not call an estimate billed or actual.
+
+LiteLLM spend logging is deliberately metadata-only: spend logs remain enabled for accounting, `store_prompts_in_spend_logs` is false, the maximum retention period is seven days, and cleanup runs daily. Prompt and response content remains excluded from both gateway spend logs and workbench traces. Upstream-provider retention is a separate provider control.
 
 ## Trace and evidence data
 

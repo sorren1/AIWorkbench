@@ -48,7 +48,8 @@ CI uploads this directory as a 14-day artifact. No detailed generated scan repor
 - ESLint and repository container-policy findings fail.
 - npm and container HIGH/CRITICAL findings fail, including findings already present; the enforced count is zero after exact, documented, unexpired suppressions.
 - The sandbox, LiteLLM, and PostgreSQL runtime images are each resolved to an exact local content ID, Trivy-scanned, and assigned a validated CycloneDX SBOM.
-- LiteLLM must meet the configured Python, `ddtrace`, and `mcp` floors, retain numeric non-root user `65534`, and derive from an upstream digest whose Cosign signature verifies with the commit-pinned LiteLLM key.
+- LiteLLM must meet the configured Python, `ddtrace`, and `mcp` floors, use the reviewed database-compatible upstream, retain numeric non-root user/group `65534:65534`, and derive from an upstream digest whose Cosign signature verifies with the commit-pinned LiteLLM key.
+- Every credential-bearing Compose service must use its reviewed explicit non-root identity, dropped capabilities, `no-new-privileges`, read-only root, Docker secret mounts, and exact writable tmpfs/volume allowlist. Plaintext credential environment values and unreviewed writable paths fail the gate.
 - Missing or disallowed license declarations fail.
 - SBOM generation and CycloneDX validation failures fail.
 - A new tracked Python, shell, PowerShell, or additional Dockerfile source fails until an explicit scanner is added.

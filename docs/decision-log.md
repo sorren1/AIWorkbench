@@ -552,20 +552,20 @@ State the functional-versus-simulated boundary in the case-study hero, preserve 
 
 ### Context
 
-The original supply-chain gate scanned only the locally built sandbox. The optional Compose stack also executes LiteLLM and PostgreSQL, and their old pins contained fixed HIGH/CRITICAL advisories. LiteLLM signs its images and publishes a non-root variant, but no current stable or pre-release image simultaneously met the required Python, `ddtrace`, and `mcp` floors.
+The original supply-chain gate scanned only the locally built sandbox. The optional Compose stack also executes LiteLLM and PostgreSQL, and their old pins contained fixed HIGH/CRITICAL advisories. LiteLLM signs its images and publishes separate database and non-root variants, but the generic non-root variant does not reliably support the Prisma-backed virtual-key database and no current stable image met every required package floor.
 
 ### Decision
 
-Treat the sandbox, LiteLLM, and PostgreSQL as the exact runtime-image inventory. Build or pull each target, resolve and publish its scanned content ID, run Trivy with zero unsuppressed HIGH/CRITICAL findings, and generate a CycloneDX SBOM for each. Verify LiteLLM's signed non-root upstream digest with Cosign and the public key pinned to immutable upstream commit `0112e53046018d726492c814b3644b7d376029d0`.
+Treat the sandbox, LiteLLM, and PostgreSQL as the exact runtime-image inventory. Build or pull each target, resolve and publish its scanned content ID, run Trivy with zero unsuppressed HIGH/CRITICAL findings, and generate a CycloneDX SBOM for each. Verify LiteLLM's signed database upstream digest with Cosign and the public key pinned to immutable upstream commit `0112e53046018d726492c814b3644b7d376029d0`.
 
-Derive the local LiteLLM runtime from signed `v1.94.0-dev.3`, which supplies Python `3.13.14-r2` and `ddtrace 4.11.0`, and install only `mcp 1.28.1` from its SHA-256-locked wheel without dependency re-resolution. Remove the temporary installer and restore numeric user `65534`. Use PostgreSQL `17.10-alpine3.24`; permit only its exact-digest `/usr/local/bin/gosu` findings under individual, expiring, reachability-documented exceptions.
+Derive the local LiteLLM runtime from signed database image `v1.94.0-dev.3`, which supplies Python `3.13.14` and `ddtrace 4.11.0`, and install only `mcp 1.28.1` from its SHA-256-locked wheel without dependency re-resolution. Relocate the pinned Prisma cache, generate its client during the build, remove the temporary installer, and set numeric user/group `65534:65534`. Use PostgreSQL `17.10-alpine3.24`; permit only its exact-digest `/usr/local/bin/gosu` findings under individual, expiring, reachability-documented exceptions.
 
 ### Consequences
 
 - The complete release gate now requires container registries, PyPI for one hash-locked wheel, Sigstore verification, current Trivy databases, and more CI time.
 - Container scanners never leave root-owned reports: Gitleaks uses the host UID/GID on Linux, while Trivy returns SARIF and CycloneDX through stdout for the non-root release process to write, sanitize, and validate.
 - The LiteLLM runtime is a local derivative, so the vendor signature applies to its exact upstream base, not to the derived content ID. The Dockerfile, wheel hash, package floors, non-root user, scan, and SBOM bind the derivative.
-- A pre-release LiteLLM base is a temporary compatibility risk. Replace it with the next signed stable non-root digest that meets every package floor.
+- A pre-release LiteLLM base is a temporary compatibility risk. Replace it with the next signed stable database-compatible digest that meets every package floor and can be made non-root without runtime mutation.
 - PostgreSQL exceptions fail if the digest/path/CVE stops matching and expire on 2026-08-15; a maintained rebuild is required if the official image is not fixed and reachability can no longer justify the exception.
 
 ## ADR-026 — Use Linux as the canonical public-screenshot pixel platform
@@ -613,3 +613,26 @@ Keep `npm run check:all` as the complete local aggregate, but split the hosted Q
 - The contrast assertion evaluates the stable UI state and still fails if the final token is below the required ratio.
 - Lighthouse's Chromium process remains unsandboxed, but the browser job gains a version- and digest-pinned userspace plus unprivileged container boundary; the surrounding ephemeral runner remains the outer isolation boundary and the audited origin is local and repository-controlled.
 - Local parallelism remains fast, and all three maintained browser engines continue to run in both environments.
+
+## ADR-028 — Harden credential-bearing containers and use file-backed secrets
+
+- Status: Accepted
+- Date: 2026-07-18
+- Detailed record: [`docs/adr/local-model-gateway.md`](adr/local-model-gateway.md)
+
+### Context
+
+The database-backed gateway previously relied on a generic non-root image that could not reliably complete Prisma initialization. Compose also injected administrator, provider, salt, and database credentials as plaintext environment values and did not fail closed if a credential-bearing service lost runtime hardening or gained a writable path.
+
+### Decision
+
+Build the gateway from LiteLLM's signed database digest, make the derivative explicitly non-root at `65534:65534`, and generate Prisma assets at build time from a relocated offline cache. Run PostgreSQL directly as `70:70`. For both credential-bearing services, drop all capabilities, enable `no-new-privileges`, make the root filesystem read-only, and allow only reviewed tmpfs paths plus PostgreSQL's data volume.
+
+Mount credentials as Compose secret files sourced from an OS-protected, gitignored location. Permit the Node client to read the same master-key file or a single-process OS-secret-manager injection, but reject ambiguous dual input. Store spend metadata without prompt/response content, delete records older than seven days, and run cleanup daily. Disable the Admin UI. Extend the container policy to discover credential-bearing services and fail on missing reviewed identities, secret mounts, controls, or exact writable-path allowlists.
+
+### Consequences
+
+- The upstream Cosign signature covers the exact database base; the local derivative remains bound by its Dockerfile, package hash, exact content ID, SBOM, and vulnerability scan rather than a vendor signature claim.
+- Local Compose secret source files are not an encrypted Docker store. They must be materialized from an OS secret manager with owner-only access and deleted after the stack and virtual-key cleanup finish.
+- PostgreSQL's reported `gosu` binary is dormant because the service starts directly as `70:70`; changing that startup identity invalidates the reachability exception and fails policy.
+- Provider egress and provider-side retention remain residual risks even though gateway spend logs exclude prompt content and expire metadata.
