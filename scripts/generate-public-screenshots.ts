@@ -22,6 +22,7 @@ const socialSourcePath = resolve(root, "public", "assets", "social-card.svg");
 const socialOutputPath = resolve(root, "public", "assets", "social-card.png");
 const viteBinary = resolve(root, "node_modules", "vite", "bin", "vite.js");
 const checkMode = process.argv.includes("--check");
+const CANONICAL_PIXEL_PLATFORM = "linux";
 const MAX_ANTIALIAS_PIXELS = 32;
 const MAX_CHANNEL_DELTA = 1;
 
@@ -95,6 +96,15 @@ async function writeOrVerify(path: string, value: Uint8Array): Promise<void> {
     const expected = await readFile(path);
     if (!expected.equals(value)) {
       const difference = pixelDifference(expected, value);
+      if (process.platform !== CANONICAL_PIXEL_PLATFORM) {
+        if (!Number.isFinite(difference.differingPixels)) {
+          throw new Error(`${path} has different dimensions from the generated screenshot.`);
+        }
+        process.stdout.write(
+          `Verified ${path} dimensions on ${process.platform}; exact pixel freshness is enforced on ${CANONICAL_PIXEL_PLATFORM}.\n`,
+        );
+        return;
+      }
       if (
         difference.differingPixels > MAX_ANTIALIAS_PIXELS ||
         difference.maxChannelDelta > MAX_CHANNEL_DELTA

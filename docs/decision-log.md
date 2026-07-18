@@ -548,3 +548,22 @@ Derive the local LiteLLM runtime from signed `v1.94.0-dev.3`, which supplies Pyt
 - The LiteLLM runtime is a local derivative, so the vendor signature applies to its exact upstream base, not to the derived content ID. The Dockerfile, wheel hash, package floors, non-root user, scan, and SBOM bind the derivative.
 - A pre-release LiteLLM base is a temporary compatibility risk. Replace it with the next signed stable non-root digest that meets every package floor.
 - PostgreSQL exceptions fail if the digest/path/CVE stops matching and expire on 2026-08-15; a maintained rebuild is required if the official image is not fixed and reachability can no longer justify the exception.
+
+## ADR-026 — Use Linux as the canonical public-screenshot pixel platform
+
+- Status: Accepted
+- Date: 2026-07-18
+
+### Context
+
+The public site intentionally uses operating-system UI fonts. Chromium therefore rasterizes text differently on Windows and Linux even when the DOM, CSS, browser version, viewport, and content are identical. Comparing Windows-generated public screenshots against an Ubuntu release runner produced hundreds of thousands of false pixel differences.
+
+### Decision
+
+Generate and enforce exact public-screenshot pixels on Linux, the hosted release-gate platform. On other operating systems, continue to build the production site, visit every capture route, wait for its expected heading and fonts, produce each screenshot, and require its dimensions to match the checked-in asset. Keep cross-browser behavioral, accessibility, responsive, and controlled visual-artifact tests platform-independent.
+
+### Consequences
+
+- Hosted Quality rejects stale public screenshots with the existing strict pixel thresholds.
+- Windows development detects broken routes, missing headings, capture failures, and dimension changes without misclassifying operating-system font rasterization as application drift.
+- Public screenshot regeneration for a release must run on Linux before the audited commit is accepted.
