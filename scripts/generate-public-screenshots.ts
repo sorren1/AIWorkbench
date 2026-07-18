@@ -26,6 +26,7 @@ const checkMode = process.argv.includes("--check");
 const CANONICAL_PIXEL_PLATFORM = "linux";
 const MAX_ANTIALIAS_PIXELS = 32;
 const MAX_CHANNEL_DELTA = 1;
+const screenshotMismatches: string[] = [];
 
 const captures: readonly Capture[] = [
   { filename: "case-study-hero.png", path: "/", heading: "AI Delivery Workbench" },
@@ -113,11 +114,13 @@ async function writeOrVerify(path: string, value: Uint8Array): Promise<void> {
         await mkdir(mismatchDirectory, { recursive: true });
         const mismatchPath = resolve(mismatchDirectory, basename(path));
         await writeFile(mismatchPath, value);
-        throw new Error(
+        const message =
           `${path} is stale: committed ${digest(expected)}, generated ${digest(value)}, ` +
-            `${difference.differingPixels} pixels differ (maximum channel delta ${difference.maxChannelDelta}). ` +
-            `Generated mismatch retained at ${mismatchPath}. Run npm run screenshots:generate.`,
-        );
+          `${difference.differingPixels} pixels differ (maximum channel delta ${difference.maxChannelDelta}). ` +
+          `Generated mismatch retained at ${mismatchPath}.`;
+        screenshotMismatches.push(message);
+        process.stderr.write(`${message}\n`);
+        return;
       }
       process.stdout.write(
         `Verified ${path} (${difference.differingPixels} antialias pixels, maximum channel delta ${difference.maxChannelDelta})\n`,
@@ -211,6 +214,11 @@ try {
   const socialBytes = await page.screenshot({ animations: "disabled" });
   await writeOrVerify(socialOutputPath, socialBytes);
   await page.close();
+  if (screenshotMismatches.length > 0) {
+    throw new Error(
+      `${screenshotMismatches.length} canonical screenshots are stale. Run npm run screenshots:generate on ${CANONICAL_PIXEL_PLATFORM}.`,
+    );
+  }
 } catch (error) {
   const detail = previewError.trim();
   if (detail) process.stderr.write(`${detail}\n`);
