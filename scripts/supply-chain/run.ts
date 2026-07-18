@@ -520,7 +520,6 @@ async function scanRuntimeImage(input: {
 }): Promise<RuntimeImageScan> {
   const mounts = [
     "/var/run/docker.sock:/var/run/docker.sock",
-    `${reportsRoot}:/reports`,
     "ai-delivery-workbench-trivy-cache:/root/.cache/trivy",
   ];
   const vulnerabilityReport = `${input.artifactPrefix}.sarif`;
@@ -540,13 +539,12 @@ async function scanRuntimeImage(input: {
       input.tooling.policy.containerFailureSeverities.join(","),
       "--format",
       "sarif",
-      "--output",
-      `/reports/${vulnerabilityReport}`,
       input.imageId,
     ],
     mounts,
   );
   if (vulnerability.exitCode !== 0) throw new Error("Trivy container vulnerability scan failed.");
+  await writeFile(resolve(reportsRoot, vulnerabilityReport), vulnerability.stdout);
   const sbom = await dockerRun(
     input.tooling.trivy.image,
     [
@@ -558,13 +556,12 @@ async function scanRuntimeImage(input: {
       "docker",
       "--format",
       "cyclonedx",
-      "--output",
-      `/reports/${sbomArtifact}`,
       input.imageId,
     ],
     mounts,
   );
   if (sbom.exitCode !== 0) throw new Error("Trivy container SBOM generation failed.");
+  await writeFile(resolve(reportsRoot, sbomArtifact), sbom.stdout);
   const bom = bomSchema.parse(await readJson(resolve(reportsRoot, sbomArtifact)));
   const reportPath = resolve(reportsRoot, vulnerabilityReport);
   await sanitizeSarif(reportPath);
