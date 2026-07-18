@@ -2,6 +2,7 @@ import {
   Fragment,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type Dispatch,
@@ -149,9 +150,20 @@ export function Sidebar() {
 export type Theme = ThemePreference;
 export function useTheme(): readonly [Theme, Dispatch<SetStateAction<Theme>>] {
   const [theme, setTheme] = useState<Theme>(() => readPreferences(localStorage).theme);
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme);
+  useLayoutEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute("data-theme-switching", "true");
+    root.setAttribute("data-theme", theme);
     writePreferences(localStorage, theme);
+
+    const settledFrame = requestAnimationFrame(() => {
+      root.removeAttribute("data-theme-switching");
+    });
+
+    return () => {
+      cancelAnimationFrame(settledFrame);
+      root.removeAttribute("data-theme-switching");
+    };
   }, [theme]);
   return [theme, setTheme];
 }

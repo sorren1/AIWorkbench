@@ -25,6 +25,14 @@
   --transition-transform: transform var(--dur-fast) var(--ease-standard); /* @kind other */
 }
 
+/* Theme-token swaps must be atomic so intermediate colors never reduce contrast. */
+[data-theme-switching],
+[data-theme-switching] *,
+[data-theme-switching] *::before,
+[data-theme-switching] *::after {
+  transition: none !important;
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur-instant: 0.01ms;

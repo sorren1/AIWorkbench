@@ -581,10 +581,11 @@ The complete hosted release gate runs cold container builds, vulnerability scans
 
 ### Decision
 
-Run Playwright with one worker and a 45-second default test timeout in CI while retaining two workers and the 30-second timeout locally. Before auditing dark-theme contrast, request reduced motion and wait for the final computed dark text color. Keep retries visible and release-blocking; do not suppress Axe rules or browser failures.
+Run Playwright with one worker and a 45-second default test timeout in CI while retaining two workers and the 30-second timeout locally. Apply a theme-token change atomically in a layout effect: mark the document as switching, disable transitions for that frame, update the theme, and remove the marker on the next animation frame. Before auditing dark-theme contrast, require the target theme and the removal of that marker. Keep retries visible and release-blocking; do not suppress Axe rules or browser failures.
 
 ### Consequences
 
 - Hosted browser coverage takes longer but avoids contention between heavyweight engines on the release runner.
+- Visitors never see the intermediate low-contrast foreground/background combinations that a gradual custom-property transition can produce.
 - The contrast assertion evaluates the stable UI state and still fails if the final token is below the required ratio.
 - Local parallelism remains fast, and all three maintained browser engines continue to run in both environments.
