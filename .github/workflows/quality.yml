@@ -14,8 +14,41 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  quality:
-    name: Build, test, inspect
+  core:
+    name: Core release controls
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+      - name: Use supported Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Clean install
+        run: npm ci
+      - name: Install canonical screenshot engine
+        run: npx playwright install --with-deps chromium
+      - name: Run deterministic, security, and supply-chain gates
+        run: npm run check
+      - name: Retain core audit artifacts
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: quality-core-evidence-${{ github.run_id }}
+          path: |
+            .security-reports/
+            coverage/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14
+
+  browser:
+    name: Browser and performance controls
+    needs: core
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -32,17 +65,17 @@ jobs:
         run: npm ci
       - name: Install maintained browser engines
         run: npx playwright install --with-deps chromium firefox webkit
-      - name: Run the complete release gate
-        run: npm run check:all
-      - name: Retain local-only audit and visual artifacts
+      - name: Run cross-browser release gate
+        run: npm run test:e2e
+      - name: Run Lighthouse release gate
+        run: npm run performance:audit
+      - name: Retain browser and performance artifacts
         if: ${{ always() }}
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: quality-evidence-${{ github.run_id }}
+          name: quality-browser-evidence-${{ github.run_id }}
           path: |
             .lighthouseci/
-            .security-reports/
-            coverage/
             playwright-report/
             test-results/
           include-hidden-files: true
