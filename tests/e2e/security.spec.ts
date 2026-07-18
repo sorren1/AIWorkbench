@@ -29,14 +29,27 @@ test("public and demo routes make no external runtime requests", async ({ page }
   expect(external).toEqual([]);
 });
 
-test("public supply-chain claims distinguish executed and unvalidated controls", async ({
+test("public supply-chain claims never reuse evidence from an older code state", async ({
   page,
 }) => {
   await page.goto("/#security-evidence");
   const section = page.getByRole("region", { name: "Security and supply-chain evidence" });
   await expect(section).toBeVisible();
+  const summaryResponse = await page.request.get("/security/release-summary.json");
+  const summaryContentType = summaryResponse.headers()["content-type"] ?? "";
+  if (!summaryContentType.includes("application/json")) {
+    await expect(
+      section.getByText("No successful supply-chain validation summary is checked in"),
+    ).toBeVisible();
+    await expect(section.getByText("Tracked files and Git history secret scan")).toHaveCount(0);
+    return;
+  }
+
+  expect(summaryResponse.ok()).toBe(true);
   await expect(section.getByText("Tracked files and Git history secret scan")).toBeVisible();
-  await expect(section.getByText("Configured · not validated")).toBeVisible();
+  await expect(section.getByText("Audited commit")).toBeVisible();
+  await expect(section.getByText("Hosted run")).toBeVisible();
+  await expect(section.getByText("Configured · not validated")).toHaveCount(0);
   await expect(
     section.getByText("Active suppressions").locator("..").getByText("15"),
   ).toBeVisible();

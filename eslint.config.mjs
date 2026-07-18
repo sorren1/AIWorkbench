@@ -5,7 +5,16 @@ import tseslint from "typescript-eslint";
 
 export default tseslint.config(
   {
-    ignores: [".security-reports/**", "dist/**", "node_modules/**", "private/**"],
+    ignores: [
+      ".lighthouseci/**",
+      ".security-reports/**",
+      "coverage/**",
+      "dist/**",
+      "node_modules/**",
+      "playwright-report/**",
+      "private/**",
+      "test-results/**",
+    ],
   },
   eslint.configs.recommended,
   ...tseslint.configs.strictTypeChecked,
