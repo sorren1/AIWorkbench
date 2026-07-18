@@ -1,5 +1,11 @@
 # Decision log
 
+## 2026-07-18 — Audit the public PR head, not GitHub's ephemeral merge commit
+
+- **Decision:** Quality-workflow jobs explicitly check out the pull request's head SHA. Push and manual runs continue to check out `github.sha`; CodeQL and dependency review retain their native pull-request context.
+- **Why:** GitHub creates an ephemeral test-merge commit for `pull_request` workflows using a GitHub-controlled identity. That commit cannot enter the public graph, but including it in `git log --all` makes the public-history identity gate fail even when every branch and tag is sanitized.
+- **Boundary:** The active ruleset still requires the pull request to be up to date with `main`, uses linear squash merges, and requires quality, CodeQL, dependency review, and code-scanning results. The public-history gate remains unchanged and still rejects any unexpected identity in the actual PR head or repository refs.
+
 ## 2026-07-18 — Keep performance policy valid across the evidence-only child
 
 - **Decision:** Record deterministic bundle measurements on the audited source commit. On its direct evidence child, continue enforcing every gzip, script-count, and external-request budget, but permit the expected HTML measurement difference only after the release-evidence validator proves the commit changes only `public/security/release-summary.json` and binds to its direct parent.
