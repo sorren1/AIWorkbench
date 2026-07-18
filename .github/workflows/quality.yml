@@ -108,6 +108,8 @@ jobs:
         run: npm ci
       - name: Verify pinned browser engines
         run: npx playwright install --list
+      - name: Build audited production site
+        run: npm run build
       - name: Run Lighthouse release gate
         run: npm run performance:audit
       - name: Retain performance artifacts
