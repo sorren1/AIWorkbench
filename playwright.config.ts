@@ -28,7 +28,11 @@ export default defineConfig({
     },
     {
       name: "firefox",
-      use: { ...devices["Desktop Firefox"], viewport: { width: 1440, height: 1000 } },
+      use: {
+        ...devices["Desktop Firefox"],
+        viewport: { width: 1440, height: 1000 },
+        trace: "off",
+      },
       testIgnore: [/deployment\.spec\.ts/, /visual\.spec\.ts/],
     },
     {
