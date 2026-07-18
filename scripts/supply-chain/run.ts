@@ -1,5 +1,4 @@
-import { createHash } from "node:crypto";
-import { copyFile, lstat, mkdir, mkdtemp, open, readFile, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, relative, resolve } from "node:path";
 import { spawn } from "node:child_process";
@@ -25,6 +24,11 @@ import {
 } from "./containerPolicy";
 import { createSarif, sanitizeSarif, sarifFindings, sha256File, writeJson } from "./reporting";
 import { versionAtLeast } from "./versionPolicy";
+import {
+  lintableTrackedSourcePaths,
+  trackedSourceDigest,
+  trackedSourcePaths,
+} from "../trackedSourceInventory";
 
 type CommandResult = {
   readonly exitCode: number;
@@ -124,51 +128,6 @@ function isSuppressed(
   return matching.length > 0;
 }
 
-async function trackedPaths(): Promise<string[]> {
-  const result = await command("git", [
-    "ls-files",
-    "--cached",
-    "--others",
-    "--exclude-standard",
-    "-z",
-  ]);
-  if (result.exitCode !== 0) throw new Error("Unable to enumerate supply-chain scan inputs.");
-  const candidates = result.stdout
-    .split("\0")
-    .filter((path) => path.length > 0)
-    .sort();
-  const present: string[] = [];
-  for (const path of candidates) {
-    const metadata = await lstat(resolve(root, path)).catch((error: unknown) => {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
-      throw error;
-    });
-    if (metadata) present.push(path);
-  }
-  return present;
-}
-
-async function treeDigest(paths: readonly string[]): Promise<string> {
-  const hash = createHash("sha256");
-  for (const path of paths) {
-    const absolute = resolve(root, path);
-    const handle = await open(absolute, "r");
-    try {
-      const stat = await handle.stat();
-      if (!stat.isFile()) {
-        throw new Error(`Supply-chain input must be a regular file: ${path}`);
-      }
-      hash.update(path.replaceAll("\\", "/"));
-      hash.update("\0");
-      hash.update(await handle.readFile());
-      hash.update("\0");
-    } finally {
-      await handle.close();
-    }
-  }
-  return hash.digest("hex");
-}
-
 async function copyScanInput(paths: readonly string[]): Promise<string> {
   const destination = await mkdtemp(resolve(tmpdir(), "adw-supply-chain-"));
   for (const path of paths) {
@@ -257,14 +216,17 @@ const eslintOutputSchema = z.array(
 );
 
 async function runEslint(
+  paths: readonly string[],
   suppressions: readonly SupplyChainSuppression[],
   matchedSuppressionIds: Set<string>,
 ): Promise<SarifFinding[]> {
   const jsonPath = resolve(reportsRoot, "eslint.json");
   const eslint = resolve(root, "node_modules/eslint/bin/eslint.js");
+  const lintPaths = lintableTrackedSourcePaths(paths);
+  if (lintPaths.length === 0) throw new Error("Tracked-source inventory has no lintable files.");
   const result = await command(process.execPath, [
     eslint,
-    ".",
+    ...lintPaths,
     "--format",
     "json",
     "--output-file",
@@ -867,10 +829,19 @@ async function main(): Promise<void> {
   }
   if (expired > 0) throw new Error("One or more supply-chain suppressions are expired or invalid.");
 
-  const paths = await trackedPaths();
-  const sourceTreeDigest = await treeDigest(
-    paths.filter((path) => path !== "public/security/release-summary.json"),
+  const paths = await trackedSourcePaths(root);
+  const sourceTreeDigest = await trackedSourceDigest(
+    root,
+    paths,
+    new Set(["public/security/release-summary.json"]),
   );
+  await writeJson(resolve(reportsRoot, "tracked-source-inventory.json"), {
+    schemaVersion: 1,
+    sourceTreeSha256: sourceTreeDigest,
+    excludedFromSourceTree: ["public/security/release-summary.json"],
+    fileCount: paths.length,
+    files: paths,
+  });
   const scanInput = await copyScanInput(paths);
   const composeSecrets = await createComposeSyntheticSecrets();
   try {
@@ -892,7 +863,11 @@ async function main(): Promise<void> {
       suppressionDocument.entries,
       matchedSuppressionIds,
     );
-    const eslintFindings = await runEslint(suppressionDocument.entries, matchedSuppressionIds);
+    const eslintFindings = await runEslint(
+      paths,
+      suppressionDocument.entries,
+      matchedSuppressionIds,
+    );
     const containerPolicyFindings = await runContainerPolicy(
       paths,
       tooling,
@@ -1038,7 +1013,7 @@ async function main(): Promise<void> {
         status: "PASSED",
         scanner: "Gitleaks",
         version: tooling.gitleaks.version,
-        target: `${paths.length} source files plus reachable Git history`,
+        target: `${paths.length} explicitly tracked files plus reachable Git history`,
         findingCount: 0,
         detail:
           "Redacted SARIF reports were generated for history and the tracked worktree snapshot.",
@@ -1156,6 +1131,7 @@ async function main(): Promise<void> {
       { kind: "PROVENANCE", name: "litellm-signature.json" },
       { kind: "INVENTORY", name: "license-inventory.json" },
       { kind: "INVENTORY", name: "scanner-metadata.json" },
+      { kind: "INVENTORY", name: "tracked-source-inventory.json" },
       { kind: "INVENTORY", name: "suppression-report.json" },
       { kind: "SUMMARY", name: "npm-audit.json" },
     ];

@@ -11,7 +11,7 @@
     "build": "vite build",
     "preview": "vite preview",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint . --max-warnings 0",
+    "lint": "tsx scripts/run-eslint.ts --max-warnings 0",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "registry:generate": "tsx scripts/generate-registry.ts",
@@ -60,8 +60,9 @@
     "test:a11y": "playwright test tests/e2e/accessibility.spec.ts",
     "test:deployment": "playwright test tests/e2e/deployment.spec.ts --project=deployment",
     "test:visual": "playwright test --project=visual",
+    "test:supply-chain:workspace-reuse": "tsx scripts/check-supply-chain-workspace-reuse.ts",
     "check": "npm run format:check && npm run lint && npm run typecheck && npm run registry:check && npm run mcp:evidence:check && npm run sandbox:evidence:validate && npm run trace:check && npm run model-gateway:check && npm run model-gateway:evidence:validate && npm run test:coverage && npm run build && tsx scripts/generate-public-screenshots.ts --check && npm run links:check && npm run performance:budgets && npm run security:check && npm run security:supply-chain",
-    "check:all": "npm run check && npm run test:e2e && npm run performance:audit"
+    "check:all": "npm run check && npm run test:e2e && npm run performance:audit && npm run test:supply-chain:workspace-reuse"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "1.29.0",

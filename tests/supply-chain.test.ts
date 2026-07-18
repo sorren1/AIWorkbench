@@ -17,6 +17,11 @@ import {
   analyzeSandboxDockerfile,
 } from "../scripts/supply-chain/containerPolicy";
 import { versionAtLeast } from "../scripts/supply-chain/versionPolicy";
+import {
+  lintableTrackedSourcePaths,
+  trackedSourceDigest,
+  trackedSourcePaths,
+} from "../scripts/trackedSourceInventory";
 import { readSupplyChainSummary, renderSupplyChainEvidence } from "../src/site/supplyChainEvidence";
 
 const root = resolve(import.meta.dirname, "..");
@@ -26,6 +31,25 @@ async function json(path: string): Promise<unknown> {
 }
 
 describe("supply-chain policy", () => {
+  it("uses a deterministic tracked-source inventory instead of generated workspace artifacts", async () => {
+    const paths = await trackedSourcePaths(root);
+    const lintPaths = lintableTrackedSourcePaths(paths);
+    expect(paths).toContain("package.json");
+    expect(paths).toContain("scripts/trackedSourceInventory.ts");
+    expect(paths.every((path) => !path.includes("\\"))).toBe(true);
+    expect(
+      paths.every(
+        (path) =>
+          !["coverage/", "dist/", ".lighthouseci/", "playwright-report/", "test-results/"].some(
+            (generatedRoot) => path.startsWith(generatedRoot),
+          ),
+      ),
+    ).toBe(true);
+    expect(lintPaths.length).toBeGreaterThan(0);
+    expect(lintPaths.every((path) => /\.(?:[cm]?[jt]s|[jt]sx)$/u.test(path))).toBe(true);
+    await expect(trackedSourceDigest(root, paths)).resolves.toMatch(/^[a-f0-9]{64}$/u);
+  });
+
   it("keeps scanner, suppression, and license policy documents versioned and valid", async () => {
     const tooling = toolingSchema.parse(await json("security/tooling.json"));
     const suppressions = suppressionSchema.parse(await json("security/suppressions.json"));

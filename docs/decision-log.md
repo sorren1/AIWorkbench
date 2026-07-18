@@ -636,3 +636,26 @@ Mount credentials as Compose secret files sourced from an OS-protected, gitignor
 - Local Compose secret source files are not an encrypted Docker store. They must be materialized from an OS secret manager with owner-only access and deleted after the stack and virtual-key cleanup finish.
 - PostgreSQL's reported `gosu` binary is dormant because the service starts directly as `70:70`; changing that startup identity invalidates the reachability exception and fails policy.
 - Provider egress and provider-side retention remain residual risks even though gateway spend logs exclude prompt content and expire metadata.
+
+## ADR-029 — Bind lint and worktree security scans to the Git index
+
+- Status: Accepted
+- Date: 2026-07-18
+- Detailed records: [`docs/quality-system.md`](quality-system.md) and [`docs/release-evidence.md`](release-evidence.md)
+
+### Context
+
+ESLint and several security checks traversed the working directory or included every nonignored untracked file. Browser, coverage, Lighthouse, and scanner runs therefore could change later scan inputs even though those generated artifacts were not source. A release gate must produce the same security decision in a clean checkout and a reused workspace.
+
+### Decision
+
+Use one shared, sorted `git ls-files --cached` regular-file inventory for lint, repository credential checks, reachable-provenance inspection, worktree Gitleaks input, language coverage, and source-tree hashing. Record the exact paths, count, exclusions, and digest in restricted supply-chain evidence. Require new source to enter the Git index before it can pass release checks.
+
+Add a reused-workspace regression to `check:all`: preserve the supply-chain result from `check`, run the full browser and Lighthouse stages, run a focused Playwright security project, rerun `security:supply-chain`, and require the stable source, controls, artifact inventory, suppressions, and runtime-image result to be identical.
+
+### Consequences
+
+- Ignored and untracked generated artifacts cannot create lint findings, leak into worktree secret reports, alter the source digest, or trigger unsupported-language policy.
+- An untracked source file is intentionally outside release scope until it is staged; contributors must add intended files before the final gates.
+- Git-history scanning remains independent and still covers every reachable ref.
+- `check:all` performs one additional focused Chromium run and supply-chain pass, increasing local release time in exchange for regression evidence from a contaminated workspace.

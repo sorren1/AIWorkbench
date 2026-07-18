@@ -2,6 +2,8 @@ import { spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
+import { trackedSourcePaths } from "./trackedSourceInventory";
+
 const root = resolve(import.meta.dirname, "..");
 const intendedEmail = "89358652+sorren1@users.noreply.github.com";
 
@@ -115,9 +117,7 @@ const provenancePatterns = [
   /resolves to commit\s*`([a-f0-9]{40})/gimu,
 ] as const;
 const provenanceReferences = new Map<string, Set<string>>();
-const trackedPaths = git(["ls-files", "-z", "--cached", "--others", "--exclude-standard"])
-  .split("\0")
-  .filter(Boolean);
+const trackedPaths = await trackedSourcePaths(root);
 for (const relativePath of trackedPaths) {
   const contents = await readFile(resolve(root, relativePath)).catch((error: unknown) => {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
