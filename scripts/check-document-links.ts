@@ -20,9 +20,23 @@ function repositoryPath(path: string): string {
   return relative(root, path).split(sep).join("/");
 }
 
+function withoutHtmlTags(text: string): string {
+  let result = "";
+  let insideTag = false;
+  for (const character of text) {
+    if (character === "<") {
+      insideTag = true;
+    } else if (character === ">") {
+      insideTag = false;
+    } else if (!insideTag) {
+      result += character;
+    }
+  }
+  return result;
+}
+
 function githubSlug(text: string): string {
-  return text
-    .replace(/<[^>]*>/g, "")
+  return withoutHtmlTags(text)
     .replace(/\[([^\]]+)]\([^)]*\)/g, "$1")
     .replace(/[`*_~]/g, "")
     .trim()
@@ -108,18 +122,22 @@ for (const sourceRelative of markdownPaths) {
       continue;
     }
     if (!target) continue;
-    const metadata = await stat(target.path).catch(() => null);
-    if (!metadata) {
-      findings.push(`${sourceRelative}: missing ${repositoryPath(target.path)}`);
-      continue;
-    }
-    if (target.fragment && metadata.isFile() && extname(target.path).toLowerCase() === ".md") {
-      const targetMarkdown = await readFile(target.path, "utf8");
+    if (target.fragment && extname(target.path).toLowerCase() === ".md") {
+      const targetMarkdown = await readFile(target.path, "utf8").catch(() => null);
+      if (targetMarkdown === null) {
+        findings.push(`${sourceRelative}: missing ${repositoryPath(target.path)}`);
+        continue;
+      }
       if (!headingSlugs(targetMarkdown).has(githubSlug(target.fragment))) {
         findings.push(
           `${sourceRelative}: missing fragment #${target.fragment} in ${repositoryPath(target.path)}`,
         );
       }
+      continue;
+    }
+    const metadata = await stat(target.path).catch(() => null);
+    if (!metadata) {
+      findings.push(`${sourceRelative}: missing ${repositoryPath(target.path)}`);
     }
   }
 }

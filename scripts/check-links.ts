@@ -41,13 +41,13 @@ for (const htmlPath of (await files(dist)).filter((path) => extname(path) === ".
     }
     const target = localTarget(htmlPath, reference);
     if (!target) continue;
-    const metadata = await stat(target.path).catch(() => null);
-    if (!metadata?.isFile()) {
+    const targetContents = await readFile(target.path).catch(() => null);
+    if (!targetContents) {
       findings.push(`${relativePath(htmlPath)}: missing ${relativePath(target.path)}`);
       continue;
     }
     if (target.fragment && extname(target.path) === ".html") {
-      const targetHtml = await readFile(target.path, "utf8");
+      const targetHtml = targetContents.toString("utf8");
       const escaped = target.fragment.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       if (!new RegExp(`(?:id|name)="${escaped}"`).test(targetHtml)) {
         findings.push(

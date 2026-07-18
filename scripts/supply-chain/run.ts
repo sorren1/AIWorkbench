@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { copyFile, lstat, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import { copyFile, lstat, mkdir, mkdtemp, open, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, relative, resolve } from "node:path";
 import { spawn } from "node:child_process";
@@ -126,14 +126,19 @@ async function treeDigest(paths: readonly string[]): Promise<string> {
   const hash = createHash("sha256");
   for (const path of paths) {
     const absolute = resolve(root, path);
-    const stat = await lstat(absolute);
-    if (!stat.isFile() || stat.isSymbolicLink()) {
-      throw new Error(`Supply-chain input must be a regular file: ${path}`);
+    const handle = await open(absolute, "r");
+    try {
+      const stat = await handle.stat();
+      if (!stat.isFile()) {
+        throw new Error(`Supply-chain input must be a regular file: ${path}`);
+      }
+      hash.update(path.replaceAll("\\", "/"));
+      hash.update("\0");
+      hash.update(await handle.readFile());
+      hash.update("\0");
+    } finally {
+      await handle.close();
     }
-    hash.update(path.replaceAll("\\", "/"));
-    hash.update("\0");
-    hash.update(await readFile(absolute));
-    hash.update("\0");
   }
   return hash.digest("hex");
 }

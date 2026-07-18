@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { readFile, readdir, realpath, stat, writeFile } from "node:fs/promises";
+import { open, readFile, readdir, realpath, writeFile } from "node:fs/promises";
 import { extname, isAbsolute, relative, resolve, sep } from "node:path";
 import { promisify } from "node:util";
 
@@ -75,11 +75,16 @@ async function boundedPath(
 
 async function readBoundedFile(context: ToyRepositoryContext, path: string): Promise<string> {
   const candidate = await boundedPath(context, path, "read");
-  const details = await stat(candidate);
-  if (!details.isFile() || details.size > MAX_FILE_BYTES) {
-    throw new Error("The requested file is unavailable or exceeds the 64 KiB fixture limit.");
+  const handle = await open(candidate, "r");
+  try {
+    const details = await handle.stat();
+    if (!details.isFile() || details.size > MAX_FILE_BYTES) {
+      throw new Error("The requested file is unavailable or exceeds the 64 KiB fixture limit.");
+    }
+    return await handle.readFile("utf8");
+  } finally {
+    await handle.close();
   }
-  return readFile(candidate, "utf8");
 }
 
 async function listTextFiles(root: string, current = root): Promise<string[]> {

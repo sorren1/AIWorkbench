@@ -1,4 +1,4 @@
-import { access, mkdir, readFile, readdir, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, writeFile } from "node:fs/promises";
 import { basename, resolve } from "node:path";
 
 import { z } from "zod";
@@ -757,12 +757,6 @@ export async function writeEvidencePack(
   const jsonPath = resolve(generatedRoot, jsonName);
   const markdownPath = resolve(generatedRoot, markdownName);
   const tracePath = resolve(generatedRoot, pack.observability.trace.artifact);
-  if (
-    await access(jsonPath)
-      .then(() => true)
-      .catch(() => false)
-  )
-    throw new Error(`Evidence file already exists: ${jsonName}`);
   const traceValidation = validateNormalizedTraceArtifact(JSON.parse(traceArtifactJson));
   if (!traceValidation.valid) {
     throw new Error(`Trace artifact is invalid: ${traceValidation.errors.join("; ")}`);

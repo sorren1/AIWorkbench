@@ -1,5 +1,5 @@
 import { execFile } from "node:child_process";
-import { readFile, stat } from "node:fs/promises";
+import { open } from "node:fs/promises";
 import { extname, resolve } from "node:path";
 import { promisify } from "node:util";
 
@@ -41,27 +41,33 @@ const findings: string[] = [];
 let scannedFileCount = 0;
 for (const relative of tracked) {
   const absolute = resolve(root, relative);
-  const metadata = await stat(absolute).catch((error: unknown) => {
+  const handle = await open(absolute, "r").catch((error: unknown) => {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
     throw error;
   });
-  if (!metadata?.isFile()) continue;
-  scannedFileCount += 1;
-  const normalized = relative.replaceAll("\\", "/");
-  const name = normalized.split("/").at(-1) ?? normalized;
-  if (/^\.env(?:\..+)?$/i.test(name) && !allowedEnvironmentTemplates.has(name)) {
-    findings.push(`${normalized}: tracked environment file`);
-    continue;
-  }
-  if (sensitiveExtensions.has(extname(name).toLocaleLowerCase())) {
-    findings.push(`${normalized}: credential-bearing file extension`);
-    continue;
-  }
-  const contents = await readFile(absolute);
-  if (contents.includes(0)) continue;
-  const text = contents.toString("utf8");
-  for (const rule of rules) {
-    if (rule.pattern.test(text)) findings.push(`${normalized}: ${rule.name}`);
+  if (!handle) continue;
+  try {
+    const metadata = await handle.stat();
+    if (!metadata.isFile()) continue;
+    scannedFileCount += 1;
+    const normalized = relative.replaceAll("\\", "/");
+    const name = normalized.split("/").at(-1) ?? normalized;
+    if (/^\.env(?:\..+)?$/i.test(name) && !allowedEnvironmentTemplates.has(name)) {
+      findings.push(`${normalized}: tracked environment file`);
+      continue;
+    }
+    if (sensitiveExtensions.has(extname(name).toLocaleLowerCase())) {
+      findings.push(`${normalized}: credential-bearing file extension`);
+      continue;
+    }
+    const contents = await handle.readFile();
+    if (contents.includes(0)) continue;
+    const text = contents.toString("utf8");
+    for (const rule of rules) {
+      if (rule.pattern.test(text)) findings.push(`${normalized}: ${rule.name}`);
+    }
+  } finally {
+    await handle.close();
   }
 }
 
