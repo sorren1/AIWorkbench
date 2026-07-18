@@ -55,8 +55,17 @@ test("principal workbench screens have no serious or critical axe violations", a
     await expectNoSeriousViolations(page, screen);
   }
 
+  await page.emulateMedia({ reducedMotion: "reduce" });
   await page.getByRole("button", { name: "Switch to dark" }).click();
-  await page.waitForTimeout(250);
+  await expect(page.getByRole("button", { name: "Switch to light" })).toBeVisible();
+  await expect
+    .poll(() =>
+      page
+        .locator(".wb-nav-item:not(.is-active)")
+        .first()
+        .evaluate((element) => getComputedStyle(element).color),
+    )
+    .toBe("rgb(169, 179, 194)");
   await expectNoSeriousViolations(page, "Settings dark theme");
 });
 

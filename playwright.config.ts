@@ -2,14 +2,16 @@ import { defineConfig, devices } from "@playwright/test";
 
 const port = 4175;
 const deploymentBaseUrl = process.env.DEPLOYMENT_BASE_URL;
+const isCI = Boolean(process.env.CI);
 
 export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: false,
-  forbidOnly: Boolean(process.env.CI),
-  retries: process.env.CI ? 1 : 0,
-  workers: 2,
-  reporter: process.env.CI
+  forbidOnly: isCI,
+  retries: isCI ? 1 : 0,
+  timeout: isCI ? 45_000 : 30_000,
+  workers: isCI ? 1 : 2,
+  reporter: isCI
     ? [["github"], ["html", { open: "never", outputFolder: "playwright-report" }]]
     : [["list"], ["html", { open: "never", outputFolder: "playwright-report" }]],
   outputDir: "test-results",

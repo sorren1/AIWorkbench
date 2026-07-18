@@ -569,3 +569,22 @@ Generate and enforce exact public-screenshot pixels on Linux, the hosted release
 - A strict hosted mismatch retains only the generated PNG in the restricted, short-lived security artifact so the canonical asset can be reviewed and refreshed without disabling the gate.
 - Windows development detects broken routes, missing headings, capture failures, and dimension changes without misclassifying operating-system font rasterization as application drift.
 - Public screenshot regeneration for a release must run on Linux before the audited commit is accepted.
+
+## ADR-027 — Serialize hosted browser release tests after container scans
+
+- Status: Accepted
+- Date: 2026-07-18
+
+### Context
+
+The complete hosted release gate runs cold container builds, vulnerability scans, SBOM generation, three browser engines, and Lighthouse on one bounded runner. Two concurrent browser workers became CPU-starved after the cold container workload, producing navigation and action timeouts that did not reproduce locally. The dark-theme accessibility check could also sample foreground transitions before they reached their final contrast-safe tokens.
+
+### Decision
+
+Run Playwright with one worker and a 45-second default test timeout in CI while retaining two workers and the 30-second timeout locally. Before auditing dark-theme contrast, request reduced motion and wait for the final computed dark text color. Keep retries visible and release-blocking; do not suppress Axe rules or browser failures.
+
+### Consequences
+
+- Hosted browser coverage takes longer but avoids contention between heavyweight engines on the release runner.
+- The contrast assertion evaluates the stable UI state and still fails if the final token is below the required ratio.
+- Local parallelism remains fast, and all three maintained browser engines continue to run in both environments.
