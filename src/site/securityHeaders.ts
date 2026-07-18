@@ -10,7 +10,7 @@ export const CONTENT_SECURITY_POLICY = [
   "media-src 'none'",
   "object-src 'none'",
   "script-src 'self'",
-  "style-src 'self' 'unsafe-inline'",
+  "style-src 'self'",
   "worker-src 'none'",
 ].join("; ");
 

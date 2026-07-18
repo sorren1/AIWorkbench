@@ -43,6 +43,40 @@ const STAGE_SCOPES: Readonly<Record<AuthorizationRequest["stageId"], readonly Sc
 };
 
 const MODE_PRECEDENCE = { ALLOW: 0, NOTIFY: 1, REQUIRE_APPROVAL: 2, DENY: 3 } as const;
+const CANONICAL_URI = /^([a-z][a-z0-9+.-]*):\/\/([a-z0-9](?:[a-z0-9.-]*[a-z0-9])?)(?:\/(.+))?$/u;
+
+function hasControlCharacter(value: string): boolean {
+  for (let index = 0; index < value.length; index += 1) {
+    const codeUnit = value.charCodeAt(index);
+    if (codeUnit <= 0x1f || codeUnit === 0x7f) return true;
+  }
+  return false;
+}
+
+function hasCanonicalSegments(path: string): boolean {
+  const segments = path.split("/");
+  return segments.every((segment) => segment.length > 0 && segment !== "." && segment !== "..");
+}
+
+export function isCanonicalTargetPath(path: string): boolean {
+  if (
+    path.length === 0 ||
+    path !== path.trim() ||
+    path !== path.normalize("NFC") ||
+    hasControlCharacter(path) ||
+    path.includes("\\") ||
+    path.includes("%") ||
+    path.includes("?") ||
+    path.includes("#")
+  ) {
+    return false;
+  }
+
+  const uri = CANONICAL_URI.exec(path);
+  if (uri) return uri[3] === undefined || hasCanonicalSegments(uri[3]);
+  if (path.startsWith("/") || path.includes("://") || path.includes(":")) return false;
+  return hasCanonicalSegments(path);
+}
 
 export function globMatches(value: string, pattern: string): boolean {
   const normalizedValue = value.replaceAll("\\", "/");
@@ -56,9 +90,10 @@ export function globMatches(value: string, pattern: string): boolean {
 }
 
 function allPathsAllowed(paths: readonly string[], patterns: readonly string[]): boolean {
-  if (paths.length === 0) return true;
-  if (patterns.length === 0) return false;
-  return paths.every((path) => patterns.some((pattern) => globMatches(path, pattern)));
+  if (paths.length === 0 || patterns.length === 0) return false;
+  return paths.every(
+    (path) => isCanonicalTargetPath(path) && patterns.some((pattern) => globMatches(path, pattern)),
+  );
 }
 
 function effectiveScopes(
@@ -90,11 +125,7 @@ function matcherMatches(
     !matcher.agentIds.some((pattern) => globMatches(request.agent.id, pattern))
   )
     return false;
-  if (
-    matcher.pathPatterns &&
-    request.targetPaths.length > 0 &&
-    !allPathsAllowed(request.targetPaths, matcher.pathPatterns)
-  )
+  if (matcher.pathPatterns && !allPathsAllowed(request.targetPaths, matcher.pathPatterns))
     return false;
   if (
     matcher.pathBoundary &&
@@ -220,6 +251,22 @@ export function evaluateAuthorization(
   }
 
   const writeBoundaryRequired = request.tool.filesystemBoundary.mode === "BOUNDED_WRITE";
+  if (writeBoundaryRequired && request.targetPaths.length === 0) {
+    return denied(
+      request,
+      "MISSING_TARGET_PATHS",
+      "A bounded write requires at least one canonical target path.",
+      scopes,
+    );
+  }
+  if (writeBoundaryRequired && !request.targetPaths.every(isCanonicalTargetPath)) {
+    return denied(
+      request,
+      "RESOURCE_BOUNDARY_DENY",
+      "A bounded-write target is malformed, noncanonical, absolute, or contains a traversal segment.",
+      scopes,
+    );
+  }
   const insideBoundary =
     !writeBoundaryRequired ||
     (allPathsAllowed(request.targetPaths, request.tool.filesystemBoundary.allowedPaths) &&
@@ -241,7 +288,7 @@ export function evaluateAuthorization(
     return denied(
       request,
       "RESOURCE_BOUNDARY_DENY",
-      "The target path is outside the intersection of the agent, tool, and approved change-target boundaries.",
+      "One or more target paths are outside the intersection of the agent, tool, and approved change-target boundaries.",
       scopes,
       policy,
     );

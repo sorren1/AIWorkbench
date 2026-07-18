@@ -172,7 +172,18 @@ describe("optional E2B sandbox provider contract", () => {
     const envExample = await readFile(resolve(projectRoot, ".env.example"), "utf8");
     const declarations = envExample.trimEnd().split("\n");
     expect(declarations).toContain("E2B_API_KEY=");
-    expect(declarations.every((line) => /^[A-Z][A-Z0-9_]*=$/.test(line))).toBe(true);
+    expect(declarations.filter((line) => !line.endsWith("="))).toEqual([
+      "LITELLM_MASTER_KEY_FILE=.workbench/model-gateway/secrets/litellm-master-key",
+      "LITELLM_SALT_KEY_FILE=.workbench/model-gateway/secrets/litellm-salt-key",
+      "LITELLM_DB_PASSWORD_FILE=.workbench/model-gateway/secrets/litellm-db-password",
+      "LITELLM_DATABASE_URL_FILE=.workbench/model-gateway/secrets/litellm-database-url",
+      "MODEL_GATEWAY_UPSTREAM_API_KEY_FILE=.workbench/model-gateway/secrets/model-gateway-upstream-api-key",
+    ]);
+    expect(
+      declarations.every((line) =>
+        /^[A-Z][A-Z0-9_]*=(?:|\.workbench\/model-gateway\/secrets\/[a-z-]+)$/.test(line),
+      ),
+    ).toBe(true);
   });
 
   it("uploads only approved roots, verifies outbound denial, captures output, and kills finally", async () => {

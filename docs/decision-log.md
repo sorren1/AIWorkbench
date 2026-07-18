@@ -552,20 +552,20 @@ State the functional-versus-simulated boundary in the case-study hero, preserve 
 
 ### Context
 
-The original supply-chain gate scanned only the locally built sandbox. The optional Compose stack also executes LiteLLM and PostgreSQL, and their old pins contained fixed HIGH/CRITICAL advisories. LiteLLM signs its images and publishes a non-root variant, but no current stable or pre-release image simultaneously met the required Python, `ddtrace`, and `mcp` floors.
+The original supply-chain gate scanned only the locally built sandbox. The optional Compose stack also executes LiteLLM and PostgreSQL, and their old pins contained fixed HIGH/CRITICAL advisories. LiteLLM signs its images and publishes separate database and non-root variants, but the generic non-root variant does not reliably support the Prisma-backed virtual-key database and no current stable image met every required package floor.
 
 ### Decision
 
-Treat the sandbox, LiteLLM, and PostgreSQL as the exact runtime-image inventory. Build or pull each target, resolve and publish its scanned content ID, run Trivy with zero unsuppressed HIGH/CRITICAL findings, and generate a CycloneDX SBOM for each. Verify LiteLLM's signed non-root upstream digest with Cosign and the public key pinned to immutable upstream commit `0112e53046018d726492c814b3644b7d376029d0`.
+Treat the sandbox, LiteLLM, and PostgreSQL as the exact runtime-image inventory. Build or pull each target, resolve and publish its scanned content ID, run Trivy with zero unsuppressed HIGH/CRITICAL findings, and generate a CycloneDX SBOM for each. Verify LiteLLM's signed database upstream digest with Cosign and the public key pinned to immutable upstream commit `0112e53046018d726492c814b3644b7d376029d0`.
 
-Derive the local LiteLLM runtime from signed `v1.94.0-dev.3`, which supplies Python `3.13.14-r2` and `ddtrace 4.11.0`, and install only `mcp 1.28.1` from its SHA-256-locked wheel without dependency re-resolution. Remove the temporary installer and restore numeric user `65534`. Use PostgreSQL `17.10-alpine3.24`; permit only its exact-digest `/usr/local/bin/gosu` findings under individual, expiring, reachability-documented exceptions.
+Derive the local LiteLLM runtime from signed database image `v1.94.0-dev.3`, which supplies Python `3.13.14` and `ddtrace 4.11.0`, and install only `mcp 1.28.1` from its SHA-256-locked wheel without dependency re-resolution. Relocate the pinned Prisma cache, generate its client during the build, remove the temporary installer, and set numeric user/group `65534:65534`. Use PostgreSQL `17.10-alpine3.24`; permit only its exact-digest `/usr/local/bin/gosu` findings under individual, expiring, reachability-documented exceptions.
 
 ### Consequences
 
 - The complete release gate now requires container registries, PyPI for one hash-locked wheel, Sigstore verification, current Trivy databases, and more CI time.
 - Container scanners never leave root-owned reports: Gitleaks uses the host UID/GID on Linux, while Trivy returns SARIF and CycloneDX through stdout for the non-root release process to write, sanitize, and validate.
 - The LiteLLM runtime is a local derivative, so the vendor signature applies to its exact upstream base, not to the derived content ID. The Dockerfile, wheel hash, package floors, non-root user, scan, and SBOM bind the derivative.
-- A pre-release LiteLLM base is a temporary compatibility risk. Replace it with the next signed stable non-root digest that meets every package floor.
+- A pre-release LiteLLM base is a temporary compatibility risk. Replace it with the next signed stable database-compatible digest that meets every package floor and can be made non-root without runtime mutation.
 - PostgreSQL exceptions fail if the digest/path/CVE stops matching and expire on 2026-08-15; a maintained rebuild is required if the official image is not fixed and reachability can no longer justify the exception.
 
 ## ADR-026 — Use Linux as the canonical public-screenshot pixel platform
@@ -613,3 +613,113 @@ Keep `npm run check:all` as the complete local aggregate, but split the hosted Q
 - The contrast assertion evaluates the stable UI state and still fails if the final token is below the required ratio.
 - Lighthouse's Chromium process remains unsandboxed, but the browser job gains a version- and digest-pinned userspace plus unprivileged container boundary; the surrounding ephemeral runner remains the outer isolation boundary and the audited origin is local and repository-controlled.
 - Local parallelism remains fast, and all three maintained browser engines continue to run in both environments.
+
+## ADR-028 — Harden credential-bearing containers and use file-backed secrets
+
+- Status: Accepted
+- Date: 2026-07-18
+- Detailed record: [`docs/adr/local-model-gateway.md`](adr/local-model-gateway.md)
+
+### Context
+
+The database-backed gateway previously relied on a generic non-root image that could not reliably complete Prisma initialization. Compose also injected administrator, provider, salt, and database credentials as plaintext environment values and did not fail closed if a credential-bearing service lost runtime hardening or gained a writable path.
+
+### Decision
+
+Build the gateway from LiteLLM's signed database digest, make the derivative explicitly non-root at `65534:65534`, and generate Prisma assets at build time from a relocated offline cache. Run PostgreSQL directly as `70:70`. For both credential-bearing services, drop all capabilities, enable `no-new-privileges`, make the root filesystem read-only, and allow only reviewed tmpfs paths plus PostgreSQL's data volume.
+
+Mount credentials as Compose secret files sourced from an OS-protected, gitignored location. Permit the Node client to read the same master-key file or a single-process OS-secret-manager injection, but reject ambiguous dual input. Store spend metadata without prompt/response content, delete records older than seven days, and run cleanup daily. Disable the Admin UI. Extend the container policy to discover credential-bearing services and fail on missing reviewed identities, secret mounts, controls, or exact writable-path allowlists.
+
+### Consequences
+
+- The upstream Cosign signature covers the exact database base; the local derivative remains bound by its Dockerfile, package hash, exact content ID, SBOM, and vulnerability scan rather than a vendor signature claim.
+- Local Compose secret source files are not an encrypted Docker store. They must be materialized from an OS secret manager with owner-only access and deleted after the stack and virtual-key cleanup finish.
+- PostgreSQL's reported `gosu` binary is dormant because the service starts directly as `70:70`; changing that startup identity invalidates the reachability exception and fails policy.
+- Provider egress and provider-side retention remain residual risks even though gateway spend logs exclude prompt content and expire metadata.
+
+## ADR-029 — Bind lint and worktree security scans to the Git index
+
+- Status: Accepted
+- Date: 2026-07-18
+- Detailed records: [`docs/quality-system.md`](quality-system.md) and [`docs/release-evidence.md`](release-evidence.md)
+
+### Context
+
+ESLint and several security checks traversed the working directory or included every nonignored untracked file. Browser, coverage, Lighthouse, and scanner runs therefore could change later scan inputs even though those generated artifacts were not source. A release gate must produce the same security decision in a clean checkout and a reused workspace.
+
+### Decision
+
+Use one shared, sorted `git ls-files --cached` regular-file inventory for lint, repository credential checks, reachable-provenance inspection, worktree Gitleaks input, language coverage, and source-tree hashing. Record the exact paths, count, exclusions, and digest in restricted supply-chain evidence. Require new source to enter the Git index before it can pass release checks.
+
+Add a reused-workspace regression to `check:all`: preserve the supply-chain result from `check`, run the full browser and Lighthouse stages, run a focused Playwright security project, rerun `security:supply-chain`, and require the stable source, controls, artifact inventory, suppressions, and runtime-image result to be identical.
+
+### Consequences
+
+- Ignored and untracked generated artifacts cannot create lint findings, leak into worktree secret reports, alter the source digest, or trigger unsupported-language policy.
+- An untracked source file is intentionally outside release scope until it is staged; contributors must add intended files before the final gates.
+- Git-history scanning remains independent and still covers every reachable ref.
+- `check:all` performs one additional focused Chromium run and supply-chain pass, increasing local release time in exchange for regression evidence from a contaminated workspace.
+
+## ADR-030 — Require canonical targets before bounded-write policy matching
+
+- Status: Accepted
+- Date: 2026-07-18
+- Detailed record: [`docs/authorization-and-separation-of-duties.md`](authorization-and-separation-of-duties.md)
+
+### Context
+
+The authorization engine treated an empty target list as satisfying every path allow-list, and a policy matcher with `pathPatterns` skipped its path check when no target was supplied. A `BOUNDED_WRITE` action could therefore advance to approval without naming the resource that the approval was meant to bind.
+
+### Decision
+
+Require every bounded write to contain at least one canonical target before evaluating approval policies. Reject malformed, absolute, encoded, or traversing targets with `RESOURCE_BOUNDARY_DENY`, and reject an absent list with `MISSING_TARGET_PATHS`. Require `pathPatterns` matchers to receive a nonempty list whose every member is canonical and matches an allowed pattern. Apply the same canonical check in the trusted MCP client before invocation.
+
+### Consequences
+
+- An approval request can never be created for a bounded write that omits its resource binding.
+- One invalid member denies the entire target list; valid entries cannot mask an outside or malformed path.
+- The MCP server remains a second real-path and symlink boundary, but invalid requests are stopped before approval or protocol execution.
+- URI targets remain supported only in canonical `scheme://authority/path` form.
+
+## ADR-031 — Route public vulnerability disclosure through GitHub private reporting
+
+- Status: Accepted
+- Date: 2026-07-18
+- Detailed record: [`SECURITY.md`](../SECURITY.md)
+
+### Context
+
+The public site needs an RFC 9116 discovery record without publishing a personal email address. The public GitHub repository provides an enabled private vulnerability-reporting channel and renders the tracked security policy at a stable repository URL.
+
+### Decision
+
+Publish `/.well-known/security.txt` with the deployed site as its canonical URI, GitHub's private advisory form as `Contact`, the GitHub-rendered `SECURITY.md` page as `Policy`, English as the preferred language, and an expiry less than one year in the future. Declare `text/plain; charset=utf-8` explicitly at the Vercel edge and test the observed deployed response.
+
+### Consequences
+
+- Researchers receive a private, structured disclosure channel without exposing personal contact data.
+- The expiry intentionally becomes release-blocking if the contact record is not reviewed before it becomes stale.
+- Changing the production domain, repository owner/name, reporting setting, or policy location requires updating and redeploying this record.
+
+## ADR-032 — Remove production toolbar injection and inline-style CSP exceptions
+
+- Status: Accepted
+- Date: 2026-07-18
+- Detailed record: [`docs/deployment-verification.md`](deployment-verification.md)
+
+### Context
+
+Vercel's Toolbar can inject a provider-hosted script into otherwise static pages, while the demo's React `style` props required `style-src 'unsafe-inline'`. The provider script was not an application dependency, and allowing either exception would weaken a public portfolio site's same-origin policy.
+
+### Decision
+
+Set the Vercel Toolbar to **Off** for both pre-production and production deployments in the `ai-delivery-workbench` project. Keep `script-src 'self'` and do not add `vercel.live`. Move all React presentation into tracked stylesheets, represent dynamic progress with native `<progress>` values, and render trace geometry with SVG attributes. Set `style-src 'self'` with no inline exception and make JSX `style` attributes a lint error.
+
+Hosted verification now sends ordinary requests without `x-vercel-skip-toolbar` as the primary test path and retains a separate explicit skip-header test. Both paths must verify every public HTML route, the final CSP, absence of toolbar markers, absence of inline style elements/attributes, and same-origin runtime requests.
+
+### Consequences
+
+- Vercel Comments and Toolbar UI are intentionally unavailable on public and preview deployments of this project.
+- A new deployment is required before the saved provider setting and tightened repository policy can be observed together; no dashboard redeploy was triggered during this change.
+- Re-enabling the Toolbar is an architecture and security-policy change, not an incidental provider toggle. It would require an explicit review of provider origins, data flow, CSP, and deployment tests.
+- Dynamic layout values remain constrained by typed tone classes, native element attributes, or SVG presentation attributes instead of reopening inline CSS.

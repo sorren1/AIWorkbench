@@ -18,37 +18,40 @@ The audited code commit deliberately contains no `public/security/release-summar
 
 The gitignored `.security-reports/` directory contains:
 
-| Artifact                  | Purpose                                                                          |
-| ------------------------- | -------------------------------------------------------------------------------- |
-| `security-summary.md`     | Human-readable outcome with no source or secret values                           |
-| `release-summary.json`    | Sanitized control/result/source/artifact digest record                           |
-| `scanner-metadata.json`   | Tool versions, immutable scanner images, Docker version, and every target digest |
-| `gitleaks-*.sarif`        | Redacted worktree and history results                                            |
-| `eslint.sarif`            | TypeScript/JavaScript static-analysis results without snippets                   |
-| `container-policy.sarif`  | Compose, Dockerfile, and language-coverage policy results                        |
-| `sandbox-image.sarif`     | Trivy high/critical image vulnerability results                                  |
-| `litellm-image.sarif`     | Trivy high/critical results for the exact patched LiteLLM runtime                |
-| `postgres-image.sarif`    | Trivy high/critical results for the exact PostgreSQL runtime                     |
-| `license-policy.sarif`    | Unknown, denied, or disallowed license results                                   |
-| `npm-production.cdx.json` | Reproducible CycloneDX SBOM for the locked production npm graph                  |
-| `npm-all.cdx.json`        | Reproducible CycloneDX SBOM for runtime and development dependencies             |
-| `sandbox-image.cdx.json`  | CycloneDX SBOM for the exact scanned sandbox image ID                            |
-| `litellm-image.cdx.json`  | CycloneDX SBOM for the exact scanned LiteLLM image ID                            |
-| `postgres-image.cdx.json` | CycloneDX SBOM for the exact scanned PostgreSQL image ID                         |
-| `litellm-signature.json`  | Sanitized Cosign result bound to the upstream LiteLLM digest and pinned key      |
-| `license-inventory.json`  | Component/version/scope/license inventory                                        |
-| `npm-audit.json`          | Machine-readable lockfile vulnerability result                                   |
-| `suppression-report.json` | Active exceptions and unsuppressed count                                         |
+| Artifact                        | Purpose                                                                           |
+| ------------------------------- | --------------------------------------------------------------------------------- |
+| `security-summary.md`           | Human-readable outcome with no source or secret values                            |
+| `release-summary.json`          | Sanitized control/result/source/artifact digest record                            |
+| `scanner-metadata.json`         | Tool versions, immutable scanner images, Docker version, and every target digest  |
+| `tracked-source-inventory.json` | Exact `git ls-files --cached` paths and source-tree digest used by worktree gates |
+| `gitleaks-*.sarif`              | Redacted worktree and history results                                             |
+| `eslint.sarif`                  | TypeScript/JavaScript static-analysis results without snippets                    |
+| `container-policy.sarif`        | Compose, Dockerfile, and language-coverage policy results                         |
+| `sandbox-image.sarif`           | Trivy high/critical image vulnerability results                                   |
+| `litellm-image.sarif`           | Trivy high/critical results for the exact patched LiteLLM runtime                 |
+| `postgres-image.sarif`          | Trivy high/critical results for the exact PostgreSQL runtime                      |
+| `license-policy.sarif`          | Unknown, denied, or disallowed license results                                    |
+| `npm-production.cdx.json`       | Reproducible CycloneDX SBOM for the locked production npm graph                   |
+| `npm-all.cdx.json`              | Reproducible CycloneDX SBOM for runtime and development dependencies              |
+| `sandbox-image.cdx.json`        | CycloneDX SBOM for the exact scanned sandbox image ID                             |
+| `litellm-image.cdx.json`        | CycloneDX SBOM for the exact scanned LiteLLM image ID                             |
+| `postgres-image.cdx.json`       | CycloneDX SBOM for the exact scanned PostgreSQL image ID                          |
+| `litellm-signature.json`        | Sanitized Cosign result bound to the upstream LiteLLM digest and pinned key       |
+| `license-inventory.json`        | Component/version/scope/license inventory                                         |
+| `npm-audit.json`                | Machine-readable lockfile vulnerability result                                    |
+| `suppression-report.json`       | Active exceptions and unsuppressed count                                          |
 
 CI uploads this directory as a 14-day artifact. No detailed generated scan report or SBOM is committed. SARIF source contents, snippets, proposed fixes, and attachments are removed before upload; Gitleaks receives `--redact=100`; public job output prints counts and statuses only.
 
 ## Enforcement policy
 
 - All secret findings fail.
+- Lint, repository credential checks, provenance checks, worktree Gitleaks, language coverage, and source-tree hashing operate on the same explicit tracked-file inventory. Generated or ignored browser, coverage, Lighthouse, build, and scanner artifacts cannot enter that inventory.
 - ESLint and repository container-policy findings fail.
 - npm and container HIGH/CRITICAL findings fail, including findings already present; the enforced count is zero after exact, documented, unexpired suppressions.
 - The sandbox, LiteLLM, and PostgreSQL runtime images are each resolved to an exact local content ID, Trivy-scanned, and assigned a validated CycloneDX SBOM.
-- LiteLLM must meet the configured Python, `ddtrace`, and `mcp` floors, retain numeric non-root user `65534`, and derive from an upstream digest whose Cosign signature verifies with the commit-pinned LiteLLM key.
+- LiteLLM must meet the configured Python, `ddtrace`, and `mcp` floors, use the reviewed database-compatible upstream, retain numeric non-root user/group `65534:65534`, and derive from an upstream digest whose Cosign signature verifies with the commit-pinned LiteLLM key.
+- Every credential-bearing Compose service must use its reviewed explicit non-root identity, dropped capabilities, `no-new-privileges`, read-only root, Docker secret mounts, and exact writable tmpfs/volume allowlist. Plaintext credential environment values and unreviewed writable paths fail the gate.
 - Missing or disallowed license declarations fail.
 - SBOM generation and CycloneDX validation failures fail.
 - A new tracked Python, shell, PowerShell, or additional Dockerfile source fails until an explicit scanner is added.

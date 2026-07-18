@@ -239,24 +239,15 @@ export function GitHubScreen() {
   return (
     <div className="wb-page wb-page-wide">
       <GitHubHead issue={issue} />
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0,1.7fr) minmax(0,1fr)",
-          gap: 16,
-          alignItems: "start",
-        }}
-      >
+      <div className="wb-u-display-grid wb-u-cols-minmax-zero-1-7fr-minmax-zero-1fr wb-u-gap-16px wb-u-items-start">
         {/* Left */}
         <div className="wb-stack">
           <Card>
             <div className="wb-card-body">
-              <div className="wb-between wb-wrap" style={{ gap: 12 }}>
-                <div style={{ minWidth: 0 }}>
-                  <div className="wb-flex" style={{ gap: 10 }}>
-                    <span className="wb-row-key" style={{ fontSize: 14 }}>
-                      Synthetic PR #{base.number}
-                    </span>
+              <div className="wb-between wb-wrap wb-u-gap-12px">
+                <div className="wb-u-min-w-0">
+                  <div className="wb-flex wb-u-gap-10px">
+                    <span className="wb-row-key wb-u-text-14px">Synthetic PR #{base.number}</span>
                     <Badge
                       tone={
                         status.startsWith("Approved")
@@ -272,8 +263,8 @@ export function GitHubScreen() {
                       {status}
                     </Badge>
                   </div>
-                  <div style={{ fontSize: 16, fontWeight: 700, marginTop: 6 }}>{base.title}</div>
-                  <div className="wb-flex wb-wrap wb-mt-8" style={{ gap: 14, fontSize: 12 }}>
+                  <div className="wb-u-text-16px wb-u-weight-700 wb-u-mt-6px">{base.title}</div>
+                  <div className="wb-flex wb-wrap wb-mt-8 wb-u-gap-14px wb-u-text-12px">
                     <span className="wb-mono wb-muted">
                       <Icon name="git-branch" size={12} /> {base.branch}
                     </span>
@@ -294,7 +285,7 @@ export function GitHubScreen() {
                 </div>
               </div>
               <hr className="wb-divider" />
-              <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
+              <div className="wb-flex wb-wrap wb-u-gap-8px">
                 <Btn size="sm" variant="secondary" icon="refresh-cw" onClick={refresh}>
                   Refresh PR status (simulated)
                 </Btn>
@@ -345,9 +336,7 @@ export function GitHubScreen() {
               }
             />
             <div className="wb-card-body">
-              <p className="wb-secondary" style={{ fontSize: 13.5, lineHeight: 1.6 }}>
-                {base.summary}
-              </p>
+              <p className="wb-secondary wb-u-text-13-5px wb-u-leading-1-6">{base.summary}</p>
               <Banner tone="neutral" icon="info">
                 Generated from the issue's spec, plan, and change-targets artifacts. A human edits
                 and owns the final description.
@@ -376,7 +365,7 @@ export function GitHubScreen() {
             />
             <div className="wb-card-body wb-card-body--tight">
               {base.unexpected === 0 && (
-                <div style={{ padding: "12px 16px" }}>
+                <div className="wb-u-p-12px-16px">
                   <Banner tone="neutral" icon="shield">
                     The approved change-targets artifact is the path allow-list. Every changed file
                     is compared with it; an outside path remains visible and blocks approval until a
@@ -385,67 +374,39 @@ export function GitHubScreen() {
                 </div>
               )}
               {base.unexpected > 0 && (
-                <div style={{ padding: "12px 16px" }}>
+                <div className="wb-u-p-12px-16px">
                   <Banner tone="warn" title="Unexpected change detected">
                     A file outside the change-targets allow-list is present. Confirm it belongs
                     before approving — this is how scope creep stays visible.
                   </Banner>
                 </div>
               )}
-              {Object.entries(groups).map(([cat, files], gi) => (
-                <div key={cat}>
-                  <div
-                    className="wb-flex"
-                    style={{
-                      gap: 8,
-                      padding: "9px 16px",
-                      background: "var(--bg-surface-2)",
-                      borderTop: gi ? "1px solid var(--border-subtle)" : "none",
-                      borderBottom: "1px solid var(--border-subtle)",
-                    }}
-                  >
+              {Object.entries(groups).map(([cat, files]) => (
+                <div key={cat} className="wb-file-group">
+                  <div className="wb-flex wb-file-group-heading">
                     <Icon name={CAT_ICON[cat] ?? "file-code"} size={14} className="wb-muted" />
                     <span className="wb-text-sm wb-strong">{cat}</span>
-                    <span className="wb-muted" style={{ fontSize: 11 }}>
-                      {files.length}
-                    </span>
+                    <span className="wb-muted wb-u-text-11px">{files.length}</span>
                   </div>
                   {files.map((f) => (
                     <div
                       key={f.path}
-                      className="wb-flex"
-                      style={{
-                        gap: 10,
-                        padding: "9px 16px",
-                        borderBottom: "1px solid var(--border-subtle)",
-                      }}
+                      className="wb-flex wb-u-gap-10px wb-u-p-9px-16px wb-u-border-bottom-1px-solid-border-subtle"
                     >
                       <Icon
                         name={f.status === "unexpected" ? "alert-triangle" : "file-code"}
                         size={14}
-                        style={{
-                          color: f.status === "unexpected" ? "var(--warn)" : "var(--text-tertiary)",
-                          flex: "none",
-                        }}
+                        className={
+                          f.status === "unexpected"
+                            ? "wb-tone--warn wb-u-flex-none"
+                            : "wb-tone--tertiary wb-u-flex-none"
+                        }
                       />
-                      <span
-                        className="wb-mono"
-                        style={{
-                          fontSize: 11.5,
-                          flex: 1,
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
+                      <span className="wb-mono wb-u-text-11-5px wb-u-flex-1 wb-u-overflow-hidden wb-u-text-overflow-ellipsis wb-u-whitespace-nowrap">
                         {f.path}
                       </span>
-                      <span className="wb-mono" style={{ fontSize: 11, color: "var(--safe)" }}>
-                        +{f.add}
-                      </span>
-                      <span className="wb-mono" style={{ fontSize: 11, color: "var(--danger)" }}>
-                        −{f.del}
-                      </span>
+                      <span className="wb-mono wb-u-text-11px wb-u-color-safe">+{f.add}</span>
+                      <span className="wb-mono wb-u-text-11px wb-u-color-danger">−{f.del}</span>
                       {f.status === "unexpected" && <Badge tone="warn">unexpected</Badge>}
                     </div>
                   ))}
@@ -465,7 +426,7 @@ export function GitHubScreen() {
               }
             />
             <div className="wb-card-body wb-card-body--tight">
-              {base.checks.map((c, i) => {
+              {base.checks.map((c) => {
                 const v = CHECK_VIS[c.status] ?? {
                   tone: "neutral",
                   icon: "circle",
@@ -474,25 +435,11 @@ export function GitHubScreen() {
                 return (
                   <div
                     key={c.name}
-                    className="wb-flex"
-                    style={{
-                      gap: 11,
-                      padding: "11px 16px",
-                      borderBottom:
-                        i < base.checks.length - 1 ? "1px solid var(--border-subtle)" : "none",
-                    }}
+                    className="wb-flex wb-divided-row wb-u-gap-11px wb-u-p-11px-16px"
                   >
-                    <Icon
-                      name={v.icon}
-                      size={16}
-                      style={{ color: "var(--" + v.tone + ")", flex: "none" }}
-                    />
-                    <span className="wb-text-sm wb-strong" style={{ flex: 1 }}>
-                      {c.name}
-                    </span>
-                    <span className="wb-muted" style={{ fontSize: 12 }}>
-                      {c.detail}
-                    </span>
+                    <Icon name={v.icon} size={16} className={`wb-tone--${v.tone} wb-u-flex-none`} />
+                    <span className="wb-text-sm wb-strong wb-u-flex-1">{c.name}</span>
+                    <span className="wb-muted wb-u-text-12px">{c.detail}</span>
                     <Badge tone={v.tone}>{v.label}</Badge>
                   </div>
                 );
@@ -506,10 +453,7 @@ export function GitHubScreen() {
           <Card>
             <CardHead icon="git-merge" title="Synthetic merge readiness" />
             <div className="wb-card-body">
-              <div
-                className={"wb-banner wb-banner--" + (mergeReady ? "safe" : "warn")}
-                style={{ marginBottom: 14 }}
-              >
+              <div className={`wb-banner wb-banner--${mergeReady ? "safe" : "warn"} wb-u-mb-14px`}>
                 <Icon
                   name={mergeReady ? "check-circle" : "lock"}
                   size={17}
@@ -519,30 +463,25 @@ export function GitHubScreen() {
                   <span className="wb-banner-title">
                     {mergeReady ? "Ready for merge" : "Blocked — gates open"}
                   </span>
-                  <div style={{ marginTop: 2 }}>
+                  <div className="wb-u-mt-2px">
                     {mergeReady
                       ? "All governance gates satisfied."
                       : "Merge is held until every gate below is met."}
                   </div>
                 </div>
               </div>
-              <div className="wb-flex-col" style={{ gap: 10 }}>
+              <div className="wb-flex-col wb-u-gap-10px">
                 {gates.map((g) => (
-                  <div key={g.label} className="wb-flex" style={{ gap: 10 }}>
+                  <div key={g.label} className="wb-flex wb-u-gap-10px">
                     <Icon
                       name={g.met ? "check-circle" : "circle"}
                       size={16}
-                      style={{
-                        color: g.met ? "var(--safe)" : "var(--text-tertiary)",
-                        flex: "none",
-                      }}
+                      className={
+                        g.met ? "wb-tone--safe wb-u-flex-none" : "wb-tone--tertiary wb-u-flex-none"
+                      }
                     />
-                    <span className="wb-text-sm" style={{ flex: 1 }}>
-                      {g.label}
-                    </span>
-                    <span className="wb-muted" style={{ fontSize: 11.5 }}>
-                      {g.detail}
-                    </span>
+                    <span className="wb-text-sm wb-u-flex-1">{g.label}</span>
+                    <span className="wb-muted wb-u-text-11-5px">{g.detail}</span>
                   </div>
                 ))}
               </div>
@@ -553,14 +492,7 @@ export function GitHubScreen() {
             <CardHead icon="list-checks" title="Human reviewer checklist" />
             <div className="wb-card-body wb-card-body--tight">
               {checklist.map((c, i) => (
-                <div
-                  key={i}
-                  style={{
-                    padding: "11px 16px",
-                    borderBottom:
-                      i < checklist.length - 1 ? "1px solid var(--border-subtle)" : "none",
-                  }}
-                >
+                <div key={i} className="wb-divided-row wb-u-p-11px-16px">
                   <Check
                     on={c.done}
                     label={c.label}
@@ -587,20 +519,18 @@ export function GitHubScreen() {
               title="Reviewers"
               actions={<Badge tone="warn">{base.unresolvedComments} unresolved</Badge>}
             />
-            <div className="wb-card-body wb-flex-col" style={{ gap: 12 }}>
+            <div className="wb-card-body wb-flex-col wb-u-gap-12px">
               {base.reviewers.map((r) => {
                 const st =
                   r === base.reviewers[0] && reviewerState !== "pending" ? reviewerState : r.state;
                 const tone: Tone =
                   st === "approved" ? "safe" : st === "changes" ? "danger" : "neutral";
                 return (
-                  <div key={r.name} className="wb-flex" style={{ gap: 10 }}>
+                  <div key={r.name} className="wb-flex wb-u-gap-10px">
                     <Avatar name={r.name} sm />
-                    <div style={{ flex: 1 }}>
+                    <div className="wb-u-flex-1">
                       <div className="wb-text-sm wb-strong">{r.name}</div>
-                      <div className="wb-muted" style={{ fontSize: 11.5 }}>
-                        {r.role}
-                      </div>
+                      <div className="wb-muted wb-u-text-11-5px">{r.role}</div>
                     </div>
                     <Badge
                       tone={tone}
@@ -635,11 +565,11 @@ function GitHubHead({ issue }: { readonly issue: Issue }) {
         </div>
       </div>
       <div className="wb-spacer" />
-      <div className="wb-flex wb-inline-field" style={{ gap: 8 }}>
+      <div className="wb-flex wb-inline-field wb-u-gap-8px">
         <label className="wb-text-sm wb-muted" htmlFor="github-issue-select">
           Issue
         </label>
-        <div className="wb-select" style={{ width: 230 }}>
+        <div className="wb-select wb-u-w-230px">
           <select
             id="github-issue-select"
             value={issue.key}

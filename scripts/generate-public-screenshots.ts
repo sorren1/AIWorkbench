@@ -150,10 +150,7 @@ async function waitForPreview(): Promise<void> {
 
 async function stabilize(page: Page): Promise<void> {
   await page.evaluate(() => document.fonts.ready);
-  await page.addStyleTag({
-    content:
-      "*,*::before,*::after{animation-duration:0s!important;transition-duration:0s!important;caret-color:transparent!important}",
-  });
+  await page.evaluate(() => document.documentElement.classList.add("is-visual-test"));
   await page.evaluate(
     () =>
       new Promise<void>((resolveFrame) => {

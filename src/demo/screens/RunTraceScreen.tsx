@@ -189,8 +189,10 @@ export function RunTraceScreen() {
                   <tr key={span.spanId}>
                     <th scope="row">
                       <span
-                        className="wb-trace-operation"
-                        style={{ paddingInlineStart: `${spanDepth(span, trace.spans) * 18}px` }}
+                        className={`wb-trace-operation wb-trace-operation--depth-${Math.min(
+                          spanDepth(span, trace.spans),
+                          8,
+                        )}`}
                       >
                         {labelSpan(span)}
                       </span>
@@ -200,12 +202,19 @@ export function RunTraceScreen() {
                     </td>
                     <td className="wb-mono">{span.durationMs.toFixed(1)} ms</td>
                     <td>
-                      <div className="wb-trace-waterfall" aria-hidden="true">
-                        <span
+                      <svg
+                        className="wb-trace-waterfall"
+                        viewBox="0 0 100 1"
+                        preserveAspectRatio="none"
+                        aria-hidden="true"
+                      >
+                        <rect
                           className={`wb-trace-bar wb-trace-bar--${span.status.toLowerCase()}`}
-                          style={{ marginInlineStart: `${left}%`, width: `${width}%` }}
+                          x={left}
+                          width={width}
+                          height={1}
                         />
-                      </div>
+                      </svg>
                     </td>
                     <td>
                       <SpanDetails span={span} />
@@ -354,7 +363,7 @@ export function RunTraceScreen() {
           <details className="wb-control-schema">
             <summary>Inspect the recorded unified diff</summary>
             <pre className="wb-code cr-scroll">{evidence.change.unifiedDiff}</pre>
-            <p className="wb-mono wb-muted" style={{ fontSize: 11.5 }}>
+            <p className="wb-mono wb-muted wb-u-text-11-5px">
               {evidence.change.changedFiles.length} changed file · diff sha256:
               {evidence.change.unifiedDiffSha256}
             </p>

@@ -19,10 +19,7 @@ test("captures controlled principal-screen visual evidence", async ({ page }, te
     if ("dark" in capture && capture.dark) {
       await page.getByRole("button", { name: "Switch to dark" }).click();
     }
-    await page.addStyleTag({
-      content:
-        "*,*::before,*::after{animation-duration:0s!important;transition-duration:0s!important;caret-color:transparent!important}",
-    });
+    await page.evaluate(() => document.documentElement.classList.add("is-visual-test"));
     await page.evaluate(() => document.fonts.ready);
     const screenshot = await page.screenshot({ fullPage: true, animations: "disabled" });
     expect(screenshot.byteLength).toBeGreaterThan(20_000);

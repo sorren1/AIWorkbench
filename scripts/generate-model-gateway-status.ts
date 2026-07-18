@@ -18,15 +18,15 @@ const evidence = await latestValidatedGatewayEvidence(root);
 const status: ModelGatewayPublicStatus = {
   schemaVersion: 1,
   implementation: "LiteLLM",
-  implementationVersion: "1.94.0-dev.3+mcp.1.28.1",
-  imageDigest: "sha256:81137025eadb62943d571f9c431578a4575e2b43ce29e4ba1ecc2cb7d13bf0f8",
+  implementationVersion: "1.94.0-dev.3+database.mcp.1.28.1",
+  imageDigest: "sha256:e71660f09007a1c08a870b6c9819e86621b1ee8578d5843857dabb5ccb78e1be",
   label: evidence ? MODEL_GATEWAY_VALIDATED_LABEL : MODEL_GATEWAY_IMPLEMENTATION_LABEL,
   liveValidated: evidence !== null,
   sourceCommit: evidence?.sourceCommit ?? null,
   catalog: evidence?.catalog ?? null,
   disclosure: evidence
     ? "Recorded sanitized metadata from a developer-invoked local gateway run; the public browser does not contact the gateway."
-    : "The adapter, credential lifecycle, policy enforcement, signed non-root upstream, hash-locked MCP security update, and fake-gateway tests are implemented. No live provider credential or successful live run was available for this checked-in build.",
+    : "The adapter, credential lifecycle, policy enforcement, signed database-compatible upstream, explicit non-root read-only runtime, file-backed Compose secrets, prompt-free seven-day spend-log retention, hash-locked MCP security update, and fake-gateway tests are implemented. No live provider credential or successful live run was available for this checked-in build.",
 };
 
 const outputs = new Map<string, string>();

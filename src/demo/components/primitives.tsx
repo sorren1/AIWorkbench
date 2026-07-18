@@ -165,11 +165,7 @@ export function CardHead({
           {icon && <Icon name={icon} size={16} className="wb-th-ico" />}
           {title}
         </h2>
-        {sub && (
-          <div className="wb-card-sub" style={{ marginTop: 2 }}>
-            {sub}
-          </div>
-        )}
+        {sub && <div className="wb-card-sub wb-u-mt-2px">{sub}</div>}
       </div>
       {actions && <div className="wb-spacer" />}
       {actions}
@@ -187,7 +183,7 @@ export function StatTile({
   readonly icon?: IconName;
   readonly value: ReactNode;
   readonly meta?: ReactNode;
-  readonly metaTone?: string;
+  readonly metaTone?: Tone;
 }) {
   return (
     <Card className="wb-stat">
@@ -197,12 +193,7 @@ export function StatTile({
       </div>
       <div className="wb-stat-value">{value}</div>
       {meta && (
-        <div
-          className="wb-stat-meta"
-          style={metaTone ? { color: "var(--" + metaTone + ")" } : undefined}
-        >
-          {meta}
-        </div>
+        <div className={`wb-stat-meta${metaTone ? ` wb-tone--${metaTone}` : ""}`}>{meta}</div>
       )}
     </Card>
   );
@@ -306,11 +297,7 @@ export function Check({
       </span>
       <span>
         <span className="wb-check-label">{label}</span>
-        {sub && (
-          <span className="wb-check-sub" style={{ display: "block" }}>
-            {sub}
-          </span>
-        )}
+        {sub && <span className="wb-check-sub wb-u-display-block">{sub}</span>}
       </span>
     </label>
   );
@@ -417,9 +404,7 @@ export function Banner({
       <Icon name={icon || defIcon} size={17} className="wb-banner-ico" />
       <div>
         {title && <div className="wb-banner-title">{title}</div>}
-        <div className="wb-secondary" style={{ color: "inherit" }}>
-          {children}
-        </div>
+        <div className="wb-secondary wb-u-color-inherit">{children}</div>
       </div>
     </div>
   );
@@ -449,20 +434,14 @@ export function Progress({
 }) {
   const boundedValue = Math.max(0, Math.min(100, value));
   return (
-    <div
-      className="wb-progress"
-      role="progressbar"
+    <progress
+      className={`wb-progress${tone ? ` wb-progress--${tone}` : ""}`}
+      max={100}
+      value={boundedValue}
       aria-label={label}
-      aria-valuemin={0}
-      aria-valuemax={100}
       aria-valuenow={boundedValue}
       aria-valuetext={valueText}
-    >
-      <div
-        className={"wb-progress-bar" + (tone ? " wb-progress-bar--" + tone : "")}
-        style={{ width: boundedValue + "%" }}
-      />
-    </div>
+    />
   );
 }
 export function EmptyState({
@@ -481,13 +460,13 @@ export function EmptyState({
       <div className="wb-empty-ico">
         <Icon name={icon} size={22} />
       </div>
-      <div style={{ fontWeight: 600, color: "var(--text-secondary)", fontSize: 14 }}>{title}</div>
+      <div className="wb-u-weight-600 wb-u-color-text-secondary wb-u-text-14px">{title}</div>
       {children && (
-        <div style={{ marginTop: 6, fontSize: 13, maxWidth: 380, margin: "6px auto 0" }}>
+        <div className="wb-u-mt-6px wb-u-text-13px wb-u-max-w-380px wb-u-m-6px-auto-0">
           {children}
         </div>
       )}
-      {action && <div style={{ marginTop: 16 }}>{action}</div>}
+      {action && <div className="wb-u-mt-16px">{action}</div>}
     </div>
   );
 }
@@ -573,7 +552,7 @@ export function MarkdownView({ body }: { readonly body: string }) {
     }
     if (/^###\s/.test(line)) {
       out.push(
-        <h4 key={key++} style={{ fontSize: 13.5 }}>
+        <h4 key={key++} className="wb-u-text-13-5px">
           {inlineMd(line.slice(4), "h" + key)}
         </h4>,
       );
@@ -587,7 +566,7 @@ export function MarkdownView({ body }: { readonly body: string }) {
     }
     if (/^>\s/.test(line)) {
       out.push(
-        <div key={key++} className="wb-banner wb-banner--neutral" style={{ marginBottom: 10 }}>
+        <div key={key++} className="wb-banner wb-banner--neutral wb-u-mb-10px">
           <Icon name="info" size={15} className="wb-banner-ico" />
           <div>{inlineMd(line.slice(2), "q" + key)}</div>
         </div>,
@@ -611,15 +590,10 @@ export function MarkdownView({ body }: { readonly body: string }) {
       out.push(
         <div
           key={key++}
-          className="wb-table-wrap"
+          className="wb-table-wrap wb-u-m-4px-zero-14px wb-u-border-1px-solid-border-subtle wb-u-radius-radius-md"
           role="region"
           aria-label="Artifact data table"
           tabIndex={0}
-          style={{
-            margin: "4px 0 14px",
-            border: "1px solid var(--border-subtle)",
-            borderRadius: "var(--radius-md)",
-          }}
         >
           <table className="wb-table">
             <thead>
@@ -631,7 +605,7 @@ export function MarkdownView({ body }: { readonly body: string }) {
             </thead>
             <tbody>
               {bodyRows.map((r, y) => (
-                <tr key={y} style={{ cursor: "default" }}>
+                <tr key={y} className="wb-u-cursor-default">
                   {r.map((c, x) => (
                     <td key={x}>{inlineMd(c, "c" + y + x)}</td>
                   ))}

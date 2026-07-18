@@ -97,22 +97,13 @@ function Screen() {
 
 function Footer() {
   return (
-    <footer style={{ maxWidth: 1320, margin: "0 auto", padding: "0 26px 28px" }}>
-      <div
-        className="wb-flex wb-wrap"
-        style={{
-          gap: 10,
-          padding: "14px 0 0",
-          borderTop: "1px solid var(--border-subtle)",
-          color: "var(--text-tertiary)",
-          fontSize: 12,
-        }}
-      >
+    <footer className="wb-u-max-w-1320px wb-u-m-0-auto wb-u-p-zero-26px-28px">
+      <div className="wb-flex wb-wrap wb-u-gap-10px wb-u-p-14px-zero-0 wb-u-border-top-1px-solid-border-subtle wb-u-color-text-tertiary wb-u-text-12px">
         <Icon name="shield-check" size={14} />
         <span>
           Independent portfolio prototype · synthetic fixtures · local workflow state is functional
         </span>
-        <span className="wb-spacer" style={{ marginLeft: "auto" }} />
+        <span className="wb-spacer wb-u-ml-auto" />
         <span className="wb-mono">
           {meta.product} · v{meta.version}
         </span>

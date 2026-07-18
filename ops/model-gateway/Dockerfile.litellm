@@ -1,4 +1,4 @@
-FROM ghcr.io/berriai/litellm-non_root:v1.94.0-dev.3@sha256:81137025eadb62943d571f9c431578a4575e2b43ce29e4ba1ecc2cb7d13bf0f8
+FROM ghcr.io/berriai/litellm-database:v1.94.0-dev.3@sha256:e71660f09007a1c08a870b6c9819e86621b1ee8578d5843857dabb5ccb78e1be
 
 USER 0
 
@@ -18,6 +18,28 @@ RUN python -m ensurepip --upgrade \
       /app/.venv/bin/pip3 \
       /app/.venv/bin/pip3.13 \
       /app/.venv/lib/python3.13/site-packages/pip \
-      /app/.venv/lib/python3.13/site-packages/pip-*.dist-info
+      /app/.venv/lib/python3.13/site-packages/pip-*.dist-info \
+    && mkdir -p /app/.cache /var/lib/litellm/assets /var/lib/litellm/ui \
+    && cp -a /root/.cache/prisma /app/.cache/prisma \
+    && cp -a /root/.cache/prisma-python /app/.cache/prisma-python \
+    && PRISMA_PATH="$(python -c 'import os, prisma; print(os.path.dirname(prisma.__file__))')" \
+    && PROXY_EXTRAS_PATH="$(python -c 'import os, litellm_proxy_extras; print(os.path.dirname(litellm_proxy_extras.__file__))')" \
+    && chown -R 65534:65534 \
+      /app/.cache \
+      "$PRISMA_PATH" \
+      "$PROXY_EXTRAS_PATH" \
+      /var/lib/litellm/assets \
+      /var/lib/litellm/ui
 
-USER 65534
+ENV HOME=/app \
+    XDG_CACHE_HOME=/app/.cache \
+    PRISMA_BINARY_CACHE_DIR=/app/.cache/prisma-python/binaries/5.4.2/ac9d7041ed77bcc8a8dbd2ab6616b39013829574 \
+    PRISMA_SKIP_POSTINSTALL_GENERATE=1 \
+    PRISMA_HIDE_UPDATE_MESSAGE=1 \
+    PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING=1 \
+    PRISMA_OFFLINE_MODE=true \
+    LITELLM_NON_ROOT=true
+
+USER 65534:65534
+
+RUN prisma generate --schema=/app/schema.prisma

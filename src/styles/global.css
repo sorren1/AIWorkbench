@@ -10,3 +10,12 @@
 @import url("tokens/radius.css");
 @import url("tokens/motion.css");
 @import url("tokens/base.css");
+
+/* Screenshot tools opt into deterministic rendering without injecting CSP-blocked styles. */
+.is-visual-test *,
+.is-visual-test *::before,
+.is-visual-test *::after {
+  animation-duration: 0s !important;
+  transition-duration: 0s !important;
+  caret-color: transparent !important;
+}

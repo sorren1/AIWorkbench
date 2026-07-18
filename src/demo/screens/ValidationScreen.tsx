@@ -197,11 +197,11 @@ export function ValidationScreen() {
           </div>
         </div>
         <div className="wb-spacer" />
-        <div className="wb-flex wb-inline-field" style={{ gap: 8 }}>
+        <div className="wb-flex wb-inline-field wb-u-gap-8px">
           <label className="wb-text-sm wb-muted" htmlFor="validation-issue-select">
             Issue
           </label>
-          <div className="wb-select" style={{ width: 230 }}>
+          <div className="wb-select wb-u-w-230px">
             <select
               id="validation-issue-select"
               value={issue.key}
@@ -220,16 +220,16 @@ export function ValidationScreen() {
 
       {/* Action bar */}
       <Card className="wb-mb-16">
-        <div className="wb-card-body wb-between wb-wrap" style={{ gap: 12 }}>
-          <div className="wb-flex" style={{ gap: 10 }}>
+        <div className="wb-card-body wb-between wb-wrap wb-u-gap-12px">
+          <div className="wb-flex wb-u-gap-10px">
             <span className="wb-text-sm wb-secondary">Final decision</span>
             <StatusPill status={decision} />
             <span className="wb-muted">·</span>
             <span className="wb-text-sm wb-secondary">Evidence</span>
             <StatusPill status={evidence} />
           </div>
-          <div className="wb-spacer" style={{ marginLeft: "auto" }} />
-          <div className="wb-flex wb-wrap" style={{ gap: 8 }}>
+          <div className="wb-spacer wb-u-ml-auto" />
+          <div className="wb-flex wb-wrap wb-u-gap-8px">
             {!started && (
               <Btn size="sm" variant="primary" icon="play" onClick={start}>
                 Start demo validation
@@ -260,7 +260,7 @@ export function ValidationScreen() {
           </div>
         </div>
         {!canApproveValidation && (
-          <div className="wb-card-body" style={{ borderTop: "1px solid var(--border-subtle)" }}>
+          <div className="wb-card-body wb-u-border-top-1px-solid-border-subtle">
             <Banner tone="warn" title="Final decision unavailable for this persona" icon="lock">
               {activePersona.shortName} does not hold validation:approve. Use the View as selector
               to inspect the distinct Validator / Release Approver policy path.
@@ -269,14 +269,7 @@ export function ValidationScreen() {
         )}
       </Card>
 
-      <div
-        style={{
-          display: "grid",
-          gridTemplateColumns: "minmax(0,1.7fr) minmax(0,1fr)",
-          gap: 16,
-          alignItems: "start",
-        }}
-      >
+      <div className="wb-u-display-grid wb-u-cols-minmax-zero-1-7fr-minmax-zero-1fr wb-u-gap-16px wb-u-items-start">
         <div className="wb-stack">
           <Card>
             <CardHead
@@ -290,24 +283,12 @@ export function ValidationScreen() {
               }
             />
             <div className="wb-card-body wb-card-body--tight">
-              {base.acceptance.map((a, i) => (
-                <div
-                  key={a.id}
-                  className="wb-flex"
-                  style={{
-                    gap: 10,
-                    padding: "10px 16px",
-                    borderBottom:
-                      i < base.acceptance.length - 1 ? "1px solid var(--border-subtle)" : "none",
-                  }}
-                >
-                  <span
-                    className="wb-mono wb-muted"
-                    style={{ fontSize: 11.5, width: 34, flex: "none" }}
-                  >
+              {base.acceptance.map((a) => (
+                <div key={a.id} className="wb-flex wb-divided-row wb-u-gap-10px wb-u-p-10px-16px">
+                  <span className="wb-mono wb-muted wb-u-text-11-5px wb-u-w-34px wb-u-flex-none">
                     {a.id}
                   </span>
-                  <span style={{ fontSize: 13, flex: 1 }}>{a.text}</span>
+                  <span className="wb-u-text-13px wb-u-flex-1">{a.text}</span>
                   <StatusPill status={a.status} />
                 </div>
               ))}
@@ -321,26 +302,19 @@ export function ValidationScreen() {
               sub="Mark each scenario as you validate"
             />
             <div className="wb-card-body wb-card-body--tight">
-              {scen.map((s, i) => (
+              {scen.map((s) => (
                 <div
                   key={s.name}
-                  className="wb-flex wb-wrap"
-                  style={{
-                    gap: 10,
-                    padding: "11px 16px",
-                    borderBottom: i < scen.length - 1 ? "1px solid var(--border-subtle)" : "none",
-                  }}
+                  className="wb-flex wb-wrap wb-divided-row wb-u-gap-10px wb-u-p-11px-16px"
                 >
-                  <div style={{ flex: 1, minWidth: 200 }}>
+                  <div className="wb-u-flex-1 wb-u-min-w-200px">
                     <div className="wb-text-sm wb-strong">{s.name}</div>
                     {s.note && (
-                      <div className="wb-mono wb-muted" style={{ fontSize: 11, marginTop: 2 }}>
-                        {s.note}
-                      </div>
+                      <div className="wb-mono wb-muted wb-u-text-11px wb-u-mt-2px">{s.note}</div>
                     )}
                   </div>
                   <StatusPill status={s.status} />
-                  <div className="wb-flex" style={{ gap: 6 }}>
+                  <div className="wb-flex wb-u-gap-6px">
                     <IconBtn
                       icon="check"
                       size="sm"
@@ -357,7 +331,7 @@ export function ValidationScreen() {
                 </div>
               ))}
               {scen.length === 0 && (
-                <div style={{ padding: 16 }}>
+                <div className="wb-u-p-16px">
                   <span className="wb-muted wb-text-sm">No scenarios defined.</span>
                 </div>
               )}
@@ -369,7 +343,7 @@ export function ValidationScreen() {
               <CardHead icon="database" title="Oracle data assumptions" />
               <div className="wb-card-body">
                 <div className="wb-md">
-                  <ul style={{ margin: 0 }}>
+                  <ul className="wb-u-m-0">
                     {base.oracleAssumptions.map((x, i) => (
                       <li key={i}>{x}</li>
                     ))}
@@ -381,7 +355,7 @@ export function ValidationScreen() {
               <CardHead icon="cpu" title="API validation notes" />
               <div className="wb-card-body">
                 <div className="wb-md">
-                  <ul style={{ margin: 0 }}>
+                  <ul className="wb-u-m-0">
                     {base.apiNotes.map((x, i) => (
                       <li key={i}>{x}</li>
                     ))}
@@ -393,7 +367,7 @@ export function ValidationScreen() {
               <CardHead icon="box" title="Angular UI validation notes" />
               <div className="wb-card-body">
                 <div className="wb-md">
-                  <ul style={{ margin: 0 }}>
+                  <ul className="wb-u-m-0">
                     {base.uiNotes.map((x, i) => (
                       <li key={i}>{x}</li>
                     ))}
@@ -430,37 +404,27 @@ export function ValidationScreen() {
             />
             <div className="wb-card-body wb-card-body--tight">
               {notes.length === 0 && (
-                <div style={{ padding: 16 }}>
+                <div className="wb-u-p-16px">
                   <span className="wb-muted wb-text-sm">No tester notes yet.</span>
                 </div>
               )}
               {notes.map((n, i) => (
                 <div
                   key={i}
-                  className="wb-flex"
-                  style={{
-                    gap: 11,
-                    padding: "12px 16px",
-                    borderBottom: "1px solid var(--border-subtle)",
-                    alignItems: "flex-start",
-                  }}
+                  className="wb-flex wb-u-gap-11px wb-u-p-12px-16px wb-u-border-bottom-1px-solid-border-subtle wb-u-items-flex-start"
                 >
                   <Avatar name={n.author} sm />
-                  <div style={{ flex: 1 }}>
-                    <div className="wb-flex" style={{ gap: 8 }}>
+                  <div className="wb-u-flex-1">
+                    <div className="wb-flex wb-u-gap-8px">
                       <span className="wb-text-sm wb-strong">{n.author}</span>
-                      <span className="wb-mono wb-muted" style={{ fontSize: 11 }}>
-                        {n.time}
-                      </span>
+                      <span className="wb-mono wb-muted wb-u-text-11px">{n.time}</span>
                     </div>
-                    <div className="wb-secondary" style={{ fontSize: 13, marginTop: 3 }}>
-                      {n.text}
-                    </div>
+                    <div className="wb-secondary wb-u-text-13px wb-u-mt-3px">{n.text}</div>
                   </div>
                 </div>
               ))}
             </div>
-            <div className="wb-card-foot" style={{ gap: 8 }}>
+            <div className="wb-card-foot wb-u-gap-8px">
               <label className="wb-sr-only" htmlFor="tester-note-input">
                 Add a synthetic tester note
               </label>
@@ -488,7 +452,7 @@ export function ValidationScreen() {
                 rows={[
                   [
                     "Branch",
-                    <span className="wb-mono wb-text-sm" style={{ color: "var(--accent-text)" }}>
+                    <span className="wb-mono wb-text-sm wb-u-color-accent-text">
                       {base.branch}
                     </span>,
                   ],

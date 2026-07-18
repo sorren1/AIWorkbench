@@ -1,20 +1,10 @@
-import { execFile } from "node:child_process";
 import { open } from "node:fs/promises";
 import { extname, resolve } from "node:path";
-import { promisify } from "node:util";
 
-const execFileAsync = promisify(execFile);
+import { trackedSourcePaths } from "./trackedSourceInventory";
+
 const root = resolve(import.meta.dirname, "..");
-const { stdout } = await execFileAsync(
-  "git",
-  ["ls-files", "-z", "--cached", "--others", "--exclude-standard"],
-  {
-    cwd: root,
-    encoding: "buffer",
-    maxBuffer: 10 * 1024 * 1024,
-  },
-);
-const tracked = stdout.toString("utf8").split("\0").filter(Boolean).sort();
+const tracked = await trackedSourcePaths(root);
 
 const allowedEnvironmentTemplates = new Set([".env.example"]);
 const sensitiveExtensions = new Set([".key", ".p12", ".pfx", ".pem"]);
@@ -77,5 +67,5 @@ if (findings.length > 0) {
   );
 }
 process.stdout.write(
-  `Repository credential policy passed for ${scannedFileCount} present tracked or untracked repository files; values were not logged.\n`,
+  `Repository credential policy passed for ${scannedFileCount} explicitly tracked files; values were not logged.\n`,
 );

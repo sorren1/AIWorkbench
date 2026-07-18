@@ -1,5 +1,4 @@
-import { createHash } from "node:crypto";
-import { copyFile, lstat, mkdir, mkdtemp, open, readFile, rm, writeFile } from "node:fs/promises";
+import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { dirname, relative, resolve } from "node:path";
 import { spawn } from "node:child_process";
@@ -19,11 +18,17 @@ import {
 import {
   analyzeComposeConfig,
   analyzeLanguageCoverage,
+  analyzeLiteLlmConfig,
   analyzeLiteLlmDockerfile,
   analyzeSandboxDockerfile,
 } from "./containerPolicy";
 import { createSarif, sanitizeSarif, sarifFindings, sha256File, writeJson } from "./reporting";
 import { versionAtLeast } from "./versionPolicy";
+import {
+  lintableTrackedSourcePaths,
+  trackedSourceDigest,
+  trackedSourcePaths,
+} from "../trackedSourceInventory";
 
 type CommandResult = {
   readonly exitCode: number;
@@ -36,15 +41,40 @@ const reportsRoot = resolve(root, ".security-reports");
 const recordSummary = process.argv.includes("--record");
 const npmCli =
   process.env.npm_execpath ?? resolve(dirname(process.execPath), "node_modules/npm/bin/npm-cli.js");
-const composeSyntheticEnvironment = {
-  LITELLM_DB_PASSWORD: "synthetic-config-validation",
-  LITELLM_MASTER_KEY: "sk-synthetic-config-validation",
-  LITELLM_SALT_KEY: "sk-synthetic-salt-validation",
-  MODEL_GATEWAY_UPSTREAM_API_KEY: "sk-synthetic-config-validation",
-  MODEL_GATEWAY_PRIMARY_MODEL: "synthetic/provider-primary",
-  MODEL_GATEWAY_FALLBACK_MODEL: "synthetic/provider-fallback",
-  MODEL_GATEWAY_REVIEW_MODEL: "synthetic/provider-review",
-} as const;
+type ComposeSyntheticSecrets = {
+  readonly directory: string;
+  readonly environment: Readonly<Record<string, string>>;
+};
+
+async function createComposeSyntheticSecrets(): Promise<ComposeSyntheticSecrets> {
+  const directory = await mkdtemp(resolve(tmpdir(), "adw-compose-secrets-"));
+  const secretFiles = {
+    LITELLM_DB_PASSWORD_FILE: ["litellm-db-password", "synthetic-config-validation"],
+    LITELLM_DATABASE_URL_FILE: [
+      "litellm-database-url",
+      "postgresql://litellm:synthetic-config-validation@database:5432/litellm",
+    ],
+    LITELLM_MASTER_KEY_FILE: ["litellm-master-key", "sk-synthetic-config-validation"],
+    LITELLM_SALT_KEY_FILE: ["litellm-salt-key", "sk-synthetic-salt-validation"],
+    MODEL_GATEWAY_UPSTREAM_API_KEY_FILE: [
+      "model-gateway-upstream-api-key",
+      "sk-synthetic-config-validation",
+    ],
+  } as const;
+  const environment: Record<string, string> = {
+    MODEL_GATEWAY_PRIMARY_MODEL: "synthetic/provider-primary",
+    MODEL_GATEWAY_FALLBACK_MODEL: "synthetic/provider-fallback",
+    MODEL_GATEWAY_REVIEW_MODEL: "synthetic/provider-review",
+  };
+  await Promise.all(
+    Object.entries(secretFiles).map(async ([name, [fileName, contents]]) => {
+      const path = resolve(directory, fileName);
+      await writeFile(path, `${contents}\n`, { encoding: "utf8", mode: 0o600 });
+      environment[name] = path;
+    }),
+  );
+  return { directory, environment };
+}
 
 async function command(
   executable: string,
@@ -96,51 +126,6 @@ function isSuppressed(
   );
   for (const entry of matching) matchedSuppressionIds.add(entry.id);
   return matching.length > 0;
-}
-
-async function trackedPaths(): Promise<string[]> {
-  const result = await command("git", [
-    "ls-files",
-    "--cached",
-    "--others",
-    "--exclude-standard",
-    "-z",
-  ]);
-  if (result.exitCode !== 0) throw new Error("Unable to enumerate supply-chain scan inputs.");
-  const candidates = result.stdout
-    .split("\0")
-    .filter((path) => path.length > 0)
-    .sort();
-  const present: string[] = [];
-  for (const path of candidates) {
-    const metadata = await lstat(resolve(root, path)).catch((error: unknown) => {
-      if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
-      throw error;
-    });
-    if (metadata) present.push(path);
-  }
-  return present;
-}
-
-async function treeDigest(paths: readonly string[]): Promise<string> {
-  const hash = createHash("sha256");
-  for (const path of paths) {
-    const absolute = resolve(root, path);
-    const handle = await open(absolute, "r");
-    try {
-      const stat = await handle.stat();
-      if (!stat.isFile()) {
-        throw new Error(`Supply-chain input must be a regular file: ${path}`);
-      }
-      hash.update(path.replaceAll("\\", "/"));
-      hash.update("\0");
-      hash.update(await handle.readFile());
-      hash.update("\0");
-    } finally {
-      await handle.close();
-    }
-  }
-  return hash.digest("hex");
 }
 
 async function copyScanInput(paths: readonly string[]): Promise<string> {
@@ -231,14 +216,17 @@ const eslintOutputSchema = z.array(
 );
 
 async function runEslint(
+  paths: readonly string[],
   suppressions: readonly SupplyChainSuppression[],
   matchedSuppressionIds: Set<string>,
 ): Promise<SarifFinding[]> {
   const jsonPath = resolve(reportsRoot, "eslint.json");
   const eslint = resolve(root, "node_modules/eslint/bin/eslint.js");
+  const lintPaths = lintableTrackedSourcePaths(paths);
+  if (lintPaths.length === 0) throw new Error("Tracked-source inventory has no lintable files.");
   const result = await command(process.execPath, [
     eslint,
-    ".",
+    ...lintPaths,
     "--format",
     "json",
     "--output-file",
@@ -278,12 +266,13 @@ async function runContainerPolicy(
   tooling: z.infer<typeof toolingSchema>,
   suppressions: readonly SupplyChainSuppression[],
   matchedSuppressionIds: Set<string>,
+  composeEnvironment: Readonly<Record<string, string>>,
 ): Promise<SarifFinding[]> {
   const compose = await command(
     "docker",
     ["compose", "-f", "ops/model-gateway/compose.yaml", "config", "--format", "json"],
     {
-      env: composeSyntheticEnvironment,
+      env: composeEnvironment,
     },
   );
   if (compose.exitCode !== 0) throw new Error("Docker Compose configuration validation failed.");
@@ -294,9 +283,29 @@ async function runContainerPolicy(
         gateway: tooling.liteLlm.image,
       },
       locallyBuiltServices: ["gateway"],
+      credentialServices: {
+        database: {
+          user: "70:70",
+          secretTargets: ["litellm_db_password"],
+          writableVolumeTargets: ["/var/lib/postgresql/data"],
+          tmpfsTargets: ["/tmp", "/var/run/postgresql"],
+        },
+        gateway: {
+          user: "65534:65534",
+          secretTargets: [
+            "litellm_database_url",
+            "litellm_master_key",
+            "litellm_salt_key",
+            "model_gateway_upstream_api_key",
+          ],
+          writableVolumeTargets: [],
+          tmpfsTargets: ["/tmp"],
+        },
+      },
     }),
     ...(await analyzeSandboxDockerfile(root, tooling)),
     ...(await analyzeLiteLlmDockerfile(root, tooling)),
+    ...(await analyzeLiteLlmConfig(root)),
     ...analyzeLanguageCoverage(paths),
   ];
   const sarifPath = resolve(reportsRoot, "container-policy.sarif");
@@ -304,7 +313,7 @@ async function runContainerPolicy(
     sarifPath,
     createSarif({
       name: "AI Delivery Workbench container policy",
-      version: "1.0.0",
+      version: "1.1.0",
       findings,
     }),
   );
@@ -689,12 +698,13 @@ async function buildAndScanLiteLlm(
   tooling: z.infer<typeof toolingSchema>,
   suppressions: readonly SupplyChainSuppression[],
   matchedSuppressionIds: Set<string>,
+  composeEnvironment: Readonly<Record<string, string>>,
 ): Promise<RuntimeImageScan> {
   await verifyLiteLlmSignature(tooling);
   const build = await command(
     "docker",
     ["compose", "-f", "ops/model-gateway/compose.yaml", "build", "--pull", "gateway"],
-    { env: composeSyntheticEnvironment },
+    { env: composeEnvironment },
   );
   if (build.exitCode !== 0) throw new Error("Patched LiteLLM runtime image build failed.");
   const imageId = await inspectImageId(tooling.liteLlm.image);
@@ -705,8 +715,10 @@ async function buildAndScanLiteLlm(
     "--format",
     "{{.Config.User}}",
   ]);
-  if (user.exitCode !== 0 || user.stdout.trim() !== "65534") {
-    throw new Error("Patched LiteLLM runtime image is not configured for numeric user 65534.");
+  if (user.exitCode !== 0 || user.stdout.trim() !== "65534:65534") {
+    throw new Error(
+      "Patched LiteLLM runtime image is not configured for numeric UID:GID 65534:65534.",
+    );
   }
   const scan = await scanRuntimeImage({
     role: "litellm",
@@ -775,7 +787,7 @@ async function scannerMetadata(
       cycloneDxNpm: { version: cyclone.stdout.trim() },
       codeql: { version: tooling.codeql.version, actionSha: tooling.codeql.actionSha },
       npmAudit: { version: process.env.npm_config_user_agent?.split(" ")[0] ?? "npm" },
-      containerPolicy: { version: "1.0.0", dockerCompose: docker.stdout.trim() },
+      containerPolicy: { version: "1.1.0", dockerCompose: docker.stdout.trim() },
     },
     targets: {
       sandboxBaseImage: tooling.sandbox.baseImage,
@@ -817,11 +829,21 @@ async function main(): Promise<void> {
   }
   if (expired > 0) throw new Error("One or more supply-chain suppressions are expired or invalid.");
 
-  const paths = await trackedPaths();
-  const sourceTreeDigest = await treeDigest(
-    paths.filter((path) => path !== "public/security/release-summary.json"),
+  const paths = await trackedSourcePaths(root);
+  const sourceTreeDigest = await trackedSourceDigest(
+    root,
+    paths,
+    new Set(["public/security/release-summary.json"]),
   );
+  await writeJson(resolve(reportsRoot, "tracked-source-inventory.json"), {
+    schemaVersion: 1,
+    sourceTreeSha256: sourceTreeDigest,
+    excludedFromSourceTree: ["public/security/release-summary.json"],
+    fileCount: paths.length,
+    files: paths,
+  });
   const scanInput = await copyScanInput(paths);
+  const composeSecrets = await createComposeSyntheticSecrets();
   try {
     const historySecrets = await runGitleaks(
       tooling.gitleaks.image,
@@ -841,12 +863,17 @@ async function main(): Promise<void> {
       suppressionDocument.entries,
       matchedSuppressionIds,
     );
-    const eslintFindings = await runEslint(suppressionDocument.entries, matchedSuppressionIds);
+    const eslintFindings = await runEslint(
+      paths,
+      suppressionDocument.entries,
+      matchedSuppressionIds,
+    );
     const containerPolicyFindings = await runContainerPolicy(
       paths,
       tooling,
       suppressionDocument.entries,
       matchedSuppressionIds,
+      composeSecrets.environment,
     );
     const npmAudit = await runNpmAudit(suppressionDocument.entries, matchedSuppressionIds);
     const licenses = await generateNpmSboms();
@@ -859,6 +886,7 @@ async function main(): Promise<void> {
       tooling,
       suppressionDocument.entries,
       matchedSuppressionIds,
+      composeSecrets.environment,
     );
     const postgres = await pullAndScanPostgres(
       tooling,
@@ -985,7 +1013,7 @@ async function main(): Promise<void> {
         status: "PASSED",
         scanner: "Gitleaks",
         version: tooling.gitleaks.version,
-        target: `${paths.length} source files plus reachable Git history`,
+        target: `${paths.length} explicitly tracked files plus reachable Git history`,
         findingCount: 0,
         detail:
           "Redacted SARIF reports were generated for history and the tracked worktree snapshot.",
@@ -995,7 +1023,7 @@ async function main(): Promise<void> {
         label: "TypeScript, JavaScript, and container configuration static analysis",
         status: "PASSED",
         scanner: "ESLint + repository container policy",
-        version: "10.7.0 / 1.0.0",
+        version: "10.7.0 / 1.1.0",
         target:
           "TypeScript/JavaScript sources, Compose configuration, and both runtime Dockerfiles",
         findingCount: 0,
@@ -1103,6 +1131,7 @@ async function main(): Promise<void> {
       { kind: "PROVENANCE", name: "litellm-signature.json" },
       { kind: "INVENTORY", name: "license-inventory.json" },
       { kind: "INVENTORY", name: "scanner-metadata.json" },
+      { kind: "INVENTORY", name: "tracked-source-inventory.json" },
       { kind: "INVENTORY", name: "suppression-report.json" },
       { kind: "SUMMARY", name: "npm-audit.json" },
     ];
@@ -1182,6 +1211,7 @@ async function main(): Promise<void> {
     );
   } finally {
     await rm(scanInput, { force: true, recursive: true });
+    await rm(composeSecrets.directory, { force: true, recursive: true });
   }
 }
 

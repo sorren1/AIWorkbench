@@ -24,24 +24,25 @@ Expected properties in the safe summary:
 Prerequisites:
 
 - Docker with Compose v2;
-- a locally supplied LiteLLM master key and stable salt key;
-- a locally supplied PostgreSQL password;
-- an upstream OpenAI-compatible/provider credential;
+- a local OS secret manager containing a LiteLLM master key, stable salt key, PostgreSQL password, matching PostgreSQL connection URL, and upstream provider credential;
 - three provider/model identifiers for the `delivery-primary`, `delivery-fallback`, and `delivery-review` aliases.
 
-`.env.example` contains names only. Put values in the current process environment or a gitignored local `.env`; never commit the file. The Node CLI reads `LITELLM_MASTER_KEY` and optional `MODEL_GATEWAY_BASE_URL` from its own process environment, so a Compose-only secret is insufficient for the CLI. Load secrets through the local shell or secret manager without echoing them.
+Compose receives secret **file paths**, never secret values. Retrieve the five values from Windows Credential Manager or PowerShell SecretManagement, macOS Keychain, `pass`, or another OS-managed store and materialize owner-readable files under gitignored `.workbench/model-gateway/secrets/` for the lifetime of the stack. Local Compose file secrets are mounted at `/run/secrets`; unlike Swarm secrets, the source files are not an encrypted-at-rest Docker store. Protect the source directory with OS permissions and delete the materialized files after shutdown.
 
 Required names:
 
 ```text
-LITELLM_MASTER_KEY
-LITELLM_SALT_KEY
-LITELLM_DB_PASSWORD
-MODEL_GATEWAY_UPSTREAM_API_KEY
+LITELLM_MASTER_KEY_FILE
+LITELLM_SALT_KEY_FILE
+LITELLM_DB_PASSWORD_FILE
+LITELLM_DATABASE_URL_FILE
+MODEL_GATEWAY_UPSTREAM_API_KEY_FILE
 MODEL_GATEWAY_PRIMARY_MODEL
 MODEL_GATEWAY_FALLBACK_MODEL
 MODEL_GATEWAY_REVIEW_MODEL
 ```
+
+The database URL secret has the form `postgresql://litellm:<URL-encoded-password>@database:5432/litellm` and must match the password file. `.env.example` contains only ignored file paths and non-secret configuration placeholders; do not place secret values in `.env`. The Node CLI reads the same master-key file. As an alternative, an OS secret manager may inject `LITELLM_MASTER_KEY` directly into the CLI process, but setting both master-key inputs is rejected.
 
 Optional names are `MODEL_GATEWAY_BASE_URL` (defaults to `http://127.0.0.1:4000`) and `MODEL_GATEWAY_UPSTREAM_BASE_URL`. The master key should follow LiteLLM's documented `sk-` convention. Keep the salt stable while the database volume exists.
 
@@ -52,7 +53,11 @@ npm run model-gateway:up
 docker compose -f ops/model-gateway/compose.yaml ps
 ```
 
-The Compose file builds a hash-locked security derivative of LiteLLM's signed non-root `v1.94.0-dev.3` digest and pins PostgreSQL `17.10-alpine3.24` by multi-platform digest. The derivative updates only `mcp` to `1.28.1`, retains user `65534`, and is rebuilt/scanned by the release gate. Port 4000 binds only to `127.0.0.1`. The database uses an internal-only Docker network. The gateway also joins a provider-egress network because real model calls require outbound access; this profile does **not** claim network isolation.
+The Compose file builds a hash-locked derivative of LiteLLM's signed, Prisma-equipped database image for `v1.94.0-dev.3` and pins PostgreSQL `17.10-alpine3.24` by multi-platform digest. The derivative updates only `mcp` to `1.28.1`, relocates the pinned Prisma cache, generates the client during the image build, and runs as explicit UID/GID `65534:65534`. PostgreSQL runs directly as `70:70`.
+
+Both credential-bearing services drop every Linux capability, enable `no-new-privileges`, and use read-only root filesystems. LiteLLM receives only a 64 MiB `/tmp` tmpfs and the read-only config mount. PostgreSQL receives only `/tmp`, its socket tmpfs, and the named data volume. Port 4000 binds only to `127.0.0.1`; the database is internal-only. The gateway also joins a provider-egress network because real model calls require outbound access, so this profile does **not** claim network isolation.
+
+Spend/accounting metadata is enabled, prompt and response content is excluded from spend logs, records older than seven days are deleted, and cleanup runs daily. The Admin UI is disabled so this local profile does not expose a second configuration surface.
 
 ## 4. Run the opt-in integration check
 
@@ -101,6 +106,8 @@ docker compose -f ops/model-gateway/compose.yaml down --volumes
 
 This deletes local gateway state. It does not revoke or rotate the upstream provider credential; handle that in the provider's control plane when required.
 
+After the stack stops, delete the five materialized files under `.workbench/model-gateway/secrets/`. Deleting the files before virtual-key cleanup prevents the cleanup client and gateway from authenticating.
+
 ## Failure interpretation
 
 - Missing environment variable: configuration blocker; no live validation occurred.
@@ -108,6 +115,6 @@ This deletes local gateway state. It does not revoke or rotate the upstream prov
 - Retryable primary failure: only the next policy-declared alias may run; inspect the fallback span.
 - Token/cost/time threshold exceeded: run stops, trace records the dimension, and cleanup still runs.
 - Revocation failure: evidence is not finalized; retain the lease file and run cleanup again.
-- Provider data retention or regional handling: governed by the configured provider and LiteLLM deployment; this local demonstration does not change those terms.
+- Spend-log retention: prompt/response content is disabled; accounting metadata is retained for at most seven days with daily cleanup. Provider-side data retention and regional handling still follow the configured provider's terms.
 
 Never paste keys into issue text, prompts, command arguments, screenshots, logs, evidence, or the browser UI.

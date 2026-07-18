@@ -12,10 +12,16 @@ import {
 import {
   analyzeComposeConfig,
   analyzeLanguageCoverage,
+  analyzeLiteLlmConfig,
   analyzeLiteLlmDockerfile,
   analyzeSandboxDockerfile,
 } from "../scripts/supply-chain/containerPolicy";
 import { versionAtLeast } from "../scripts/supply-chain/versionPolicy";
+import {
+  lintableTrackedSourcePaths,
+  trackedSourceDigest,
+  trackedSourcePaths,
+} from "../scripts/trackedSourceInventory";
 import { readSupplyChainSummary, renderSupplyChainEvidence } from "../src/site/supplyChainEvidence";
 
 const root = resolve(import.meta.dirname, "..");
@@ -25,6 +31,25 @@ async function json(path: string): Promise<unknown> {
 }
 
 describe("supply-chain policy", () => {
+  it("uses a deterministic tracked-source inventory instead of generated workspace artifacts", async () => {
+    const paths = await trackedSourcePaths(root);
+    const lintPaths = lintableTrackedSourcePaths(paths);
+    expect(paths).toContain("package.json");
+    expect(paths).toContain("scripts/trackedSourceInventory.ts");
+    expect(paths.every((path) => !path.includes("\\"))).toBe(true);
+    expect(
+      paths.every(
+        (path) =>
+          !["coverage/", "dist/", ".lighthouseci/", "playwright-report/", "test-results/"].some(
+            (generatedRoot) => path.startsWith(generatedRoot),
+          ),
+      ),
+    ).toBe(true);
+    expect(lintPaths.length).toBeGreaterThan(0);
+    expect(lintPaths.every((path) => /\.(?:[cm]?[jt]s|[jt]sx)$/u.test(path))).toBe(true);
+    await expect(trackedSourceDigest(root, paths)).resolves.toMatch(/^[a-f0-9]{64}$/u);
+  });
+
   it("keeps scanner, suppression, and license policy documents versioned and valid", async () => {
     const tooling = toolingSchema.parse(await json("security/tooling.json"));
     const suppressions = suppressionSchema.parse(await json("security/suppressions.json"));
@@ -105,6 +130,117 @@ describe("supply-chain policy", () => {
     );
   });
 
+  it("fails closed for every credential-bearing service without the full runtime controls", () => {
+    const findings = analyzeComposeConfig({
+      services: {
+        credentialWorker: {
+          image: `example.invalid/worker@sha256:${"c".repeat(64)}`,
+          environment: { API_KEY: "example-credential-placeholder" },
+          volumes: ["worker-state:/unreviewed"],
+        },
+      },
+    });
+    expect(findings.map((finding) => finding.ruleId)).toEqual(
+      expect.arrayContaining([
+        "CONTAINER-CREDENTIAL-SERVICE-UNREVIEWED",
+        "CONTAINER-EXPLICIT-NONROOT-USER",
+        "CONTAINER-DROP-ALL-CAPABILITIES",
+        "CONTAINER-NO-NEW-PRIVILEGES",
+        "CONTAINER-READONLY-ROOT",
+        "CONTAINER-SECRET-FILES-REQUIRED",
+        "CONTAINER-NO-PLAINTEXT-CREDENTIAL-ENV",
+        "CONTAINER-UNREVIEWED-WRITABLE-PATH",
+      ]),
+    );
+  });
+
+  it("accepts only the reviewed secret files and writable paths", () => {
+    const hardened = analyzeComposeConfig(
+      {
+        services: {
+          database: {
+            image: `example.invalid/database@sha256:${"d".repeat(64)}`,
+            user: "70:70",
+            environment: {
+              POSTGRES_PASSWORD_FILE: "/run/secrets/litellm_db_password",
+            },
+            secrets: [{ source: "litellm_db_password", target: "litellm_db_password" }],
+            cap_drop: ["ALL"],
+            security_opt: ["no-new-privileges:true"],
+            read_only: true,
+            tmpfs: ["/tmp:rw", "/var/run/postgresql:rw"],
+            volumes: [
+              {
+                type: "volume",
+                source: "gateway-database",
+                target: "/var/lib/postgresql/data",
+              },
+            ],
+          },
+          gateway: {
+            image: "example.invalid/gateway:local",
+            build: { dockerfile: "Dockerfile.litellm" },
+            user: "65534:65534",
+            environment: {
+              DATABASE_URL_FILE: "/run/secrets/litellm_database_url",
+              LITELLM_MASTER_KEY_FILE: "/run/secrets/litellm_master_key",
+              LITELLM_SALT_KEY_FILE: "/run/secrets/litellm_salt_key",
+              MODEL_GATEWAY_UPSTREAM_API_KEY_FILE: "/run/secrets/model_gateway_upstream_api_key",
+            },
+            secrets: [
+              { source: "litellm_database_url", target: "litellm_database_url" },
+              { source: "litellm_master_key", target: "litellm_master_key" },
+              { source: "litellm_salt_key", target: "litellm_salt_key" },
+              {
+                source: "model_gateway_upstream_api_key",
+                target: "model_gateway_upstream_api_key",
+              },
+            ],
+            cap_drop: ["ALL"],
+            security_opt: ["no-new-privileges:true"],
+            read_only: true,
+            tmpfs: ["/tmp:rw"],
+            volumes: [
+              {
+                type: "bind",
+                source: "litellm-config.yaml",
+                target: "/app/config.yaml",
+                read_only: true,
+              },
+            ],
+          },
+        },
+      },
+      {
+        expectedImages: {
+          database: `example.invalid/database@sha256:${"d".repeat(64)}`,
+          gateway: "example.invalid/gateway:local",
+        },
+        locallyBuiltServices: ["gateway"],
+        credentialServices: {
+          database: {
+            user: "70:70",
+            secretTargets: ["litellm_db_password"],
+            writableVolumeTargets: ["/var/lib/postgresql/data"],
+            tmpfsTargets: ["/tmp", "/var/run/postgresql"],
+          },
+          gateway: {
+            user: "65534:65534",
+            secretTargets: [
+              "litellm_database_url",
+              "litellm_master_key",
+              "litellm_salt_key",
+              "model_gateway_upstream_api_key",
+            ],
+            writableVolumeTargets: [],
+            tmpfsTargets: ["/tmp"],
+          },
+        },
+      },
+    );
+    expect(hardened).toEqual([]);
+  });
+
   it("fails closed when a source language or Dockerfile lacks an assigned scanner", () => {
     expect(
       analyzeLanguageCoverage([
@@ -120,6 +256,7 @@ describe("supply-chain policy", () => {
     const tooling = toolingSchema.parse(await json("security/tooling.json"));
     await expect(analyzeSandboxDockerfile(root, tooling)).resolves.toEqual([]);
     await expect(analyzeLiteLlmDockerfile(root, tooling)).resolves.toEqual([]);
+    await expect(analyzeLiteLlmConfig(root)).resolves.toEqual([]);
   });
 
   it("enforces the LiteLLM security package version floors", () => {
