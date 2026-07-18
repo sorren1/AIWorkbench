@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import type { Download } from "@playwright/test";
 
-import { expect, test } from "./fixtures";
+import { expect, reopenCurrentRoute, test } from "./fixtures";
 
 async function downloadedText(download: Download) {
   const path = await download.path();
@@ -111,7 +111,7 @@ test("validation JSON and Markdown exports include effective synthetic evidence"
   }
 });
 
-test("deep links restore screen, issue, artifact, and settings subview after reload", async ({
+test("deep links restore screen, issue, artifact, and settings subview after reopening", async ({
   page,
 }) => {
   await page.goto("/demo/?screen=artifacts&issue=FIN-1150&artifact=spec.md");
@@ -120,7 +120,7 @@ test("deep links restore screen, issue, artifact, and settings subview after rel
     "aria-pressed",
     "true",
   );
-  await page.reload({ waitUntil: "commit" });
+  await reopenCurrentRoute(page);
   await expect(page.getByRole("button", { name: /spec\.md/ })).toHaveAttribute(
     "aria-pressed",
     "true",
@@ -137,7 +137,7 @@ test("deep links restore screen, issue, artifact, and settings subview after rel
     "aria-selected",
     "true",
   );
-  await page.reload({ waitUntil: "commit" });
+  await reopenCurrentRoute(page);
   await expect(page.getByRole("tab", { name: "Governance" })).toHaveAttribute(
     "aria-selected",
     "true",
@@ -197,7 +197,7 @@ test("reset requires confirmation and restores the deterministic baseline and th
     "synthetic-code-reviewer",
   );
   expect(new URL(page.url()).searchParams.get("scenario")).toBeNull();
-  await page.reload({ waitUntil: "commit" });
+  await reopenCurrentRoute(page);
   await expect(page.getByRole("heading", { level: 1, name: "Work Queue" })).toBeVisible();
   await expect(page.getByLabel("Scenario seed")).toHaveValue("baseline");
 });
@@ -210,7 +210,7 @@ test("versioned local preferences persist and the disclosure keeps writes unambi
     "Demo mode · Synthetic data · No external writes",
   );
   await page.getByRole("button", { name: "Switch to dark" }).click();
-  await page.reload({ waitUntil: "commit" });
+  await reopenCurrentRoute(page);
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
   await expect(page.getByRole("button", { name: "Sync Jira (simulated)" })).toBeVisible();
   await page.getByRole("button", { name: /Open issue FIN-1150/ }).click();

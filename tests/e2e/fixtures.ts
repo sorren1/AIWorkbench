@@ -20,3 +20,9 @@ export const test = base.extend<{ browserErrorGuard: undefined }>({
 
 export { expect };
 export type { Page } from "@playwright/test";
+
+export async function reopenCurrentRoute(page: import("@playwright/test").Page): Promise<void> {
+  const route = page.url();
+  await page.goto("about:blank", { waitUntil: "commit" });
+  await page.goto(route, { waitUntil: "commit" });
+}

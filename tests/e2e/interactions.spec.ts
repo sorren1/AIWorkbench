@@ -1,4 +1,4 @@
-import { expect, test } from "./fixtures";
+import { expect, reopenCurrentRoute, test } from "./fixtures";
 
 test("skip links move keyboard focus to each page's main content", async ({
   browserName,
@@ -141,7 +141,7 @@ test("the guided walkthrough resumes its URL-bound step after interruption", asy
     }),
   ).toBeVisible();
 
-  await page.reload({ waitUntil: "commit" });
+  await reopenCurrentRoute(page);
   await expect(progress).toHaveAttribute("aria-valuenow", "5");
 
   await page.getByRole("button", { name: "Next" }).click();

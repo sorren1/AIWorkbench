@@ -1,7 +1,7 @@
 import { readFile } from "node:fs/promises";
 import type { Download } from "@playwright/test";
 
-import { expect, test } from "./fixtures";
+import { expect, reopenCurrentRoute, test } from "./fixtures";
 
 async function downloadedText(download: Download): Promise<string> {
   const path = await download.path();
@@ -17,7 +17,7 @@ test("control-plane deep link exposes searchable versioned registry details", as
   await expect(
     page.getByText("gateway implemented; live provider path not validated", { exact: true }),
   ).toBeVisible();
-  await page.reload({ waitUntil: "commit" });
+  await reopenCurrentRoute(page);
   await expect(page.getByRole("heading", { level: 1, name: "Control Plane" })).toBeVisible();
 
   await page.getByRole("tab", { name: /^Tools/ }).click();
