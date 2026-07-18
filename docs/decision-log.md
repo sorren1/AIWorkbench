@@ -680,3 +680,23 @@ Require every bounded write to contain at least one canonical target before eval
 - One invalid member denies the entire target list; valid entries cannot mask an outside or malformed path.
 - The MCP server remains a second real-path and symlink boundary, but invalid requests are stopped before approval or protocol execution.
 - URI targets remain supported only in canonical `scheme://authority/path` form.
+
+## ADR-031 — Route public vulnerability disclosure through GitHub private reporting
+
+- Status: Accepted
+- Date: 2026-07-18
+- Detailed record: [`SECURITY.md`](../SECURITY.md)
+
+### Context
+
+The public site needs an RFC 9116 discovery record without publishing a personal email address. The public GitHub repository provides an enabled private vulnerability-reporting channel and renders the tracked security policy at a stable repository URL.
+
+### Decision
+
+Publish `/.well-known/security.txt` with the deployed site as its canonical URI, GitHub's private advisory form as `Contact`, the GitHub-rendered `SECURITY.md` page as `Policy`, English as the preferred language, and an expiry less than one year in the future. Declare `text/plain; charset=utf-8` explicitly at the Vercel edge and test the observed deployed response.
+
+### Consequences
+
+- Researchers receive a private, structured disclosure channel without exposing personal contact data.
+- The expiry intentionally becomes release-blocking if the contact record is not reviewed before it becomes stale.
+- Changing the production domain, repository owner/name, reporting setting, or policy location requires updating and redeploying this record.

@@ -8,6 +8,23 @@ if (!deploymentBaseUrl) {
 
 const deploymentOrigin = new URL(deploymentBaseUrl).origin;
 const expectedCanonicalUrl = process.env.EXPECTED_CANONICAL_URL?.replace(/\/+$/, "");
+const securityTxtCanonical =
+  "https://ai-delivery-workbench-onedermant1-9606-workbench1.vercel.app/.well-known/security.txt";
+const privateReportingUrl = "https://github.com/sorren1/AIWorkbench/security/advisories/new";
+const securityPolicyUrl = "https://github.com/sorren1/AIWorkbench/security/policy";
+
+function securityTxtFields(contents: string): ReadonlyMap<string, readonly string[]> {
+  const fields = new Map<string, string[]>();
+  for (const line of contents.split(/\r?\n/u)) {
+    if (!line || line.startsWith("#")) continue;
+    const separator = line.indexOf(":");
+    expect(separator, `Malformed security.txt line: ${line}`).toBeGreaterThan(0);
+    const name = line.slice(0, separator);
+    const value = line.slice(separator + 1).trim();
+    fields.set(name, [...(fields.get(name) ?? []), value]);
+  }
+  return fields;
+}
 
 test("serves every public route directly and uses the custom 404", async ({ request }) => {
   for (const path of ["/", "/demo/", "/writing/governing-ai-assisted-delivery/"]) {
@@ -18,6 +35,26 @@ test("serves every public route directly and uses the custom 404", async ({ requ
   const notFound = await request.get("/deployment-verification-missing-route");
   expect(notFound.status()).toBe(404);
   await expect(notFound.text()).resolves.toContain("Page not found");
+});
+
+test("publishes a current RFC 9116 security.txt with private reporting", async ({ request }) => {
+  const response = await request.get("/.well-known/security.txt");
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"]).toMatch(/^text\/plain(?:;\s*charset=utf-8)?$/iu);
+
+  const contents = await response.text();
+  const fields = securityTxtFields(contents);
+  expect(fields.get("Canonical")).toEqual([securityTxtCanonical]);
+  expect(fields.get("Contact")).toEqual([privateReportingUrl]);
+  expect(fields.get("Policy")).toEqual([securityPolicyUrl]);
+  expect(fields.get("Preferred-Languages")).toEqual(["en"]);
+  expect(fields.get("Expires")).toHaveLength(1);
+
+  const expires = Date.parse(fields.get("Expires")?.[0] ?? "");
+  expect(expires).not.toBeNaN();
+  expect(expires).toBeGreaterThan(Date.now());
+  expect(expires).toBeLessThanOrEqual(Date.now() + 366 * 24 * 60 * 60 * 1000);
+  expect(contents).not.toContain("mailto:");
 });
 
 test("applies security headers and the intended static cache policy", async ({ page, request }) => {
