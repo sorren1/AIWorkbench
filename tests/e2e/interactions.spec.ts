@@ -141,7 +141,7 @@ test("the guided walkthrough resumes its URL-bound step after interruption", asy
     }),
   ).toBeVisible();
 
-  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.reload({ waitUntil: "commit" });
   await expect(progress).toHaveAttribute("aria-valuenow", "5");
 
   await page.getByRole("button", { name: "Next" }).click();

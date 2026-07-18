@@ -581,12 +581,13 @@ The complete hosted release gate runs cold container builds, vulnerability scans
 
 ### Decision
 
-Run Playwright with one worker and a 45-second default test timeout in CI while retaining two workers and the 30-second timeout locally. Reload the static app only through `DOMContentLoaded`, then assert the application-specific ready state. Apply a theme-token change atomically in a layout effect: mark the document as switching, disable transitions for that frame, update the theme, and remove the marker on the next animation frame. Before auditing dark-theme contrast, require the target theme and the removal of that marker. Launch the pinned Chromium with `--no-sandbox --disable-setuid-sandbox` only for Lighthouse on the ephemeral CI runner, where it visits only the repository's trusted local static build. Keep retries visible and release-blocking; do not suppress Axe rules or browser failures.
+Run Playwright with one worker and a 90-second per-test timeout in CI while retaining two workers and the 30-second timeout locally. Disable CI retries so a first-attempt failure cannot be hidden inside a green release gate. Reload the static app only through navigation commit, then assert the application-specific ready state; perform one-time authorization cleanup after a commit-only setup navigation rather than waiting for a redundant page load. Apply a theme-token change atomically in a layout effect: mark the document as switching, disable transitions for that frame, update the theme, and remove the marker on the next animation frame. Before auditing dark-theme contrast, require the target theme and the removal of that marker. Launch the pinned Chromium with `--no-sandbox --disable-setuid-sandbox` only for Lighthouse on the ephemeral CI runner, where it visits only the repository's trusted local static build. Do not suppress Axe rules or browser failures.
 
 ### Consequences
 
 - Hosted browser coverage takes longer but avoids contention between heavyweight engines on the release runner.
-- Reload checks no longer depend on fonts, images, or another nonessential resource completing before application assertions begin.
+- Reload checks no longer depend on lifecycle events, fonts, images, or another nonessential resource completing before application assertions begin.
+- A hosted browser gate either passes on its first attempt or fails the release; there is no successful-but-flaky state.
 - Visitors never see the intermediate low-contrast foreground/background combinations that a gradual custom-property transition can produce.
 - The contrast assertion evaluates the stable UI state and still fails if the final token is below the required ratio.
 - The CI-only Lighthouse browser has no Chromium process sandbox; the surrounding ephemeral runner remains the isolation boundary and the audited origin is local and repository-controlled.

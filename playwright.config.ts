@@ -8,8 +8,8 @@ export default defineConfig({
   testDir: "./tests/e2e",
   fullyParallel: false,
   forbidOnly: isCI,
-  retries: isCI ? 1 : 0,
-  timeout: isCI ? 45_000 : 30_000,
+  retries: 0,
+  timeout: isCI ? 90_000 : 30_000,
   workers: isCI ? 1 : 2,
   reporter: isCI
     ? [["github"], ["html", { open: "never", outputFolder: "playwright-report" }]]

@@ -1,7 +1,7 @@
 import { expect, test } from "./fixtures";
 
 test.beforeEach(async ({ page }) => {
-  await page.goto("/demo/");
+  await page.goto("/demo/", { waitUntil: "commit" });
   await page.evaluate(() => localStorage.removeItem("ai-delivery-workbench.authorization.v1"));
 });
 
@@ -30,7 +30,7 @@ test("approval inbox persists a bound request and enforces distinct validator ap
     page.getByText("Decision unavailable for this persona", { exact: true }),
   ).toBeVisible();
 
-  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.reload({ waitUntil: "commit" });
   await expect(page.getByText("approval.browser.1", { exact: true }).first()).toBeVisible();
   await page
     .getByLabel("View authorization as synthetic persona")
@@ -44,7 +44,7 @@ test("approval inbox persists a bound request and enforces distinct validator ap
       .first(),
   ).toBeVisible();
 
-  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.reload({ waitUntil: "commit" });
   await expect(
     page
       .locator(".wb-badge")
