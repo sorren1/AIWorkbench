@@ -632,6 +632,11 @@ html {
   color: var(--text-secondary);
 }
 
+.site-matrix a {
+  text-decoration: underline;
+  text-underline-offset: 0.18em;
+}
+
 .site-status {
   display: inline-flex;
   padding: 4px 8px;
