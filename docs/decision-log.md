@@ -565,5 +565,6 @@ Generate and enforce exact public-screenshot pixels on Linux, the hosted release
 ### Consequences
 
 - Hosted Quality rejects stale public screenshots with the existing strict pixel thresholds.
+- A strict hosted mismatch retains only the generated PNG in the restricted, short-lived security artifact so the canonical asset can be reviewed and refreshed without disabling the gate.
 - Windows development detects broken routes, missing headings, capture failures, and dimension changes without misclassifying operating-system font rasterization as application drift.
 - Public screenshot regeneration for a release must run on Linux before the audited commit is accepted.

@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { spawn } from "node:child_process";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
-import { resolve } from "node:path";
+import { basename, resolve } from "node:path";
 
 import { chromium, type Page } from "@playwright/test";
 import { PNG } from "pngjs";
@@ -18,6 +18,7 @@ const host = "127.0.0.1";
 const port = 4176;
 const baseUrl = `http://${host}:${port}`;
 const outputDirectory = resolve(root, "public", "assets", "screenshots");
+const mismatchDirectory = resolve(root, ".security-reports", "screenshot-mismatch");
 const socialSourcePath = resolve(root, "public", "assets", "social-card.svg");
 const socialOutputPath = resolve(root, "public", "assets", "social-card.png");
 const viteBinary = resolve(root, "node_modules", "vite", "bin", "vite.js");
@@ -109,10 +110,13 @@ async function writeOrVerify(path: string, value: Uint8Array): Promise<void> {
         difference.differingPixels > MAX_ANTIALIAS_PIXELS ||
         difference.maxChannelDelta > MAX_CHANNEL_DELTA
       ) {
+        await mkdir(mismatchDirectory, { recursive: true });
+        const mismatchPath = resolve(mismatchDirectory, basename(path));
+        await writeFile(mismatchPath, value);
         throw new Error(
           `${path} is stale: committed ${digest(expected)}, generated ${digest(value)}, ` +
             `${difference.differingPixels} pixels differ (maximum channel delta ${difference.maxChannelDelta}). ` +
-            "Run npm run screenshots:generate.",
+            `Generated mismatch retained at ${mismatchPath}. Run npm run screenshots:generate.`,
         );
       }
       process.stdout.write(
