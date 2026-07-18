@@ -1607,12 +1607,10 @@ textarea.wb-input {
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-xl);
   z-index: 61;
-  opacity: 0;
   animation: wb-modal-in var(--dur-base) var(--ease-out) forwards;
 }
 @keyframes wb-modal-in {
   to {
-    opacity: 1;
     transform: translate(-50%, -50%);
   }
 }

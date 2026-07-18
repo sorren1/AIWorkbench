@@ -1,5 +1,11 @@
 # Decision log
 
+## 2026-07-18 — Keep dialog content opaque throughout entrance motion
+
+- **Decision:** Animate modal position only; never animate the opacity of the dialog surface or its descendants. Pause the entrance animation at its midpoint in the maintained-browser accessibility suite, require computed opacity `1`, and run Axe against that exact transitional state.
+- **Why:** Whole-surface opacity blends both foreground and background with the page underneath. Firefox exposed a transient primary-button contrast of 4.43:1 during the old fade, below the 4.5:1 requirement even though the fully settled colors passed.
+- **Boundary:** The scrim may still fade because it contains no readable or interactive content. Drawer and toast entrances remain transform-only. Reduced-motion behavior and the existing stable-state Axe coverage remain required.
+
 ## 2026-07-18 — Treat checked pull requests as the approval boundary for sanitized-history releases
 
 - **Decision:** Keep the account-specific GitHub noreply address as the only permitted public author, committer, and annotated-tag address. For a sanitized-history release, run every required check on an up-to-date pull request, reproduce the reviewed linear commit locally with the identical parent and tree, and use a named maintainer ruleset bypass only for the guarded `--force-with-lease` ref correction. Remove and verify the bypass immediately, then require fresh Quality and CodeQL success on the exact corrected commit before evidence generation, tagging, or deployment.

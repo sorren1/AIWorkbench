@@ -1,128 +1,109 @@
 # Vercel deployment verification
 
-- Status: Preview verified; GitHub automation blocked on account connection; Production deferred
-- Review date: 2026-07-17
-- Git branch: `codex/vercel-deployment`
-- Release baseline: `v1.0.0` at `cf42eee54649812b91b04c9494b4dc7a0d935ea5`
-- Deployment configuration commit: `7e833645cdabb652e8102532a0a3016b3255d030`
+- Status: GitHub automation connected and verified; exact tagged Preview pending; Production blocked on an owner-selected custom domain
+- Review date: 2026-07-18
 - Source repository: <https://github.com/sorren1/AIWorkbench>
-- Preview URL: <https://ai-delivery-workbench-1828w6v09-workbench1.vercel.app>
-- Production URL: Not created. No custom domain has been selected or verified.
+- Vercel project: `workbench1/ai-delivery-workbench`
+- Release baseline: `v1.0.2` at `7b2ec2ae8c215751b60a9505a05d0b5799061145`
+- Current source review: <https://github.com/sorren1/AIWorkbench/pull/9>
+- Intended evidence release: `v1.0.4` (`v1.0.3` was abandoned before tagging after the exact-main audit exposed a transitional contrast failure)
+- Production URL: Not created. The account has no owner-selected custom domain.
 
-This record distinguishes tracked readiness from provider evidence. A local build, a `vercel.json` file, or an account dashboard is not a deployed preview and is not evidence of edge headers, DNS, TLS, or route behavior.
+This record distinguishes tracked readiness, GitHub evidence, and provider evidence. A local build, a `vercel.json` file, an account dashboard, or a failed deployment is not evidence of a Ready hosted artifact. Historical failures are retained as provider audit history and are not represented as successful deployment evidence.
 
-## Local pre-deployment evidence
+## Re-audit disposition
 
-| Check                                  | Result | Evidence                                                                                                                    |
-| -------------------------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------- |
-| Clean lockfile install                 | PASS   | `npm ci` added 766 packages and reported zero npm audit vulnerabilities.                                                    |
-| Complete release gate                  | PASS   | `npm run check:all` exited zero in 327.6 seconds.                                                                           |
-| Unit/integration coverage suite        | PASS   | 21 files passed, 2 live-provider files skipped; 116 tests passed and 2 skipped.                                             |
-| Browser/E2E/accessibility/visual suite | PASS   | Chromium, Firefox, WebKit, and visual projects: 137 passed, 2 documented clipboard-capability skips.                        |
-| Evidence and supply-chain validation   | PASS   | Recorded sandbox/schema/trace evidence validated; six supply-chain controls passed with no suppressions.                    |
-| Production build and static links      | PASS   | Vite emitted the multi-page `dist/` tree; 116 Markdown links across 54 documents and static HTML routes passed.             |
-| Bundle budgets                         | PASS   | Case study 11,537 B gzip; demo entry 110,555 B gzip; total JavaScript 125,519 B gzip.                                       |
-| Local Lighthouse assertions            | PASS   | Desktop and mobile case-study/demo profiles passed the checked-in thresholds. These results are local, not hosted evidence. |
+| Area                                          | Result                      | Finding and disposition                                                                                                                                                                                                                                                                    |
+| --------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GitHub account authentication                 | RESOLVED                    | The Vercel account accepts the GitHub login connection for the approved GitHub identity. Authentication alone did not install the repository integration.                                                                                                                                  |
+| Vercel GitHub App                             | RESOLVED                    | The official Vercel GitHub App was installed for the personal `sorren1` account with repository access limited to `sorren1/AIWorkbench`, then the Vercel project was connected to that repository.                                                                                         |
+| Automatic branch and pull-request deployments | VERIFIED                    | Pushing pull request 9 caused Vercel to clone the exact branch commit and report a Vercel status on GitHub. The source-only branch failed at the checked-in release-evidence gate, which is the required fail-closed behavior rather than an integration failure.                          |
+| Email deployment failures                     | EXPLAINED                   | The notifications were caused by the missing Vercel repository integration/team authorization path. They did not invalidate local tests or GitHub Actions, but they did mean that automatic Vercel Preview verification had not occurred. The integration gap is now resolved.             |
+| Production branch tracking                    | CONTAINED                   | Production tracking is set to the dedicated `production-hold` branch, not `main`. The branch points to reviewed evidence and is not used for ongoing development, preventing source and evidence commits on `main` from being treated as Production before a canonical domain exists.      |
+| Transitional modal contrast                   | FIXED AND REGRESSION-TESTED | The exact-main Firefox audit for the abandoned v1.0.3 evidence commit sampled a primary button during modal fade-in at 4.43:1. Dialog content now remains fully opaque while position animates; the maintained accessibility test pauses the animation at its midpoint and runs Axe there. |
+| v1.0.3 evidence                               | ABANDONED                   | No `v1.0.3` tag was created. The failed exact-main audit prevented release, as designed. Replacement evidence will use `v1.0.4` so the abandoned evidence identity is not reused.                                                                                                          |
+| Exact tagged Preview                          | PENDING                     | Preview-scoped release bindings must be updated to the final `v1.0.4` tag, audited source commit, and evidence commit. A new Git branch at the exact tagged evidence commit will then trigger and prove an automatic Ready Preview.                                                        |
+| Production                                    | BLOCKED                     | There is no owner-selected custom domain or `SITE_CANONICAL_URL`. The build deliberately rejects temporary `*.vercel.app` values as canonical production origins. Production deployment and production SEO/DNS/TLS verification therefore remain unrun.                                    |
+| Live E2B provider validation                  | BLOCKED EXTERNALLY          | `E2B_API_KEY` is unavailable. The deterministic local adapter is tested; no live-provider success is claimed.                                                                                                                                                                              |
+| Live model-gateway validation                 | BLOCKED EXTERNALLY          | A live LiteLLM master key/provider endpoint is unavailable. The deterministic gateway contract is tested; no live-provider success is claimed.                                                                                                                                             |
+
+## Current local and GitHub evidence
+
+| Check                                         | Result | Evidence                                                                                                                                                                                                                                   |
+| --------------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Clean install and dependency audit            | PASS   | The current `npm ci` path uses the committed lockfile and reports zero npm audit vulnerabilities.                                                                                                                                          |
+| Complete local release gate                   | PASS   | `npm run check:all` exited zero in 529.1 seconds after the modal-transition fix.                                                                                                                                                           |
+| Unit/integration suite                        | PASS   | 24 files passed, 2 live-provider files were skipped; 134 tests passed and 2 skipped.                                                                                                                                                       |
+| Browser, accessibility, E2E, and visual suite | PASS   | 140 maintained-browser tests passed across Chromium, Firefox, and WebKit; 2 clipboard-capability tests were skipped as documented.                                                                                                         |
+| Transitional accessibility regression         | PASS   | The About dialog is paused at the midpoint of its entrance animation, computed opacity is required to equal `1`, and Axe is run against that exact state in every maintained browser.                                                      |
+| Pull-request quality gates                    | PASS   | Pull request 9 passed Core release controls, Chromium, Firefox, WebKit, Performance, Dependency Review, CodeQL analysis, and the CodeQL status check. The Vercel status is intentionally failing until checked-in release evidence exists. |
+| Supply-chain controls                         | PASS   | Seven controls passed using pinned scanner images; 15 reviewed suppressions were reported. Detailed scanner output remains in ignored or restricted evidence storage.                                                                      |
+| Bundle budgets                                | PASS   | Measured demo entry JavaScript is 113,308 B gzip, total JavaScript is 130,869 B gzip, and total CSS is 17,151 B gzip, within tracked budgets.                                                                                              |
+| Lighthouse                                    | PASS   | The checked-in desktop and mobile profiles passed their route-specific performance, accessibility, best-practices, and SEO thresholds locally. Hosted Preview SEO is evaluated separately because Vercel adds Preview noindex behavior.    |
 
 ## Tracked deployment contract
 
-| Setting                  | Value                                               | Reason                                                                                             |
-| ------------------------ | --------------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Framework                | Vite                                                | The repository already produces a conventional multi-page static build.                            |
-| Install                  | `npm ci`                                            | Uses only the tracked lockfile.                                                                    |
-| Build                    | `npm run build`                                     | Runs the normal production build.                                                                  |
-| Output                   | `dist`                                              | Contains root case study, article, `/demo/`, `404.html`, metadata, and local assets.               |
-| Routing                  | Vercel filesystem routing                           | No SPA rewrite; direct page refreshes and `404.html` retain their intended behavior.               |
-| Hashed assets            | `/assets/immutable/`                                | Only Vite-hashed JavaScript and CSS receive a one-year immutable cache directive.                  |
-| HTML and unhashed assets | Vercel default `public, max-age=0, must-revalidate` | Avoids stale browser HTML and does not incorrectly mark stable-name assets immutable.              |
-| Canonical URL            | `SITE_CANONICAL_URL`, Production environment only   | Preview builds omit canonical-dependent tags; the typed parser rejects temporary Vercel hostnames. |
-| Production branch        | `main`                                              | Non-production branches and pull requests remain Preview deployments.                              |
-| Release commit binding   | `VERCEL_GIT_COMMIT_SHA`                             | Must equal the separately approved, annotated-tag evidence commit or the build fails.              |
+| Setting                   | Value                                                                                   | Reason                                                                                                       |
+| ------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Framework                 | Vite                                                                                    | The repository produces a conventional multi-page static build.                                              |
+| Runtime                   | Node 22.x                                                                               | Matches `package.json`, `.nvmrc`, CI, and the Vercel project setting.                                        |
+| Install                   | `npm ci`                                                                                | Uses only the committed lockfile.                                                                            |
+| Build                     | `npm run build`                                                                         | Runs the normal production build and release-binding checks.                                                 |
+| Output                    | `dist`                                                                                  | Contains the root case study, article, `/demo/`, authored `404.html`, metadata, and local assets.            |
+| Routing                   | Vercel filesystem routing                                                               | No SPA rewrite; direct page refreshes and the custom 404 retain their intended behavior.                     |
+| Hashed assets             | `/assets/immutable/`                                                                    | Only Vite-hashed JavaScript and CSS receive one-year immutable caching.                                      |
+| HTML and unhashed assets  | `public, max-age=0, must-revalidate`                                                    | Prevents stale browser HTML and avoids marking stable-name assets immutable.                                 |
+| Canonical URL             | `SITE_CANONICAL_URL`, Production only                                                   | Preview omits canonical-dependent tags; the typed parser rejects temporary Vercel hostnames.                 |
+| Production branch         | `production-hold`                                                                       | Prevents ordinary `main` pushes from becoming Production until the domain and production bindings are ready. |
+| Release commit binding    | `VERCEL_GIT_COMMIT_SHA`                                                                 | Must equal the separately approved, annotated-tag evidence commit or the build fails.                        |
+| Explicit release bindings | `APPROVED_RELEASE_TAG`, `APPROVED_AUDITED_COMMIT_SHA`, `APPROVED_DEPLOYMENT_COMMIT_SHA` | Prevents a deployment from silently substituting an unreviewed source, evidence commit, or tag.              |
 
-`vercel.json` contains no rewrites, functions, or Vercel-specific application runtime. The conventional static `404.html` is the custom not-found document.
+`vercel.json` contains no rewrites, functions, or Vercel-specific application runtime. Preview Deployment Protection is disabled for public artifact auditability, and the Vercel Toolbar is disabled for pre-production and production. The repository contains no bypass credential.
 
-The Vercel project setting uses Node 22.x, matching the tracked Node 22 engine and `.nvmrc`. Preview Deployment Protection was disabled so an external browser and automation could audit the static public artifact. The repository contains no protection bypass credential. Every release deployment must additionally provide `APPROVED_DEPLOYMENT_COMMIT_SHA`, `APPROVED_AUDITED_COMMIT_SHA`, and `APPROVED_RELEASE_TAG`; a successful build emits `security/deployment-binding.json` and displays the deployed commit in the public evidence section.
+## Git integration evidence
 
-## Preview-first procedure
+The Vercel authentication page accepting GitHub was necessary but insufficient. Vercel project Git settings still required the official GitHub App. The app was installed for exactly this repository, and project Git settings now show one connected source: `sorren1/AIWorkbench`. The CLI confirms that the repository is already connected.
 
-1. Push `codex/vercel-deployment` to the configured GitHub origin.
-2. Create or link the Vercel project without assigning a custom production domain. Keep `main` as the Production Branch and enable the GitHub integration's pull-request comments and automatic Preview deployments.
-3. Do not set `SITE_CANONICAL_URL` for Preview. Set it only in the Production environment after the owner has selected the exact HTTPS custom-domain origin or dedicated subpath.
-4. Open a pull request from `codex/vercel-deployment`. Record the immutable Preview URL below only after the deployment reports Ready.
-5. Run the hosted suite against that URL:
+The first post-connection pull-request push created an automatic Vercel Preview attempt at:
 
-   ```powershell
-   $env:DEPLOYMENT_BASE_URL = $previewUrl
-   Remove-Item Env:EXPECTED_CANONICAL_URL -ErrorAction SilentlyContinue
-   npm run test:deployment
-   ```
+- <https://ai-delivery-workbench-17fos00et-workbench1.vercel.app>
 
-6. In an external browser, inspect `/`, `/demo/`, `/writing/governing-ai-assisted-delivery/`, and a missing route. Verify keyboard navigation, focus, responsive behavior, and that DevTools Network shows only the Preview origin during ordinary use.
-7. Run desktop and mobile Lighthouse audits against `/` and `/demo/`. Apply the repository thresholds: case-study Performance at least 90 and Accessibility, Best Practices, and SEO at least 95; demo Performance at least 85, Accessibility and Best Practices at least 95, and SEO at least 90.
-8. Inspect the Preview response headers with `curl.exe --head $previewUrl`. Confirm CSP, Referrer-Policy, X-Content-Type-Options, Permissions-Policy, Cross-Origin-Opener-Policy, and revalidation-safe HTML caching. Inspect one `/assets/immutable/` response and confirm its immutable cache directive.
-9. Record every result in the matrix below. Do not merge or promote while any required check is failed or unrun.
+Its build cloned the reviewed source commit, ran `npm ci`, reported zero vulnerabilities, and then stopped with `Vercel release build requires checked-in audited release evidence.` That failure proves both the automatic Git trigger and the release guard. It is not a deployable artifact and must not be used as Preview evidence.
 
-## Preview evidence
+Connecting Git also triggered two short-lived Production attempts while branch tracking still named `main`. Both stopped at the stale release-binding guard and never became Ready. No custom domain was assigned and no Production artifact was accepted. Production tracking was then moved to `production-hold` and verified after reload.
 
-| Check                                      | Result                           | Evidence                                                                                                                                                                                                                                                                                                                    |
-| ------------------------------------------ | -------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Preview deployment of pushed commit        | PASS                             | Vercel deployment `dpl_6q5rfAAib27w7ga6c7TtMAvvAgpW` reached Ready from the pre-public branch history. Its rewritten configuration commit is `7e833645cdabb652e8102532a0a3016b3255d030`; the historical deployment itself predates the rewrite.                                                                             |
-| Automatic branch and pull-request previews | BLOCKED                          | `vercel git connect` returned HTTP 400 because the new Vercel account does not yet have a GitHub login connection. No claim of automatic Git previews is made until the owner connects GitHub and a subsequent branch push is observed.                                                                                     |
-| Smoke and direct refresh                   | PASS                             | Hosted Playwright returned 200 for `/`, `/demo/`, and `/writing/governing-ai-assisted-delivery/`. The external browser opened the case study, guided-demo entry, and article directly.                                                                                                                                      |
-| Custom 404 and status code                 | PASS                             | A nonexistent route returned HTTP 404 and the authored `Page not found` content in automation and the external browser.                                                                                                                                                                                                     |
-| Hosted axe checks                          | PASS                             | Root and principal demo screen had zero critical or serious findings.                                                                                                                                                                                                                                                       |
-| Keyboard and responsive browser review     | PASS                             | The hosted guided walkthrough exposed correct focusable controls and an active Next control; the full keyboard and width matrix had already passed the same production artifact locally.                                                                                                                                    |
-| Metadata and preview canonical omission    | PASS                             | Preview HTML omitted canonical and `og:url`; `robots.txt` omitted a Sitemap line and `sitemap.xml` contained no locations. The temporary Vercel URL was not promoted to canonical.                                                                                                                                          |
-| Security headers and CSP                   | PASS                             | Observed CSP matched the typed local-only policy, including `frame-ancestors 'none'`; Referrer-Policy, nosniff, Permissions-Policy, and Cross-Origin-Opener-Policy were present.                                                                                                                                            |
-| HTML and immutable-asset caching           | PASS                             | HTML returned `public, max-age=0, must-revalidate`; hashed CSS under `/assets/immutable/` returned `public, max-age=31536000, immutable`.                                                                                                                                                                                   |
-| Internal/source links                      | PASS                             | Hosted route checks and the configured GitHub source link passed; external source links use safe opener attributes.                                                                                                                                                                                                         |
-| External-request inspection                | REQUIRES FRESH DEPLOYMENT        | The Vercel Toolbar is now set to Off for both pre-production and production. The hosted suite's primary path sends no skip header and rejects `vercel.live`, toolbar markers, inline styles, CSP violations, or external requests on every HTML route; a separate test retains the documented `x-vercel-skip-toolbar` path. |
-| Desktop Lighthouse                         | PASS WITH PREVIEW SEO LIMITATION | Root and demo scored 100 Performance, 100 Accessibility, and 100 Best Practices. SEO scored 66/63 only because Vercel adds `X-Robots-Tag: noindex` to Preview responses.                                                                                                                                                    |
-| Mobile Lighthouse                          | PASS WITH PREVIEW SEO LIMITATION | Root scored 96/100/100 and demo 100/100/100 for Performance/Accessibility/Best Practices. SEO again scored 66/63 because of the provider Preview noindex header. Production SEO thresholds remain unchanged and unverified.                                                                                                 |
+## Exact tagged Preview procedure
 
-## Provider observations during Preview creation
+1. Merge the reviewed source commit only after every required pull-request check passes.
+2. Require fresh Quality and CodeQL success on that exact `main` commit.
+3. Generate one summary-only evidence child bound to the source commit and the exact successful CodeQL run; review it through a pull request and require fresh checks again.
+4. Create and push annotated tag `v1.0.4` on the exact evidence child. Run `npm run security:release-evidence:require` against the tag.
+5. Update only the Preview scope of the three explicit release-binding variables. Do not change Production bindings and do not set `SITE_CANONICAL_URL` for Preview.
+6. Push a new non-production branch whose ref points exactly to the tagged evidence commit. Require the automatic Vercel deployment to reach Ready.
+7. Set `DEPLOYMENT_BASE_URL` to the immutable Preview URL, leave `EXPECTED_CANONICAL_URL` unset, and run `npm run test:deployment`.
+8. Inspect `/security/deployment-binding.json` and require exact tag, audited source commit, evidence commit, and CodeQL URL/count bindings.
+9. In an external browser, inspect `/`, `/demo/`, `/writing/governing-ai-assisted-delivery/`, and a missing route. Verify direct refresh, the authored 404 status/content, keyboard navigation, focus handling, responsive layouts, and no unexpected external requests or toolbar injection.
+10. Inspect HTML and hashed-asset headers. Require CSP without `unsafe-inline`, Referrer-Policy, nosniff, Permissions-Policy, Cross-Origin-Opener-Policy, revalidation-safe HTML caching, and immutable caching only for hashed assets.
+11. Run hosted desktop and mobile Lighthouse audits for `/` and `/demo/`. Record Preview noindex effects separately from code-controlled SEO.
 
-- On an empty project, Vercel CLI 56.3.1 classified the first explicit `--target preview` invocation as Production and assigned only a generated `vercel.app` alias. That deployment was removed immediately, before audit. It had no custom domain and canonical metadata remained absent.
-- A subsequent default `vercel deploy` created the expected Preview target. This is the deployment recorded above.
-- The project initially defaulted to Node 24.x despite the repository's Node 22 contract. The project setting was corrected to Node 22.x and the recorded Preview was rebuilt after that correction.
-- Standard Preview Protection initially redirected automation to Vercel's login page. It was disabled for this public portfolio Preview; the hosted suite was rerun only after direct public access was confirmed.
-- Vercel adds `X-Robots-Tag: noindex` to Preview responses. This correctly prevents indexing but lowers hosted Preview Lighthouse SEO. The production SEO gate still requires the repository thresholds on a real custom domain.
-- The Vercel Toolbar setting is Off for both pre-production and production. Vercel reported that a new deployment is required for the change to take effect; this configuration change did not trigger a dashboard redeploy.
+## Production gate
 
-## Production promotion and verification
+Production remains intentionally unrun until the owner supplies one exact custom HTTPS domain. The Vercel project currently lists only provider-assigned `vercel.app` domains, which are not accepted as this case study's production canonical identity.
 
-After all Preview checks pass:
+After a domain is selected:
 
-1. Select one custom domain, add it to the Vercel project, and configure the required DNS records. Configure any alternate domain to redirect permanently to that one canonical origin.
-2. Set `SITE_CANONICAL_URL` to that exact HTTPS origin in the Production environment only. Trigger a fresh Preview if Vercel supports a production-environment test deployment; otherwise review the generated `dist/` locally with the same setting before merging.
-3. Merge the reviewed commit to `main`. Do not use an unreviewed dashboard redeploy as a substitute for the Git-backed source commit.
-4. Confirm Vercel reports the production deployment Ready and HTTPS valid for the custom domain.
-5. Run the hosted suite against production with both environment variables set:
+1. Add it to the project, configure and verify DNS/TLS, and choose one canonical origin. Redirect any alternate domain permanently to that origin.
+2. Set `SITE_CANONICAL_URL` to the exact HTTPS canonical origin in Production only.
+3. Refresh the Production-scoped release bindings to the approved tag/source/evidence tuple.
+4. Move Production branch tracking from `production-hold` to the approved release branch only when ready to deploy.
+5. Require Ready status, then run `npm run test:deployment` with both `DEPLOYMENT_BASE_URL` and matching `EXPECTED_CANONICAL_URL`.
+6. Repeat route, browser, accessibility, header, network, cache, link, and desktop/mobile Lighthouse checks. Require canonical tags, `og:url`, Open Graph image URL, `robots.txt`, and every sitemap location to use only the selected domain.
+7. Update public live-demo links only after all Production checks pass.
 
-   ```powershell
-   $env:DEPLOYMENT_BASE_URL = $productionUrl
-   $env:EXPECTED_CANONICAL_URL = $productionUrl
-   npm run test:deployment
-   ```
+## Items that do not require corrective action
 
-6. Re-run the browser, Lighthouse, header, link, and network checks from the Preview procedure. Confirm the canonical tags, `og:url`, Open Graph image URL, `robots.txt` sitemap line, and every `sitemap.xml` location use only the chosen custom domain.
-7. Update the README live-demo link only after the final URL exists and these checks pass. Record the deployed commit and tag here; do not move `v1.0.0` to a different commit.
-
-## Production evidence
-
-| Check                                                | Result   | Evidence                                        |
-| ---------------------------------------------------- | -------- | ----------------------------------------------- |
-| Custom domain and HTTPS                              | NOT RUN  | No domain configured.                           |
-| Canonical/robots/sitemap/Open Graph URLs             | NOT RUN  | No domain configured.                           |
-| Direct route refresh and custom 404                  | NOT RUN  | No production deployment.                       |
-| Hosted accessibility, smoke, link, and network suite | NOT RUN  | No production deployment.                       |
-| Security headers and CSP                             | NOT RUN  | No production deployment.                       |
-| Desktop/mobile Lighthouse                            | NOT RUN  | No production deployment.                       |
-| README final URLs                                    | DEFERRED | Must follow successful production verification. |
-
-## Provider-specific limitations
-
-- GitHub integration and automatic branch/pull-request previews remain blocked until the owner adds a GitHub login connection to the Vercel account.
-- Production Branch selection, custom-domain DNS, TLS, canonical environment configuration, and alternate-domain redirects remain unverified provider state.
-- Preview authentication is currently disabled for public auditability. If it is re-enabled later, use an owner-controlled verification session; never commit or print a bypass token.
-- The project deliberately does not derive canonical metadata from `VERCEL_URL` or `VERCEL_PROJECT_PRODUCTION_URL`, because those values can resolve to temporary `vercel.app` hostnames.
+- Historical failed Vercel deployment records should remain as provider audit history. They contain no Ready artifact and deleting them would not improve the current source or integration.
+- The failed Vercel status on a source-only pull request is expected. Source commits deliberately omit release evidence; only the reviewed evidence child may produce a release deployment.
+- The two skipped live-provider test files are not silent product failures. They are explicit credential-dependent validations, remain blocked, and are never counted as successful live evidence.
+- Preview `X-Robots-Tag: noindex` behavior is provider-controlled and appropriate for a non-production artifact. Production SEO thresholds still apply on the eventual custom domain.
+- No Vercel Pro upgrade or additional team collaborator is required for the approved single-owner flow now that the authenticated GitHub identity and repository-scoped Vercel App installation are connected.

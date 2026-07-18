@@ -65,7 +65,18 @@ test("principal workbench screens have no serious or critical axe violations", a
 test("modal and drawer surfaces have no serious or critical axe violations", async ({ page }) => {
   await page.goto("/demo/");
   await page.getByRole("button", { name: "About AI Delivery Workbench" }).click();
-  await expect(page.getByRole("dialog", { name: "About AI Delivery Workbench" })).toBeVisible();
+  const aboutDialog = page.getByRole("dialog", { name: "About AI Delivery Workbench" });
+  await expect(aboutDialog).toBeVisible();
+  await aboutDialog.evaluate((element) => {
+    const [animation] = element.getAnimations();
+    const duration = animation?.effect?.getComputedTiming().duration;
+    if (!animation || typeof duration !== "number") {
+      throw new Error("About dialog entrance animation is unavailable.");
+    }
+    animation.pause();
+    animation.currentTime = duration / 2;
+  });
+  await expect(aboutDialog).toHaveCSS("opacity", "1");
   await expectNoSeriousViolations(page, "About dialog");
   await page.keyboard.press("Escape");
 
