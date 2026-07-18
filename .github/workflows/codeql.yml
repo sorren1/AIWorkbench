@@ -7,6 +7,7 @@ on:
   workflow_dispatch:
 
 permissions:
+  actions: read
   contents: read
   packages: read
   security-events: write
@@ -34,3 +35,32 @@ jobs:
         uses: github/codeql-action/analyze@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06 # v4
         with:
           category: /language:javascript-typescript
+          output: codeql-results
+          upload: ${{ github.event.repository.private && 'never' || 'always' }}
+      - name: Require zero release-blocking CodeQL findings
+        shell: bash
+        run: |
+          mapfile -d '' sarif_files < <(find codeql-results -type f -name '*.sarif' -print0)
+          if [[ ${#sarif_files[@]} -eq 0 ]]; then
+            echo "CodeQL did not produce a SARIF result." >&2
+            exit 1
+          fi
+          finding_count=$(jq -s '[.[].runs[]?.results[]?] | length' "${sarif_files[@]}")
+          jq -n \
+            --arg sourceCommit "$GITHUB_SHA" \
+            --arg runUrl "https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            --argjson findingCount "$finding_count" \
+            '{schemaVersion:1, sourceCommit:$sourceCommit, runUrl:$runUrl, releaseBlockingFindings:$findingCount}' \
+            > codeql-results/release-codeql-summary.json
+          if [[ "$finding_count" -ne 0 ]]; then
+            echo "CodeQL reported $finding_count release-blocking finding(s)." >&2
+            exit 1
+          fi
+      - name: Retain hosted CodeQL evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: codeql-evidence-${{ github.sha }}
+          path: codeql-results/
+          if-no-files-found: error
+          retention-days: 30

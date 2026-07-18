@@ -1,5 +1,12 @@
 # Decision log
 
+## 2026-07-18 — Separate audited source, release evidence, and deployment identity
+
+- **Decision:** Audit a clean code commit with no public release summary, then create one direct evidence child whose sole changed path is `public/security/release-summary.json`. Put the annotated public release tag on that evidence child.
+- **Why:** A commit cannot truthfully include its own SHA. Binding the generated summary to its reachable parent removes the previous amended/unreachable-commit failure mode while keeping the evidence diff independently reviewable.
+- **Deployment boundary:** Vercel must expose `VERCEL_GIT_COMMIT_SHA` and it must equal a separately supplied `APPROVED_DEPLOYMENT_COMMIT_SHA`. The static build publishes the full deployment/audit relation in `security/deployment-binding.json`; it refuses an absent or mismatched binding.
+- **Hosted analysis boundary:** CodeQL must run against the audited parent. While the repository remains private without GitHub Advanced Security, the hosted action gates and retains SARIF without claiming GitHub code-scanning ingestion.
+
 ## 2026-07-17 — Pause Dependabot version PRs during sanitized-history publication
 
 - **Decision:** Retain the npm and GitHub Actions Dependabot configuration but set both `open-pull-requests-limit` values to zero during publication.

@@ -16,10 +16,7 @@ import {
   analyzeSandboxDockerfile,
 } from "../scripts/supply-chain/containerPolicy";
 import { versionAtLeast } from "../scripts/supply-chain/versionPolicy";
-import {
-  publicSupplyChainSummarySchema,
-  renderSupplyChainEvidence,
-} from "../src/site/supplyChainEvidence";
+import { readSupplyChainSummary, renderSupplyChainEvidence } from "../src/site/supplyChainEvidence";
 
 const root = resolve(import.meta.dirname, "..");
 
@@ -134,11 +131,14 @@ describe("supply-chain policy", () => {
 });
 
 describe("public supply-chain evidence", () => {
-  it("renders successful controls separately from configured but unvalidated controls", async () => {
-    const summary = publicSupplyChainSummarySchema.parse(
-      await json("public/security/release-summary.json"),
-    );
+  it("never renders a stale summary and presents only a generated evidence child", async () => {
+    const summary = await readSupplyChainSummary(root);
     const html = await renderSupplyChainEvidence(root);
+
+    if (!summary) {
+      expect(html).toContain("No successful supply-chain validation summary is checked in");
+      return;
+    }
 
     expect(summary.artifacts.filter((artifact) => artifact.kind === "SBOM")).toHaveLength(5);
     expect(summary.runtimeImages.map((image) => image.role).sort()).toEqual([
@@ -153,13 +153,13 @@ describe("public supply-chain evidence", () => {
         ),
       ),
     ).toBe(true);
-    expect(summary.controls.find((control) => control.id === "codeql")?.status).toBe(
-      "CONFIGURED_NOT_RUN",
-    );
+    expect(summary.controls.find((control) => control.id === "codeql")?.status).toBe("PASSED");
+    expect(summary.evidence.parentCommit).toBe(summary.release.auditedCommit);
+    expect(summary.source.baseCommit).toBe(summary.release.auditedCommit);
     expect(html).toContain("Executed");
     expect(html).toContain("Scanned digest");
     for (const image of summary.runtimeImages) expect(html).toContain(image.scannedDigest);
-    expect(html).toContain("Configured · not validated");
-    expect(html).not.toContain('site-status--functional">Configured');
+    expect(html).toContain("Audited commit");
+    expect(html).not.toContain("Configured · not validated");
   });
 });

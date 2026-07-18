@@ -37,10 +37,11 @@ This record distinguishes tracked readiness from provider evidence. A local buil
 | HTML and unhashed assets | Vercel default `public, max-age=0, must-revalidate` | Avoids stale browser HTML and does not incorrectly mark stable-name assets immutable.              |
 | Canonical URL            | `SITE_CANONICAL_URL`, Production environment only   | Preview builds omit canonical-dependent tags; the typed parser rejects temporary Vercel hostnames. |
 | Production branch        | `main`                                              | Non-production branches and pull requests remain Preview deployments.                              |
+| Release commit binding   | `VERCEL_GIT_COMMIT_SHA`                             | Must equal the separately approved, annotated-tag evidence commit or the build fails.              |
 
 `vercel.json` contains no rewrites, functions, or Vercel-specific application runtime. The conventional static `404.html` is the custom not-found document.
 
-The Vercel project setting uses Node 22.x, matching the tracked Node 22 engine and `.nvmrc`. Preview Deployment Protection was disabled so an external browser and automation could audit the static public artifact. The repository contains no protection bypass credential.
+The Vercel project setting uses Node 22.x, matching the tracked Node 22 engine and `.nvmrc`. Preview Deployment Protection was disabled so an external browser and automation could audit the static public artifact. The repository contains no protection bypass credential. Every release deployment must additionally provide `APPROVED_DEPLOYMENT_COMMIT_SHA`, `APPROVED_AUDITED_COMMIT_SHA`, and `APPROVED_RELEASE_TAG`; a successful build emits `security/deployment-binding.json` and displays the deployed commit in the public evidence section.
 
 ## Preview-first procedure
 

@@ -11,6 +11,7 @@ Complete this checklist against the candidate commit before publication or taggi
 - [ ] `npm run screenshots:check` verified decoded image pixels within the documented antialias tolerance.
 - [ ] Static and tracked-document links/fragments passed `npm run links:check`.
 - [ ] Production build contains no unplanned external request, credential, or CSP violation.
+- [ ] The audited code commit contains no checked-in `public/security/release-summary.json`.
 
 ## Supply chain
 
@@ -28,6 +29,7 @@ Complete this checklist against the candidate commit before publication or taggi
 - [ ] Every suppression has rule, path, reason, reviewer, review date, expiry, and explicit owner acceptance.
 - [ ] PostgreSQL `gosu` exceptions still match the documented reachability boundary and have not reached 2026-08-15.
 - [ ] Scanner reports were retained as restricted CI artifacts and were not committed to the repository.
+- [ ] Hosted CodeQL's immutable run URL names the audited commit and its retained SARIF contains zero results.
 
 ## Claims and publication
 
@@ -38,3 +40,5 @@ Complete this checklist against the candidate commit before publication or taggi
 - [ ] Canonical/live/contact links contain real public values or remain omitted; no placeholder/dead links are rendered.
 - [ ] Hosted CodeQL, dependency review, security headers, sitemap, canonical metadata, and all public routes were observed at the candidate URL.
 - [ ] The private publication review checklist has been completed separately and remains untracked.
+- [ ] The evidence child changes only `public/security/release-summary.json`; its parent is the audited commit and is reachable from the annotated release tag.
+- [ ] Vercel's `VERCEL_GIT_COMMIT_SHA` equals the separately approved tagged evidence commit, and `/security/deployment-binding.json` displays that full SHA.

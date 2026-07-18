@@ -894,6 +894,40 @@ async function main(): Promise<void> {
       throw new Error("Unable to bind supply-chain summary to source state.");
     }
     const baseCommit = process.env.GITHUB_SHA ?? baseCommitResult.stdout.trim();
+    const releaseTag = process.env.RELEASE_TAG?.trim();
+    const auditedReleaseCommit = process.env.AUDITED_RELEASE_COMMIT_SHA?.trim();
+    const codeqlRunUrl = process.env.CODEQL_RUN_URL?.trim();
+    const codeqlRunCommit = process.env.CODEQL_RUN_COMMIT_SHA?.trim();
+    const codeqlFindingCount = process.env.CODEQL_FINDING_COUNT?.trim();
+    if (recordSummary) {
+      if (statusResult.stdout.trim().length > 0) {
+        throw new Error(
+          "Public release evidence can be recorded only from a clean audited commit.",
+        );
+      }
+      if (!releaseTag?.match(/^v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$/u)) {
+        throw new Error("RELEASE_TAG must identify the new public release tag.");
+      }
+      if (!auditedReleaseCommit?.match(/^[a-f0-9]{40}$/u)) {
+        throw new Error("AUDITED_RELEASE_COMMIT_SHA must be a full commit SHA.");
+      }
+      if (auditedReleaseCommit !== baseCommit) {
+        throw new Error("AUDITED_RELEASE_COMMIT_SHA must equal the clean checked-out commit.");
+      }
+      if (!codeqlRunCommit?.match(/^[a-f0-9]{40}$/u) || codeqlRunCommit !== baseCommit) {
+        throw new Error("CODEQL_RUN_COMMIT_SHA must equal the audited release commit.");
+      }
+      if (
+        !codeqlRunUrl?.match(
+          /^https:\/\/github\.com\/sorren1\/AIWorkbench\/actions\/runs\/[0-9]+$/u,
+        )
+      ) {
+        throw new Error("CODEQL_RUN_URL must be an immutable hosted workflow-run URL.");
+      }
+      if (codeqlFindingCount !== "0") {
+        throw new Error("CODEQL_FINDING_COUNT must be exactly zero before evidence is recorded.");
+      }
+    }
     const generatedAt = new Date().toISOString();
     const runtimeImages = [
       {
@@ -1011,13 +1045,17 @@ async function main(): Promise<void> {
       control({
         id: "codeql",
         label: "GitHub CodeQL JavaScript/TypeScript analysis",
-        status: "CONFIGURED_NOT_RUN",
+        status: recordSummary ? "PASSED" : "CONFIGURED_NOT_RUN",
         scanner: "GitHub CodeQL",
         version: `${tooling.codeql.version} @ ${tooling.codeql.actionSha.slice(0, 12)}`,
         target: "JavaScript/TypeScript",
-        findingCount: null,
-        detail:
-          "The hosted workflow is configured, but no successful GitHub run was available to this local validation.",
+        findingCount: recordSummary ? 0 : null,
+        detail: recordSummary
+          ? "The hosted workflow analyzed the audited release commit and its retained SARIF contained zero release-blocking results."
+          : "The hosted workflow is configured, but no successful GitHub run was supplied to this local validation.",
+        ...(recordSummary && codeqlRunUrl && codeqlRunCommit
+          ? { evidenceUrl: codeqlRunUrl, sourceCommit: codeqlRunCommit }
+          : {}),
       }),
       control({
         id: "python-shell",
@@ -1062,12 +1100,30 @@ async function main(): Promise<void> {
       })),
     );
     const summary: ReleaseSummary = {
-      schemaVersion: 2,
+      schemaVersion: 3,
       generatedAt,
       source: {
         baseCommit,
         revisionKind: statusResult.stdout.trim().length === 0 ? "COMMIT" : "WORKTREE",
         treeDigest: sourceTreeDigest,
+      },
+      release:
+        recordSummary && releaseTag && auditedReleaseCommit
+          ? { tag: releaseTag, auditedCommit: auditedReleaseCommit }
+          : null,
+      evidence:
+        recordSummary && auditedReleaseCommit
+          ? {
+              parentCommit: auditedReleaseCommit,
+              commitPolicy: "DIRECT_CHILD_SUMMARY_ONLY",
+              allowedPaths: ["public/security/release-summary.json"],
+            }
+          : null,
+      deployment: {
+        provider: "VERCEL",
+        commitEnvironment: "VERCEL_GIT_COMMIT_SHA",
+        approvedCommitEnvironment: "APPROVED_DEPLOYMENT_COMMIT_SHA",
+        relation: "TAGGED_EVIDENCE_CHILD_OF_AUDITED_COMMIT",
       },
       controls,
       artifacts,

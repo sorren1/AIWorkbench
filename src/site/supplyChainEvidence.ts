@@ -3,6 +3,8 @@ import { resolve } from "node:path";
 
 import { z } from "zod";
 
+import type { ReleaseDeploymentIdentity, VerifiedDeploymentBinding } from "./deploymentBinding";
+
 const controlSchema = z.object({
   id: z.string(),
   label: z.string(),
@@ -12,16 +14,36 @@ const controlSchema = z.object({
   target: z.string(),
   findingCount: z.number().nullable(),
   detail: z.string(),
+  evidenceUrl: z.url().optional(),
+  sourceCommit: z
+    .string()
+    .regex(/^[a-f0-9]{40}$/)
+    .optional(),
 });
 
 export const publicSupplyChainSummarySchema = z
   .object({
-    schemaVersion: z.literal(2),
+    schemaVersion: z.literal(3),
     generatedAt: z.iso.datetime(),
     source: z.object({
       baseCommit: z.string().regex(/^[a-f0-9]{40}$/),
-      revisionKind: z.enum(["COMMIT", "WORKTREE"]),
+      revisionKind: z.literal("COMMIT"),
       treeDigest: z.string().regex(/^[a-f0-9]{64}$/),
+    }),
+    release: z.object({
+      tag: z.string().regex(/^v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?$/),
+      auditedCommit: z.string().regex(/^[a-f0-9]{40}$/),
+    }),
+    evidence: z.object({
+      parentCommit: z.string().regex(/^[a-f0-9]{40}$/),
+      commitPolicy: z.literal("DIRECT_CHILD_SUMMARY_ONLY"),
+      allowedPaths: z.tuple([z.literal("public/security/release-summary.json")]),
+    }),
+    deployment: z.object({
+      provider: z.literal("VERCEL"),
+      commitEnvironment: z.literal("VERCEL_GIT_COMMIT_SHA"),
+      approvedCommitEnvironment: z.literal("APPROVED_DEPLOYMENT_COMMIT_SHA"),
+      relation: z.literal("TAGGED_EVIDENCE_CHILD_OF_AUDITED_COMMIT"),
     }),
     controls: z.array(controlSchema),
     artifacts: z.array(
@@ -49,6 +71,29 @@ export const publicSupplyChainSummarySchema = z
       .length(3),
   })
   .superRefine((summary, context) => {
+    if (
+      summary.source.baseCommit !== summary.release.auditedCommit ||
+      summary.evidence.parentCommit !== summary.release.auditedCommit
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "The source and evidence parent must equal the audited release commit.",
+        path: ["release", "auditedCommit"],
+      });
+    }
+    const codeql = summary.controls.find((control) => control.id === "codeql");
+    if (
+      codeql?.status !== "PASSED" ||
+      codeql.findingCount !== 0 ||
+      codeql.sourceCommit !== summary.release.auditedCommit ||
+      !codeql.evidenceUrl
+    ) {
+      context.addIssue({
+        code: "custom",
+        message: "Hosted CodeQL must pass with zero findings against the audited commit.",
+        path: ["controls"],
+      });
+    }
     if (new Set(summary.runtimeImages.map((image) => image.role)).size !== 3) {
       context.addIssue({
         code: "custom",
@@ -72,6 +117,21 @@ export const publicSupplyChainSummarySchema = z
   });
 
 export type PublicSupplyChainSummary = z.infer<typeof publicSupplyChainSummarySchema>;
+
+export function releaseDeploymentIdentity(
+  summary: PublicSupplyChainSummary | null,
+): ReleaseDeploymentIdentity | null {
+  if (!summary) return null;
+  const codeql = summary.controls.find((control) => control.id === "codeql");
+  if (!codeql?.evidenceUrl || !codeql.sourceCommit) return null;
+  return {
+    releaseTag: summary.release.tag,
+    auditedCommit: summary.release.auditedCommit,
+    evidenceParentCommit: summary.evidence.parentCommit,
+    codeqlRunUrl: codeql.evidenceUrl,
+    codeqlSourceCommit: codeql.sourceCommit,
+  };
+}
 
 function escapeHtml(value: string): string {
   return value
@@ -110,7 +170,10 @@ export async function readSupplyChainSummary(
   }
 }
 
-export async function renderSupplyChainEvidence(root: string): Promise<string> {
+export async function renderSupplyChainEvidence(
+  root: string,
+  deploymentBinding: VerifiedDeploymentBinding | null = null,
+): Promise<string> {
   const summary = await readSupplyChainSummary(root);
   if (!summary) {
     return '<div class="site-evidence-note"><p>No successful supply-chain validation summary is checked in. Configured controls are not presented as executed.</p></div>';
@@ -121,10 +184,13 @@ export async function renderSupplyChainEvidence(root: string): Promise<string> {
       const status = statusPresentation(control.status);
       const findings =
         control.findingCount === null ? "not measured" : String(control.findingCount);
+      const evidence = control.evidenceUrl
+        ? ` <a href="${escapeHtml(control.evidenceUrl)}" rel="noopener noreferrer">Hosted run</a>`
+        : "";
       return `<tr>
         <th scope="row">${escapeHtml(control.label)}</th>
         <td><span class="${status.className}">${escapeHtml(status.label)}</span></td>
-        <td>${escapeHtml(control.scanner)} ${escapeHtml(control.version)}</td>
+        <td>${escapeHtml(control.scanner)} ${escapeHtml(control.version)}${evidence}</td>
         <td>${escapeHtml(findings)}</td>
       </tr>`;
     })
@@ -141,8 +207,9 @@ export async function renderSupplyChainEvidence(root: string): Promise<string> {
     .join("\n");
   return `<div class="site-evidence-summary">
     <div class="site-evidence-summary__facts" aria-label="Recorded supply-chain evidence facts">
-      <div><span>Validated source state</span><strong>${escapeHtml(summary.source.revisionKind.toLowerCase())}</strong></div>
-      <div><span>Validation base commit</span><strong><code>${escapeHtml(summary.source.baseCommit.slice(0, 12))}</code></strong></div>
+      <div><span>Release tag</span><strong>${escapeHtml(summary.release.tag)}</strong></div>
+      <div><span>Audited commit</span><strong><code>${escapeHtml(summary.release.auditedCommit.slice(0, 12))}</code></strong></div>
+      <div><span>Deployed commit</span><strong><code>${escapeHtml(deploymentBinding?.deployedCommit.slice(0, 12) ?? "not a deployed build")}</code></strong></div>
       <div><span>Runtime image SBOMs</span><strong>${summary.runtimeImages.length}</strong></div>
       <div><span>Active suppressions</span><strong>${summary.suppressions.active}</strong></div>
     </div>
@@ -152,7 +219,7 @@ export async function renderSupplyChainEvidence(root: string): Promise<string> {
         <tbody>${imageRows}</tbody>
       </table>
     </div>
-    <p class="site-evidence-summary__binding">Recorded ${escapeHtml(summary.generatedAt)} against source-tree digest <code>${escapeHtml(summary.source.treeDigest)}</code>. Detailed SARIF, SBOM, inventory, and scanner metadata stay in local or CI artifacts rather than the public bundle.</p>
+    <p class="site-evidence-summary__binding">Recorded ${escapeHtml(summary.generatedAt)} against audited source-tree digest <code>${escapeHtml(summary.source.treeDigest)}</code>. The evidence commit is a direct child whose only changed path is this generated summary. ${deploymentBinding ? `Vercel verified deployed commit <code>${escapeHtml(deploymentBinding.deployedCommit)}</code>; the complete binding is published at <a href="./security/deployment-binding.json">deployment-binding.json</a>.` : "A Vercel deployment must supply and verify the approved evidence-commit binding before this site can be published."} Detailed SARIF, SBOM, inventory, and scanner metadata stay in local or CI artifacts rather than the public bundle.</p>
     <div class="site-table-wrap" role="region" aria-label="Supply-chain control results" tabindex="0">
       <table class="site-matrix">
         <thead><tr><th scope="col">Control</th><th scope="col">Recorded status</th><th scope="col">Tool</th><th scope="col">Findings</th></tr></thead>

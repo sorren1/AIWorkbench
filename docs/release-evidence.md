@@ -10,7 +10,9 @@ npm run security:supply-chain
 
 The first run may download the immutable Gitleaks, Trivy, and Cosign images, Trivy's current vulnerability database, the digest-pinned Node and LiteLLM bases, and the exact PostgreSQL image. Scanner images, versions, base digests, package floors, thresholds, and runtime targets are declared in `security/tooling.json`.
 
-`npm run security:supply-chain:record` performs the same gate and, only after success, refreshes the small sanitized `public/security/release-summary.json` used by the case study. The record identifies a Git base commit and a digest of the scanned source worktree; it does not pretend a pre-commit worktree is already the eventual commit.
+The audited code commit deliberately contains no `public/security/release-summary.json`. Run every local and hosted gate against that clean commit first. After hosted CodeQL succeeds with zero release-blocking SARIF results, `npm run security:supply-chain:record` requires `AUDITED_RELEASE_COMMIT_SHA`, `RELEASE_TAG`, `CODEQL_RUN_URL`, `CODEQL_RUN_COMMIT_SHA`, and `CODEQL_FINDING_COUNT=0`. It then creates the only permitted evidence-child change: `public/security/release-summary.json`.
+
+`npm run security:release-evidence:require` verifies that the summary names the evidence commit's direct parent, that the parent is reachable from the annotated release tag, that CodeQL ran against that parent, and that the evidence commit changes no other path. A later code change makes the summary stale and fails `npm run security:release-evidence`; the next candidate must remove it and repeat the two-commit process.
 
 ## Generated artifacts
 
@@ -68,4 +70,6 @@ The scanner report retains the original finding. The orchestrator matches the do
 
 ## GitHub-only controls
 
-Pull requests run GitHub dependency review and the complete local-equivalent gate. CodeQL uses GitHub's JavaScript/TypeScript extractor and `security-extended` queries in a separate SHA-pinned workflow. CodeQL cannot be honestly marked executed by a local run; the checked-in summary therefore reports `CONFIGURED_NOT_RUN` until hosted evidence exists.
+Pull requests run GitHub dependency review and the complete local-equivalent gate. CodeQL uses GitHub's JavaScript/TypeScript extractor and `security-extended` queries in a separate SHA-pinned workflow. The hosted job retains SARIF and a small commit/run/count record, and fails unless the result count is zero. While the repository remains private without GitHub Advanced Security, SARIF upload to GitHub code scanning is disabled; the hosted workflow artifact is the source of the zero-finding claim.
+
+Vercel builds fail closed unless `VERCEL_GIT_COMMIT_SHA` exactly equals `APPROVED_DEPLOYMENT_COMMIT_SHA`, and the audited commit and release tag match the checked-in summary. A successful build emits `/security/deployment-binding.json` with the full deployed commit, audited parent, release tag, CodeQL run, and verified relation. This build-generated file avoids placing a self-referential evidence-commit SHA inside its own Git tree.

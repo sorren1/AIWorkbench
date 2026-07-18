@@ -6,6 +6,7 @@ import type { Plugin } from "vite";
 import { modelGatewayStatus } from "../demo/model-gateway/generated";
 import type { ModelGatewayPublicStatus } from "../demo/model-gateway/status";
 import type { SiteConfig } from "./config";
+import type { VerifiedDeploymentBinding } from "./deploymentBinding";
 import {
   renderRecordedSandboxEvidence,
   type RecordedSandboxEvidenceRender,
@@ -136,7 +137,11 @@ function renderModelGatewayStatus(): string {
   </tr>`;
 }
 
-export function portfolioSitePlugin(root: string, siteConfig: SiteConfig): Plugin {
+export function portfolioSitePlugin(
+  root: string,
+  siteConfig: SiteConfig,
+  deploymentBinding: VerifiedDeploymentBinding | null = null,
+): Plugin {
   let recordedEvidence: RecordedSandboxEvidenceRender | null = null;
   return {
     name: "portfolio-site-generator",
@@ -192,7 +197,10 @@ export function portfolioSitePlugin(root: string, siteConfig: SiteConfig): Plugi
           .replace("<!-- site:generated-head -->", renderMetadataTags(siteConfig, page))
           .replace("<!-- site:structured-data -->", renderStructuredData(siteConfig, kind, page))
           .replace("<!-- site:model-gateway-status -->", renderModelGatewayStatus())
-          .replace("<!-- site:supply-chain-evidence -->", await renderSupplyChainEvidence(root));
+          .replace(
+            "<!-- site:supply-chain-evidence -->",
+            await renderSupplyChainEvidence(root, deploymentBinding),
+          );
         if (withMetadata.includes("<!-- site:recorded-sandbox-evidence -->")) {
           recordedEvidence = await renderRecordedSandboxEvidence(root);
           withMetadata = withMetadata.replace(
@@ -212,6 +220,13 @@ export function portfolioSitePlugin(root: string, siteConfig: SiteConfig): Plugi
         fileName: "sitemap.xml",
         source: createSitemapXml(siteConfig),
       });
+      if (deploymentBinding) {
+        this.emitFile({
+          type: "asset",
+          fileName: "security/deployment-binding.json",
+          source: `${JSON.stringify(deploymentBinding, null, 2)}\n`,
+        });
+      }
       if (recordedEvidence) {
         this.emitFile({
           type: "asset",

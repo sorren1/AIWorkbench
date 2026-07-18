@@ -83,15 +83,32 @@ export type ReleaseControlSummary = {
   readonly target: string;
   readonly findingCount: number | null;
   readonly detail: string;
+  readonly evidenceUrl?: string;
+  readonly sourceCommit?: string;
 };
 
 export type ReleaseSummary = {
-  readonly schemaVersion: 2;
+  readonly schemaVersion: 3;
   readonly generatedAt: string;
   readonly source: {
     readonly baseCommit: string;
     readonly revisionKind: "COMMIT" | "WORKTREE";
     readonly treeDigest: string;
+  };
+  readonly release: {
+    readonly tag: string;
+    readonly auditedCommit: string;
+  } | null;
+  readonly evidence: {
+    readonly parentCommit: string;
+    readonly commitPolicy: "DIRECT_CHILD_SUMMARY_ONLY";
+    readonly allowedPaths: readonly ["public/security/release-summary.json"];
+  } | null;
+  readonly deployment: {
+    readonly provider: "VERCEL";
+    readonly commitEnvironment: "VERCEL_GIT_COMMIT_SHA";
+    readonly approvedCommitEnvironment: "APPROVED_DEPLOYMENT_COMMIT_SHA";
+    readonly relation: "TAGGED_EVIDENCE_CHILD_OF_AUDITED_COMMIT";
   };
   readonly controls: readonly ReleaseControlSummary[];
   readonly artifacts: readonly {

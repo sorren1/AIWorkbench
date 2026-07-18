@@ -104,6 +104,8 @@ for (const commit of reachableCommits) {
 const provenancePatterns = [
   /sourceCommit(?:\\?["'])?\s*:\s*\\?["']([a-f0-9]{40})/gu,
   /baseCommit(?:\\?["'])?\s*:\s*\\?["']([a-f0-9]{40})/gu,
+  /auditedCommit(?:\\?["'])?\s*:\s*\\?["']([a-f0-9]{40})/gu,
+  /parentCommit(?:\\?["'])?\s*:\s*\\?["']([a-f0-9]{40})/gu,
   /delivery\.source\.commit(?:\\?["'])?\s*:\s*\\?["']([a-f0-9]{40})/gu,
   /^- Source commit:\s*`?([a-f0-9]{40})/gimu,
   /^- source commit\s*`([a-f0-9]{40})/gimu,

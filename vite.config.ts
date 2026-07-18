@@ -5,17 +5,24 @@ import { loadEnv } from "vite";
 import { defineConfig } from "vitest/config";
 
 import { createSiteConfig } from "./src/site/config";
+import { resolveDeploymentBinding } from "./src/site/deploymentBinding";
+import { readSupplyChainSummary, releaseDeploymentIdentity } from "./src/site/supplyChainEvidence";
 import { portfolioSitePlugin } from "./src/site/vitePlugin";
 import { STATIC_SECURITY_HEADERS } from "./src/site/securityHeaders";
 
 const root = import.meta.dirname;
+const releaseSummary = await readSupplyChainSummary(root);
+const deploymentBinding = resolveDeploymentBinding(
+  process.env,
+  releaseDeploymentIdentity(releaseSummary),
+);
 
 export default defineConfig(({ mode }) => {
   const publicSiteConfig = createSiteConfig(loadEnv(mode, root, "SITE_"));
 
   return {
     base: "./",
-    plugins: [portfolioSitePlugin(root, publicSiteConfig), react()],
+    plugins: [portfolioSitePlugin(root, publicSiteConfig, deploymentBinding), react()],
     server: { headers: STATIC_SECURITY_HEADERS },
     preview: { headers: STATIC_SECURITY_HEADERS },
     build: {
