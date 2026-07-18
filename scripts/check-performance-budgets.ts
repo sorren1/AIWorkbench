@@ -145,7 +145,7 @@ if (process.argv.includes("--record")) {
       process.argv.length = argumentCount;
     }
     process.stdout.write(
-      "The rendered evidence summary changed the recorded HTML measurement; the tagged summary-only evidence commit remains within every performance budget.\n",
+      "The rendered evidence summary changed the recorded HTML measurement; the validated summary-only evidence commit remains within every performance budget.\n",
     );
   }
 }
