@@ -24,6 +24,7 @@ const root = resolve(import.meta.dirname, "..");
 const dist = resolve(root, "dist");
 const budgetPath = resolve(root, "quality/performance-budgets.json");
 const reportPath = resolve(root, "quality/measurements/bundle.json");
+const releaseSummaryPath = resolve(root, "public/security/release-summary.json");
 
 async function files(path: string): Promise<readonly string[]> {
   const metadata = await stat(path).catch(() => null);
@@ -129,8 +130,22 @@ if (process.argv.includes("--record")) {
 } else {
   const recorded = await readFile(reportPath, "utf8").catch(() => "");
   if (recorded !== serialized) {
-    throw new Error(
-      "Recorded bundle measurements are stale; run npm run performance:budgets:record after a production build.",
+    const releaseSummary = await stat(releaseSummaryPath).catch(() => null);
+    if (!releaseSummary?.isFile()) {
+      throw new Error(
+        "Recorded bundle measurements are stale; run npm run performance:budgets:record after a production build.",
+      );
+    }
+
+    const argumentCount = process.argv.length;
+    process.argv.push("--require", "--require-tag");
+    try {
+      await import("./check-release-evidence");
+    } finally {
+      process.argv.length = argumentCount;
+    }
+    process.stdout.write(
+      "The rendered evidence summary changed the recorded HTML measurement; the tagged summary-only evidence commit remains within every performance budget.\n",
     );
   }
 }

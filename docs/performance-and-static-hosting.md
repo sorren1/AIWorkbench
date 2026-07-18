@@ -2,7 +2,9 @@
 
 ## Measured budgets
 
-`quality/performance-budgets.json` is the policy and `quality/measurements/bundle.json` is the deterministic measurement of the current Vite production output using gzip level 9. Before measuring case-study HTML, the script replaces only fixed-width generated timestamps, run IDs, and cryptographic identifiers with same-length placeholders. This keeps a fresh evidence run from changing compression noise while preserving the measured structure and byte lengths. `npm run performance:budgets` fails if the normalized output exceeds policy or differs from the recorded measurement.
+`quality/performance-budgets.json` is the policy and `quality/measurements/bundle.json` is the deterministic measurement of the audited source commit's Vite production output using gzip level 9. Before measuring case-study HTML, the script replaces only fixed-width generated timestamps, run IDs, and cryptographic identifiers with same-length placeholders. This keeps a fresh evidence run from changing compression noise while preserving the measured structure and byte lengths. `npm run performance:budgets` fails if the normalized source output exceeds policy or differs from the recorded measurement.
+
+The direct evidence child deliberately renders the generated release summary that is absent from its audited parent, so its case-study HTML cannot equal the parent's recorded byte measurement. That one case still enforces every byte/request budget and is accepted only after `security:release-evidence:require` proves that the current commit is annotated-tagged, changes only `public/security/release-summary.json`, and binds the hosted CodeQL result to its direct parent. Any executable, CSS, source, or untagged summary change continues to fail closed.
 
 | Production asset boundary          |        Budget |
 | ---------------------------------- | ------------: |
