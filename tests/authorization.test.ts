@@ -10,7 +10,11 @@ import {
   validateApprovalForResume,
   verifyApprovalEventLog,
 } from "../src/demo/authorization/approvalProtocol";
-import { evaluateAuthorization, globMatches } from "../src/demo/authorization/engine";
+import {
+  evaluateAuthorization,
+  globMatches,
+  isCanonicalTargetPath,
+} from "../src/demo/authorization/engine";
 import { PERSONAS, personaById } from "../src/demo/authorization/personas";
 import { sha256Hex } from "../src/demo/control-plane/registry/canonical";
 import { registrySnapshot } from "../src/demo/control-plane/registry/generated";
@@ -135,6 +139,96 @@ describe("shared authorization policy engine", () => {
     });
     expect(network.decision).toMatchObject({ allowed: false, reasonCode: "POLICY_DENY" });
     expect(network.decision.matchedPolicy?.id).toBe("policy.sandbox.network-deny");
+  });
+
+  it("denies empty, malformed, traversing, and mismatched bounded-write targets before approval", async () => {
+    const cases = [
+      { name: "empty", targetPaths: [], reasonCode: "MISSING_TARGET_PATHS" },
+      {
+        name: "malformed",
+        targetPaths: ["src\\report.js"],
+        reasonCode: "RESOURCE_BOUNDARY_DENY",
+      },
+      {
+        name: "traversal",
+        targetPaths: ["src/../report.js"],
+        reasonCode: "RESOURCE_BOUNDARY_DENY",
+      },
+      {
+        name: "mismatched",
+        targetPaths: ["src/report.js", "docs/outside.md"],
+        reasonCode: "RESOURCE_BOUNDARY_DENY",
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      const context = await action({ targetPaths: testCase.targetPaths });
+      expect(context.decision, testCase.name).toMatchObject({
+        allowed: false,
+        mode: "DENY",
+        reasonCode: testCase.reasonCode,
+      });
+      await expect(
+        createBoundApprovalRequest({
+          requestId: `approval.test.${testCase.name}`,
+          identity: context.request.identity,
+          decision: context.decision,
+          tool: {
+            id: context.request.tool.id,
+            version: context.request.tool.version,
+            contentHash: context.request.tool.contentHash,
+          },
+          stage: "implement",
+          argumentsValue: { ...PATCH_ARGUMENTS, path: testCase.targetPaths[0] },
+          targetPaths: testCase.targetPaths,
+          changeTargetDigest: await sha256Hex(TARGETS),
+          contextPackDigest: CONTEXT_DIGEST,
+          requestedAt: NOW,
+        }),
+      ).rejects.toThrow("only be created from REQUIRE_APPROVAL");
+    }
+  });
+
+  it("requires canonical targets whenever a policy matcher declares path patterns", async () => {
+    expect(isCanonicalTargetPath("src/report.js")).toBe(true);
+    expect(isCanonicalTargetPath("browser-local://evidence/FIN-1077.json")).toBe(true);
+    for (const path of [
+      "",
+      " src/report.js",
+      "src\\report.js",
+      "src//report.js",
+      "src/./report.js",
+      "src/../report.js",
+      "/src/report.js",
+      "C:/src/report.js",
+      "src/%2e%2e/report.js",
+    ]) {
+      expect(isCanonicalTargetPath(path), path).toBe(false);
+    }
+
+    const read = await action({
+      toolId: "tool.repository.file.read",
+      targetPaths: ["src/report.js"],
+    });
+    const readPolicy = registrySnapshot.approvalPolicies.find(
+      (policy) => policy.id === "policy.repository.read",
+    );
+    if (!readPolicy) throw new Error("Repository read policy missing from test registry.");
+    const pathPolicy = {
+      ...readPolicy,
+      matcher: { ...readPolicy.matcher, pathPatterns: ["src/**"] },
+    };
+
+    expect(evaluateAuthorization(read.request, [pathPolicy])).toMatchObject({
+      allowed: true,
+      reasonCode: "POLICY_ALLOW",
+    });
+    for (const targetPaths of [[], ["src\\report.js"], ["src/../report.js"]]) {
+      expect(
+        evaluateAuthorization({ ...read.request, targetPaths }, [pathPolicy]),
+        JSON.stringify(targetPaths),
+      ).toMatchObject({ allowed: false, reasonCode: "NO_MATCHING_POLICY" });
+    }
   });
 
   it("denies mutation of finalized evidence", async () => {

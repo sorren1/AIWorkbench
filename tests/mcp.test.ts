@@ -145,6 +145,36 @@ describe("repository-owned local MCP slice", () => {
     }
   });
 
+  it("keeps empty, malformed, traversing, and mismatched patch targets out of approval and execution", async () => {
+    const disposable = await createDisposableToyRepository();
+    const session = await startToyMcpSession({
+      toyRepositoryRoot: disposable.root,
+      stageId: "implement",
+      approvedToolIds: ["tool.repository.patch.controlled", "tool.repository.diff.inspect"],
+      authorization: authorization("run.test.invalid-patch-targets"),
+    });
+    const patch = (path: string) =>
+      session.callApprovedTool("tool.repository.patch.controlled", {
+        path,
+        expected: "return `Variance: ${actual - budget}`;",
+        replacement: 'return "unexpected execution";',
+      });
+    try {
+      await expect(patch("")).rejects.toThrow("input schema denied arguments");
+      for (const path of ["src\\report.js", "src/../src/report.js", "test/report.test.js"]) {
+        await expect(patch(path), path).rejects.toThrow("Local path policy denied");
+      }
+      await expect(patch("src/report.js")).rejects.toThrow(
+        "Local policy requires a bound approval",
+      );
+      const unchanged = await session.callApprovedTool("tool.repository.diff.inspect", {});
+      expect(unchanged.payload.changedPaths).toEqual([]);
+    } finally {
+      await session.close();
+      await disposable.cleanup();
+    }
+  });
+
   it("performs an approved bounded patch, diff, and fixed validation command", async () => {
     const disposable = await createDisposableToyRepository();
     const patchArguments = {

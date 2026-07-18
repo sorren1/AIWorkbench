@@ -17,6 +17,7 @@ import {
   validateToolDescriptor,
 } from "../../src/demo/control-plane/registry/validation";
 import { authorizeRegistryAction } from "../../src/demo/authorization/authorizeAction";
+import { globMatches, isCanonicalTargetPath } from "../../src/demo/authorization/engine";
 import {
   proposedArgumentsHash,
   validateApprovalForResume,
@@ -108,9 +109,9 @@ export function sanitizeDiscovery(
 }
 
 function pathAllowed(requestedPath: string, patterns: readonly string[]): boolean {
-  const normalized = requestedPath.replaceAll("\\", "/");
-  return patterns.some((pattern) =>
-    pattern.endsWith("/**") ? normalized.startsWith(pattern.slice(0, -2)) : normalized === pattern,
+  return (
+    isCanonicalTargetPath(requestedPath) &&
+    patterns.some((pattern) => globMatches(requestedPath, pattern))
   );
 }
 

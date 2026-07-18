@@ -659,3 +659,24 @@ Add a reused-workspace regression to `check:all`: preserve the supply-chain resu
 - An untracked source file is intentionally outside release scope until it is staged; contributors must add intended files before the final gates.
 - Git-history scanning remains independent and still covers every reachable ref.
 - `check:all` performs one additional focused Chromium run and supply-chain pass, increasing local release time in exchange for regression evidence from a contaminated workspace.
+
+## ADR-030 — Require canonical targets before bounded-write policy matching
+
+- Status: Accepted
+- Date: 2026-07-18
+- Detailed record: [`docs/authorization-and-separation-of-duties.md`](authorization-and-separation-of-duties.md)
+
+### Context
+
+The authorization engine treated an empty target list as satisfying every path allow-list, and a policy matcher with `pathPatterns` skipped its path check when no target was supplied. A `BOUNDED_WRITE` action could therefore advance to approval without naming the resource that the approval was meant to bind.
+
+### Decision
+
+Require every bounded write to contain at least one canonical target before evaluating approval policies. Reject malformed, absolute, encoded, or traversing targets with `RESOURCE_BOUNDARY_DENY`, and reject an absent list with `MISSING_TARGET_PATHS`. Require `pathPatterns` matchers to receive a nonempty list whose every member is canonical and matches an allowed pattern. Apply the same canonical check in the trusted MCP client before invocation.
+
+### Consequences
+
+- An approval request can never be created for a bounded write that omits its resource binding.
+- One invalid member denies the entire target list; valid entries cannot mask an outside or malformed path.
+- The MCP server remains a second real-path and symlink boundary, but invalid requests are stopped before approval or protocol execution.
+- URI targets remain supported only in canonical `scheme://authority/path` form.

@@ -47,7 +47,7 @@ For every governed action, the engine intersects:
 5. the approved tool descriptor's scopes, stage, risk, and filesystem boundary;
 6. the approved change-target set and matched versioned policy.
 
-Any delegation scope absent from the human persona is an escalation attempt and is denied. A bounded write must fit all three path sets: agent write paths, tool write paths, and current change targets. Deny rules take precedence over approval, notification, and allow rules. No matching enabled policy means deny.
+Any delegation scope absent from the human persona is an escalation attempt and is denied. A bounded write must declare at least one canonical target, and every target must fit all three path sets: agent write paths, tool write paths, and current change targets. Canonical targets use normalized relative POSIX paths or the explicitly modeled URI form; empty values, absolute paths, backslashes, dot/traversal segments, duplicate separators, control characters, percent encoding, queries, and fragments fail closed. A policy matcher with `pathPatterns` cannot match an empty or noncanonical target list. Deny rules take precedence over approval, notification, and allow rules. No matching enabled policy means deny.
 
 ## Delegated identity envelope
 
@@ -64,4 +64,4 @@ This envelope demonstrates an on-behalf-of contract without claiming token excha
 - Auditors remain read-only.
 - AI agents never appear in `requiredApproverPersonas`.
 
-Tests cover scope intersection, delegation escalation, deny precedence, path globs, administrator restrictions, reviewer/validator separation, and the absence of an AI approver identity.
+Tests cover scope intersection, delegation escalation, deny precedence, canonical path globs, empty/malformed/traversing/mismatched bounded-write targets, administrator restrictions, reviewer/validator separation, and the absence of an AI approver identity. The MCP integration test also verifies that invalid targets produce neither an approval pause nor a repository diff.
