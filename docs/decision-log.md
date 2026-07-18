@@ -1,5 +1,11 @@
 # Decision log
 
+## 2026-07-18 — Treat checked pull requests as the approval boundary for sanitized-history releases
+
+- **Decision:** Keep the account-specific GitHub noreply address as the only permitted public author, committer, and annotated-tag address. For a sanitized-history release, run every required check on an up-to-date pull request, reproduce the reviewed linear commit locally with the identical parent and tree, and use a named maintainer ruleset bypass only for the guarded `--force-with-lease` ref correction. Remove and verify the bypass immediately, then require fresh Quality and CodeQL success on the exact corrected commit before evidence generation, tagging, or deployment.
+- **Why:** GitHub assigns `noreply@github.com` as the committer of a web-created squash merge. Accepting that additional identity would violate the deliberately narrow public-history policy even though the reviewed source tree is unchanged.
+- **Boundary:** This is not a standing administrator bypass and does not waive pull-request review, required checks, dependency review, CodeQL, linear history, or immutable-tag controls. The final ruleset has no bypass actors; any ref correction must name the expected old SHA, be followed by a fresh all-ref history and Gitleaks audit, and remain blocked from production until the replacement commit's hosted checks pass.
+
 ## 2026-07-18 — Audit the public PR head, not GitHub's ephemeral merge commit
 
 - **Decision:** Quality-workflow jobs explicitly check out the pull request's head SHA. Push and manual runs continue to check out `github.sha`; CodeQL and dependency review retain their native pull-request context.
