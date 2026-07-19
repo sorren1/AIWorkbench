@@ -14,4 +14,23 @@ describe("synthetic workbench content", () => {
       expect(validationFor(issue).acceptance.length).toBeGreaterThan(0);
     }
   });
+
+  it("derives the FIN-1150 PR artifact check from the reviewed change-target artifact", () => {
+    const issue = issues.find((candidate) => candidate.key === "FIN-1150");
+    expect(issue).toBeDefined();
+    if (!issue) return;
+
+    const pending = prFor(issue).checks.find(
+      (check) => check.name === "Change-target artifact review",
+    );
+    const approved = prFor(issue, {
+      "FIN-1150::change-targets.json": "Approved",
+    }).checks.find((check) => check.name === "Change-target artifact review");
+
+    expect(pending).toMatchObject({ status: "pending" });
+    expect(approved).toMatchObject({
+      status: "pass",
+      detail: "change-targets.json approved",
+    });
+  });
 });

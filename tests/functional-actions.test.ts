@@ -174,6 +174,8 @@ describe("deep links, scenarios, reset, and harmless preferences", () => {
     const stale = applyDemoScenario(createInitialState(), "stale-downstream");
     expect(stale.issues["FIN-1198"]?.s).toContain("stale");
     const clean = applyDemoScenario(createInitialState(), "clean-walkthrough");
+    expect(clean.artifactReviews["FIN-1150::change-targets.json"]).toBe("Approved");
+    expect(clean.valState["FIN-1150"]?.accessibility).toBe("Passed");
     expect(clean.issues["FIN-1150"]?.s).toEqual([
       "done",
       "done",
@@ -189,7 +191,7 @@ describe("deep links, scenarios, reset, and harmless preferences", () => {
   it("returns all reducer-backed demo state to the exact baseline", () => {
     const modified = applyDemoScenario(createInitialState(), "clean-walkthrough");
     modified.filters.search = "changed";
-    modified.artifactReviews["FIN-1150:spec.md"] = "Changes requested";
+    modified.artifactReviews["FIN-1150::spec.md"] = "Changes requested";
     const reset = reducer(modified, { type: "RESET" });
     expect(reset).toEqual(createInitialState());
   });

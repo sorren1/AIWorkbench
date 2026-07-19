@@ -77,11 +77,14 @@ export function applyDemoScenario(
   const scenarios = Object.fromEntries(
     validation.scenarios.map((scenario) => [scenario.name, "Passed" as const]),
   );
+  const acceptance = Object.fromEntries(
+    validation.acceptance.map((criterion) => [criterion.id, "Passed" as const]),
+  );
   const checklist = Object.fromEntries(
     // The labels are stable synthetic fixture identifiers within this scenario.
     [
-      "Changed files match change-targets.json",
-      "No unexpected files outside the allow-list",
+      "Changed files compared with change-targets.json",
+      "Unexpected evidence file reviewed and scope exception accepted",
       "Tests cover acceptance criteria",
       "No secrets / credentials in diff",
       "Approval gate verified in UI and API",
@@ -105,12 +108,18 @@ export function applyDemoScenario(
     prState: {
       "FIN-1150": { diffReviewed: true, checklist, status: "Ready for review" },
     },
+    artifactReviews: {
+      "FIN-1150::change-targets.json": "Approved",
+    },
     valState: {
       "FIN-1150": {
         started: true,
         evidenceStatus: "Complete",
         decision: "Passed",
         scenarios,
+        acceptance,
+        accessibility: "Passed",
+        security: "Passed",
       },
     },
   };

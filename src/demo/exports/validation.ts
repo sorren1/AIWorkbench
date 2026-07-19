@@ -45,6 +45,10 @@ export function createValidationEvidencePack(
     ...scenario,
     status: override.scenarios?.[scenario.name] ?? scenario.status,
   }));
+  const acceptance = base.acceptance.map((criterion) => ({
+    ...criterion,
+    status: override.acceptance?.[criterion.id] ?? criterion.status,
+  }));
   return {
     schemaVersion: 1,
     kind: "synthetic-validation-evidence-pack",
@@ -58,14 +62,17 @@ export function createValidationEvidencePack(
     },
     finalDecision: override.decision ?? base.decision,
     evidenceStatus: override.evidenceStatus ?? base.evidenceStatus,
-    acceptance: base.acceptance,
+    acceptance,
     scenarios,
     assumptions: {
       database: base.oracleAssumptions,
       api: base.apiNotes,
       ui: base.uiNotes,
     },
-    reviews: { accessibility: base.a11y, security: base.security },
+    reviews: {
+      accessibility: override.accessibility ?? base.a11y,
+      security: override.security ?? base.security,
+    },
     testerNotes: base.testerNotes,
     excludedLocalContent: {
       browserLocalTesterNoteCount: override.notes?.length ?? 0,

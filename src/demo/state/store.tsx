@@ -83,6 +83,9 @@ export type PullRequestOverride = {
 
 export type ValidationOverride = {
   scenarios?: Record<string, ValidationStatus>;
+  acceptance?: Record<string, ValidationStatus>;
+  accessibility?: ValidationStatus;
+  security?: ValidationStatus;
   started?: boolean;
   evidenceStatus?: ValidationStatus;
   decision?: ValidationStatus;

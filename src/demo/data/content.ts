@@ -463,8 +463,19 @@ const PR_FILES_1150: PullRequestFile[] = [
   },
 ];
 
-export function prFor(issue: Issue): PullRequestData {
+export function prFor(
+  issue: Issue,
+  artifactReviews: Readonly<Record<string, string>> = {},
+): PullRequestData {
   if (issue.key === "FIN-1150") {
+    const changeTargetsReview =
+      artifactReviews[`${issue.key}::change-targets.json`] ?? REVIEW_STATUS["change-targets.json"];
+    const changeTargetsCheck =
+      changeTargetsReview === "Approved"
+        ? { status: "pass", detail: "change-targets.json approved" }
+        : changeTargetsReview === "Changes requested"
+          ? { status: "fail", detail: "change-targets.json changes requested" }
+          : { status: "pending", detail: "change-targets.json awaiting review" };
     return {
       number: 284,
       title: "FIN-1150: AI variance commentary draft (Angular + .NET + Oracle)",
@@ -489,9 +500,8 @@ export function prFor(issue: Issue): PullRequestData {
         { name: "SQL validation", status: "pass", detail: "view + package parse OK" },
         { name: "Lint / static analysis", status: "pass", detail: "0 errors · 2 warnings" },
         {
-          name: "Artifact review complete",
-          status: "pending",
-          detail: "change-targets.json awaiting review",
+          name: "Change-target artifact review",
+          ...changeTargetsCheck,
         },
         { name: "No secrets detected", status: "pass", detail: "0 findings" },
         { name: "Human review required", status: "required", detail: "reviewer gate not yet met" },
@@ -501,8 +511,11 @@ export function prFor(issue: Issue): PullRequestData {
         { name: "Synthetic reviewer B", role: "Service adapter", state: "pending" },
       ],
       checklist: [
-        { label: "Changed files match change-targets.json", done: false },
-        { label: "No unexpected files outside the allow-list", done: false },
+        { label: "Changed files compared with change-targets.json", done: false },
+        {
+          label: "Unexpected evidence file reviewed and scope exception accepted",
+          done: false,
+        },
         { label: "Tests cover acceptance criteria", done: true },
         { label: "No secrets / credentials in diff", done: true },
         { label: "Approval gate verified in UI and API", done: true },

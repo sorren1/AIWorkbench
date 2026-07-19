@@ -40,8 +40,17 @@ const CAT_ICON: Record<string, IconName> = {
 export function GitHubScreen() {
   const { state, actions } = useApp();
   const issue = useIssue(state.selectedKey);
-  const base = prFor(issue);
   const ov = state.prState[issue.key] || {};
+  const reviewerState = ov.reviewer || "pending";
+  const fixture = prFor(issue, state.artifactReviews);
+  const base = {
+    ...fixture,
+    checks: fixture.checks.map((check) =>
+      check.name === "Human review required" && reviewerState === "approved"
+        ? { ...check, status: "pass", detail: "validator approval consumed" }
+        : check,
+    ),
+  };
   const hasPR = !!issue.pr;
 
   const createMockPR = () => {
@@ -81,10 +90,7 @@ export function GitHubScreen() {
   };
   const markReviewed = async () => {
     if (!(await authorizeDiffReview("reviewed"))) return;
-    actions.setPR(issue.key, {
-      diffReviewed: true,
-      checklist: Object.fromEntries(base.checklist.map((item) => [item.label, true])),
-    });
+    actions.setPR(issue.key, { diffReviewed: true });
     actions.toast(
       "success",
       "Diff marked reviewed",
@@ -132,6 +138,18 @@ export function GitHubScreen() {
         VALIDATION_EVIDENCE_INCOMPLETE: [
           "Evidence incomplete",
           "Validation evidence remains open.",
+        ],
+        VALIDATION_ACCEPTANCE_INCOMPLETE: [
+          "Acceptance incomplete",
+          "Acceptance criteria remain open.",
+        ],
+        VALIDATION_SECURITY_INCOMPLETE: [
+          "Security review incomplete",
+          "Security review remains open.",
+        ],
+        VALIDATION_ACCESSIBILITY_INCOMPLETE: [
+          "Accessibility review incomplete",
+          "Accessibility review remains open.",
         ],
       } as const;
       actions.toast("warn", message[blocker.code][0], message[blocker.code][1]);
@@ -212,7 +230,6 @@ export function GitHubScreen() {
   }
 
   const status = ov.status || base.status;
-  const reviewerState = ov.reviewer || "pending";
   const checklist = base.checklist.map((item) => ({
     ...item,
     done: ov.checklist?.[item.label] ?? item.done,
@@ -517,7 +534,11 @@ export function GitHubScreen() {
             <CardHead
               icon="users"
               title="Reviewers"
-              actions={<Badge tone="warn">{base.unresolvedComments} unresolved</Badge>}
+              actions={
+                <Badge tone={reviewerState === "approved" ? "safe" : "warn"}>
+                  {reviewerState === "approved" ? 0 : base.unresolvedComments} unresolved
+                </Badge>
+              }
             />
             <div className="wb-card-body wb-flex-col wb-u-gap-12px">
               {base.reviewers.map((r) => {

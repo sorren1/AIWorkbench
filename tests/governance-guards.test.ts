@@ -60,13 +60,35 @@ describe("workflow governance guards", () => {
       approvedForValidation: false,
       personaCanApprove: false,
       scenarioStatuses: ["Failed"],
+      acceptanceStatuses: ["Not Started"],
+      securityStatus: "Not Started",
+      accessibilityStatus: "Not Started",
     });
     expect(result.allowed).toBe(false);
     expect(result.blockers.map((blocker) => blocker.code)).toEqual([
       "BOUND_APPROVAL_REQUIRED",
       "VALIDATION_PERSONA_REQUIRED",
       "VALIDATION_SCENARIOS_INCOMPLETE",
+      "VALIDATION_ACCEPTANCE_INCOMPLETE",
+      "VALIDATION_SECURITY_INCOMPLETE",
+      "VALIDATION_ACCESSIBILITY_INCOMPLETE",
     ]);
+  });
+
+  it("allows final validation only after every evidence category passes", () => {
+    const ready = issue("FIN-1077");
+    const result = evaluateValidationCompletion({
+      issue: ready,
+      approvedForValidation: true,
+      personaCanApprove: true,
+      scenarioStatuses: ["Passed"],
+      acceptanceStatuses: ["Passed", "Passed"],
+      securityStatus: "Passed",
+      accessibilityStatus: "Passed",
+    });
+
+    expect(result.allowed).toBe(true);
+    expect(result.blockers).toEqual([]);
   });
 
   it("keeps release readiness blocked until validation evidence is complete", () => {
