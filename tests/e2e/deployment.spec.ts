@@ -8,8 +8,9 @@ if (!deploymentBaseUrl) {
 
 const deploymentOrigin = new URL(deploymentBaseUrl).origin;
 const expectedCanonicalUrl = process.env.EXPECTED_CANONICAL_URL?.replace(/\/+$/, "");
-const securityTxtCanonical =
-  "https://ai-delivery-workbench-onedermant1-9606-workbench1.vercel.app/.well-known/security.txt";
+const expectedSecurityTxtCanonical = expectedCanonicalUrl
+  ? new URL(".well-known/security.txt", `${expectedCanonicalUrl}/`).toString()
+  : null;
 const privateReportingUrl = "https://github.com/sorren1/AIWorkbench/security/advisories/new";
 const securityPolicyUrl = "https://github.com/sorren1/AIWorkbench/security/policy";
 const publicHtmlRoutes = [
@@ -17,6 +18,11 @@ const publicHtmlRoutes = [
   "/demo/",
   "/writing/governing-ai-assisted-delivery/",
   "/404.html",
+] as const;
+const nestedMissingRoutes = [
+  "/missing/nested/path",
+  "/missing/nested/path/",
+  "/missing/nested/path?source=test",
 ] as const;
 
 function expectFinalCsp(headers: Readonly<Record<string, string>>, path: string): void {
@@ -50,6 +56,42 @@ test("serves every public route directly and uses the custom 404", async ({ requ
   const notFound = await request.get("/deployment-verification-missing-route");
   expect(notFound.status()).toBe(404);
   await expect(notFound.text()).resolves.toContain("Page not found");
+});
+
+test("keeps the custom 404 functional at nested missing routes", async ({ page }) => {
+  for (const path of nestedMissingRoutes) {
+    const response = await page.goto(path);
+    expect(response?.status(), `${path} should retain the missing response status`).toBe(404);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "This page is outside the expected change surface.",
+    );
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(245, 247, 250)");
+
+    const logo = page.locator(".site-not-found img");
+    await expect(logo).toBeVisible();
+    expect(
+      await logo.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0),
+    ).toBe(true);
+
+    await expect(page.getByRole("link", { name: "Return to case study" })).toHaveAttribute(
+      "href",
+      "/",
+    );
+    await expect(page.getByRole("link", { name: "Open interactive prototype" })).toHaveAttribute(
+      "href",
+      "/demo/",
+    );
+  }
+
+  await page.goto(nestedMissingRoutes[0]);
+  await page.getByRole("link", { name: "Return to case study" }).click();
+  await expect(page).toHaveURL(`${deploymentOrigin}/`);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("AI Delivery Workbench");
+
+  await page.goto(nestedMissingRoutes[1]);
+  await page.getByRole("link", { name: "Open interactive prototype" }).click();
+  await expect(page).toHaveURL(`${deploymentOrigin}/demo/`);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Work Queue");
 });
 
 test("ordinary deployment requests have no toolbar injection and satisfy CSP on every route", async ({
@@ -110,7 +152,11 @@ test("publishes a current RFC 9116 security.txt with private reporting", async (
 
   const contents = await response.text();
   const fields = securityTxtFields(contents);
-  expect(fields.get("Canonical")).toEqual([securityTxtCanonical]);
+  if (expectedSecurityTxtCanonical) {
+    expect(fields.get("Canonical")).toEqual([expectedSecurityTxtCanonical]);
+  } else {
+    expect(fields.has("Canonical")).toBe(false);
+  }
   expect(fields.get("Contact")).toEqual([privateReportingUrl]);
   expect(fields.get("Policy")).toEqual([securityPolicyUrl]);
   expect(fields.get("Preferred-Languages")).toEqual(["en"]);
@@ -121,6 +167,19 @@ test("publishes a current RFC 9116 security.txt with private reporting", async (
   expect(expires).toBeGreaterThan(Date.now());
   expect(expires).toBeLessThanOrEqual(Date.now() + 366 * 24 * 60 * 60 * 1000);
   expect(contents).not.toContain("mailto:");
+});
+
+test("configured Production canonical security.txt resolves on the expected origin", async ({
+  request,
+}) => {
+  test.skip(!expectedSecurityTxtCanonical, "Production canonical origin is not configured.");
+
+  const canonical = new URL(expectedSecurityTxtCanonical ?? "");
+  expect(canonical.origin).toBe(new URL(expectedCanonicalUrl ?? "").origin);
+  const response = await request.get(canonical.toString());
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"]).toMatch(/^text\/plain(?:;\s*charset=utf-8)?$/iu);
+  expect(securityTxtFields(await response.text()).get("Canonical")).toEqual([canonical.toString()]);
 });
 
 test("applies security headers and the intended static cache policy", async ({ page, request }) => {

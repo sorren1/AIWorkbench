@@ -35,5 +35,9 @@ describe("Vercel static deployment contract", () => {
     const notFound = readFileSync(resolve(import.meta.dirname, "../404.html"), "utf8");
     expect(notFound).toContain('data-page="not-found"');
     expect(notFound).toContain("Page not found");
+    expect(notFound).toContain('<base href="/" />');
+    expect(notFound).toContain('href="/">Return to case study</a>');
+    expect(notFound).toContain('href="/demo/">Open interactive prototype</a>');
+    expect(notFound).not.toMatch(/(?:href|src)="\.\//u);
   });
 });

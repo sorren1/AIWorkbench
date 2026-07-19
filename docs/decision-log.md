@@ -719,6 +719,12 @@ Publish `/.well-known/security.txt` with the deployed site as its canonical URI,
 - The expiry intentionally becomes release-blocking if the contact record is not reviewed before it becomes stale.
 - Changing the production domain, repository owner/name, reporting setting, or policy location requires updating and redeploying this record.
 
+## 2026-07-19 — Bind security.txt identity to the validated site origin
+
+- **Decision:** Keep the stable disclosure fields in a canonical-free source template and generate `/.well-known/security.txt` through the existing Vite site plugin. Inject `Canonical` only from the validated `SITE_CANONICAL_URL`; omit it when the setting is absent and fail the build when the setting is malformed or uses a transient `vercel.app` hostname.
+- **Rationale:** The security record is deployment metadata and must share the same authoritative origin and validation boundary as HTML canonical tags, robots, and sitemap output. A checked-in deployment hostname can become stale and can misidentify a Preview as the public security-policy origin.
+- **Boundary:** Contact, policy, language, and expiry remain tracked content. This does not select a production domain, deploy the site, or constitute Production verification.
+
 ## ADR-032 — Remove production toolbar injection and inline-style CSP exceptions
 
 - Status: Accepted
