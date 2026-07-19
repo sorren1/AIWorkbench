@@ -62,4 +62,33 @@ describe("workbench reducer", () => {
     const routed = reducer(modified, { type: "ROUTE", route: "trace" });
     expect(reducer(routed, { type: "RESET" })).toEqual(createInitialState());
   });
+
+  it("merges sequential validation results without dropping earlier evidence", () => {
+    const initial = createInitialState();
+    const first = reducer(initial, {
+      type: "VAL",
+      key: "FIN-1150",
+      patch: {
+        scenarios: { "VC-01": "Passed" },
+        acceptance: { AC1: "Passed" },
+      },
+    });
+    const second = reducer(first, {
+      type: "VAL",
+      key: "FIN-1150",
+      patch: {
+        scenarios: { "VC-02": "Passed" },
+        acceptance: { AC2: "Passed" },
+      },
+    });
+
+    expect(second.valState["FIN-1150"]?.scenarios).toEqual({
+      "VC-01": "Passed",
+      "VC-02": "Passed",
+    });
+    expect(second.valState["FIN-1150"]?.acceptance).toEqual({
+      AC1: "Passed",
+      AC2: "Passed",
+    });
+  });
 });

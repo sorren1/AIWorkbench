@@ -316,14 +316,25 @@ export function reducer(state: WorkbenchState, action: Action): WorkbenchState {
           [action.key]: { ...state.prState[action.key], ...action.patch },
         },
       };
-    case "VAL":
+    case "VAL": {
+      const previous = state.valState[action.key] ?? {};
       return {
         ...state,
         valState: {
           ...state.valState,
-          [action.key]: { ...state.valState[action.key], ...action.patch },
+          [action.key]: {
+            ...previous,
+            ...action.patch,
+            ...(action.patch.scenarios
+              ? { scenarios: { ...previous.scenarios, ...action.patch.scenarios } }
+              : {}),
+            ...(action.patch.acceptance
+              ? { acceptance: { ...previous.acceptance, ...action.patch.acceptance } }
+              : {}),
+          },
         },
       };
+    }
     case "BUSY":
       return { ...state, busy: { ...state.busy, [action.id]: action.on } };
     case "FILTER":
