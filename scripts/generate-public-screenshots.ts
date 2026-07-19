@@ -5,7 +5,8 @@ import { pathToFileURL } from "node:url";
 import { basename, resolve } from "node:path";
 
 import { chromium, type Page } from "@playwright/test";
-import { PNG } from "pngjs";
+
+import { isAcceptableScreenshotDifference, pixelDifference } from "./screenshot-diff";
 
 type Capture = {
   readonly filename: string;
@@ -24,8 +25,6 @@ const socialOutputPath = resolve(root, "public", "assets", "social-card.png");
 const viteBinary = resolve(root, "node_modules", "vite", "bin", "vite.js");
 const checkMode = process.argv.includes("--check");
 const CANONICAL_PIXEL_PLATFORM = "linux";
-const MAX_ANTIALIAS_PIXELS = 32;
-const MAX_CHANNEL_DELTA = 1;
 const screenshotMismatches: string[] = [];
 
 const captures: readonly Capture[] = [
@@ -62,37 +61,6 @@ function digest(value: Uint8Array): string {
   return createHash("sha256").update(value).digest("hex").slice(0, 12);
 }
 
-function pixelDifference(
-  expected: Uint8Array,
-  actual: Uint8Array,
-): {
-  readonly differingPixels: number;
-  readonly maxChannelDelta: number;
-} {
-  const expectedPng = PNG.sync.read(Buffer.from(expected));
-  const actualPng = PNG.sync.read(Buffer.from(actual));
-  if (expectedPng.width !== actualPng.width || expectedPng.height !== actualPng.height) {
-    return { differingPixels: Number.POSITIVE_INFINITY, maxChannelDelta: 255 };
-  }
-
-  let differingPixels = 0;
-  let maxChannelDelta = 0;
-  for (let offset = 0; offset < expectedPng.data.length; offset += 4) {
-    let pixelDelta = 0;
-    for (let channel = 0; channel < 4; channel += 1) {
-      pixelDelta = Math.max(
-        pixelDelta,
-        Math.abs(
-          (expectedPng.data[offset + channel] ?? 0) - (actualPng.data[offset + channel] ?? 0),
-        ),
-      );
-    }
-    if (pixelDelta > 0) differingPixels += 1;
-    maxChannelDelta = Math.max(maxChannelDelta, pixelDelta);
-  }
-  return { differingPixels, maxChannelDelta };
-}
-
 async function writeOrVerify(path: string, value: Uint8Array): Promise<void> {
   if (checkMode) {
     const expected = await readFile(path);
@@ -107,10 +75,7 @@ async function writeOrVerify(path: string, value: Uint8Array): Promise<void> {
         );
         return;
       }
-      if (
-        difference.differingPixels > MAX_ANTIALIAS_PIXELS ||
-        difference.maxChannelDelta > MAX_CHANNEL_DELTA
-      ) {
+      if (!isAcceptableScreenshotDifference(difference)) {
         await mkdir(mismatchDirectory, { recursive: true });
         const mismatchPath = resolve(mismatchDirectory, basename(path));
         await writeFile(mismatchPath, value);

@@ -1,5 +1,11 @@
 # Decision log
 
+## 2026-07-18 — Bound canonical screenshot antialias tolerance by area and channel delta
+
+- **Decision:** Accept a canonical Linux screenshot difference only when no more than 32 pixels differ and the maximum per-channel delta is no more than 40. Keep dimension mismatches, larger changed regions, and stronger channel changes release-blocking. Maintain unit tests at each boundary.
+- **Why:** Three exact-commit Linux runs of the unchanged Architecture screen alternated between two otherwise identical rasters. The alternate image changed 27 isolated edge pixels across three SVG icons, with a maximum channel delta of 37; the evidence summary could not affect that demo route. A one-channel tolerance treated browser edge antialiasing as a product change and made release results nondeterministic.
+- **Boundary:** This tolerance applies only to the canonical screenshot byte comparison after fonts, reduced motion, disabled animations, and two settled animation frames. It does not relax layout, accessibility, responsive, visual attachment, or hosted browser checks, and fully changed pixels still fail.
+
 ## 2026-07-18 — Keep dialog content opaque throughout entrance motion
 
 - **Decision:** Animate modal position only; never animate the opacity of the dialog surface or its descendants. Pause the entrance animation at its midpoint in the maintained-browser accessibility suite, require computed opacity `1`, and run Axe against that exact transitional state.
