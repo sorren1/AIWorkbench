@@ -1,5 +1,7 @@
 # Baseline audit
 
+Record type: historical snapshot of the preserved original prototype, not current release status. Current release boundaries are maintained in [the v1.0.8 release notes](releases/1.0.8.md) and [deployment verification](deployment-verification.md).
+
 Audit date: 2026-07-16
 Repository root: `D:\workbench`
 Rewritten baseline commit: `bfc947c` (`Initial commit`)

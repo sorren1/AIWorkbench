@@ -1,6 +1,6 @@
 # Portfolio upgrade plan
 
-Status: approved implementation plan
+Status: historical implementation plan; source and verified Preview milestones completed through v1.0.7, with v1.0.8 Production verification release-specific
 Rewritten baseline: commit `bfc947c` (`Initial commit`)
 Prepared: 2026-07-16
 Expanded: 2026-07-16 to include the focused agent control plane
@@ -351,7 +351,7 @@ Suggested commit: `feat: add governed run evidence and traceability`
 
 ### Phase 7 — Quality gates, CI, security, and supply-chain evidence
 
-Status: Complete across `test: add release-grade quality gates` and `security: add supply-chain evidence and SBOM`. The repository now produces normalized SARIF, five validated CycloneDX SBOMs (two npm graphs plus the sandbox, LiteLLM, and PostgreSQL runtimes), scanner/version metadata, LiteLLM signature evidence, license inventory, suppression evidence, and a sanitized source-linked summary. GitHub CodeQL is configured but remains explicitly `configured · not validated` until a successful hosted run is observed.
+Status: Complete across `test: add release-grade quality gates` and `security: add supply-chain evidence and SBOM`. The repository produces normalized SARIF, five validated CycloneDX SBOMs (two npm graphs plus the sandbox, LiteLLM, and PostgreSQL runtimes), scanner/version metadata, LiteLLM signature evidence, license inventory, suppression evidence, and a sanitized source-linked summary. Hosted CodeQL was successfully observed and bound for immutable v1.0.7; each later release, including v1.0.8, still requires fresh commit-specific hosted evidence before its own summary is generated.
 
 Scope: make the repository safe, predictable, and evidentiary for contributors.
 
@@ -372,7 +372,7 @@ Implemented commits: `test: add release-grade quality gates`; `security: add sup
 
 ### Phase 8 — Portfolio polish and final release
 
-Status: Repository-curation and technical-documentation subphase complete. Publication, public-URL verification, hosted-workflow observation, and release tagging remain pending and require the separately authorized final release phase.
+Status: Repository curation, hosted workflow observation, immutable release tagging, and exact Preview verification were completed through v1.0.7. Version 1.0.8 returns to the audited-source boundary and must repeat its own evidence/tag/Preview procedure. Production verification at `<PRODUCTION_ORIGIN>` remains a separate release gate and is not claimed by this historical plan.
 
 Scope: final content/design QA followed by the only authorized publication step.
 

@@ -4,7 +4,9 @@
 
 AI Delivery Workbench shows how coding-agent output can remain subordinate to explicit context, authorization, approval, validation, budget, and evidence controls.
 
-- **Live demo:** not published yet; run the static site locally.
+- **Intended Production origin:** `<PRODUCTION_ORIGIN>`. No v1.0.8 Production deployment, DNS/TLS result, canonical metadata, or Production verification is claimed at this source boundary.
+- **Verified Preview baseline:** [immutable v1.0.7 Preview](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/), bound to the v1.0.7 evidence commit. It is a Preview artifact, not Production and not v1.0.8.
+- **v1.0.8 candidate:** this repository source. Fresh hosted CI, CodeQL, release evidence, Preview, and Production verification belong to the later release procedure and are not inherited from v1.0.7.
 - **Source:** [github.com/sorren1/AIWorkbench](https://github.com/sorren1/AIWorkbench)
 - **Local routes:** case study at `/`, technical article at `/writing/governing-ai-assisted-delivery/`, and interactive prototype at `/demo/`.
 
@@ -90,9 +92,15 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/contributor-commands.md](docs/c
 
 `npm run check:all` covers formatting, lint, strict type checking, registry/context/evidence drift, unit and component coverage, production build, static and documentation links, bundle budgets, credential-pattern checks, supply-chain evidence, Chromium/Firefox/WebKit end-to-end tests, axe checks, controlled visual captures, and desktop/mobile Lighthouse assertions.
 
-The supply-chain gate adds redacted tracked-file/history secret scanning, TypeScript/JavaScript analysis, dependency and container vulnerability scans, three CycloneDX SBOMs, license policy, suppression validation, and sanitized source-linked evidence. Missing Docker, scanners, advisory data, or history fails the gate rather than becoming a pass. CodeQL is configured for hosted CI but remains labeled unvalidated until a successful hosted run is observed.
+The supply-chain gate adds redacted tracked-file/history secret scanning, TypeScript/JavaScript analysis, dependency and container vulnerability scans, five CycloneDX SBOMs, license policy, suppression validation, and sanitized source-linked evidence. Missing Docker, scanners, advisory data, or history fails the gate rather than becoming a pass. Hosted CodeQL is release-specific: v1.0.7 has generated zero-finding evidence for its audited source, while v1.0.8 must produce fresh hosted evidence before its own summary, tag, or deployment can be accepted.
 
 Read [EVALUATION.md](EVALUATION.md), [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md), and [docs/release-evidence.md](docs/release-evidence.md) for claim definitions and assurance limits.
+
+## Release and deployment evidence
+
+The durable v1.0.7 Preview record is its [generated deployment binding](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/security/deployment-binding.json) plus its [generated release summary](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/security/release-summary.json). Those generated records bind release tag, audited source, evidence commit, deployed commit, and hosted CodeQL result without relying on a hand-maintained run table.
+
+The v1.0.8 audited source intentionally contains no `public/security/release-summary.json`. After fresh local and hosted gates pass, the release process creates one direct evidence child containing only that generated file, tags that child, and produces a new deployment binding. The intended stable public URL is `<PRODUCTION_ORIGIN>`; it becomes Production evidence only after the Production gate in [docs/deployment-verification.md](docs/deployment-verification.md) succeeds there.
 
 ## Repository map
 
@@ -127,4 +135,4 @@ In professional work, I built a related governed AI-assisted delivery platform t
 
 ## License and releases
 
-No reuse license has been granted for the first-party project code in this revision. Third-party components retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the [license decision ADR](docs/adr/source-license-decision.md). See [CHANGELOG.md](CHANGELOG.md) and the [1.0.0 release notes](docs/releases/1.0.0.md) for release status and known limitations.
+No reuse license has been granted for the first-party project code in this revision. Third-party components retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the [license decision ADR](docs/adr/source-license-decision.md). See [CHANGELOG.md](CHANGELOG.md) and the [v1.0.8 release notes](docs/releases/1.0.8.md) for the candidate contents, evidence boundary, and known limitations.

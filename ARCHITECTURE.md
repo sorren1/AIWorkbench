@@ -94,7 +94,7 @@ The default `ModelGateway` is deterministic and offline. An optional loopback Li
 
 Vite creates a multi-page static build: root case-study HTML and the article retain their substantive content without JavaScript; React is bundled only for `/demo/`. Build-time generation injects optional configured links and metadata, synchronized code excerpts, the latest validated evidence, `robots.txt`, `sitemap.xml`, and static-host header manifests. Assets are local and the CSP does not require `unsafe-eval` or external runtime origins.
 
-The current deployment decision is host-neutral and Git-backed. Canonical metadata and public links remain absent until `src/site/config.ts` contains real public values. Publication and release tagging are explicitly outside ordinary implementation phases. See [ADR: static hosting](docs/adr/static-hosting-and-security-headers.md).
+Vercel is the selected Git-backed static host. The immutable v1.0.7 evidence commit has a verified Preview, while v1.0.8 is a separate source candidate and `<PRODUCTION_ORIGIN>` is the intended stable Production origin. Preview builds omit canonical-dependent output. Production builds accept the origin only through validated `SITE_CANONICAL_URL`, which drives HTML metadata, robots/sitemap output, and RFC 9116 canonical identity. Generated release summaries and deployment bindings—not a mutable architecture status sentence—prove the exact source/evidence/tag/deployment relation. No v1.0.8 Production result is claimed here. See [ADR: static hosting](docs/adr/static-hosting-and-security-headers.md) and [deployment verification](docs/deployment-verification.md).
 
 ## Deliberate non-goals and tradeoffs
 

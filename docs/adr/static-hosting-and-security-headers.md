@@ -1,12 +1,12 @@
 # ADR: Static Git-backed hosting and security headers
 
-- Status: Accepted; Vercel selected, hosted verification pending
+- Status: Accepted; Vercel selected, v1.0.7 Preview verified, v1.0.8 Production verification unrecorded
 - Date: 2026-07-17
 - Decision owners: repository maintainers
 
 ## Context
 
-The case study must remain indexable without loading the demo bundle, work on a repository subpath, have no backend/runtime secrets, and apply a restrictive policy matching only local assets. Vercel is the selected Git-backed host. A final custom domain is not yet configured, so canonical metadata must remain absent from preview builds.
+The case study must remain indexable without loading the demo bundle, work on a repository subpath, have no backend/runtime secrets, and apply a restrictive policy matching only local assets. Vercel is the selected Git-backed host. The intended stable Production origin is `<PRODUCTION_ORIGIN>`; Preview builds must still omit canonical metadata, and the intended value is not evidence of DNS, TLS, deployment, or Production verification.
 
 ## Decision
 
@@ -16,15 +16,16 @@ Use relative/subpath-safe assets, generated canonical/robots/sitemap behavior on
 
 Emit Vercel configuration for Content-Security-Policy, Referrer-Policy, X-Content-Type-Options, Permissions-Policy, Cross-Origin-Opener-Policy, and anti-framing through `frame-ancestors`. The CSP permits only the local script/style/image/font/connect forms the build uses and does not require `unsafe-eval`. Vite-generated hashed JavaScript and CSS live under `/assets/immutable/` and receive a one-year immutable cache directive. Unhashed assets do not. HTML retains Vercel's revalidation-safe default. Publication must verify the observed edge headers; a committed configuration is not evidence of deployed behavior.
 
-Connect the GitHub repository through Vercel's Git integration with `main` as the production branch. Pull requests and non-production branches create Preview deployments. Preview must pass the hosted verification suite and Lighthouse review before any production promotion or merge.
+Connect the GitHub repository through Vercel's Git integration. Keep ordinary development and source/evidence review on non-Production refs; the provider's Production ref remains isolated until an approved tagged evidence commit is ready. Pull requests and non-Production branches create Preview deployments. The exact tagged Preview must pass deployment binding, hosted route/header/accessibility/browser/network/cache checks, and Lighthouse review before Production is considered.
 
 ## Consequences
 
 - The project can be previewed and audited locally without network calls or credentials.
 - The repository has one small host adapter, `vercel.json`; no Vercel application runtime or SDK is introduced.
-- Canonical, contact, resume, and live-demo links remain omitted rather than becoming placeholders until their real destinations exist.
+- Preview omits Production canonical output. A Production build derives canonical HTML, Open Graph, robots/sitemap, and `security.txt` identity only from validated `SITE_CANONICAL_URL=<PRODUCTION_ORIGIN>`.
 - Preview and production evidence remain separate. A successful local build does not prove custom-domain DNS, TLS, edge headers, or Git integration.
 - Alternate custom domains must redirect to the single configured canonical origin in Vercel project settings.
+- The v1.0.7 generated deployment binding is immutable Preview evidence only; v1.0.8 requires fresh generated release and deployment records before any Production claim.
 
 ## Alternatives considered
 

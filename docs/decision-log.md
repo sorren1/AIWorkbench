@@ -1,5 +1,17 @@
 # Decision log
 
+## 2026-07-19 — Make generated evidence authoritative for each release environment
+
+- **Decision:** Treat the audited source, one-file evidence child, annotated tag, and generated deployment binding as four explicit release identities. Link durable generated release/deployment records from public documentation instead of maintaining provider run IDs or prose that purports to update itself. Record `<PRODUCTION_ORIGIN>` as the intended stable v1.0.8 Production origin while keeping the immutable v1.0.7 Ready artifact labeled Preview.
+- **Why:** Hosted success is commit- and environment-specific. v1.0.7 has valid generated Preview evidence, but its post-deployment audit found a stale `security.txt` canonical and nested-route 404 resolution defect. Neither successful v1.0.7 controls nor a fixed local v1.0.8 source prove a v1.0.8 Preview or Production deployment.
+- **Boundary:** The v1.0.8 audited source contains no inherited release summary. Fresh hosted CodeQL and release gates must create its direct evidence child; only verified DNS/TLS, canonical metadata, routes, headers, browsers, accessibility, network, cache, and Lighthouse results at `<PRODUCTION_ORIGIN>` can establish Production.
+
+## 2026-07-19 — Restore bounded Dependabot proposal queues after history publication
+
+- **Decision:** Restore weekly npm version proposals with `open-pull-requests-limit: 5` and monthly GitHub Actions proposals with `open-pull-requests-limit: 2`. Keep automatic merge disabled and require exact-version/full-action-SHA review plus the normal dependency-review, Quality, CodeQL, history, and supply-chain gates.
+- **Why:** The sanitized public graph, preservation tag, release tags, generated provenance, and hosted controls have been published and audited. Suppressing all update proposals no longer improves that completed publication boundary and would hide maintenance work.
+- **Boundary:** A Dependabot pull request is review input, not accepted release lineage. The exact public-history identity rule for release branches/tags remains unchanged; an accepted bot proposal must enter the release graph through an owner-authored reviewed commit. Opening bounded proposals does not validate, merge, deploy, or publish them.
+
 ## 2026-07-18 — Exercise deployment-only evidence states before release
 
 - **Decision:** Keep links embedded in prose visibly underlined at rest, and maintain an accessibility test that injects the deployment-binding state when a local source build has no release summary. The test requires the computed underline and runs Axe against the exact prose/link surface.
@@ -47,7 +59,7 @@
 
 - **Decision:** Retain the npm and GitHub Actions Dependabot configuration but set both `open-pull-requests-limit` values to zero during publication.
 - **Why:** GitHub creates permanent pull refs for Dependabot PRs. Those bot-authored commits would make the exact noreply-identity acceptance gate fail even after the temporary branch was deleted.
-- **Follow-up:** Re-enabling version updates requires an explicit expansion of the allowed-identity policy and a new fresh-mirror audit. Dependency review, npm audit, Gitleaks, SBOM, image scanning, pinned-action review, and CodeQL remain active release gates.
+- **Follow-up:** Superseded by the 2026-07-19 bounded-queue decision above. Bot-authored proposal refs are review inputs rather than accepted release lineage, so the release-branch/tag identity policy remains narrow. Dependency review, npm audit, Gitleaks, SBOM, image scanning, pinned-action review, and CodeQL remain active release gates.
 
 ## 2026-07-17 — Make public-history privacy and provenance reachability release gates
 
@@ -478,7 +490,7 @@ The repository already enforced source quality, credential-pattern checks, npm a
 
 Add a typed, fail-closed supply-chain orchestrator using immutable Gitleaks and Trivy images, the locked CycloneDX npm generator, ESLint, npm audit, and repository-specific container/language policy. Build a minimal sandbox runtime from a digest-pinned Node base, remove npm because fixed checks invoke Node directly, scan the exact built image ID, and generate CycloneDX records for production npm dependencies, the complete npm graph, and the image. Keep detailed reports gitignored/CI-retained and publish only a sanitized source-tree/result digest summary.
 
-Pin GitHub dependency review and CodeQL actions by commit SHA. Treat CodeQL as configured but unvalidated until hosted evidence exists. Centralize suppressions with exact scanner/rule/path matching, reviewer, review date, and expiry; missing tools, databases, history, Docker, or scan output fail rather than becoming a pass.
+Pin GitHub dependency review and CodeQL actions by commit SHA. At this decision's source boundary, CodeQL had configuration but no hosted result; immutable v1.0.7 later supplied successful hosted evidence, and every subsequent release still requires its own result. Centralize suppressions with exact scanner/rule/path matching, reviewer, review date, and expiry; missing tools, databases, history, Docker, or scan output fail rather than becoming a pass.
 
 ### Consequences
 
