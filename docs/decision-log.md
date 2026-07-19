@@ -1,5 +1,11 @@
 # Decision log
 
+## 2026-07-18 — Exercise deployment-only evidence states before release
+
+- **Decision:** Keep links embedded in prose visibly underlined at rest, and maintain an accessibility test that injects the deployment-binding state when a local source build has no release summary. The test requires the computed underline and runs Axe against the exact prose/link surface.
+- **Why:** The v1.0.5 exact tagged Preview passed its deployment binding and exposed markup that cannot exist in a clean source build. Hosted Axe correctly reported the binding link as relying only on color, even though source, evidence, exact-main, and local browser gates were green.
+- **Boundary:** The published v1.0.5 tag remains immutable audit history and is not promoted as a release. A new source/evidence/tag identity is required after the fix passes every local, pull-request, exact-main, and hosted Preview gate.
+
 ## 2026-07-18 — Bound canonical screenshot antialias tolerance by area and channel delta
 
 - **Decision:** Accept a canonical Linux screenshot difference only when no more than 32 pixels differ and the maximum per-channel delta is no more than 40. Keep dimension mismatches, larger changed regions, and stronger channel changes release-blocking. Maintain unit tests at each boundary.

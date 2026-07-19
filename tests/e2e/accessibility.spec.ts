@@ -34,6 +34,29 @@ test("case study and technical article have no serious or critical axe violation
   await expectNoSeriousViolations(page, "technical article");
 });
 
+test("deployment evidence links are distinguishable without relying on color", async ({ page }) => {
+  await page.goto("/");
+  const bindingLink = page.getByRole("link", { name: "deployment-binding.json" });
+  if ((await bindingLink.count()) === 0) {
+    await page.locator("main").evaluate((main) => {
+      const paragraph = document.createElement("p");
+      paragraph.className = "site-evidence-summary__binding";
+      paragraph.append("The complete binding is published at ");
+      const link = document.createElement("a");
+      link.href = "./security/deployment-binding.json";
+      link.textContent = "deployment-binding.json";
+      paragraph.append(link, ".");
+      main.append(paragraph);
+    });
+  }
+
+  await expect(bindingLink).toHaveCSS("text-decoration-line", "underline");
+  const results = await new AxeBuilder({ page })
+    .include(".site-evidence-summary__binding")
+    .analyze();
+  expect(results.violations.map(({ id }) => id)).not.toContain("link-in-text-block");
+});
+
 test("principal workbench screens have no serious or critical axe violations", async ({ page }) => {
   await page.goto("/demo/");
   await expectNoSeriousViolations(page, "Work Queue");
