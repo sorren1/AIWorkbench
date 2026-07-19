@@ -10,6 +10,9 @@ export type GovernanceBlockerCode =
   | "BOUND_APPROVAL_REQUIRED"
   | "VALIDATION_PERSONA_REQUIRED"
   | "VALIDATION_SCENARIOS_INCOMPLETE"
+  | "VALIDATION_ACCEPTANCE_INCOMPLETE"
+  | "VALIDATION_SECURITY_INCOMPLETE"
+  | "VALIDATION_ACCESSIBILITY_INCOMPLETE"
   | "VALIDATION_EVIDENCE_INCOMPLETE";
 
 export type GovernanceGate = {
@@ -92,10 +95,16 @@ export function evaluateValidationCompletion(input: {
   readonly approvedForValidation: boolean;
   readonly personaCanApprove: boolean;
   readonly scenarioStatuses: readonly ValidationStatus[];
+  readonly acceptanceStatuses: readonly ValidationStatus[];
+  readonly securityStatus: ValidationStatus;
+  readonly accessibilityStatus: ValidationStatus;
 }): GovernanceDecision {
   const scenariosPassed =
     input.scenarioStatuses.length > 0 &&
     input.scenarioStatuses.every((status) => status === "Passed");
+  const acceptancePassed =
+    input.acceptanceStatuses.length > 0 &&
+    input.acceptanceStatuses.every((status) => status === "Passed");
   return decision([
     {
       code: "VERIFY_NOT_PASSED",
@@ -120,6 +129,24 @@ export function evaluateValidationCompletion(input: {
       label: "Validation scenarios",
       met: scenariosPassed,
       detail: scenariosPassed ? "all passed" : "incomplete or failed",
+    },
+    {
+      code: "VALIDATION_ACCEPTANCE_INCOMPLETE",
+      label: "Acceptance criteria",
+      met: acceptancePassed,
+      detail: acceptancePassed ? "all passed" : "incomplete or failed",
+    },
+    {
+      code: "VALIDATION_SECURITY_INCOMPLETE",
+      label: "Security review",
+      met: input.securityStatus === "Passed",
+      detail: input.securityStatus === "Passed" ? "passed" : "incomplete or failed",
+    },
+    {
+      code: "VALIDATION_ACCESSIBILITY_INCOMPLETE",
+      label: "Accessibility review",
+      met: input.accessibilityStatus === "Passed",
+      detail: input.accessibilityStatus === "Passed" ? "passed" : "incomplete or failed",
     },
   ]);
 }

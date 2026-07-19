@@ -64,6 +64,12 @@ export function ValidationScreen() {
     ...s,
     status: (ov.scenarios && ov.scenarios[s.name]) || s.status,
   }));
+  const acceptance = base.acceptance.map((criterion) => ({
+    ...criterion,
+    status: ov.acceptance?.[criterion.id] ?? criterion.status,
+  }));
+  const accessibility = ov.accessibility ?? base.a11y;
+  const security = ov.security ?? base.security;
   const notes = [...(base.testerNotes || []), ...(ov.notes || [])];
   const decision = ov.decision || base.decision;
   const evidence = ov.evidenceStatus || base.evidenceStatus;
@@ -81,6 +87,27 @@ export function ValidationScreen() {
       status === "Passed" ? "success" : "error",
       "Test " + (status === "Passed" ? "passed" : "failed"),
       name + " marked " + status + " in browser-local demo state.",
+    );
+  };
+  const setAcceptance = (id: string, status: Extract<ValidationStatus, "Passed" | "Failed">) => {
+    actions.setVal(issue.key, {
+      acceptance: { ...(ov.acceptance || {}), [id]: status },
+    });
+    actions.toast(
+      status === "Passed" ? "success" : "error",
+      `Acceptance criterion ${status === "Passed" ? "passed" : "failed"}`,
+      `${id} marked ${status} in browser-local demo state.`,
+    );
+  };
+  const setReview = (
+    review: "security" | "accessibility",
+    status: Extract<ValidationStatus, "Passed" | "Failed">,
+  ) => {
+    actions.setVal(issue.key, { [review]: status });
+    actions.toast(
+      status === "Passed" ? "success" : "error",
+      `${review === "security" ? "Security" : "Accessibility"} review ${status.toLocaleLowerCase()}`,
+      `The synthetic ${review} review was marked ${status}.`,
     );
   };
   const start = () => {
@@ -110,6 +137,9 @@ export function ValidationScreen() {
       approvedForValidation: state.prState[issue.key]?.approvedForValidation === true,
       personaCanApprove: canApproveValidation,
       scenarioStatuses: scen.map((scenario) => scenario.status),
+      acceptanceStatuses: acceptance.map((criterion) => criterion.status),
+      securityStatus: security,
+      accessibilityStatus: accessibility,
     });
     const blocker = gate.blockers[0];
     if (blocker) {
@@ -129,6 +159,18 @@ export function ValidationScreen() {
         VALIDATION_SCENARIOS_INCOMPLETE: [
           "Tests not all passing",
           "Every scenario must pass before evidence can be marked complete.",
+        ],
+        VALIDATION_ACCEPTANCE_INCOMPLETE: [
+          "Acceptance not complete",
+          "Every acceptance criterion must pass before evidence can be marked complete.",
+        ],
+        VALIDATION_SECURITY_INCOMPLETE: [
+          "Security review not complete",
+          "The security review must pass before evidence can be marked complete.",
+        ],
+        VALIDATION_ACCESSIBILITY_INCOMPLETE: [
+          "Accessibility review not complete",
+          "The accessibility review must pass before evidence can be marked complete.",
         ],
         REQUIRED_CHECKS_NOT_PASSED: ["Checks incomplete", "Required checks remain open."],
         DIFF_NOT_REVIEWED: ["Diff review required", "The changed-file review remains open."],
@@ -277,19 +319,33 @@ export function ValidationScreen() {
               title="Acceptance criteria coverage"
               actions={
                 <Badge tone="neutral">
-                  {base.acceptance.filter((a) => a.status === "Passed").length}/
-                  {base.acceptance.length}
+                  {acceptance.filter((criterion) => criterion.status === "Passed").length}/
+                  {acceptance.length}
                 </Badge>
               }
             />
             <div className="wb-card-body wb-card-body--tight">
-              {base.acceptance.map((a) => (
+              {acceptance.map((a) => (
                 <div key={a.id} className="wb-flex wb-divided-row wb-u-gap-10px wb-u-p-10px-16px">
                   <span className="wb-mono wb-muted wb-u-text-11-5px wb-u-w-34px wb-u-flex-none">
                     {a.id}
                   </span>
                   <span className="wb-u-text-13px wb-u-flex-1">{a.text}</span>
                   <StatusPill status={a.status} />
+                  <div className="wb-flex wb-u-gap-6px">
+                    <IconBtn
+                      icon="check"
+                      size="sm"
+                      title={`Mark ${a.id} passed`}
+                      onClick={() => setAcceptance(a.id, "Passed")}
+                    />
+                    <IconBtn
+                      icon="x"
+                      size="sm"
+                      title={`Mark ${a.id} failed`}
+                      onClick={() => setAcceptance(a.id, "Failed")}
+                    />
+                  </div>
                 </div>
               ))}
             </div>
@@ -380,7 +436,21 @@ export function ValidationScreen() {
               <div className="wb-card-body wb-stack-sm">
                 <div className="wb-between">
                   <span className="wb-text-sm wb-secondary">Permission / RBAC review</span>
-                  <StatusPill status={base.security} />
+                  <div className="wb-flex wb-u-gap-6px">
+                    <StatusPill status={security} />
+                    <IconBtn
+                      icon="check"
+                      size="sm"
+                      title="Mark security review passed"
+                      onClick={() => setReview("security", "Passed")}
+                    />
+                    <IconBtn
+                      icon="x"
+                      size="sm"
+                      title="Mark security review failed"
+                      onClick={() => setReview("security", "Failed")}
+                    />
+                  </div>
                 </div>
                 <div className="wb-between">
                   <span className="wb-text-sm wb-secondary">Secrets in output</span>
@@ -390,7 +460,21 @@ export function ValidationScreen() {
                 </div>
                 <div className="wb-between">
                   <span className="wb-text-sm wb-secondary">Accessibility check</span>
-                  <StatusPill status={base.a11y} />
+                  <div className="wb-flex wb-u-gap-6px">
+                    <StatusPill status={accessibility} />
+                    <IconBtn
+                      icon="check"
+                      size="sm"
+                      title="Mark accessibility review passed"
+                      onClick={() => setReview("accessibility", "Passed")}
+                    />
+                    <IconBtn
+                      icon="x"
+                      size="sm"
+                      title="Mark accessibility review failed"
+                      onClick={() => setReview("accessibility", "Failed")}
+                    />
+                  </div>
                 </div>
               </div>
             </Card>
@@ -480,8 +564,8 @@ export function ValidationScreen() {
               <div className="wb-between">
                 <span className="wb-text-sm wb-secondary">Acceptance passed</span>
                 <span className="wb-mono wb-strong">
-                  {base.acceptance.filter((a) => a.status === "Passed").length}/
-                  {base.acceptance.length}
+                  {acceptance.filter((criterion) => criterion.status === "Passed").length}/
+                  {acceptance.length}
                 </span>
               </div>
               <div className="wb-between">

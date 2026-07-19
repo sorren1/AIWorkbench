@@ -741,3 +741,24 @@ Hosted verification now sends ordinary requests without `x-vercel-skip-toolbar` 
 - A new deployment is required before the saved provider setting and tightened repository policy can be observed together; no dashboard redeploy was triggered during this change.
 - Re-enabling the Toolbar is an architecture and security-policy change, not an incidental provider toggle. It would require an explicit review of provider origins, data flow, CSP, and deployment tests.
 - Dynamic layout values remain constrained by typed tone classes, native element attributes, or SVG presentation attributes instead of reopening inline CSS.
+
+## ADR-033 — Derive demo release gates from reviewable browser-local evidence
+
+- Status: Accepted
+- Date: 2026-07-19
+- Detailed records: [`src/demo/state/guards.ts`](../src/demo/state/guards.ts) and [`tests/e2e/quality-gates.spec.ts`](../tests/e2e/quality-gates.spec.ts)
+
+### Context
+
+The FIN-1150 pull-request fixture displayed a permanently pending `change-targets.json` check even after a reviewer approved that artifact. Its PR review action also marked every checklist assertion complete, and final validation considered only scenario statuses while visibly incomplete acceptance, security, or accessibility evidence remained on screen. The generic FIN-1077 test path did not exercise those FIN-1150 state connections.
+
+### Decision
+
+Derive the FIN-1150 change-target check from the exact artifact review identifier stored in browser-local state. Keep diff inspection separate from explicit reviewer checklist decisions, and describe the synthetic unexpected evidence file as a reviewed scope exception rather than claiming no exception exists. Require every validation scenario, acceptance criterion, security review, and accessibility review to pass before the final evidence decision can be recorded. Export those effective browser-local review states and cover the complete FIN-1150 approval path in a browser test.
+
+### Consequences
+
+- Approving `FIN-1150::change-targets.json` now clears the corresponding required PR check without bypassing the human checklist.
+- The clean walkthrough seeds the same evidence-backed state used by the interactive workflow rather than a contradictory static readiness fixture.
+- Reviewers must explicitly record acceptance and cross-cutting review outcomes before final validation; these actions remain synthetic and browser-local.
+- PR check and unresolved-comment summaries update after the bound validator approval is consumed.
