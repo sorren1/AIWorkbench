@@ -1,5 +1,11 @@
 # Decision log
 
+## 2026-07-20 — Separate release lineage from provider-created review refs
+
+- **Decision:** Keep the account-specific GitHub noreply address mandatory for every commit reachable from `HEAD` or an annotated release tag. Outside that release lineage, recognize only the exact GitHub web-committer form for an owner-authored discarded squash artifact or a Dependabot-authored proposal. Continue scanning every reachable commit, ref, path, message, blob, tag, and generated provenance reference for the remaining public-history controls.
+- **Why:** Restoring bounded Dependabot queues creates public review branches with the bot author and GitHub web committer identities. GitHub can also retain a reviewed web-squash artifact while a guarded identical-tree correction becomes `main`. Treating those review-only refs as accepted release lineage makes exact-main Quality fail even though neither commit can enter a release without being re-authored.
+- **Boundary:** A provider-authored commit fails immediately if it becomes reachable from `HEAD` or any release tag. Dependabot proposals remain untrusted review inputs; accepting one requires an owner-authored commit and the complete pull-request, exact-main, CodeQL, history, and supply-chain path. The exception does not relax tagger identity or the all-ref content/provenance scan.
+
 ## 2026-07-20 — Keep the personal origin separate from the Workbench namespace
 
 - **Decision:** Use `https://tylerwilhite.dev` as the canonical Production origin. Serve a small static portfolio index at `/`, and map the complete AI Delivery Workbench surface to `/workbench/` through narrow Vercel rewrites. Permanently redirect former hosted page routes such as `/demo/` and `/writing/` into the Workbench namespace; do not add an SPA fallback.

@@ -4,6 +4,8 @@ Dependabot version proposals are enabled after completion of the sanitized publi
 
 Dependencies are exact-versioned in `package.json` and resolved through the committed npm lockfile. Actions remain pinned to reviewed full commit SHAs. Dependabot branches are review inputs, not accepted release lineage: an approved update enters a release branch through an owner-authored reviewed commit that preserves the repository's narrow public-history identity policy.
 
+The public-history check recognizes the exact Dependabot author plus GitHub web-committer pair only while that commit remains outside `HEAD` and annotated-tag lineage. The same commit becomes release-blocking if it enters either boundary, so a green proposal branch cannot substitute for owner-authored acceptance.
+
 For each dependency change:
 
 1. inspect the direct and transitive lockfile diff, release notes, runtime purpose, and license;
