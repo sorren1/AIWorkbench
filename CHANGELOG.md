@@ -29,6 +29,7 @@ Evidence policy: this entry describes the source contents only. A v1.0.8 tag, ho
 - prevented a Preview hostname from remaining hard-coded as the canonical RFC 9116 security record.
 - allowed bounded extra startup time for process-backed Vitest suites and parallel local WebKit workflows so Windows release-gate runs do not fail at framework timing defaults while the same assertions pass independently; retries remain disabled and CI retains its existing limit.
 - kept the public-history identity gate compatible with restored Dependabot proposal branches without permitting bot-authored or GitHub-web-committed changes into a release.
+- replaced the provider wildcard Workbench rewrite with exact page-to-file rewrites and corrected Vercel's named wildcard syntax for immutable assets, so hosted subroutes resolve directly and hashed CSS/JavaScript retain their intended cache policy.
 
 ### Security
 
