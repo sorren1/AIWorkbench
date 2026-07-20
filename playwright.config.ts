@@ -9,7 +9,7 @@ export default defineConfig({
   fullyParallel: false,
   forbidOnly: isCI,
   retries: 0,
-  timeout: isCI ? 90_000 : 30_000,
+  timeout: isCI ? 90_000 : 60_000,
   workers: isCI ? 1 : 2,
   reporter: isCI
     ? [["github"], ["html", { open: "never", outputFolder: "playwright-report" }]]

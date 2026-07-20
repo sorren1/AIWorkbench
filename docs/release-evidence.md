@@ -1,5 +1,11 @@
 # Release security evidence
 
+## Release lineage
+
+The immutable v1.0.7 example is available through its [generated release summary](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/security/release-summary.json) and [generated deployment binding](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/security/deployment-binding.json). Those records bind audited source `7cb0e186c8d3225908fcfeed8df8c8e143ff0ed6`, evidence/deployed commit `af3b0b3554d9a26d4d9538eb2fc5626e84342827`, tag `v1.0.7`, and the hosted CodeQL result.
+
+Version 1.0.8 is a fresh release lineage. Its audited source intentionally omits `public/security/release-summary.json`; v1.0.7 evidence cannot be copied forward. Only a later direct evidence child generated from successful v1.0.8 gates may restore that path. A deployed `/security/deployment-binding.json` becomes v1.0.8 Production evidence only after verification at the intended stable origin `https://tylerwilhite.dev`, including the Workbench surface at `/workbench/`.
+
 ## Reproducible command
 
 Prerequisites are the pinned Node version, a clean `npm ci`, Git history, and Docker Engine with Linux containers. Run:
@@ -73,6 +79,6 @@ The scanner report retains the original finding. The orchestrator matches the do
 
 ## GitHub-only controls
 
-Pull requests run GitHub dependency review and the complete local-equivalent gate. CodeQL uses GitHub's JavaScript/TypeScript extractor and `security-extended` queries in a separate SHA-pinned workflow. The hosted job retains SARIF and a small commit/run/count record, and fails unless the result count is zero. While the repository remains private without GitHub Advanced Security, SARIF upload to GitHub code scanning is disabled; the hosted workflow artifact is the source of the zero-finding claim.
+Pull requests run GitHub dependency review and the complete local-equivalent gate. CodeQL uses GitHub's JavaScript/TypeScript extractor and `security-extended` queries in a separate SHA-pinned workflow. The hosted job retains SARIF and a small commit/run/count record and fails unless the result count is zero. The public repository also uploads the SARIF result to GitHub code scanning; the generated release summary binds the exact audited commit and retained zero-finding record used for the release rather than treating the repository's mutable alert page as release evidence.
 
 Vercel builds fail closed unless `VERCEL_GIT_COMMIT_SHA` exactly equals `APPROVED_DEPLOYMENT_COMMIT_SHA`, and the audited commit and release tag match the checked-in summary. A successful build emits `/security/deployment-binding.json` with the full deployed commit, audited parent, release tag, CodeQL run, and verified relation. This build-generated file avoids placing a self-referential evidence-commit SHA inside its own Git tree.

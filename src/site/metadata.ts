@@ -1,6 +1,6 @@
 import type { SiteConfig } from "./config";
 
-export type PageKind = "case-study" | "article" | "demo" | "not-found";
+export type PageKind = "home" | "case-study" | "article" | "demo" | "not-found";
 
 export type PageMetadata = {
   readonly title: string;
@@ -10,25 +10,32 @@ export type PageMetadata = {
 };
 
 export const PAGE_METADATA: Record<PageKind, PageMetadata> = {
+  home: {
+    title: "Tyler Wilhite — Software systems portfolio",
+    description:
+      "A portfolio index for selected public work in software systems, AI-assisted delivery, and developer tools.",
+    path: "/",
+    type: "website",
+  },
   "case-study": {
     title: "AI Delivery Workbench — Governed AI-assisted delivery",
     description:
       "A governed, human-in-the-loop control plane for AI-assisted software delivery, presented as an independent case study and interactive prototype.",
-    path: "/",
+    path: "/workbench/",
     type: "website",
   },
   article: {
     title: "Governing AI-assisted delivery — AI Delivery Workbench",
     description:
       "A technical essay about authorization, bounded context, human approval, invalidation, and commit-bound evidence in coding-agent workflows.",
-    path: "/writing/governing-ai-assisted-delivery/",
+    path: "/workbench/writing/governing-ai-assisted-delivery/",
     type: "article",
   },
   demo: {
     title: "AI Delivery Workbench — Interactive portfolio prototype",
     description:
       "Explore the functional local workflow and synthetic evidence model behind AI Delivery Workbench.",
-    path: "/demo/",
+    path: "/workbench/demo/",
     type: "website",
   },
   "not-found": {
@@ -53,14 +60,15 @@ function normalizedBaseUrl(value: string): string {
 
 export function absoluteSiteUrl(config: SiteConfig, path: string): string | null {
   if (!config.canonicalUrl) return null;
-  return new URL(path.replace(/^\//, ""), normalizedBaseUrl(config.canonicalUrl)).toString();
+  return new URL(path, normalizedBaseUrl(config.canonicalUrl)).toString();
 }
 
 export function renderMetadataTags(config: SiteConfig, page: PageMetadata): string {
   const pageUrl = absoluteSiteUrl(config, page.path);
-  const socialImageUrl = absoluteSiteUrl(config, "/assets/social-card.png");
+  const socialImageUrl = absoluteSiteUrl(config, "/workbench/assets/social-card.png");
+  const siteName = page === PAGE_METADATA.home ? "Tyler Wilhite" : "AI Delivery Workbench";
   const tags = [
-    `<meta property="og:site_name" content="AI Delivery Workbench" />`,
+    `<meta property="og:site_name" content="${siteName}" />`,
     `<meta property="og:type" content="${page.type}" />`,
     `<meta property="og:title" content="${escapeAttribute(page.title)}" />`,
     `<meta property="og:description" content="${escapeAttribute(page.description)}" />`,
@@ -108,12 +116,26 @@ function projectSchema(config: SiteConfig, pageUrl: string | null): Record<strin
   return schema;
 }
 
+function portfolioSchema(pageUrl: string | null): Record<string, unknown> {
+  const schema: Record<string, unknown> = {
+    "@type": "WebSite",
+    name: "Tyler Wilhite",
+    description: PAGE_METADATA.home.description,
+  };
+  if (pageUrl) schema.url = pageUrl;
+  return schema;
+}
+
 export function renderStructuredData(
   config: SiteConfig,
   kind: PageKind,
   page: PageMetadata,
 ): string {
   const pageUrl = absoluteSiteUrl(config, page.path);
+  if (kind === "home") {
+    const data = { "@context": "https://schema.org", "@graph": [portfolioSchema(pageUrl)] };
+    return `<script type="application/ld+json">${JSON.stringify(data).replaceAll("<", "\\u003c")}</script>`;
+  }
   const graph: Record<string, unknown>[] = [projectSchema(config, pageUrl)];
 
   if (kind === "article") {
@@ -142,6 +164,7 @@ export function createRobotsTxt(config: SiteConfig): string {
 
 export function createSitemapXml(config: SiteConfig): string {
   const publicPaths = [
+    PAGE_METADATA.home.path,
     PAGE_METADATA["case-study"].path,
     PAGE_METADATA.article.path,
     PAGE_METADATA.demo.path,

@@ -37,7 +37,7 @@ export function resolveDeploymentBinding(
   environment: DeploymentBindingEnvironment,
   identity: ReleaseDeploymentIdentity | null,
 ): VerifiedDeploymentBinding | null {
-  if (environment.VERCEL !== "1") return null;
+  if (environment.VERCEL !== "1" || environment.VERCEL_ENV === "development") return null;
   if (!identity) {
     throw new Error("Vercel release build requires checked-in audited release evidence.");
   }

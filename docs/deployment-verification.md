@@ -1,114 +1,103 @@
 # Vercel deployment verification
 
-- Status: GitHub automation connected and verified; v1.0.5 tagged Preview rejected by hosted accessibility audit; v1.0.6 remediation in review; Production blocked on an owner-selected custom domain
-- Review date: 2026-07-18
+## Release boundary
+
+- Evidence review date: 2026-07-20
 - Source repository: <https://github.com/sorren1/AIWorkbench>
 - Vercel project: `workbench1/ai-delivery-workbench`
-- Release baseline: `v1.0.2` at `7b2ec2ae8c215751b60a9505a05d0b5799061145`
-- Current remediation branch: `codex/hosted-binding-link-a11y`
-- Intended evidence release: `v1.0.6` (`v1.0.3` and `v1.0.4` were abandoned before tagging; tagged candidate `v1.0.5` was rejected by the hosted Preview audit and remains immutable history)
-- Production URL: Not created. The account has no owner-selected custom domain.
+- Intended stable Production origin: `https://tylerwilhite.dev`
+- Intended stable Workbench URL: `https://tylerwilhite.dev/workbench/`
+- Previous immutable release: `v1.0.7`
+- v1.0.7 audited source: `7cb0e186c8d3225908fcfeed8df8c8e143ff0ed6`
+- v1.0.7 evidence/deployed commit: `af3b0b3554d9a26d4d9538eb2fc5626e84342827`
+- Current verified artifact: [exact v1.0.7 Preview](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/)
+- Intended next release: `v1.0.8`
 
-This record distinguishes tracked readiness, GitHub evidence, and provider evidence. A local build, a `vercel.json` file, an account dashboard, or a failed deployment is not evidence of a Ready hosted artifact. Historical failures are retained as provider audit history and are not represented as successful deployment evidence.
+The v1.0.7 artifact is a verified Preview, not Production. Version 1.0.8 is a separate source candidate and cannot inherit v1.0.7 hosted, CodeQL, deployment, or Production evidence. This document does not record future v1.0.8 CI, Preview, DNS, TLS, or Production work as successful.
 
-## Re-audit disposition
+### Domain configuration snapshot — 2026-07-20
 
-| Area                                          | Result                      | Finding and disposition                                                                                                                                                                                                                                                                                                                          |
-| --------------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GitHub account authentication                 | RESOLVED                    | The Vercel account accepts the GitHub login connection for the approved GitHub identity. Authentication alone did not install the repository integration.                                                                                                                                                                                        |
-| Vercel GitHub App                             | RESOLVED                    | The official Vercel GitHub App was installed for the personal `sorren1` account with repository access limited to `sorren1/AIWorkbench`, then the Vercel project was connected to that repository.                                                                                                                                               |
-| Automatic branch and pull-request deployments | VERIFIED                    | Pushing pull request 9 caused Vercel to clone the exact branch commit and report a Vercel status on GitHub. The source-only branch failed at the checked-in release-evidence gate, which is the required fail-closed behavior rather than an integration failure.                                                                                |
-| Email deployment failures                     | EXPLAINED                   | The notifications were caused by the missing Vercel repository integration/team authorization path. They did not invalidate local tests or GitHub Actions, but they did mean that automatic Vercel Preview verification had not occurred. The integration gap is now resolved.                                                                   |
-| Production branch tracking                    | CONTAINED                   | Production tracking is set to the dedicated `production-hold` branch, not `main`. The branch points to reviewed evidence and is not used for ongoing development, preventing source and evidence commits on `main` from being treated as Production before a canonical domain exists.                                                            |
-| Transitional modal contrast                   | FIXED AND REGRESSION-TESTED | The exact-main Firefox audit for the abandoned v1.0.3 evidence commit sampled a primary button during modal fade-in at 4.43:1. Dialog content now remains fully opaque while position animates; the maintained accessibility test pauses the animation at its midpoint and runs Axe there.                                                       |
-| v1.0.3 evidence                               | ABANDONED                   | No `v1.0.3` tag was created. The failed exact-main audit prevented release, as designed. Its evidence identity was not reused.                                                                                                                                                                                                                   |
-| Canonical screenshot determinism              | FIXED AND REGRESSION-TESTED | The v1.0.4 evidence audit alternated between two visually identical Architecture rasters. The alternate changed 27 isolated SVG-edge pixels with maximum channel delta 37 on two of three Linux runs. The comparison now uses a tested bounded antialias tolerance while still rejecting larger regions, stronger deltas, and dimension changes. |
-| v1.0.4 evidence                               | ABANDONED                   | No `v1.0.4` tag was created. Its exact-main Quality run reproduced the screenshot nondeterminism, so the evidence identity will not be reused.                                                                                                                                                                                                   |
-| Deployment-only evidence-link accessibility   | FIX IN REVIEW               | The Ready v1.0.5 Preview exposed the build-generated binding link. Hosted Axe reported a serious WCAG 1.4.1 failure because the inline link was distinguished from surrounding text only by color. The link is now underlined at rest, and maintained-browser coverage injects and audits the deployment-only state before evidence exists.      |
-| v1.0.5 tagged candidate                       | REJECTED                    | The annotated tag remains immutable and is not promoted as a release. Its exact Preview proved the commit binding, routes, CSP, caching, toolbar exclusion, canonical suppression, and seven of eight hosted checks, but failed the deployment-only accessibility test.                                                                          |
-| Exact tagged Preview                          | PENDING                     | A new v1.0.6 source/evidence/tag tuple must pass the complete local, pull-request, exact-main, binding, hosted deployment, accessibility, route, header, network, cache, and Lighthouse gates.                                                                                                                                                   |
-| Production                                    | BLOCKED                     | There is no owner-selected custom domain or `SITE_CANONICAL_URL`. The build deliberately rejects temporary `*.vercel.app` values as canonical production origins. Production deployment and production SEO/DNS/TLS verification therefore remain unrun.                                                                                          |
-| Live E2B provider validation                  | BLOCKED EXTERNALLY          | `E2B_API_KEY` is unavailable. The deterministic local adapter is tested; no live-provider success is claimed.                                                                                                                                                                                                                                    |
-| Live model-gateway validation                 | BLOCKED EXTERNALLY          | A live LiteLLM master key/provider endpoint is unavailable. The deterministic gateway contract is tested; no live-provider success is claimed.                                                                                                                                                                                                   |
+- The Vercel account owns a domain record for `tylerwilhite.dev`, and the linked project has Production-only `SITE_CANONICAL_URL=https://tylerwilhite.dev` configured.
+- Vercel refused to assign the domain to `workbench1/ai-delivery-workbench` because the project's latest Production deployment is an error. Its retained build log shows the intended fail-closed reason: the Production environment did not provide `APPROVED_DEPLOYMENT_COMMIT_SHA`. No older Preview was promoted and no approval binding was invented to bypass that release boundary.
+- Authoritative DNS remains with Porkbun and does not point to the Vercel project. Vercel currently recommends apex record `A 76.76.21.21`; re-inspect the provider's live instructions at cutover rather than treating this snapshot as an evergreen DNS value.
+- Do not change apex or `www` DNS until the exact v1.0.8 evidence artifact is Ready, the domain assignment succeeds, and the alternate-host redirect is configured. These provider settings do not establish deployment, DNS, TLS, or Production success.
 
-## Current local and GitHub evidence
+## Durable evidence sources
 
-| Check                                         | Result  | Evidence                                                                                                                                                                                                                                |
-| --------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Clean install and dependency audit            | PASS    | The current `npm ci` path uses the committed lockfile and reports zero npm audit vulnerabilities.                                                                                                                                       |
-| Complete local release gate                   | PASS    | `npm run check:all` exited zero twice after the deployment-only accessibility fix; the final exact-code browser/Lighthouse run completed in 372.4 seconds.                                                                              |
-| Unit/integration suite                        | PASS    | 25 files passed, 2 live-provider files were skipped; 137 tests passed and 2 skipped.                                                                                                                                                    |
-| Browser, accessibility, E2E, and visual suite | PASS    | 143 maintained-browser tests passed across Chromium, Firefox, and WebKit; 2 clipboard-capability tests were skipped as documented.                                                                                                      |
-| Transitional accessibility regression         | PASS    | The About dialog is paused at the midpoint of its entrance animation, computed opacity is required to equal `1`, and Axe is run against that exact state in every maintained browser.                                                   |
-| Deployment-state accessibility regression     | PASS    | Every maintained browser injects the binding-link state that a source-only build cannot render, requires a computed underline, and runs Axe against the exact prose/link surface.                                                       |
-| Current remediation pull-request gates        | PENDING | The local aggregate is green; GitHub review, required checks, and fresh exact-main Quality and CodeQL evidence must still complete before v1.0.6 evidence is generated.                                                                 |
-| Supply-chain controls                         | PASS    | Seven controls passed using pinned scanner images; 15 reviewed suppressions were reported. Detailed scanner output remains in ignored or restricted evidence storage.                                                                   |
-| Bundle budgets                                | PASS    | Measured demo entry JavaScript is 113,308 B gzip, total JavaScript is 130,869 B gzip, and total CSS is 17,158 B gzip, within tracked budgets.                                                                                           |
-| Lighthouse                                    | PASS    | The checked-in desktop and mobile profiles passed their route-specific performance, accessibility, best-practices, and SEO thresholds locally. Hosted Preview SEO is evaluated separately because Vercel adds Preview noindex behavior. |
+Use generated, commit-bound records instead of copying provider run numbers into status prose:
+
+- [v1.0.7 generated deployment binding](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/security/deployment-binding.json) — exact release tag, audited source, evidence parent, evidence/deployed commit, CodeQL source/result, and verified relation;
+- [v1.0.7 generated release summary](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/security/release-summary.json) — sanitized local supply-chain controls, artifact hashes, source digest, runtime-image digests, suppressions, and hosted CodeQL binding;
+- [`v1.0.7` annotated tag](https://github.com/sorren1/AIWorkbench/tree/v1.0.7) — immutable Git release boundary;
+- [`v1.0.7` audited source](https://github.com/sorren1/AIWorkbench/commit/7cb0e186c8d3225908fcfeed8df8c8e143ff0ed6) and [evidence commit](https://github.com/sorren1/AIWorkbench/commit/af3b0b3554d9a26d4d9538eb2fc5626e84342827).
+
+The v1.0.8 equivalents do not exist in this audited-source tree by design. The source commit must omit `public/security/release-summary.json`; the summary is generated only after fresh hosted CodeQL and all other gates succeed, and the deployment binding is generated only by a correctly bound deployment.
+
+## v1.0.7 Preview disposition
+
+The immutable v1.0.7 source and evidence commits each received successful hosted Quality, dependency-review, and CodeQL results. The tagged evidence commit reached a Ready Vercel Preview. Direct inspection on 2026-07-19 observed 200 responses for `/`, `/demo/`, `/writing/governing-ai-assisted-delivery/`, the generated release summary, the generated deployment binding, and `/.well-known/security.txt`; a nested unknown route returned the authored page with status 404.
+
+The same inspection found two release defects, so the Preview was not promoted to Production:
+
+1. `/.well-known/security.txt` declared a different temporary Preview hostname as `Canonical` instead of deriving identity from the stable site origin.
+2. The nested 404 response used `./` asset and recovery-link URLs, which resolve under the missing route rather than at the site root.
+
+Version 1.0.8 contains source and test fixes for both findings. Their local presence is not hosted verification; the v1.0.8 Preview procedure must observe them again on the exact tagged artifact.
+
+Earlier release-iteration history remains immutable: v1.0.3 and v1.0.4 were untagged audit attempts, v1.0.5 was a tagged Preview rejected by its hosted accessibility result, and v1.0.6/v1.0.7 superseded those candidates. None is represented as Production.
 
 ## Tracked deployment contract
 
-| Setting                   | Value                                                                                   | Reason                                                                                                       |
-| ------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| Framework                 | Vite                                                                                    | The repository produces a conventional multi-page static build.                                              |
-| Runtime                   | Node 22.x                                                                               | Matches `package.json`, `.nvmrc`, CI, and the Vercel project setting.                                        |
-| Install                   | `npm ci`                                                                                | Uses only the committed lockfile.                                                                            |
-| Build                     | `npm run build`                                                                         | Runs the normal production build and release-binding checks.                                                 |
-| Output                    | `dist`                                                                                  | Contains the root case study, article, `/demo/`, authored `404.html`, metadata, and local assets.            |
-| Routing                   | Vercel filesystem routing                                                               | No SPA rewrite; direct page refreshes and the custom 404 retain their intended behavior.                     |
-| Hashed assets             | `/assets/immutable/`                                                                    | Only Vite-hashed JavaScript and CSS receive one-year immutable caching.                                      |
-| HTML and unhashed assets  | `public, max-age=0, must-revalidate`                                                    | Prevents stale browser HTML and avoids marking stable-name assets immutable.                                 |
-| Canonical URL             | `SITE_CANONICAL_URL`, Production only                                                   | Preview omits canonical-dependent tags; the typed parser rejects temporary Vercel hostnames.                 |
-| Production branch         | `production-hold`                                                                       | Prevents ordinary `main` pushes from becoming Production until the domain and production bindings are ready. |
-| Release commit binding    | `VERCEL_GIT_COMMIT_SHA`                                                                 | Must equal the separately approved, annotated-tag evidence commit or the build fails.                        |
-| Explicit release bindings | `APPROVED_RELEASE_TAG`, `APPROVED_AUDITED_COMMIT_SHA`, `APPROVED_DEPLOYMENT_COMMIT_SHA` | Prevents a deployment from silently substituting an unreviewed source, evidence commit, or tag.              |
+| Setting              | Value                                                                                   | Boundary                                                                       |
+| -------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
+| Provider/framework   | Vercel / Vite                                                                           | Static multi-page output; no Vercel application runtime.                       |
+| Runtime              | Node 22.x                                                                               | Matches `package.json`, `.nvmrc`, CI, and provider configuration.              |
+| Install/build/output | `npm ci` / `npm run build` / `dist`                                                     | Reproducible lockfile build.                                                   |
+| Routing              | Narrow root and `/workbench/:path*` rewrites plus legacy-page redirects                 | Portfolio index at `/`; Workbench at `/workbench/`; no catch-all SPA fallback. |
+| Hashed assets        | `/assets/immutable/`                                                                    | Only Vite-hashed JS/CSS receives one-year immutable caching.                   |
+| HTML/unhashed assets | `public, max-age=0, must-revalidate`                                                    | Prevents stable-name HTML/assets from becoming stale immutable content.        |
+| Production origin    | `SITE_CANONICAL_URL=https://tylerwilhite.dev`                                           | Production only; Preview omits canonical-dependent output.                     |
+| Release commit       | `VERCEL_GIT_COMMIT_SHA`                                                                 | Must equal the approved tagged evidence commit.                                |
+| Explicit bindings    | `APPROVED_RELEASE_TAG`, `APPROVED_AUDITED_COMMIT_SHA`, `APPROVED_DEPLOYMENT_COMMIT_SHA` | Prevents source, evidence, tag, or deployment substitution.                    |
+| Generated identity   | `/security/deployment-binding.json`                                                     | Emitted only when the tag/source/evidence/deployment relationship validates.   |
 
-`vercel.json` contains no rewrites, functions, or Vercel-specific application runtime. Preview Deployment Protection is disabled for public artifact auditability, and the Vercel Toolbar is disabled for pre-production and production. The repository contains no bypass credential.
+The typed Production-origin parser requires HTTPS and rejects credentials, a non-default port, query/fragment data, and temporary `vercel.app` hostnames. The same origin drives HTML canonical/Open Graph URLs, `robots.txt`, the sitemap, and `security.txt`. The Vercel Toolbar is disabled for Preview and Production; the CSP does not permit provider toolbar origins or inline/eval script/style exceptions.
 
-## Git integration evidence
+## v1.0.8 exact Preview procedure
 
-The Vercel authentication page accepting GitHub was necessary but insufficient. Vercel project Git settings still required the official GitHub App. The app was installed for exactly this repository, and project Git settings now show one connected source: `sorren1/AIWorkbench`. The CLI confirms that the repository is already connected.
+1. Audit a clean v1.0.8 source commit with no `public/security/release-summary.json` and require the complete local gate.
+2. Require successful pull-request and exact-main Quality, dependency-review, and CodeQL results on that exact source commit.
+3. Generate the sanitized summary with the exact source/tag/CodeQL inputs and create one direct evidence child whose only changed path is `public/security/release-summary.json`.
+4. Require the evidence child checks, create the annotated `v1.0.8` tag on that child, and run `npm run security:release-evidence:require` against the tag.
+5. Configure only Preview-scoped release bindings for the approved v1.0.8 tuple. Do not set `SITE_CANONICAL_URL` in Preview.
+6. Deploy a non-Production ref pointing exactly to the tag and require Ready status.
+7. Run `npm run test:deployment` with `DEPLOYMENT_BASE_URL` set to the immutable Preview URL and `EXPECTED_CANONICAL_URL` unset.
+8. Inspect the generated release summary and deployment binding. Require exact tag/source/evidence/deployed/CodeQL values and verified relation.
+9. Inspect `/`, `/workbench/`, `/workbench/demo/`, `/workbench/writing/governing-ai-assisted-delivery/`, `/404.html`, nested missing routes, legacy redirects, and `/.well-known/security.txt` in maintained browsers. Verify direct refresh, real 404 status, Workbench recovery actions, keyboard/focus/responsive behavior, and no unexpected external request or toolbar injection.
+10. Require `security.txt` to omit `Canonical` on Preview. Verify CSP, Referrer-Policy, nosniff, Permissions-Policy, Cross-Origin-Opener-Policy, HTML revalidation, and immutable caching only for hashed assets.
+11. Run hosted desktop/mobile Lighthouse checks for `/`, `/workbench/`, and `/workbench/demo/`, keeping provider-controlled Preview noindex behavior separate from Production SEO.
 
-The first post-connection pull-request push created an automatic Vercel Preview attempt at:
+## v1.0.8 Production gate
 
-- <https://ai-delivery-workbench-17fos00et-workbench1.vercel.app>
+Only the exact v1.0.8 tagged evidence artifact that passes the Preview procedure may be considered for Production at `https://tylerwilhite.dev`, with the Workbench rooted at `/workbench/`.
 
-Its build cloned the reviewed source commit, ran `npm ci`, reported zero vulnerabilities, and then stopped with `Vercel release build requires checked-in audited release evidence.` That failure proves both the automatic Git trigger and the release guard. It is not a deployable artifact and must not be used as Preview evidence.
+1. Configure the stable domain, DNS, TLS, and permanent redirects so `www.tylerwilhite.dev` resolves to `https://tylerwilhite.dev` and legacy Workbench page routes resolve beneath `/workbench/`.
+2. Set Production-only `SITE_CANONICAL_URL` to exactly `https://tylerwilhite.dev` and set the three Production release bindings to the approved v1.0.8 tag/source/evidence tuple.
+3. Change the provider's Production branch/ref only as required to deploy the exact tagged evidence commit; do not treat an ordinary development branch as the approval boundary.
+4. Require Ready status, then run `npm run test:deployment` with `DEPLOYMENT_BASE_URL=https://tylerwilhite.dev` and `EXPECTED_CANONICAL_URL=https://tylerwilhite.dev`.
+5. Require the generated deployment binding to identify v1.0.8 and the exact audited source/evidence/deployed relation.
+6. Repeat route, nested-404, maintained-browser, axe, keyboard/focus, responsive, header, cache, network, and desktop/mobile Lighthouse verification.
+7. Require the portfolio canonical to be `https://tylerwilhite.dev/`, Workbench canonical URLs to remain beneath `https://tylerwilhite.dev/workbench/`, and `robots.txt`, sitemap locations, Open Graph URLs, and the RFC 9116 `Canonical` field to use the same origin and intended paths.
+8. Only after those observations may public live-demo links or a release report call v1.0.8 Production.
 
-Connecting Git also triggered two short-lived Production attempts while branch tracking still named `main`. Both stopped at the stale release-binding guard and never became Ready. No custom domain was assigned and no Production artifact was accepted. Production tracking was then moved to `production-hold` and verified after reload.
+## Facts not established by this source candidate
 
-## Exact tagged Preview procedure
+- v1.0.8 hosted Quality, dependency-review, or CodeQL success;
+- a generated v1.0.8 release summary, evidence commit, annotated tag, or retained hosted artifacts;
+- a Ready v1.0.8 Preview or its generated deployment binding;
+- hosted confirmation of the v1.0.8 nested 404 and origin-derived `security.txt` fixes;
+- any deployment, DNS, TLS, redirect, canonical, security-header, cache, accessibility, browser, network, or Lighthouse result at `https://tylerwilhite.dev`;
+- Production reliability, availability, identity, shared approvals, or operational readiness; or
+- live E2B and live LiteLLM/provider validation, which remain blocked by unavailable credentials.
 
-1. Merge the reviewed source commit only after every required pull-request check passes.
-2. Require fresh Quality and CodeQL success on that exact `main` commit.
-3. Generate one summary-only evidence child bound to the source commit and the exact successful CodeQL run; review it through a pull request and require fresh checks again.
-4. Create and push annotated tag `v1.0.6` on the exact evidence child. Run `npm run security:release-evidence:require` against the tag.
-5. Update only the Preview scope of the three explicit release-binding variables. Do not change Production bindings and do not set `SITE_CANONICAL_URL` for Preview.
-6. Push a new non-production branch whose ref points exactly to the tagged evidence commit. Require the automatic Vercel deployment to reach Ready.
-7. Set `DEPLOYMENT_BASE_URL` to the immutable Preview URL, leave `EXPECTED_CANONICAL_URL` unset, and run `npm run test:deployment`.
-8. Inspect `/security/deployment-binding.json` and require exact tag, audited source commit, evidence commit, and CodeQL URL/count bindings.
-9. In an external browser, inspect `/`, `/demo/`, `/writing/governing-ai-assisted-delivery/`, and a missing route. Verify direct refresh, the authored 404 status/content, keyboard navigation, focus handling, responsive layouts, and no unexpected external requests or toolbar injection.
-10. Inspect HTML and hashed-asset headers. Require CSP without `unsafe-inline`, Referrer-Policy, nosniff, Permissions-Policy, Cross-Origin-Opener-Policy, revalidation-safe HTML caching, and immutable caching only for hashed assets.
-11. Run hosted desktop and mobile Lighthouse audits for `/` and `/demo/`. Record Preview noindex effects separately from code-controlled SEO.
-
-## Production gate
-
-Production remains intentionally unrun until the owner supplies one exact custom HTTPS domain. The Vercel project currently lists only provider-assigned `vercel.app` domains, which are not accepted as this case study's production canonical identity.
-
-After a domain is selected:
-
-1. Add it to the project, configure and verify DNS/TLS, and choose one canonical origin. Redirect any alternate domain permanently to that origin.
-2. Set `SITE_CANONICAL_URL` to the exact HTTPS canonical origin in Production only.
-3. Refresh the Production-scoped release bindings to the approved tag/source/evidence tuple.
-4. Move Production branch tracking from `production-hold` to the approved release branch only when ready to deploy.
-5. Require Ready status, then run `npm run test:deployment` with both `DEPLOYMENT_BASE_URL` and matching `EXPECTED_CANONICAL_URL`.
-6. Repeat route, browser, accessibility, header, network, cache, link, and desktop/mobile Lighthouse checks. Require canonical tags, `og:url`, Open Graph image URL, `robots.txt`, and every sitemap location to use only the selected domain.
-7. Update public live-demo links only after all Production checks pass.
-
-## Items that do not require corrective action
-
-- Historical failed Vercel deployment records should remain as provider audit history. They contain no Ready artifact and deleting them would not improve the current source or integration.
-- The failed Vercel status on a source-only pull request is expected. Source commits deliberately omit release evidence; only the reviewed evidence child may produce a release deployment.
-- The two skipped live-provider test files are not silent product failures. They are explicit credential-dependent validations, remain blocked, and are never counted as successful live evidence.
-- Preview `X-Robots-Tag: noindex` behavior is provider-controlled and appropriate for a non-production artifact. Production SEO thresholds still apply on the eventual custom domain.
-- No Vercel Pro upgrade or additional team collaborator is required for the approved single-owner flow now that the authenticated GitHub identity and repository-scoped Vercel App installation are connected.
+Historical failed provider attempts remain provider audit history and are not successful evidence. A local build, provider dashboard configuration, GitHub status, or Ready Preview cannot substitute for Production verification at `https://tylerwilhite.dev`.

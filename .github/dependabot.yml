@@ -7,8 +7,8 @@ updates:
       day: monday
       time: "09:00"
       timezone: America/Chicago
-    # Keep version-update pull refs paused during the public-history publication audit.
-    open-pull-requests-limit: 0
+    # Keep the weekly queue reviewable; every proposal still passes the full release gates.
+    open-pull-requests-limit: 5
     groups:
       development-tooling:
         dependency-type: development
@@ -17,5 +17,5 @@ updates:
     directory: /
     schedule:
       interval: monthly
-    # Keep version-update pull refs paused during the public-history publication audit.
-    open-pull-requests-limit: 0
+    # Action updates are lower-volume and require full-SHA pin review before merge.
+    open-pull-requests-limit: 2

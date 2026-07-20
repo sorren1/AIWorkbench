@@ -27,7 +27,7 @@ const unconfigured: SiteConfig = {
 const configured: SiteConfig = {
   ...unconfigured,
   authorName: "Example Author",
-  canonicalUrl: "https://portfolio.example/projects/workbench/",
+  canonicalUrl: "https://portfolio.example/",
   contactUrl: "https://portfolio.example/contact/",
 };
 
@@ -63,11 +63,10 @@ describe("static site metadata", () => {
     expect(createSitemapXml(unconfigured)).not.toContain("<loc>");
   });
 
-  it("loads and normalizes a custom canonical domain from the build environment", () => {
+  it("loads and normalizes a custom canonical origin from the build environment", () => {
     expect(
-      createSiteConfig({ SITE_CANONICAL_URL: " https://workbench.example.net/case-study " })
-        .canonicalUrl,
-    ).toBe("https://workbench.example.net/case-study/");
+      createSiteConfig({ SITE_CANONICAL_URL: " https://workbench.example.net " }).canonicalUrl,
+    ).toBe("https://workbench.example.net/");
   });
 
   it.each([
@@ -76,28 +75,42 @@ describe("static site metadata", () => {
     "https://workbench.example.net:8443",
     "https://workbench.example.net?preview=true",
     "https://workbench.example.net/#section",
+    "https://workbench.example.net/case-study",
     "https://ai-workbench.vercel.app",
     "https://vercel.app",
   ])("rejects an unsafe or ephemeral canonical URL: %s", (canonicalUrl) => {
     expect(() => createSiteConfig({ SITE_CANONICAL_URL: canonicalUrl })).toThrow();
   });
 
-  it("generates subpath-safe canonical, social, robots, and sitemap URLs when configured", () => {
+  it("generates origin and workbench-path canonical metadata when configured", () => {
     expect(absoluteSiteUrl(configured, "/writing/governing-ai-assisted-delivery/")).toBe(
-      "https://portfolio.example/projects/workbench/writing/governing-ai-assisted-delivery/",
+      "https://portfolio.example/writing/governing-ai-assisted-delivery/",
     );
 
     const tags = renderMetadataTags(configured, PAGE_METADATA.article);
     expect(tags).toContain('rel="canonical"');
+    expect(tags).toContain(
+      'href="https://portfolio.example/workbench/writing/governing-ai-assisted-delivery/"',
+    );
     expect(tags).toContain('property="og:image"');
-    expect(tags).toContain("assets/social-card.png");
+    expect(tags).toContain("workbench/assets/social-card.png");
     expect(tags).toContain('property="og:image:type" content="image/png"');
-    expect(createRobotsTxt(configured)).toContain(
-      "Sitemap: https://portfolio.example/projects/workbench/sitemap.xml",
-    );
+    expect(createRobotsTxt(configured)).toContain("Sitemap: https://portfolio.example/sitemap.xml");
     expect(createSitemapXml(configured)).toContain(
-      "<loc>https://portfolio.example/projects/workbench/demo/</loc>",
+      "<loc>https://portfolio.example/workbench/demo/</loc>",
     );
+    expect(createSitemapXml(configured)).toContain("<loc>https://portfolio.example/</loc>");
+  });
+
+  it("keeps the portfolio home distinct from Workbench metadata", () => {
+    const tags = renderMetadataTags(configured, PAGE_METADATA.home);
+    expect(tags).toContain('property="og:site_name" content="Tyler Wilhite"');
+    expect(tags).toContain('rel="canonical" href="https://portfolio.example/"');
+
+    const schema = renderStructuredData(configured, "home", PAGE_METADATA.home);
+    expect(schema).toContain('"@type":"WebSite"');
+    expect(schema).toContain('"name":"Tyler Wilhite"');
+    expect(schema).not.toContain('"@type":"SoftwareSourceCode"');
   });
 
   it("emits project and article schema with a person only when public author data exists", () => {
