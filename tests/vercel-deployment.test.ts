@@ -30,6 +30,13 @@ describe("Vercel static deployment contract", () => {
         source: "/workbench/writing/governing-ai-assisted-delivery/",
         destination: "/writing/governing-ai-assisted-delivery/index.html",
       },
+      { source: "/workbench/assets/:path*", destination: "/assets/:path*" },
+      { source: "/workbench/capabilities/:path*", destination: "/capabilities/:path*" },
+      {
+        source: "/workbench/recorded-evidence/:path*",
+        destination: "/recorded-evidence/:path*",
+      },
+      { source: "/workbench/site.webmanifest", destination: "/site.webmanifest" },
     ]);
     expect(vercelConfig.rewrites).not.toContainEqual({
       source: "/workbench/:path*",

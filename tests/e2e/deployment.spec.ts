@@ -20,6 +20,15 @@ const publicHtmlRoutes = [
   "/workbench/writing/governing-ai-assisted-delivery/",
   "/404.html",
 ] as const;
+const renderedPageHeadings = [
+  { path: "/", name: "Tyler Wilhite" },
+  { path: "/workbench/", name: "AI Delivery Workbench" },
+  { path: "/workbench/demo/", name: "Work Queue" },
+  {
+    path: "/workbench/writing/governing-ai-assisted-delivery/",
+    name: "Governing AI-assisted delivery",
+  },
+] as const;
 const nestedMissingRoutes = [
   "/missing/nested/path",
   "/missing/nested/path/",
@@ -131,6 +140,42 @@ test("ordinary deployment requests have no toolbar injection and satisfy CSP on 
 
   expect([...externalRequests]).toEqual([]);
   expect(cspViolations).toEqual([]);
+});
+
+test("renders every public page with its Workbench-scoped assets", async ({ page }) => {
+  const failedResources: string[] = [];
+  page.on("response", (response) => {
+    const url = new URL(response.url());
+    if (url.origin === deploymentOrigin && response.status() >= 400) {
+      failedResources.push(`${response.status()} ${url.pathname}`);
+    }
+  });
+
+  for (const route of renderedPageHeadings) {
+    await page.goto(route.path);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(route.name);
+    expect(
+      await page
+        .locator('link[rel="stylesheet"]')
+        .evaluateAll((stylesheets) =>
+          stylesheets.every((stylesheet) => (stylesheet as HTMLLinkElement).sheet !== null),
+        ),
+      `${route.path} should apply every declared stylesheet`,
+    ).toBe(true);
+    expect(
+      await page
+        .locator("img")
+        .evaluateAll((images) =>
+          images.every(
+            (image) =>
+              (image as HTMLImageElement).complete && (image as HTMLImageElement).naturalWidth > 0,
+          ),
+        ),
+      `${route.path} should load every declared image`,
+    ).toBe(true);
+  }
+
+  expect(failedResources).toEqual([]);
 });
 
 test("the explicit toolbar-skip request path remains independently verified", async ({
