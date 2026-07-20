@@ -28,12 +28,15 @@ function canonicalUrl(value: string | undefined): OptionalPublicUrl {
   if (parsed.search || parsed.hash) {
     throw new Error("SITE_CANONICAL_URL must not contain a query string or fragment.");
   }
+  if (parsed.pathname !== "/") {
+    throw new Error("SITE_CANONICAL_URL must be an origin without a path.");
+  }
   const hostname = parsed.hostname.toLowerCase();
   if (hostname === "vercel.app" || hostname.endsWith(".vercel.app")) {
     throw new Error("SITE_CANONICAL_URL must be a stable custom domain, not a preview hostname.");
   }
 
-  parsed.pathname = parsed.pathname === "/" ? "/" : `${parsed.pathname.replace(/\/+$/, "")}/`;
+  parsed.pathname = "/";
   return parsed.toString();
 }
 

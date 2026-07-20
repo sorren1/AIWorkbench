@@ -4,11 +4,13 @@
 
 AI Delivery Workbench shows how coding-agent output can remain subordinate to explicit context, authorization, approval, validation, budget, and evidence controls.
 
-- **Intended Production origin:** `<PRODUCTION_ORIGIN>`. No v1.0.8 Production deployment, DNS/TLS result, canonical metadata, or Production verification is claimed at this source boundary.
+- **Intended Production origin:** `https://tylerwilhite.dev`.
+- **Intended Workbench URL:** `https://tylerwilhite.dev/workbench/`. The domain and path are configuration targets, not evidence that v1.0.8 Production deployment, DNS/TLS, canonical metadata, or Production verification has succeeded.
 - **Verified Preview baseline:** [immutable v1.0.7 Preview](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/), bound to the v1.0.7 evidence commit. It is a Preview artifact, not Production and not v1.0.8.
 - **v1.0.8 candidate:** this repository source. Fresh hosted CI, CodeQL, release evidence, Preview, and Production verification belong to the later release procedure and are not inherited from v1.0.7.
 - **Source:** [github.com/sorren1/AIWorkbench](https://github.com/sorren1/AIWorkbench)
 - **Local routes:** case study at `/`, technical article at `/writing/governing-ai-assisted-delivery/`, and interactive prototype at `/demo/`.
+- **Hosted route contract:** the portfolio index occupies `/`; Vercel maps the full case study, article, and prototype beneath `/workbench/` and permanently redirects legacy public page routes into that namespace.
 
 ![AI Delivery Workbench showing the synthetic work queue and governed delivery stages](public/assets/screenshots/workbench-overview.png)
 
@@ -100,13 +102,14 @@ Read [EVALUATION.md](EVALUATION.md), [SECURITY.md](SECURITY.md), [THREAT_MODEL.m
 
 The durable v1.0.7 Preview record is its [generated deployment binding](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/security/deployment-binding.json) plus its [generated release summary](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/security/release-summary.json). Those generated records bind release tag, audited source, evidence commit, deployed commit, and hosted CodeQL result without relying on a hand-maintained run table.
 
-The v1.0.8 audited source intentionally contains no `public/security/release-summary.json`. After fresh local and hosted gates pass, the release process creates one direct evidence child containing only that generated file, tags that child, and produces a new deployment binding. The intended stable public URL is `<PRODUCTION_ORIGIN>`; it becomes Production evidence only after the Production gate in [docs/deployment-verification.md](docs/deployment-verification.md) succeeds there.
+The v1.0.8 audited source intentionally contains no `public/security/release-summary.json`. After fresh local and hosted gates pass, the release process creates one direct evidence child containing only that generated file, tags that child, and produces a new deployment binding. The intended stable Workbench URL is `https://tylerwilhite.dev/workbench/`; it becomes Production evidence only after the Production gate in [docs/deployment-verification.md](docs/deployment-verification.md) succeeds at `https://tylerwilhite.dev`.
 
 ## Repository map
 
 | Path                                          | Purpose                                                                         |
 | --------------------------------------------- | ------------------------------------------------------------------------------- |
-| `index.html`, `writing/`, `404.html`          | Static public case study, article, and not-found page                           |
+| `home/index.html`                             | Static portfolio index served at the Production origin                          |
+| `index.html`, `writing/`, `404.html`          | Static Workbench case study, article, and shared not-found page                 |
 | `demo/index.html`, `src/demo/`                | Interactive React workbench, screens, state, data, and control-plane contracts  |
 | `src/case-study/`, `src/site/`                | Shared public styling plus typed metadata/link configuration                    |
 | `src/styles/tokens/`, `src/shared/`           | Authored semantic tokens and local SVG icon system                              |

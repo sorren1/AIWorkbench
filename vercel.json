@@ -4,6 +4,51 @@
   "installCommand": "npm ci",
   "buildCommand": "npm run build",
   "outputDirectory": "dist",
+  "redirects": [
+    {
+      "source": "/home",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/home/:path*",
+      "destination": "/",
+      "permanent": true
+    },
+    {
+      "source": "/index.html",
+      "destination": "/workbench/",
+      "permanent": true
+    },
+    {
+      "source": "/demo/:path*",
+      "destination": "/workbench/demo/:path*",
+      "permanent": true
+    },
+    {
+      "source": "/writing/:path*",
+      "destination": "/workbench/writing/:path*",
+      "permanent": true
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/",
+      "destination": "/home/index.html"
+    },
+    {
+      "source": "/workbench",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/workbench/",
+      "destination": "/index.html"
+    },
+    {
+      "source": "/workbench/:path*",
+      "destination": "/:path*"
+    }
+  ],
   "headers": [
     {
       "source": "/.well-known/security.txt",
@@ -16,6 +61,15 @@
     },
     {
       "source": "/assets/immutable/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/workbench/assets/immutable/(.*)",
       "headers": [
         {
           "key": "Cache-Control",

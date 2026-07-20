@@ -2,6 +2,7 @@ import { expect, test } from "./fixtures";
 
 const publicHtmlRoutes = [
   { path: "/", heading: "AI Delivery Workbench" },
+  { path: "/home/", heading: "Tyler Wilhite" },
   { path: "/demo/", heading: "Work Queue" },
   { path: "/writing/governing-ai-assisted-delivery/", heading: "Governing AI-assisted delivery" },
   { path: "/404.html", heading: "This page is outside the expected change surface." },

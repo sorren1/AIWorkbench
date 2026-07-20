@@ -6,13 +6,13 @@
 
 ## Context
 
-The case study must remain indexable without loading the demo bundle, work on a repository subpath, have no backend/runtime secrets, and apply a restrictive policy matching only local assets. Vercel is the selected Git-backed host. The intended stable Production origin is `<PRODUCTION_ORIGIN>`; Preview builds must still omit canonical metadata, and the intended value is not evidence of DNS, TLS, deployment, or Production verification.
+The case study must remain indexable without loading the demo bundle, work on a repository subpath, have no backend/runtime secrets, and apply a restrictive policy matching only local assets. Vercel is the selected Git-backed host. The intended stable Production origin is `https://tylerwilhite.dev`, with the project at `/workbench/`; Preview builds must still omit canonical metadata, and the intended values are not evidence of DNS, TLS, deployment, or Production verification.
 
 ## Decision
 
-Build a Vite multi-page static artifact for Vercel. Keep substantive case-study/article HTML at build time and isolate React to `/demo/`. Vercel installs from the lockfile with `npm ci`, runs `npm run build`, and publishes `dist/`. Filesystem routing serves the emitted page directories and conventional `404.html`; do not add a catch-all SPA rewrite.
+Build a Vite multi-page static artifact for Vercel. Keep substantive portfolio-index, case-study, and article HTML at build time and isolate React to the demo entry. Vercel installs from the lockfile with `npm ci`, runs `npm run build`, and publishes `dist/`. Narrow rewrites serve the portfolio index at `/` and map `/workbench/:path*` to the corresponding static output; permanent redirects move former public page routes into that namespace. The conventional `404.html` remains authoritative, and no catch-all SPA rewrite is added.
 
-Use relative/subpath-safe assets, generated canonical/robots/sitemap behavior only when a real canonical URL is configured, and no third-party analytics by default. `SITE_CANONICAL_URL` is a build-only environment setting scoped to Production. The typed parser requires HTTPS, rejects credentials/query/fragment values, and rejects `vercel.app` hostnames so a preview URL cannot silently become canonical.
+Use relative/subpath-safe assets, generated canonical/robots/sitemap behavior only when a real canonical origin is configured, and no third-party analytics by default. `SITE_CANONICAL_URL` is a build-only environment setting scoped to Production and is exactly `https://tylerwilhite.dev`; page metadata supplies `/workbench/` paths where appropriate. The typed parser requires an HTTPS origin without credentials, port, query, fragment, or path, and rejects `vercel.app` hostnames so a preview URL cannot silently become canonical.
 
 Emit Vercel configuration for Content-Security-Policy, Referrer-Policy, X-Content-Type-Options, Permissions-Policy, Cross-Origin-Opener-Policy, and anti-framing through `frame-ancestors`. The CSP permits only the local script/style/image/font/connect forms the build uses and does not require `unsafe-eval`. Vite-generated hashed JavaScript and CSS live under `/assets/immutable/` and receive a one-year immutable cache directive. Unhashed assets do not. HTML retains Vercel's revalidation-safe default. Publication must verify the observed edge headers; a committed configuration is not evidence of deployed behavior.
 
@@ -22,7 +22,7 @@ Connect the GitHub repository through Vercel's Git integration. Keep ordinary de
 
 - The project can be previewed and audited locally without network calls or credentials.
 - The repository has one small host adapter, `vercel.json`; no Vercel application runtime or SDK is introduced.
-- Preview omits Production canonical output. A Production build derives canonical HTML, Open Graph, robots/sitemap, and `security.txt` identity only from validated `SITE_CANONICAL_URL=<PRODUCTION_ORIGIN>`.
+- Preview omits Production canonical output. A Production build derives canonical HTML, Open Graph, robots/sitemap, and `security.txt` identity only from validated `SITE_CANONICAL_URL=https://tylerwilhite.dev`.
 - Preview and production evidence remain separate. A successful local build does not prove custom-domain DNS, TLS, edge headers, or Git integration.
 - Alternate custom domains must redirect to the single configured canonical origin in Vercel project settings.
 - The v1.0.7 generated deployment binding is immutable Preview evidence only; v1.0.8 requires fresh generated release and deployment records before any Production claim.
@@ -32,5 +32,5 @@ Connect the GitHub repository through Vercel's Git integration. Keep ordinary de
 - **Server-rendered framework:** rejected because there is no dynamic/public backend requirement.
 - **Single React SPA:** rejected because the case study should be useful without the demo runtime.
 - **GitHub Pages:** not selected because it cannot apply the required response headers without another edge layer.
-- **Vercel SPA rewrite:** rejected because the project is a real multi-page static build and the rewrite would hide the custom 404 behavior.
+- **Vercel SPA rewrite:** rejected because the project is a real multi-page static build. The accepted rewrites are limited to the root portfolio entry and `/workbench/` namespace; they do not catch arbitrary missing routes or hide the custom 404 behavior.
 - **Third-party analytics on by default:** rejected because it adds unnecessary tracking, network, and policy surface.

@@ -4,7 +4,7 @@
 
 The immutable v1.0.7 example is available through its [generated release summary](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/security/release-summary.json) and [generated deployment binding](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/security/deployment-binding.json). Those records bind audited source `7cb0e186c8d3225908fcfeed8df8c8e143ff0ed6`, evidence/deployed commit `af3b0b3554d9a26d4d9538eb2fc5626e84342827`, tag `v1.0.7`, and the hosted CodeQL result.
 
-Version 1.0.8 is a fresh release lineage. Its audited source intentionally omits `public/security/release-summary.json`; v1.0.7 evidence cannot be copied forward. Only a later direct evidence child generated from successful v1.0.8 gates may restore that path. A deployed `/security/deployment-binding.json` becomes v1.0.8 Production evidence only after verification at the intended stable origin `<PRODUCTION_ORIGIN>`.
+Version 1.0.8 is a fresh release lineage. Its audited source intentionally omits `public/security/release-summary.json`; v1.0.7 evidence cannot be copied forward. Only a later direct evidence child generated from successful v1.0.8 gates may restore that path. A deployed `/security/deployment-binding.json` becomes v1.0.8 Production evidence only after verification at the intended stable origin `https://tylerwilhite.dev`, including the Workbench surface at `/workbench/`.
 
 ## Reproducible command
 

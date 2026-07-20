@@ -74,8 +74,9 @@ function readExcerpt(root: string, excerpt: Excerpt): string {
 }
 
 function pageKindFromHtml(html: string): PageKind {
-  const match = /<body[^>]*data-page="(case-study|article|demo|not-found)"/.exec(html);
+  const match = /<body[^>]*data-page="(home|case-study|article|demo|not-found)"/.exec(html);
   switch (match?.[1]) {
+    case "home":
     case "case-study":
     case "article":
     case "demo":

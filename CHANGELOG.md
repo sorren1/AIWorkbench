@@ -2,7 +2,7 @@
 
 All notable changes to AI Delivery Workbench are recorded here. The project follows [Semantic Versioning](https://semver.org/) for public release labels.
 
-## [1.0.8](docs/releases/1.0.8.md) — 2026-07-19
+## [1.0.8](docs/releases/1.0.8.md) — 2026-07-20
 
 Evidence policy: this entry describes the source contents only. A v1.0.8 tag, hosted controls, Preview artifact, and Production deployment are accepted only through the generated release summary and deployment binding described in the release notes.
 
@@ -11,6 +11,7 @@ Evidence policy: this entry describes the source contents only. A v1.0.8 tag, ho
 - durable v1.0.8 release notes and deployment-verification records that distinguish the v1.0.7 Preview baseline, the v1.0.8 source candidate, and the intended Production origin;
 - an automated alignment check for the package, lockfile, web manifest, case-study footer, and demo footer version labels;
 - hosted deployment coverage for nested missing routes and Production-derived RFC 9116 canonical identity.
+- a static portfolio index for `tylerwilhite.dev` that links into the independently implemented Workbench without turning the origin page into the Workbench itself.
 
 ### Changed
 
@@ -18,17 +19,20 @@ Evidence policy: this entry describes the source contents only. A v1.0.8 tag, ho
 - moved the stable `security.txt` disclosure fields into a source template and made canonical identity build-derived from the validated Production origin;
 - restored bounded Dependabot queues after the public-history publication audit: five weekly npm proposals and two monthly GitHub Actions proposals;
 - replaced release-iteration prose and hand-maintained run-status narration with links to generated release/deployment evidence and immutable commit boundaries.
+- scoped the hosted case study, article, and interactive prototype beneath `/workbench/`; retained their simple local development routes and added permanent redirects from the former hosted page locations.
+- kept release identity fail-closed for Vercel Preview and Production while allowing `VERCEL_ENV=development` to exercise the provider's local development adapter without fabricated release evidence.
 
 ### Fixed
 
 - made the custom 404 page use root-relative assets and navigation so it remains functional at nested missing routes;
 - prevented a Preview hostname from remaining hard-coded as the canonical RFC 9116 security record.
+- allowed bounded extra startup time for process-backed Vitest suites and parallel local WebKit workflows so Windows release-gate runs do not fail at framework timing defaults while the same assertions pass independently; retries remain disabled and CI retains its existing limit.
 
 ### Security
 
 - the audited v1.0.8 source intentionally carries no inherited `public/security/release-summary.json`; fresh CodeQL and supply-chain evidence must be generated in the permitted one-file evidence child;
 - E2B and live LiteLLM/provider paths remain credential-gated and are not promoted to validated capabilities;
-- `<PRODUCTION_ORIGIN>` remains the intended Production origin, not evidence that Production deployment, DNS, TLS, headers, canonical metadata, or route checks have passed.
+- `https://tylerwilhite.dev` is the intended Production origin and `https://tylerwilhite.dev/workbench/` is the intended Workbench URL; neither value is evidence that Production deployment, DNS, TLS, headers, canonical metadata, or route checks have passed.
 
 ## [1.0.7] — 2026-07-19
 

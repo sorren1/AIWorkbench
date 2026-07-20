@@ -1,10 +1,16 @@
 # Decision log
 
+## 2026-07-20 — Keep the personal origin separate from the Workbench namespace
+
+- **Decision:** Use `https://tylerwilhite.dev` as the canonical Production origin. Serve a small static portfolio index at `/`, and map the complete AI Delivery Workbench surface to `/workbench/` through narrow Vercel rewrites. Permanently redirect former hosted page routes such as `/demo/` and `/writing/` into the Workbench namespace; do not add an SPA fallback.
+- **Why:** Assigning the custom domain directly to the existing output would make the Workbench case study the personal-domain home page. One multi-page static project can keep the origin available for a broader portfolio while preserving the existing case study, article, demo, evidence, and no-backend boundaries under a stable project URL.
+- **Boundary:** Local Vite routes remain physical build-entry routes. The tracked route and domain configuration is not proof of a Ready v1.0.8 Preview, DNS delegation, TLS, redirects, canonical output, or Production behavior. The existing release-evidence gate remains authoritative and cannot be bypassed to deploy this source candidate.
+
 ## 2026-07-19 — Make generated evidence authoritative for each release environment
 
-- **Decision:** Treat the audited source, one-file evidence child, annotated tag, and generated deployment binding as four explicit release identities. Link durable generated release/deployment records from public documentation instead of maintaining provider run IDs or prose that purports to update itself. Record `<PRODUCTION_ORIGIN>` as the intended stable v1.0.8 Production origin while keeping the immutable v1.0.7 Ready artifact labeled Preview.
+- **Decision:** Treat the audited source, one-file evidence child, annotated tag, and generated deployment binding as four explicit release identities. Link durable generated release/deployment records from public documentation instead of maintaining provider run IDs or prose that purports to update itself. Record `https://tylerwilhite.dev` as the intended stable v1.0.8 Production origin while keeping the immutable v1.0.7 Ready artifact labeled Preview.
 - **Why:** Hosted success is commit- and environment-specific. v1.0.7 has valid generated Preview evidence, but its post-deployment audit found a stale `security.txt` canonical and nested-route 404 resolution defect. Neither successful v1.0.7 controls nor a fixed local v1.0.8 source prove a v1.0.8 Preview or Production deployment.
-- **Boundary:** The v1.0.8 audited source contains no inherited release summary. Fresh hosted CodeQL and release gates must create its direct evidence child; only verified DNS/TLS, canonical metadata, routes, headers, browsers, accessibility, network, cache, and Lighthouse results at `<PRODUCTION_ORIGIN>` can establish Production.
+- **Boundary:** The v1.0.8 audited source contains no inherited release summary. Fresh hosted CodeQL and release gates must create its direct evidence child; only verified DNS/TLS, canonical metadata, routes, headers, browsers, accessibility, network, cache, and Lighthouse results at `https://tylerwilhite.dev` can establish Production.
 
 ## 2026-07-19 — Restore bounded Dependabot proposal queues after history publication
 

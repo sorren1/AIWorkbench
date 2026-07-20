@@ -27,6 +27,9 @@ async function expectNoSeriousViolations(page: Page, context: string) {
 test("case study and technical article have no serious or critical axe violations", async ({
   page,
 }) => {
+  await page.goto("/home/");
+  await expectNoSeriousViolations(page, "portfolio home");
+
   await page.goto("/");
   await expectNoSeriousViolations(page, "case study");
 

@@ -15,8 +15,16 @@ describe("Vercel static deployment contract", () => {
     });
   });
 
-  it("preserves filesystem routing instead of shadowing static pages with an SPA rewrite", () => {
-    expect(vercelConfig).not.toHaveProperty("rewrites");
+  it("keeps the portfolio home at the origin and scopes the complete Workbench under its prefix", () => {
+    expect(vercelConfig.rewrites).toEqual([
+      { source: "/", destination: "/home/index.html" },
+      { source: "/workbench", destination: "/index.html" },
+      { source: "/workbench/", destination: "/index.html" },
+      { source: "/workbench/:path*", destination: "/:path*" },
+    ]);
+    expect(readFileSync(resolve(import.meta.dirname, "../home/index.html"), "utf8")).toContain(
+      'data-page="home"',
+    );
     expect(readFileSync(resolve(import.meta.dirname, "../index.html"), "utf8")).toContain(
       'data-page="case-study"',
     );
@@ -36,8 +44,8 @@ describe("Vercel static deployment contract", () => {
     expect(notFound).toContain('data-page="not-found"');
     expect(notFound).toContain("Page not found");
     expect(notFound).toContain('<base href="/" />');
-    expect(notFound).toContain('href="/">Return to case study</a>');
-    expect(notFound).toContain('href="/demo/">Open interactive prototype</a>');
+    expect(notFound).toContain('href="/workbench/">Return to case study</a>');
+    expect(notFound).toContain('href="/workbench/demo/">Open interactive prototype</a>');
     expect(notFound).not.toMatch(/(?:href|src)="\.\//u);
   });
 });

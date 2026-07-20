@@ -372,7 +372,7 @@ Implemented commits: `test: add release-grade quality gates`; `security: add sup
 
 ### Phase 8 — Portfolio polish and final release
 
-Status: Repository curation, hosted workflow observation, immutable release tagging, and exact Preview verification were completed through v1.0.7. Version 1.0.8 returns to the audited-source boundary and must repeat its own evidence/tag/Preview procedure. Production verification at `<PRODUCTION_ORIGIN>` remains a separate release gate and is not claimed by this historical plan.
+Status: Repository curation, hosted workflow observation, immutable release tagging, and exact Preview verification were completed through v1.0.7. Version 1.0.8 returns to the audited-source boundary and must repeat its own evidence/tag/Preview procedure. The later domain decision reserves `https://tylerwilhite.dev/` for a portfolio index and places this project at `https://tylerwilhite.dev/workbench/`; Production verification remains a separate release gate and is not claimed by this historical plan.
 
 Scope: final content/design QA followed by the only authorized publication step.
 
