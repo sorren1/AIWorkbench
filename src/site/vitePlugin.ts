@@ -20,6 +20,7 @@ import {
   type PageKind,
 } from "./metadata";
 import { renderStaticHostHeaders } from "./securityHeaders";
+import { createSecurityTxt, SECURITY_TXT_PATH } from "./securityTxt";
 import { renderSupplyChainEvidence } from "./supplyChainEvidence";
 
 type Excerpt = {
@@ -73,8 +74,9 @@ function readExcerpt(root: string, excerpt: Excerpt): string {
 }
 
 function pageKindFromHtml(html: string): PageKind {
-  const match = /<body[^>]*data-page="(case-study|article|demo|not-found)"/.exec(html);
+  const match = /<body[^>]*data-page="(home|case-study|article|demo|not-found)"/.exec(html);
   switch (match?.[1]) {
+    case "home":
     case "case-study":
     case "article":
     case "demo":
@@ -143,6 +145,10 @@ export function portfolioSitePlugin(
   deploymentBinding: VerifiedDeploymentBinding | null = null,
 ): Plugin {
   let recordedEvidence: RecordedSandboxEvidenceRender | null = null;
+  const securityTxt = createSecurityTxt(
+    siteConfig,
+    readFileSync(resolve(root, "src/site/security.txt"), "utf8"),
+  );
   return {
     name: "portfolio-site-generator",
     configureServer(server) {
@@ -214,6 +220,11 @@ export function portfolioSitePlugin(
     },
     generateBundle() {
       this.emitFile({ type: "asset", fileName: "_headers", source: renderStaticHostHeaders() });
+      this.emitFile({
+        type: "asset",
+        fileName: SECURITY_TXT_PATH.replace(/^\//u, ""),
+        source: securityTxt,
+      });
       this.emitFile({ type: "asset", fileName: "robots.txt", source: createRobotsTxt(siteConfig) });
       this.emitFile({
         type: "asset",

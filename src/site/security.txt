@@ -1,4 +1,3 @@
-Canonical: https://ai-delivery-workbench-onedermant1-9606-workbench1.vercel.app/.well-known/security.txt
 Contact: https://github.com/sorren1/AIWorkbench/security/advisories/new
 Policy: https://github.com/sorren1/AIWorkbench/security/policy
 Preferred-Languages: en

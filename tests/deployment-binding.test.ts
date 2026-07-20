@@ -18,6 +18,9 @@ const identity: ReleaseDeploymentIdentity = {
 describe("Vercel release binding", () => {
   it("does not invent a deployment identity for local builds", () => {
     expect(resolveDeploymentBinding({}, identity)).toBeNull();
+    expect(
+      resolveDeploymentBinding({ VERCEL: "1", VERCEL_ENV: "development" }, identity),
+    ).toBeNull();
   });
 
   it("fails closed when Vercel does not provide an exact approved commit binding", () => {

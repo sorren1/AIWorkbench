@@ -92,7 +92,7 @@ The audited `dist/` was served with `npm run preview -- --host 127.0.0.1 --port 
 
 The latest index points to a `SUCCEEDED` `LOCAL_DOCKER` evidence pack. Its source commit is reachable, its normalized trace hash exactly matches the index, container networking is `none`, `websiteExecutesCode` and `visitorInputAccepted` are false, and accounting records zero model calls/cost rather than inventing model use. The public page describes this as a recorded local run and exposes the exact source commit, modified-worktree state, approved path, limits, command receipts, context digest, evidence digest, trace ID, and trace digest.
 
-The second checked-in pack is an honest failed run. E2B status remains “implemented but not live-validated,” the LiteLLM gateway remains “gateway implemented; live provider path not validated,” and CodeQL remains “configured · not validated.” No public claim upgrades these states.
+The second checked-in pack is an honest failed run. E2B status remains “implemented but not live-validated,” and the LiteLLM gateway remains “gateway implemented; live provider path not validated.” No hosted CodeQL result existed for the 1.0.0 audit boundary; the later v1.0.7 hosted result is release-specific and does not retroactively upgrade this record.
 
 ## Semantic-distance and secret search
 
@@ -133,7 +133,7 @@ The strongest implementation evidence is the explicit state/guard test surface, 
 
 ## Remaining limitations and publication blockers
 
-- `gh run list` returned no hosted workflow runs. Local configuration is present for quality, dependency review, and CodeQL, but those controls must not be marked executed until the candidate is pushed and GitHub reports success.
+- `gh run list` returned no hosted workflow runs for the 1.0.0 audit. Later releases have hosted evidence, but it is not evidence for this historical source boundary.
 - `git ls-remote origin` showed remote `main` still at the original prototype commit and no remote `v1.0.0`. This audit intentionally does not push or deploy. The source link becomes current only after a separately authorized publication step.
 - Canonical/contact/résumé URLs are null and analytics is off. This avoids dead placeholders and tracking but requires a final deployment-specific metadata review.
 - The custom `404.html` exists, but real unknown-path status/routing and emitted security headers must be observed on the chosen host.

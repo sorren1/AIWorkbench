@@ -30,6 +30,7 @@ export default defineConfig(({ mode }) => {
       manifest: true,
       rollupOptions: {
         input: {
+          home: resolve(root, "home/index.html"),
           site: resolve(root, "index.html"),
           article: resolve(root, "writing/governing-ai-assisted-delivery/index.html"),
           demo: resolve(root, "demo/index.html"),
@@ -39,6 +40,7 @@ export default defineConfig(({ mode }) => {
     },
     test: {
       environment: "jsdom",
+      testTimeout: 10_000,
       setupFiles: ["./tests/setup.ts"],
       include: ["tests/**/*.test.{ts,tsx}"],
       exclude: ["tests/e2e/**", "fixtures/**", ".workbench/**", "node_modules/**", "dist/**"],

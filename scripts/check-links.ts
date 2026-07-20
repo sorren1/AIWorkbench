@@ -17,11 +17,19 @@ function relativePath(path: string): string {
   return path.replace(`${dist}${sep}`, "").replaceAll(sep, "/");
 }
 
+function physicalDeploymentPath(pathname: string): string {
+  if (pathname === "/workbench" || pathname === "/workbench/") return "/index.html";
+  if (pathname.startsWith("/workbench/")) {
+    return pathname.slice("/workbench".length);
+  }
+  return pathname;
+}
+
 function localTarget(source: string, reference: string): { path: string; fragment: string } | null {
   if (/^(?:https?:|mailto:|tel:|data:|blob:)/i.test(reference)) return null;
   const base = new URL(`https://static.invalid/${relativePath(source)}`);
   const target = new URL(reference, base);
-  let targetPath = decodeURIComponent(target.pathname);
+  let targetPath = physicalDeploymentPath(decodeURIComponent(target.pathname));
   if (targetPath.endsWith("/")) targetPath += "index.html";
   const path = resolve(dist, targetPath.replace(/^\//, ""));
   if (path !== dist && !path.startsWith(`${dist}${sep}`)) {

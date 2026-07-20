@@ -1,8 +1,8 @@
 # Dependency review process
 
-Dependabot version-update pull requests are temporarily paused with `open-pull-requests-limit: 0` while the sanitized public graph is published and audited. This retains the checked-in ecosystem configuration without allowing GitHub to create permanent bot-authored pull refs that would invalidate the exact-identity history gate. Re-enabling version updates requires an explicit decision to broaden the permitted public-history identities, followed by a fresh all-ref audit.
+Dependabot version proposals are enabled after completion of the sanitized public-history publication audit. Weekly npm updates have a five-pull-request limit; monthly GitHub Actions updates have a two-pull-request limit. These bounded queues keep maintenance visible without allowing automated proposals to bypass review.
 
-Dependencies are exact-versioned in `package.json` and resolved through the committed npm lockfile. When re-enabled, Dependabot is configured to propose weekly npm updates and monthly GitHub Actions updates. Automated proposals do not bypass review.
+Dependencies are exact-versioned in `package.json` and resolved through the committed npm lockfile. Actions remain pinned to reviewed full commit SHAs. Dependabot branches are review inputs, not accepted release lineage: an approved update enters a release branch through an owner-authored reviewed commit that preserves the repository's narrow public-history identity policy.
 
 For each dependency change:
 
@@ -17,4 +17,4 @@ The Lighthouse CI dependency currently needs `tmp` and `uuid` resolutions newer 
 
 A clean install currently emits transitive deprecation notices from Lighthouse CI's `chrome-launcher` chain, CycloneDX's optional XML/native tooling chain, and E2B's `glob` dependency. The recorded audit has no vulnerability finding for those resolved versions, but deprecation is maintenance debt rather than a security pass. Re-check the owner paths with `npm explain`, prefer upstream upgrades over broad overrides, and remove optional/native packages only when CycloneDX generation remains schema-valid on all supported platforms.
 
-Dependency review is evidence about the checked-in graph at review time, not a guarantee that a package or advisory database will remain unchanged. Repository owners should also enable GitHub's dependency graph, Dependabot security updates, and branch protection for the quality, dependency-review, and CodeQL workflows before publication.
+Dependency review is evidence about the checked-in graph at review time, not a guarantee that a package or advisory database will remain unchanged. The public repository has Dependabot security updates enabled; release branches still require the Quality, dependency-review, CodeQL, exact-history, and supply-chain controls for the exact accepted source.

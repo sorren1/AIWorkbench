@@ -8,15 +8,22 @@ if (!deploymentBaseUrl) {
 
 const deploymentOrigin = new URL(deploymentBaseUrl).origin;
 const expectedCanonicalUrl = process.env.EXPECTED_CANONICAL_URL?.replace(/\/+$/, "");
-const securityTxtCanonical =
-  "https://ai-delivery-workbench-onedermant1-9606-workbench1.vercel.app/.well-known/security.txt";
+const expectedSecurityTxtCanonical = expectedCanonicalUrl
+  ? new URL("/.well-known/security.txt", `${expectedCanonicalUrl}/`).toString()
+  : null;
 const privateReportingUrl = "https://github.com/sorren1/AIWorkbench/security/advisories/new";
 const securityPolicyUrl = "https://github.com/sorren1/AIWorkbench/security/policy";
 const publicHtmlRoutes = [
   "/",
-  "/demo/",
-  "/writing/governing-ai-assisted-delivery/",
+  "/workbench/",
+  "/workbench/demo/",
+  "/workbench/writing/governing-ai-assisted-delivery/",
   "/404.html",
+] as const;
+const nestedMissingRoutes = [
+  "/missing/nested/path",
+  "/missing/nested/path/",
+  "/missing/nested/path?source=test",
 ] as const;
 
 function expectFinalCsp(headers: Readonly<Record<string, string>>, path: string): void {
@@ -50,6 +57,42 @@ test("serves every public route directly and uses the custom 404", async ({ requ
   const notFound = await request.get("/deployment-verification-missing-route");
   expect(notFound.status()).toBe(404);
   await expect(notFound.text()).resolves.toContain("Page not found");
+});
+
+test("keeps the custom 404 functional at nested missing routes", async ({ page }) => {
+  for (const path of nestedMissingRoutes) {
+    const response = await page.goto(path);
+    expect(response?.status(), `${path} should retain the missing response status`).toBe(404);
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText(
+      "This page is outside the expected change surface.",
+    );
+    await expect(page.locator("body")).toHaveCSS("background-color", "rgb(245, 247, 250)");
+
+    const logo = page.locator(".site-not-found img");
+    await expect(logo).toBeVisible();
+    expect(
+      await logo.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0),
+    ).toBe(true);
+
+    await expect(page.getByRole("link", { name: "Return to case study" })).toHaveAttribute(
+      "href",
+      "/workbench/",
+    );
+    await expect(page.getByRole("link", { name: "Open interactive prototype" })).toHaveAttribute(
+      "href",
+      "/workbench/demo/",
+    );
+  }
+
+  await page.goto(nestedMissingRoutes[0]);
+  await page.getByRole("link", { name: "Return to case study" }).click();
+  await expect(page).toHaveURL(`${deploymentOrigin}/workbench/`);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("AI Delivery Workbench");
+
+  await page.goto(nestedMissingRoutes[1]);
+  await page.getByRole("link", { name: "Open interactive prototype" }).click();
+  await expect(page).toHaveURL(`${deploymentOrigin}/workbench/demo/`);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Work Queue");
 });
 
 test("ordinary deployment requests have no toolbar injection and satisfy CSP on every route", async ({
@@ -103,6 +146,25 @@ test("the explicit toolbar-skip request path remains independently verified", as
   }
 });
 
+test("redirects legacy public pages into the Workbench namespace", async ({ request }) => {
+  const legacyRoutes = [
+    { source: "/index.html", destination: "/workbench/" },
+    { source: "/demo/", destination: "/workbench/demo/" },
+    {
+      source: "/writing/governing-ai-assisted-delivery/",
+      destination: "/workbench/writing/governing-ai-assisted-delivery/",
+    },
+  ] as const;
+
+  for (const route of legacyRoutes) {
+    const response = await request.get(route.source, { maxRedirects: 0 });
+    expect(response.status(), route.source).toBe(308);
+    expect(new URL(response.headers().location ?? "", deploymentOrigin).pathname).toBe(
+      route.destination,
+    );
+  }
+});
+
 test("publishes a current RFC 9116 security.txt with private reporting", async ({ request }) => {
   const response = await request.get("/.well-known/security.txt");
   expect(response.status()).toBe(200);
@@ -110,7 +172,11 @@ test("publishes a current RFC 9116 security.txt with private reporting", async (
 
   const contents = await response.text();
   const fields = securityTxtFields(contents);
-  expect(fields.get("Canonical")).toEqual([securityTxtCanonical]);
+  if (expectedSecurityTxtCanonical) {
+    expect(fields.get("Canonical")).toEqual([expectedSecurityTxtCanonical]);
+  } else {
+    expect(fields.has("Canonical")).toBe(false);
+  }
   expect(fields.get("Contact")).toEqual([privateReportingUrl]);
   expect(fields.get("Policy")).toEqual([securityPolicyUrl]);
   expect(fields.get("Preferred-Languages")).toEqual(["en"]);
@@ -123,6 +189,19 @@ test("publishes a current RFC 9116 security.txt with private reporting", async (
   expect(contents).not.toContain("mailto:");
 });
 
+test("configured Production canonical security.txt resolves on the expected origin", async ({
+  request,
+}) => {
+  test.skip(!expectedSecurityTxtCanonical, "Production canonical origin is not configured.");
+
+  const canonical = new URL(expectedSecurityTxtCanonical ?? "");
+  expect(canonical.origin).toBe(new URL(expectedCanonicalUrl ?? "").origin);
+  const response = await request.get(canonical.toString());
+  expect(response.status()).toBe(200);
+  expect(response.headers()["content-type"]).toMatch(/^text\/plain(?:;\s*charset=utf-8)?$/iu);
+  expect(securityTxtFields(await response.text()).get("Canonical")).toEqual([canonical.toString()]);
+});
+
 test("applies security headers and the intended static cache policy", async ({ page, request }) => {
   const htmlResponse = await request.get("/");
   expectFinalCsp(htmlResponse.headers(), "/");
@@ -133,7 +212,7 @@ test("applies security headers and the intended static cache policy", async ({ p
   expect(htmlResponse.headers()["cache-control"]).toContain("max-age=0");
   expect(htmlResponse.headers()["cache-control"]).toContain("must-revalidate");
 
-  await page.goto("/demo/");
+  await page.goto("/workbench/demo/");
   const stylesheet = await page.locator('link[rel="stylesheet"]').first().getAttribute("href");
   if (!stylesheet) throw new Error("The demo stylesheet was not emitted.");
   const stylesheetUrl = new URL(stylesheet, page.url());
@@ -155,10 +234,15 @@ test("emits canonical metadata only for the configured production domain", async
   if (expectedCanonicalUrl) {
     await expect(canonical).toHaveAttribute("href", `${expectedCanonicalUrl}/`);
     expect(robots).toContain(`Sitemap: ${expectedCanonicalUrl}/sitemap.xml`);
-    expect(sitemap).toContain(`<loc>${expectedCanonicalUrl}/demo/</loc>`);
+    expect(sitemap).toContain(`<loc>${expectedCanonicalUrl}/workbench/demo/</loc>`);
     await expect(page.locator('meta[property="og:image"]')).toHaveAttribute(
       "content",
-      `${expectedCanonicalUrl}/assets/social-card.png`,
+      `${expectedCanonicalUrl}/workbench/assets/social-card.png`,
+    );
+    await page.goto("/workbench/");
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      "href",
+      `${expectedCanonicalUrl}/workbench/`,
     );
   } else {
     await expect(canonical).toHaveCount(0);
@@ -174,7 +258,7 @@ test("has no serious accessibility findings or unintended runtime origins", asyn
     if (requestOrigin !== deploymentOrigin) externalRequests.add(requestOrigin);
   });
 
-  for (const path of ["/", "/demo/?screen=work-queue"]) {
+  for (const path of ["/", "/workbench/", "/workbench/demo/?screen=work-queue"]) {
     await page.goto(path);
     const results = await new AxeBuilder({ page }).analyze();
     expect(
@@ -186,7 +270,7 @@ test("has no serious accessibility findings or unintended runtime origins", asyn
 });
 
 test("publishes the configured source link without an unsafe opener", async ({ page }) => {
-  await page.goto("/");
+  await page.goto("/workbench/");
   const sourceLink = page.locator('a[href="https://github.com/sorren1/AIWorkbench"]').first();
   await expect(sourceLink).toBeVisible();
   if ((await sourceLink.getAttribute("target")) === "_blank") {
