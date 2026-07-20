@@ -21,13 +21,23 @@
       "permanent": true
     },
     {
-      "source": "/demo/:path*",
-      "destination": "/workbench/demo/:path*",
+      "source": "/demo",
+      "destination": "/workbench/demo/",
       "permanent": true
     },
     {
-      "source": "/writing/:path*",
-      "destination": "/workbench/writing/:path*",
+      "source": "/demo/",
+      "destination": "/workbench/demo/",
+      "permanent": true
+    },
+    {
+      "source": "/writing/governing-ai-assisted-delivery",
+      "destination": "/workbench/writing/governing-ai-assisted-delivery/",
+      "permanent": true
+    },
+    {
+      "source": "/writing/governing-ai-assisted-delivery/",
+      "destination": "/workbench/writing/governing-ai-assisted-delivery/",
       "permanent": true
     }
   ],
@@ -45,8 +55,20 @@
       "destination": "/index.html"
     },
     {
-      "source": "/workbench/:path*",
-      "destination": "/:path*"
+      "source": "/workbench/demo",
+      "destination": "/demo/index.html"
+    },
+    {
+      "source": "/workbench/demo/",
+      "destination": "/demo/index.html"
+    },
+    {
+      "source": "/workbench/writing/governing-ai-assisted-delivery",
+      "destination": "/writing/governing-ai-assisted-delivery/index.html"
+    },
+    {
+      "source": "/workbench/writing/governing-ai-assisted-delivery/",
+      "destination": "/writing/governing-ai-assisted-delivery/index.html"
     }
   ],
   "headers": [
@@ -60,7 +82,7 @@
       ]
     },
     {
-      "source": "/assets/immutable/(.*)",
+      "source": "/assets/immutable/:path*",
       "headers": [
         {
           "key": "Cache-Control",
@@ -69,7 +91,7 @@
       ]
     },
     {
-      "source": "/workbench/assets/immutable/(.*)",
+      "source": "/workbench/assets/immutable/:path*",
       "headers": [
         {
           "key": "Cache-Control",

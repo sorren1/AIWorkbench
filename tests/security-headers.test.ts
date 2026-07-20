@@ -42,7 +42,7 @@ describe("static-host security policy", () => {
 
   it("caches only Vite-hashed assets immutably", () => {
     const immutableRule = vercelConfig.headers.find(
-      (rule) => rule.source === "/assets/immutable/(.*)",
+      (rule) => rule.source === "/assets/immutable/:path*",
     );
     expect(immutableRule?.headers).toContainEqual({
       key: "Cache-Control",

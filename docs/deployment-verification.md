@@ -48,18 +48,18 @@ Earlier release-iteration history remains immutable: v1.0.3 and v1.0.4 were unta
 
 ## Tracked deployment contract
 
-| Setting              | Value                                                                                   | Boundary                                                                       |
-| -------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| Provider/framework   | Vercel / Vite                                                                           | Static multi-page output; no Vercel application runtime.                       |
-| Runtime              | Node 22.x                                                                               | Matches `package.json`, `.nvmrc`, CI, and provider configuration.              |
-| Install/build/output | `npm ci` / `npm run build` / `dist`                                                     | Reproducible lockfile build.                                                   |
-| Routing              | Narrow root and `/workbench/:path*` rewrites plus legacy-page redirects                 | Portfolio index at `/`; Workbench at `/workbench/`; no catch-all SPA fallback. |
-| Hashed assets        | `/assets/immutable/`                                                                    | Only Vite-hashed JS/CSS receives one-year immutable caching.                   |
-| HTML/unhashed assets | `public, max-age=0, must-revalidate`                                                    | Prevents stable-name HTML/assets from becoming stale immutable content.        |
-| Production origin    | `SITE_CANONICAL_URL=https://tylerwilhite.dev`                                           | Production only; Preview omits canonical-dependent output.                     |
-| Release commit       | `VERCEL_GIT_COMMIT_SHA`                                                                 | Must equal the approved tagged evidence commit.                                |
-| Explicit bindings    | `APPROVED_RELEASE_TAG`, `APPROVED_AUDITED_COMMIT_SHA`, `APPROVED_DEPLOYMENT_COMMIT_SHA` | Prevents source, evidence, tag, or deployment substitution.                    |
-| Generated identity   | `/security/deployment-binding.json`                                                     | Emitted only when the tag/source/evidence/deployment relationship validates.   |
+| Setting              | Value                                                                                   | Boundary                                                                      |
+| -------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Provider/framework   | Vercel / Vite                                                                           | Static multi-page output; no Vercel application runtime.                      |
+| Runtime              | Node 22.x                                                                               | Matches `package.json`, `.nvmrc`, CI, and provider configuration.             |
+| Install/build/output | `npm ci` / `npm run build` / `dist`                                                     | Reproducible lockfile build.                                                  |
+| Routing              | Exact root/Workbench page-to-file rewrites plus legacy-page redirects                   | Portfolio index at `/`; Workbench at `/workbench/`; unknown paths remain 404. |
+| Hashed assets        | `/assets/immutable/`                                                                    | Only Vite-hashed JS/CSS receives one-year immutable caching.                  |
+| HTML/unhashed assets | `public, max-age=0, must-revalidate`                                                    | Prevents stable-name HTML/assets from becoming stale immutable content.       |
+| Production origin    | `SITE_CANONICAL_URL=https://tylerwilhite.dev`                                           | Production only; Preview omits canonical-dependent output.                    |
+| Release commit       | `VERCEL_GIT_COMMIT_SHA`                                                                 | Must equal the approved tagged evidence commit.                               |
+| Explicit bindings    | `APPROVED_RELEASE_TAG`, `APPROVED_AUDITED_COMMIT_SHA`, `APPROVED_DEPLOYMENT_COMMIT_SHA` | Prevents source, evidence, tag, or deployment substitution.                   |
+| Generated identity   | `/security/deployment-binding.json`                                                     | Emitted only when the tag/source/evidence/deployment relationship validates.  |
 
 The typed Production-origin parser requires HTTPS and rejects credentials, a non-default port, query/fragment data, and temporary `vercel.app` hostnames. The same origin drives HTML canonical/Open Graph URLs, `robots.txt`, the sitemap, and `security.txt`. The Vercel Toolbar is disabled for Preview and Production; the CSP does not permit provider toolbar origins or inline/eval script/style exceptions.
 

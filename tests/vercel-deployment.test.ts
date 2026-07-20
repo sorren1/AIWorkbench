@@ -20,8 +20,21 @@ describe("Vercel static deployment contract", () => {
       { source: "/", destination: "/home/index.html" },
       { source: "/workbench", destination: "/index.html" },
       { source: "/workbench/", destination: "/index.html" },
-      { source: "/workbench/:path*", destination: "/:path*" },
+      { source: "/workbench/demo", destination: "/demo/index.html" },
+      { source: "/workbench/demo/", destination: "/demo/index.html" },
+      {
+        source: "/workbench/writing/governing-ai-assisted-delivery",
+        destination: "/writing/governing-ai-assisted-delivery/index.html",
+      },
+      {
+        source: "/workbench/writing/governing-ai-assisted-delivery/",
+        destination: "/writing/governing-ai-assisted-delivery/index.html",
+      },
     ]);
+    expect(vercelConfig.rewrites).not.toContainEqual({
+      source: "/workbench/:path*",
+      destination: "/:path*",
+    });
     expect(readFileSync(resolve(import.meta.dirname, "../home/index.html"), "utf8")).toContain(
       'data-page="home"',
     );
