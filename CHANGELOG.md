@@ -21,12 +21,14 @@ Evidence policy: this entry describes the source contents only. A v1.0.8 tag, ho
 - replaced release-iteration prose and hand-maintained run-status narration with links to generated release/deployment evidence and immutable commit boundaries.
 - scoped the hosted case study, article, and interactive prototype beneath `/workbench/`; retained their simple local development routes and added permanent redirects from the former hosted page locations.
 - kept release identity fail-closed for Vercel Preview and Production while allowing `VERCEL_ENV=development` to exercise the provider's local development adapter without fabricated release evidence.
+- distinguished provider-created review refs from accepted release lineage: exact Dependabot and discarded GitHub squash identities are recognized only outside `HEAD` and annotated tags, while all reachable content remains audited.
 
 ### Fixed
 
 - made the custom 404 page use root-relative assets and navigation so it remains functional at nested missing routes;
 - prevented a Preview hostname from remaining hard-coded as the canonical RFC 9116 security record.
 - allowed bounded extra startup time for process-backed Vitest suites and parallel local WebKit workflows so Windows release-gate runs do not fail at framework timing defaults while the same assertions pass independently; retries remain disabled and CI retains its existing limit.
+- kept the public-history identity gate compatible with restored Dependabot proposal branches without permitting bot-authored or GitHub-web-committed changes into a release.
 
 ### Security
 

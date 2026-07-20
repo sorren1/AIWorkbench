@@ -2,10 +2,10 @@ import { spawnSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
+import { isPermittedPublicCommitIdentity, OWNER_PUBLIC_EMAIL } from "./publicHistoryIdentity";
 import { trackedSourcePaths } from "./trackedSourceInventory";
 
 const root = resolve(import.meta.dirname, "..");
-const intendedEmail = "89358652+sorren1@users.noreply.github.com";
 
 // Assemble the retired organization token without storing the searchable value in this graph.
 const retiredOrganizationToken = String.fromCharCode(
@@ -46,10 +46,17 @@ function nonemptyLines(value: string): readonly string[] {
 
 const failures: string[] = [];
 const reachableCommits = new Set(nonemptyLines(git(["rev-list", "--all"])));
+const releaseLineageCommits = new Set(nonemptyLines(git(["rev-list", "HEAD", "--tags"])));
 
 for (const line of nonemptyLines(git(["log", "--all", "--format=%H|%ae|%ce"]))) {
   const [commit, authorEmail, committerEmail] = line.split("|");
-  if (authorEmail !== intendedEmail || committerEmail !== intendedEmail) {
+  if (
+    !isPermittedPublicCommitIdentity(
+      authorEmail,
+      committerEmail,
+      commit ? releaseLineageCommits.has(commit) : true,
+    )
+  ) {
     failures.push(`${commit ?? "unknown commit"}: unexpected author or committer address`);
   }
 }
@@ -61,7 +68,7 @@ for (const line of tagLines) {
   const [ref, objectType, rawTaggerEmail] = line.split("|");
   const taggerEmail = rawTaggerEmail?.replace(/^<|>$/gu, "");
   if (objectType !== "tag") failures.push(`${ref ?? "unknown tag"}: tag is not annotated`);
-  if (taggerEmail !== intendedEmail) {
+  if (taggerEmail !== OWNER_PUBLIC_EMAIL) {
     failures.push(`${ref ?? "unknown tag"}: unexpected tagger address`);
   }
 }
@@ -149,5 +156,5 @@ if (failures.length > 0) {
 }
 
 process.stdout.write(
-  `Public history policy passed for ${reachableCommits.size} commits, ${tagLines.length} annotated tags, and ${provenanceReferences.size} reachable provenance commits.\n`,
+  `Public history policy passed for ${reachableCommits.size} commits, ${releaseLineageCommits.size} release-lineage commits, ${tagLines.length} annotated tags, and ${provenanceReferences.size} reachable provenance commits.\n`,
 );
