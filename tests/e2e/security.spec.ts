@@ -1,10 +1,13 @@
 import { expect, test } from "./fixtures";
 
 const publicHtmlRoutes = [
-  { path: "/", heading: "AI Delivery Workbench" },
-  { path: "/home/", heading: "Tyler Wilhite" },
-  { path: "/demo/", heading: "Work Queue" },
-  { path: "/writing/governing-ai-assisted-delivery/", heading: "Governing AI-assisted delivery" },
+  { path: "/", heading: "Tyler Wilhite" },
+  { path: "/workbench/", heading: "AI Delivery Workbench" },
+  { path: "/workbench/demo/", heading: "Work Queue" },
+  {
+    path: "/workbench/writing/governing-ai-assisted-delivery/",
+    heading: "Governing AI-assisted delivery",
+  },
   { path: "/404.html", heading: "This page is outside the expected change surface." },
 ] as const;
 
@@ -57,7 +60,7 @@ test("public routes make no external runtime requests", async ({ page }) => {
 test("public supply-chain claims never reuse evidence from an older code state", async ({
   page,
 }) => {
-  await page.goto("/#security-evidence");
+  await page.goto("/workbench/#security-evidence");
   const section = page.getByRole("region", { name: "Security and supply-chain evidence" });
   await expect(section).toBeVisible();
   const summaryResponse = await page.request.get("/security/release-summary.json");

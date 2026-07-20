@@ -101,7 +101,7 @@ test("public and demo pages expose only recorded gateway status and never call a
   page.on("request", (request) => {
     if (request.url().includes(":4000")) gatewayRequests.push(request.url());
   });
-  await page.goto("/");
+  await page.goto("/workbench/");
   await expect(
     page.getByText("gateway implemented; live provider path not validated"),
   ).toBeVisible();

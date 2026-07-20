@@ -5,7 +5,7 @@ const REVIEW_REASON = "Reviewed bounded synthetic diff and allow-listed path.";
 test("the full seven-minute principal path follows one deterministic control and evidence chain", async ({
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/workbench/");
   await expect(
     page.getByRole("heading", { level: 1, name: "AI Delivery Workbench" }),
   ).toBeVisible();

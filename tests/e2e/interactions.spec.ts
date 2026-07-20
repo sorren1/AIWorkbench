@@ -4,7 +4,7 @@ test("skip links move keyboard focus to each page's main content", async ({
   browserName,
   page,
 }) => {
-  await page.goto("/");
+  await page.goto("/workbench/");
   const caseStudySkip = page.getByRole("link", { name: "Skip to case study" });
   if (browserName === "webkit") await caseStudySkip.focus();
   else await page.keyboard.press("Tab");

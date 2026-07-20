@@ -54,7 +54,7 @@ function assetPath(htmlPath: string, reference: string): string {
 
 const budgets = JSON.parse(await readFile(budgetPath, "utf8")) as Budgets;
 if (budgets.schemaVersion !== 1) throw new Error("Unsupported performance budget schema");
-const caseStudyPath = resolve(dist, "index.html");
+const caseStudyPath = resolve(dist, "workbench/index.html");
 const demoPath = resolve(dist, "demo/index.html");
 const [caseStudyHtml, demoHtml, outputFiles] = await Promise.all([
   readFile(caseStudyPath, "utf8"),

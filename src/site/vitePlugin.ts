@@ -218,45 +218,95 @@ export function portfolioSitePlugin(
         return replaceConfigLinks(replaceExcerpts(withMetadata, root), siteConfig);
       },
     },
-    generateBundle() {
-      this.emitFile({ type: "asset", fileName: "_headers", source: renderStaticHostHeaders() });
-      this.emitFile({
-        type: "asset",
-        fileName: SECURITY_TXT_PATH.replace(/^\//u, ""),
-        source: securityTxt,
-      });
-      this.emitFile({ type: "asset", fileName: "robots.txt", source: createRobotsTxt(siteConfig) });
-      this.emitFile({
-        type: "asset",
-        fileName: "sitemap.xml",
-        source: createSitemapXml(siteConfig),
-      });
-      if (deploymentBinding) {
+    generateBundle: {
+      order: "post",
+      handler(_options, bundle) {
+        const pageSource = (fileName: string): string | Uint8Array => {
+          const asset = bundle[fileName];
+          if (!asset || asset.type !== "asset") {
+            throw new Error(`Expected Vite to emit ${fileName} as an HTML asset.`);
+          }
+          return asset.source;
+        };
+        const rootPublicAssets = (source: string | Uint8Array): string => {
+          const html = typeof source === "string" ? source : new TextDecoder().decode(source);
+          return html
+            .replaceAll(/(?:\.\.\/)+assets\//gu, "/assets/")
+            .replaceAll("./assets/", "/assets/")
+            .replaceAll(/(?:\.\.\/)+site\.webmanifest/gu, "/site.webmanifest")
+            .replaceAll("./site.webmanifest", "/site.webmanifest");
+        };
+
+        const homePage = pageSource("home/index.html");
+        const workbenchPage = pageSource("index.html");
         this.emitFile({
           type: "asset",
-          fileName: "security/deployment-binding.json",
-          source: `${JSON.stringify(deploymentBinding, null, 2)}\n`,
-        });
-      }
-      if (recordedEvidence) {
-        this.emitFile({
-          type: "asset",
-          fileName: `recorded-evidence/${recordedEvidence.jsonName}`,
-          source: recordedEvidence.json,
+          fileName: "workbench/index.html",
+          source: rootPublicAssets(workbenchPage),
         });
         this.emitFile({
           type: "asset",
-          fileName: `recorded-evidence/${recordedEvidence.markdownName}`,
-          source: recordedEvidence.markdown,
+          fileName: "workbench/demo/index.html",
+          source: rootPublicAssets(pageSource("demo/index.html")),
         });
-        if (recordedEvidence.traceName && recordedEvidence.trace) {
+        this.emitFile({
+          type: "asset",
+          fileName: "workbench/writing/governing-ai-assisted-delivery/index.html",
+          source: rootPublicAssets(pageSource("writing/governing-ai-assisted-delivery/index.html")),
+        });
+        const rootPage = bundle["index.html"];
+        if (!rootPage || rootPage.type !== "asset") {
+          throw new Error("Expected Vite to emit index.html as an HTML asset.");
+        }
+        rootPage.source = homePage;
+
+        this.emitFile({ type: "asset", fileName: "_headers", source: renderStaticHostHeaders() });
+        this.emitFile({
+          type: "asset",
+          fileName: SECURITY_TXT_PATH.replace(/^\//u, ""),
+          source: securityTxt,
+        });
+        this.emitFile({
+          type: "asset",
+          fileName: "robots.txt",
+          source: createRobotsTxt(siteConfig),
+        });
+        this.emitFile({
+          type: "asset",
+          fileName: "sitemap.xml",
+          source: createSitemapXml(siteConfig),
+        });
+        if (deploymentBinding) {
           this.emitFile({
             type: "asset",
-            fileName: `recorded-evidence/${recordedEvidence.traceName}`,
-            source: recordedEvidence.trace,
+            fileName: "security/deployment-binding.json",
+            source: `${JSON.stringify(deploymentBinding, null, 2)}\n`,
           });
         }
-      }
+        if (recordedEvidence) {
+          for (const prefix of ["recorded-evidence", "workbench/recorded-evidence"] as const) {
+            this.emitFile({
+              type: "asset",
+              fileName: `${prefix}/${recordedEvidence.jsonName}`,
+              source: recordedEvidence.json,
+            });
+            this.emitFile({
+              type: "asset",
+              fileName: `${prefix}/${recordedEvidence.markdownName}`,
+              source: recordedEvidence.markdown,
+            });
+          }
+          if (recordedEvidence.traceName && recordedEvidence.trace) {
+            for (const prefix of ["recorded-evidence", "workbench/recorded-evidence"] as const) {
+              this.emitFile({
+                type: "asset",
+                fileName: `${prefix}/${recordedEvidence.traceName}`,
+                source: recordedEvidence.trace,
+              });
+            }
+          }
+        }
+      },
     },
   };
 }
