@@ -2,8 +2,12 @@ import { expect, test } from "./fixtures";
 
 const publicWidths = [320, 375, 768, 1024, 1280, 1440] as const;
 const publicPages = [
-  { path: "/", heading: "AI Delivery Workbench" },
-  { path: "/writing/governing-ai-assisted-delivery/", heading: "Governing AI-assisted delivery" },
+  { path: "/", heading: "Tyler Wilhite" },
+  { path: "/workbench/", heading: "AI Delivery Workbench" },
+  {
+    path: "/workbench/writing/governing-ai-assisted-delivery/",
+    heading: "Governing AI-assisted delivery",
+  },
   { path: "/404.html", heading: "This page is outside the expected change surface." },
 ] as const;
 

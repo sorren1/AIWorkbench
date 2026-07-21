@@ -18,8 +18,11 @@ function relativePath(path: string): string {
 }
 
 function physicalDeploymentPath(pathname: string): string {
-  if (pathname === "/workbench" || pathname === "/workbench/") return "/index.html";
-  if (pathname.startsWith("/workbench/")) {
+  if (
+    pathname.startsWith("/workbench/assets/") ||
+    pathname.startsWith("/workbench/capabilities/") ||
+    pathname === "/workbench/site.webmanifest"
+  ) {
     return pathname.slice("/workbench".length);
   }
   return pathname;
@@ -39,6 +42,21 @@ function localTarget(source: string, reference: string): { path: string; fragmen
 }
 
 const findings: string[] = [];
+const deployedPages = [
+  { path: "index.html", marker: 'data-page="home"' },
+  { path: "workbench/index.html", marker: 'data-page="case-study"' },
+  { path: "workbench/demo/index.html", marker: 'data-page="demo"' },
+  {
+    path: "workbench/writing/governing-ai-assisted-delivery/index.html",
+    marker: 'data-page="article"',
+  },
+] as const;
+for (const page of deployedPages) {
+  const contents = await readFile(resolve(dist, page.path), "utf8").catch(() => null);
+  if (!contents?.includes(page.marker)) {
+    findings.push(`${page.path}: missing deployed page marker ${page.marker}`);
+  }
+}
 for (const htmlPath of (await files(dist)).filter((path) => extname(path) === ".html")) {
   const html = await readFile(htmlPath, "utf8");
   const references = [...html.matchAll(/\b(?:href|src)="([^"]+)"/g)].map((match) => match[1] ?? "");

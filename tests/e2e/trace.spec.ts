@@ -31,7 +31,7 @@ test("case study publishes the recorded trace as a read-only validated asset", a
   page,
   request,
 }) => {
-  await page.goto("/");
+  await page.goto("/workbench/");
   await expect(page.getByText("Trace ID", { exact: true })).toBeVisible();
   const traceLink = page.getByRole("link", { name: "Open normalized trace JSON" });
   await expect(traceLink).toBeVisible();

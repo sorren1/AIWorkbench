@@ -28,7 +28,7 @@ const CANONICAL_PIXEL_PLATFORM = "linux";
 const screenshotMismatches: string[] = [];
 
 const captures: readonly Capture[] = [
-  { filename: "case-study-hero.png", path: "/", heading: "AI Delivery Workbench" },
+  { filename: "case-study-hero.png", path: "/workbench/", heading: "AI Delivery Workbench" },
   { filename: "workbench-overview.png", path: "/demo/", heading: "Work Queue" },
   {
     filename: "governed-issue-timeline.png",

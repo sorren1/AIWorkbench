@@ -43,32 +43,28 @@
   ],
   "rewrites": [
     {
-      "source": "/",
-      "destination": "/home/index.html"
-    },
-    {
       "source": "/workbench",
-      "destination": "/index.html"
+      "destination": "/workbench/index.html"
     },
     {
       "source": "/workbench/",
-      "destination": "/index.html"
+      "destination": "/workbench/index.html"
     },
     {
       "source": "/workbench/demo",
-      "destination": "/demo/index.html"
+      "destination": "/workbench/demo/index.html"
     },
     {
       "source": "/workbench/demo/",
-      "destination": "/demo/index.html"
+      "destination": "/workbench/demo/index.html"
     },
     {
       "source": "/workbench/writing/governing-ai-assisted-delivery",
-      "destination": "/writing/governing-ai-assisted-delivery/index.html"
+      "destination": "/workbench/writing/governing-ai-assisted-delivery/index.html"
     },
     {
       "source": "/workbench/writing/governing-ai-assisted-delivery/",
-      "destination": "/writing/governing-ai-assisted-delivery/index.html"
+      "destination": "/workbench/writing/governing-ai-assisted-delivery/index.html"
     },
     {
       "source": "/workbench/assets/:path*",

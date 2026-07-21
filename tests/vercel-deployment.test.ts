@@ -17,18 +17,17 @@ describe("Vercel static deployment contract", () => {
 
   it("keeps the portfolio home at the origin and scopes the complete Workbench under its prefix", () => {
     expect(vercelConfig.rewrites).toEqual([
-      { source: "/", destination: "/home/index.html" },
-      { source: "/workbench", destination: "/index.html" },
-      { source: "/workbench/", destination: "/index.html" },
-      { source: "/workbench/demo", destination: "/demo/index.html" },
-      { source: "/workbench/demo/", destination: "/demo/index.html" },
+      { source: "/workbench", destination: "/workbench/index.html" },
+      { source: "/workbench/", destination: "/workbench/index.html" },
+      { source: "/workbench/demo", destination: "/workbench/demo/index.html" },
+      { source: "/workbench/demo/", destination: "/workbench/demo/index.html" },
       {
         source: "/workbench/writing/governing-ai-assisted-delivery",
-        destination: "/writing/governing-ai-assisted-delivery/index.html",
+        destination: "/workbench/writing/governing-ai-assisted-delivery/index.html",
       },
       {
         source: "/workbench/writing/governing-ai-assisted-delivery/",
-        destination: "/writing/governing-ai-assisted-delivery/index.html",
+        destination: "/workbench/writing/governing-ai-assisted-delivery/index.html",
       },
       { source: "/workbench/assets/:path*", destination: "/assets/:path*" },
       { source: "/workbench/capabilities/:path*", destination: "/capabilities/:path*" },
