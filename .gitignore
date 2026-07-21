@@ -62,6 +62,8 @@ test-results/
 .security-reports/
 .workbench/
 .vercel/
+codex-runs/
+Run-CodexPrompt - working.ps1
 
 # Private local review notes (retain the tracked directory notice)
 private/*
