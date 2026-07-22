@@ -17,6 +17,7 @@ Evidence policy: this entry describes the audited-source contents only. The sour
 - Firefox aggregate coverage now runs with bounded worker pressure and independently reported route/viewport cases;
 - supply-chain suppressions require exact selectors, valid review/expiry order, and unique finding selectors;
 - direct transitive overrides keep `@hono/node-server` and `fast-uri` on patched versions while their parent packages catch up;
+- the LiteLLM derivative hash-pins `pyasn1` 0.6.4 after hosted Trivy identified two fixed high-severity findings in 0.6.3;
 - public documentation distinguishes the completed v1.0.8 predecessor from reusable audited-source release procedure.
 
 ### Security

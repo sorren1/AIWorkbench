@@ -11,7 +11,7 @@ RUN python -m ensurepip --upgrade \
       --no-deps \
       --require-hashes \
       --requirement /tmp/litellm-security-requirements.txt \
-    && python -c "import importlib.metadata; assert importlib.metadata.version('mcp') == '1.28.1'" \
+    && python -c "import importlib.metadata; assert importlib.metadata.version('mcp') == '1.28.1'; assert importlib.metadata.version('pyasn1') == '0.6.4'" \
     && rm -rf \
       /tmp/litellm-security-requirements.txt \
       /app/.venv/bin/pip \

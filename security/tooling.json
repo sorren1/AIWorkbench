@@ -25,11 +25,11 @@
     "baseImage": "node:22.23.1-alpine3.24@sha256:16e22a550f3863206a3f701448c45f7912c6896a62de43add43bb9c86130c3e2"
   },
   "liteLlm": {
-    "image": "ai-delivery-workbench-litellm:v1.94.0-dev.3-database-mcp1.28.1",
+    "image": "ai-delivery-workbench-litellm:v1.94.0-dev.3-database-mcp1.28.1-pyasn1-0.6.4",
     "dockerfile": "ops/model-gateway/Dockerfile.litellm",
     "context": "ops/model-gateway",
     "requirements": "ops/model-gateway/litellm-security-requirements.txt",
-    "requirementsSha256": "30aae71226f51b26442e383287563b975d1bcfb105d024d712944196e41095d9",
+    "requirementsSha256": "d8753b9202343f07cca8dd2e75f8356a5fd295a07bdccfb0c545e7bcbb396a8e",
     "upstreamImage": "ghcr.io/berriai/litellm-database:v1.94.0-dev.3@sha256:e71660f09007a1c08a870b6c9819e86621b1ee8578d5843857dabb5ccb78e1be",
     "cosignPublicKey": "security/keys/litellm-cosign.pub",
     "cosignPublicKeySha256": "ff8869bf14ba9d10af7b64b9d479543b44daec0165e715753c43ff8a998f6dd3",
@@ -37,7 +37,8 @@
       "python-3.13": "3.13.14-r2",
       "python-3.13-base": "3.13.14-r2",
       "ddtrace": "4.8.2",
-      "mcp": "1.28.1"
+      "mcp": "1.28.1",
+      "pyasn1": "0.6.4"
     }
   },
   "postgres": {

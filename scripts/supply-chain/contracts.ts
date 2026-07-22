@@ -31,6 +31,7 @@ export const toolingSchema = z.object({
       "python-3.13-base": z.string().min(1),
       ddtrace: z.string().min(1),
       mcp: z.string().min(1),
+      pyasn1: z.string().min(1),
     }),
   }),
   postgres: z.object({ image: sha256Image }),

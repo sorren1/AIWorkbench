@@ -329,6 +329,8 @@ describe("supply-chain policy", () => {
     expect(versionAtLeast("3.13.14-r1", "3.13.14-r2")).toBe(false);
     expect(versionAtLeast("4.11.0", "4.8.2")).toBe(true);
     expect(versionAtLeast("1.27.2", "1.28.1")).toBe(false);
+    expect(versionAtLeast("0.6.4", "0.6.4")).toBe(true);
+    expect(versionAtLeast("0.6.3", "0.6.4")).toBe(false);
   });
 });
 
