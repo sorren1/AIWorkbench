@@ -1,5 +1,25 @@
 # Decision log
 
+## 2026-07-21 — Centralize interruption-safe local resource cleanup
+
+- **Decision:** Handle SIGINT and SIGTERM through one reusable CLI lifecycle coordinator that propagates an `AbortSignal`, rejects cleanup registration after shutdown starts, executes registered cleanup once in reverse order, bounds each operation to 10 seconds, and preserves exit 130/143. Keep runner/provider `finally`, Docker `--rm`, E2B TTL, and credential expiry as defense in depth.
+- **Sandbox recovery:** Create exact ownership state before acquisition under gitignored `.workbench/local-sandbox/runs/` and keep workspaces under its sibling `workspaces/` root. Recovery requires one validated run ID, rejects symlinks/traversal/provider mismatch, and cleans only Docker resources with both project/run labels or E2B resources with exact project/run metadata. Retain the state record after provider cleanup failure while removing the contained workspace.
+- **Gateway cleanup:** Register exact-run lease cleanup before catalog/vending work, propagate cancellation through adapter requests, serialize concurrent revocation for one lease, block evidence finalization until revocation succeeds, and retain failed lease state for explicit retry.
+- **Why:** JavaScript `finally` is not guaranteed to finish after process termination. A shared signal boundary plus durable exact ownership makes ordinary errors, timeouts, supported signals, and recovery deterministic without broad scanning or new public/runtime services.
+- **Boundary:** Native cross-process SIGINT/SIGTERM delivery is platform-dependent; Windows child-process tests use IPC to emit the same Node signals. E2B TTL and gateway lease expiry still cover uncatchable termination windows. No live E2B or model-provider credential was available, so fake-provider lifecycle coverage is not live-provider validation.
+
+## 2026-07-21 — Separate current release status from audited-source history
+
+- **Decision:** Present v1.0.8 current status through four explicit identities: audited source `fc2957843077606a1cdb8fe9101cbed9421fb243`, one-file evidence child `1c1c06b8e5c6973604b025b63aafed606b2bd522`, annotated tag `v1.0.8` pointing to that child, and the same child as the deployed commit. Link the hosted release summary and deployment binding as the authoritative current records. Retain source-summary omission and release-gate instructions only when they are explicitly scoped as audited-source history or reusable pre-release procedure.
+- **Why:** The audited source correctly described v1.0.8 as a candidate, but that prose became contradictory after the direct evidence child, tag, and verified Production deployment existed. Separating immutable history from current status preserves the two-commit evidence model without making hand-maintained prose compete with generated evidence.
+- **Boundary:** The Production result applies to the exact static artifact at `https://tylerwilhite.dev`, with the Workbench at `/workbench/`. It does not establish reliability, authenticated/shared identity, durable multi-user state, real external integrations, safe multi-tenant execution, live E2B, or live LiteLLM/provider validation. Preview evidence remains labeled Preview. This reconciliation does not modify generated evidence, deployment bindings, or tags.
+
+## 2026-07-21 — Bound Firefox aggregate pressure and isolate responsive cases
+
+- **Decision:** Limit the Firefox Playwright project to one worker on every platform while retaining the existing two-worker local limit for other projects. Exercise each public route and viewport width as an independent responsive test instead of sharing one test budget across four sequential navigations.
+- **Why:** The supported-Windows aggregate failed once when Firefox timed out in the four-route 1024px case, while the exact focused case and the audited commits' one-worker hosted Firefox jobs passed immediately. The result indicates aggregate Firefox worker pressure rather than a responsive product defect; independent route/viewport cases also identify the affected URL without consuming a shared timeout budget.
+- **Boundary:** Keep all six public widths, all four public routes, every assertion, zero retries, and the existing local and CI timeouts. Firefox remains a first-attempt fail-closed release gate, and its worker cap should be reconsidered only after a pinned browser/Playwright upgrade passes isolated and aggregate stress coverage on supported Windows.
+
 ## 2026-07-20 — Separate release lineage from provider-created review refs
 
 - **Decision:** Keep the account-specific GitHub noreply address mandatory for every commit reachable from `HEAD` or an annotated release tag. Outside that release lineage, recognize only the exact GitHub web-committer form for an owner-authored discarded squash artifact or a Dependabot-authored proposal. Continue scanning every reachable commit, ref, path, message, blob, tag, and generated provenance reference for the remaining public-history controls.
@@ -792,3 +812,26 @@ Derive the FIN-1150 change-target check from the exact artifact review identifie
 - The clean walkthrough seeds the same evidence-backed state used by the interactive workflow rather than a contradictory static readiness fixture.
 - Reviewers must explicitly record acceptance and cross-cutting review outcomes before final validation; these actions remain synthetic and browser-local.
 - PR check and unresolved-comment summaries update after the bound validator approval is consumed.
+
+## ADR-034 — Retain sanitized commit-bound Production behavior evidence
+
+- Status: Accepted
+- Date: 2026-07-21
+- Detailed records: [`docs/deployment-verification.md`](deployment-verification.md) and [`docs/release-evidence.md`](release-evidence.md)
+
+### Context
+
+The generated deployment binding proves the exact release/source/evidence/deployment lineage, while the Quality workflow retains build-time browser and Lighthouse results. The existing Production deployment and Lighthouse commands can inspect a live origin, but their results were not retained in a small record that also named the live binding, deployed commit, canonical origin, and workflow run.
+
+### Decision
+
+Add a manually dispatchable, credential-free-after-deployment GitHub workflow. Before running behavior checks, fetch the canonical origin's deployment binding and `security.txt` without redirects; require the fixed verified relation and every candidate identity to match; and reject Preview hostnames. Reuse the existing deployment suite and Lighthouse thresholds, adding hosted Lighthouse collection for the three required routes in desktop and mobile profiles.
+
+Retain one strict machine-readable summary for 90 days and keep detailed Playwright, command, and Lighthouse output in restricted 14-day artifacts. The summary records only allowlisted identities, tool versions, control outcomes, counts, and category scores; schema validation recursively rejects sensitive raw fields. A local execution remains labeled `LOCAL` and cannot satisfy hosted-evidence validation.
+
+### Consequences
+
+- Production behavior evidence can be traced to one live origin and one deployment tuple without Vercel credentials or a backend.
+- Missing or malformed binding data, identity/canonical mismatch, redirects, absent test output, a failed assertion, or an incomplete Lighthouse matrix fails closed.
+- GitHub write authority is still required to publish and dispatch the workflow; no hosted artifact exists until its run is directly observed.
+- This mechanism does not modify or reinterpret the immutable v1.0.8 summary, tag, or deployment binding.

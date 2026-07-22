@@ -4,10 +4,10 @@
 
 AI Delivery Workbench shows how coding-agent output can remain subordinate to explicit context, authorization, approval, validation, budget, and evidence controls.
 
-- **Intended Production origin:** `https://tylerwilhite.dev`.
-- **Intended Workbench URL:** `https://tylerwilhite.dev/workbench/`. The domain and path are configuration targets, not evidence that v1.0.8 Production deployment, DNS/TLS, canonical metadata, or Production verification has succeeded.
-- **Verified Preview baseline:** [immutable v1.0.7 Preview](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/), bound to the v1.0.7 evidence commit. It is a Preview artifact, not Production and not v1.0.8.
-- **v1.0.8 candidate:** this repository source. Fresh hosted CI, CodeQL, release evidence, Preview, and Production verification belong to the later release procedure and are not inherited from v1.0.7.
+- **Production:** [portfolio origin](https://tylerwilhite.dev) with the [Workbench at `/workbench/`](https://tylerwilhite.dev/workbench/), verified for the exact v1.0.8 static artifact.
+- **v1.0.8 lineage:** audited source [`fc2957843077606a1cdb8fe9101cbed9421fb243`](https://github.com/sorren1/AIWorkbench/commit/fc2957843077606a1cdb8fe9101cbed9421fb243); direct evidence child and deployed commit [`1c1c06b8e5c6973604b025b63aafed606b2bd522`](https://github.com/sorren1/AIWorkbench/commit/1c1c06b8e5c6973604b025b63aafed606b2bd522); annotated tag [`v1.0.8`](https://github.com/sorren1/AIWorkbench/tree/v1.0.8), pointing to that evidence child.
+- **Authoritative evidence:** [hosted release summary](https://tylerwilhite.dev/security/release-summary.json) and [deployment binding](https://tylerwilhite.dev/security/deployment-binding.json).
+- **Historical Preview:** [immutable v1.0.7 Preview](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/), bound to the v1.0.7 evidence commit. It remains a Preview artifact, not Production and not v1.0.8.
 - **Source:** [github.com/sorren1/AIWorkbench](https://github.com/sorren1/AIWorkbench)
 - **Local routes:** case study at `/`, technical article at `/writing/governing-ai-assisted-delivery/`, and interactive prototype at `/demo/`.
 - **Hosted route contract:** the portfolio index occupies `/`; Vercel maps the full case study, article, and prototype beneath `/workbench/` and permanently redirects legacy public page routes into that namespace.
@@ -94,7 +94,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) and [docs/contributor-commands.md](docs/c
 
 `npm run check:all` covers formatting, lint, strict type checking, registry/context/evidence drift, unit and component coverage, production build, static and documentation links, bundle budgets, credential-pattern checks, supply-chain evidence, Chromium/Firefox/WebKit end-to-end tests, axe checks, controlled visual captures, and desktop/mobile Lighthouse assertions.
 
-The supply-chain gate adds redacted tracked-file/history secret scanning, TypeScript/JavaScript analysis, dependency and container vulnerability scans, five CycloneDX SBOMs, license policy, suppression validation, and sanitized source-linked evidence. Missing Docker, scanners, advisory data, or history fails the gate rather than becoming a pass. Hosted CodeQL is release-specific: v1.0.7 has generated zero-finding evidence for its audited source, while v1.0.8 must produce fresh hosted evidence before its own summary, tag, or deployment can be accepted.
+The supply-chain gate adds redacted tracked-file/history secret scanning, TypeScript/JavaScript analysis, dependency and container vulnerability scans, five CycloneDX SBOMs, license policy, suppression validation, and sanitized source-linked evidence. Missing Docker, scanners, advisory data, or history fails the gate rather than becoming a pass. Hosted CodeQL is release-specific: the v1.0.8 [release summary](https://tylerwilhite.dev/security/release-summary.json) binds a fresh zero-finding [hosted CodeQL run](https://github.com/sorren1/AIWorkbench/actions/runs/29789562556) to its audited source; it is not evidence for later commits.
 
 Read [EVALUATION.md](EVALUATION.md), [SECURITY.md](SECURITY.md), [THREAT_MODEL.md](THREAT_MODEL.md), and [docs/release-evidence.md](docs/release-evidence.md) for claim definitions and assurance limits.
 
@@ -102,7 +102,9 @@ Read [EVALUATION.md](EVALUATION.md), [SECURITY.md](SECURITY.md), [THREAT_MODEL.m
 
 The durable v1.0.7 Preview record is its [generated deployment binding](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/security/deployment-binding.json) plus its [generated release summary](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/security/release-summary.json). Those generated records bind release tag, audited source, evidence commit, deployed commit, and hosted CodeQL result without relying on a hand-maintained run table.
 
-The v1.0.8 audited source intentionally contains no `public/security/release-summary.json`. After fresh local and hosted gates pass, the release process creates one direct evidence child containing only that generated file, tags that child, and produces a new deployment binding. The intended stable Workbench URL is `https://tylerwilhite.dev/workbench/`; it becomes Production evidence only after the Production gate in [docs/deployment-verification.md](docs/deployment-verification.md) succeeds at `https://tylerwilhite.dev`.
+The v1.0.8 audited source `fc2957843077606a1cdb8fe9101cbed9421fb243` intentionally contains no `public/security/release-summary.json`. After its fresh gates passed, direct child `1c1c06b8e5c6973604b025b63aafed606b2bd522` added only that generated file; annotated tag `v1.0.8` points to the child, and the same child is deployed. The hosted [release summary](https://tylerwilhite.dev/security/release-summary.json) matches that generated record, while the hosted [deployment binding](https://tylerwilhite.dev/security/deployment-binding.json) records the exact source/evidence/tag/deployment relation for Production at `https://tylerwilhite.dev` and the Workbench at `/workbench/`.
+
+That verification is specific to the static v1.0.8 artifact. It is not a claim of Production reliability, authenticated or shared identity, durable multi-user state, real external integrations, live E2B execution, or live LiteLLM/provider validation.
 
 ## Repository map
 
@@ -138,4 +140,4 @@ In professional work, I built a related governed AI-assisted delivery platform t
 
 ## License and releases
 
-No reuse license has been granted for the first-party project code in this revision. Third-party components retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the [license decision ADR](docs/adr/source-license-decision.md). See [CHANGELOG.md](CHANGELOG.md) and the [v1.0.8 release notes](docs/releases/1.0.8.md) for the candidate contents, evidence boundary, and known limitations.
+No reuse license has been granted for the first-party project code in this revision. Third-party components retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the [license decision ADR](docs/adr/source-license-decision.md). See [CHANGELOG.md](CHANGELOG.md) and the [v1.0.8 release notes](docs/releases/1.0.8.md) for the release contents, evidence boundary, and known limitations.

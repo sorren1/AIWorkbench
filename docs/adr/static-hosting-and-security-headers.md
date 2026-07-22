@@ -1,12 +1,12 @@
 # ADR: Static Git-backed hosting and security headers
 
-- Status: Accepted; Vercel selected, v1.0.7 Preview verified, v1.0.8 Production verification unrecorded
+- Status: Accepted; Vercel selected, v1.0.8 Production binding verified
 - Date: 2026-07-17
 - Decision owners: repository maintainers
 
 ## Context
 
-The case study must remain indexable without loading the demo bundle, work on a repository subpath, have no backend/runtime secrets, and apply a restrictive policy matching only local assets. Vercel is the selected Git-backed host. The intended stable Production origin is `https://tylerwilhite.dev`, with the project at `/workbench/`; Preview builds must still omit canonical metadata, and the intended values are not evidence of DNS, TLS, deployment, or Production verification.
+The case study must remain indexable without loading the demo bundle, work on a repository subpath, have no backend/runtime secrets, and apply a restrictive policy matching only local assets. Vercel is the selected Git-backed host. The stable Production origin is `https://tylerwilhite.dev`, with the project at `/workbench/`; v1.0.8 verification is recorded in its hosted [release summary](https://tylerwilhite.dev/security/release-summary.json) and [deployment binding](https://tylerwilhite.dev/security/deployment-binding.json). Preview builds must still omit canonical metadata, and configuration alone remains insufficient evidence for any later release or deployment.
 
 ## Decision
 
@@ -25,7 +25,7 @@ Connect the GitHub repository through Vercel's Git integration. Keep ordinary de
 - Preview omits Production canonical output. A Production build derives canonical HTML, Open Graph, robots/sitemap, and `security.txt` identity only from validated `SITE_CANONICAL_URL=https://tylerwilhite.dev`.
 - Preview and production evidence remain separate. A successful local build does not prove custom-domain DNS, TLS, edge headers, or Git integration.
 - Alternate custom domains must redirect to the single configured canonical origin in Vercel project settings.
-- The v1.0.7 generated deployment binding is immutable Preview evidence only; v1.0.8 requires fresh generated release and deployment records before any Production claim.
+- The v1.0.7 generated deployment binding is immutable Preview evidence only. Version 1.0.8 has separate generated Production records bound to audited source `fc2957843077606a1cdb8fe9101cbed9421fb243` and evidence/deployed commit `1c1c06b8e5c6973604b025b63aafed606b2bd522`.
 
 ## Alternatives considered
 
