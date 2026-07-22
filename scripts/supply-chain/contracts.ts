@@ -44,20 +44,30 @@ export const toolingSchema = z.object({
 
 export type SupplyChainTooling = z.infer<typeof toolingSchema>;
 
+const exactSuppressionSelector = z
+  .string()
+  .min(1)
+  .refine((value) => !value.includes("*"), "Suppression selectors must not contain wildcards.");
+
+const suppressionEntrySchema = z
+  .object({
+    id: z.string().regex(/^SUP-[0-9]{4}-[0-9]{3}$/),
+    scanner: z.enum(["gitleaks", "eslint", "container-policy", "npm-audit", "trivy"]),
+    ruleId: exactSuppressionSelector,
+    path: exactSuppressionSelector,
+    reason: z.string().min(20),
+    reviewer: z.string().min(1),
+    reviewOn: z.iso.date(),
+    expiresOn: z.iso.date(),
+  })
+  .refine((entry) => entry.reviewOn <= entry.expiresOn, {
+    message: "Suppression reviewOn must be on or before expiresOn.",
+    path: ["expiresOn"],
+  });
+
 export const suppressionSchema = z.object({
   schemaVersion: z.literal(1),
-  entries: z.array(
-    z.object({
-      id: z.string().regex(/^SUP-[0-9]{4}-[0-9]{3}$/),
-      scanner: z.enum(["gitleaks", "eslint", "container-policy", "npm-audit", "trivy"]),
-      ruleId: z.string().min(1),
-      path: z.string().min(1),
-      reason: z.string().min(20),
-      reviewer: z.string().min(1),
-      reviewOn: z.iso.date(),
-      expiresOn: z.iso.date(),
-    }),
-  ),
+  entries: z.array(suppressionEntrySchema),
 });
 
 export type SupplyChainSuppressions = z.infer<typeof suppressionSchema>;

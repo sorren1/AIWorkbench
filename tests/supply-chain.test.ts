@@ -16,6 +16,7 @@ import {
   analyzeLiteLlmDockerfile,
   analyzeSandboxDockerfile,
 } from "../scripts/supply-chain/containerPolicy";
+import { validateSuppressionPolicy } from "../scripts/supply-chain/suppressionPolicy";
 import { versionAtLeast } from "../scripts/supply-chain/versionPolicy";
 import {
   lintableTrackedSourcePaths,
@@ -74,6 +75,70 @@ describe("supply-chain policy", () => {
       tooling.liteLlm.cosignPublicKeySha256,
     );
     expect(licenses.requireDeclaredLicense).toBe(true);
+  });
+
+  it("rejects wildcard and reversed-date suppressions", () => {
+    const entry = {
+      id: "SUP-2026-999",
+      scanner: "trivy",
+      ruleId: "CVE-2026-99999",
+      path: `image:example.invalid/database@sha256:${"a".repeat(64)}/usr/local/bin/helper`,
+      reason: "The exact finding is temporarily unreachable under the reviewed runtime profile.",
+      reviewer: "repository owner",
+      reviewOn: "2026-07-21",
+      expiresOn: "2026-08-15",
+    } as const;
+
+    expect(() =>
+      suppressionSchema.parse({
+        schemaVersion: 1,
+        entries: [{ ...entry, ruleId: "CVE-*" }],
+      }),
+    ).toThrow(/wildcards/u);
+    expect(() =>
+      suppressionSchema.parse({
+        schemaVersion: 1,
+        entries: [{ ...entry, path: "image:*" }],
+      }),
+    ).toThrow(/wildcards/u);
+    expect(() =>
+      suppressionSchema.parse({
+        schemaVersion: 1,
+        entries: [{ ...entry, reviewOn: "2026-08-16" }],
+      }),
+    ).toThrow(/reviewOn/u);
+  });
+
+  it("rejects expired and duplicate suppressions before scanner execution", () => {
+    const entry = suppressionSchema.parse({
+      schemaVersion: 1,
+      entries: [
+        {
+          id: "SUP-2026-999",
+          scanner: "trivy",
+          ruleId: "CVE-2026-99999",
+          path: `image:example.invalid/database@sha256:${"a".repeat(64)}/usr/local/bin/helper`,
+          reason:
+            "The exact finding is temporarily unreachable under the reviewed runtime profile.",
+          reviewer: "repository owner",
+          reviewOn: "2026-07-01",
+          expiresOn: "2026-07-20",
+        },
+      ],
+    }).entries[0];
+    expect(entry).toBeDefined();
+    if (!entry) return;
+
+    expect(() => validateSuppressionPolicy([entry], "2026-07-21")).toThrow(/Expired/u);
+    expect(() =>
+      validateSuppressionPolicy([entry, { ...entry, expiresOn: "2026-08-01" }], "2026-07-01"),
+    ).toThrow(/Duplicate suppression ID/u);
+    expect(() =>
+      validateSuppressionPolicy(
+        [entry, { ...entry, id: "SUP-2026-998", expiresOn: "2026-08-01" }],
+        "2026-07-01",
+      ),
+    ).toThrow(/Duplicate suppression selector/u);
   });
 
   it("accepts the constrained Compose profile and rejects unsafe container configuration", async () => {
