@@ -39,6 +39,8 @@
     "performance:budgets": "tsx scripts/check-performance-budgets.ts",
     "performance:budgets:record": "tsx scripts/check-performance-budgets.ts --record",
     "performance:audit": "tsx scripts/run-lighthouse.ts",
+    "post-deployment:verify": "tsx scripts/post-deployment/run.ts",
+    "post-deployment:evidence:validate": "tsx scripts/post-deployment/check.ts --require-hosted",
     "model-gateway:up": "docker compose -f ops/model-gateway/compose.yaml up -d --wait",
     "model-gateway:down": "docker compose -f ops/model-gateway/compose.yaml down",
     "demo:model-gateway": "tsx tools/model-gateway/cli.ts run",
