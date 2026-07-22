@@ -38,7 +38,7 @@ The command:
 6. applies one exact replacement to `src/report.js` after path and symlink checks;
 7. rejects any unexpected file or changed path;
 8. runs the fixed build and tests in fresh constrained, network-disabled containers;
-9. removes labeled containers and the temporary workspace in `finally`; and
+9. removes exactly labeled provider resources and the repo-contained temporary workspace through bounded, idempotent cleanup, with `finally` retained as defense in depth; and
 10. writes immutable-style JSON, Markdown, and normalized OpenTelemetry-compatible trace evidence under `evidence/generated/`.
 
 The last line is JSON. Dynamic IDs, digests, and durations will differ, but a successful result has this shape:
@@ -124,6 +124,16 @@ npm test -- --run tests/local-sandbox.test.ts tests/e2b-sandbox.test.ts
 ```
 
 The suites cover exact allow-list enforcement, traversal rejection, symlink escape rejection, unexpected files, process timeout, deterministic output normalization, cleanup, successful evidence, failed-test evidence, trace hierarchy/redaction/binding, budget warnings/stops, repair limits, exact-versus-estimated accounting, evidence tamper detection, explicit E2B selection, bounded E2B uploads, network-verification gating, normalized provider metadata, and orphan cleanup. Fake provider tests require neither Docker nor E2B; the checked-in recorded run remains Docker-backed integration evidence.
+
+SIGINT and SIGTERM child-process cases interrupt resource setup, active execution, evidence finalization, and cleanup itself. On Windows, where Node cannot deliver those signals to another process with `child.kill`, the child test receives an IPC instruction and emits the same process signal; platforms with native delivery use the operating-system signal. The assertions require one cleanup attempt, no temporary workspace, no fake container/sandbox handle or active lease, bounded cleanup, signal-appropriate status, and non-zero cleanup failures.
+
+If a process is terminated before its handler runs, use only the exact run ID recorded under `.workbench/local-sandbox/runs/`:
+
+```powershell
+npm run demo:sandbox:recover -- --run-id sandbox-<owned-run-id>
+```
+
+The command is idempotent and path-contained. It will not discover or delete arbitrary temp paths, Docker containers without both ownership labels, or E2B sandboxes without the exact project/run metadata.
 
 ## Public rendering
 

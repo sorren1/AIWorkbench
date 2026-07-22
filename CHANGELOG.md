@@ -2,13 +2,37 @@
 
 All notable changes to AI Delivery Workbench are recorded here. The project follows [Semantic Versioning](https://semver.org/) for public release labels.
 
-## [1.0.8](docs/releases/1.0.8.md) — 2026-07-20
+## [1.0.9](docs/releases/1.0.9.md) — 2026-07-22
 
-Evidence policy: this entry describes the source contents only. A v1.0.8 tag, hosted controls, Preview artifact, and Production deployment are accepted only through the generated release summary and deployment binding described in the release notes.
+Evidence policy: this entry describes the audited-source contents only. The source intentionally omits `public/security/release-summary.json`. A v1.0.9 evidence child, annotated tag, deployment, and Production result are accepted only through fresh generated records and observed gates; none is inherited from v1.0.8.
 
 ### Added
 
-- durable v1.0.8 release notes and deployment-verification records that distinguish the v1.0.7 Preview baseline, the v1.0.8 source candidate, and the intended Production origin;
+- signal-aware cleanup coordination and exact-run recovery for local sandbox and model-gateway resources;
+- a manually dispatched, commit-bound Production behavior workflow with sanitized retained evidence;
+- a read-only hosted release-evidence generator for release operators without a Linux Docker engine.
+
+### Changed
+
+- Firefox aggregate coverage now runs with bounded worker pressure and independently reported route/viewport cases;
+- supply-chain suppressions require exact selectors, valid review/expiry order, and unique finding selectors;
+- direct transitive overrides keep `@hono/node-server` and `fast-uri` on patched versions while their parent packages catch up;
+- the LiteLLM derivative hash-pins `pyasn1` 0.6.4 after hosted Trivy identified two fixed high-severity findings in 0.6.3;
+- public documentation distinguishes the completed v1.0.8 predecessor from reusable audited-source release procedure.
+
+### Security
+
+- release-summary generation still requires an exact successful hosted CodeQL run and a fresh full scanner pass for the audited source;
+- missing Linux Docker support remains a failed local supply-chain gate and must be satisfied by the hosted release-evidence workflow;
+- the inherited v1.0.8 release summary is removed at the v1.0.9 audited-source boundary.
+
+## [1.0.8](docs/releases/1.0.8.md) — 2026-07-20
+
+Release status: completed. Audited source [`fc2957843077606a1cdb8fe9101cbed9421fb243`](https://github.com/sorren1/AIWorkbench/commit/fc2957843077606a1cdb8fe9101cbed9421fb243) is the direct parent of one-file evidence child [`1c1c06b8e5c6973604b025b63aafed606b2bd522`](https://github.com/sorren1/AIWorkbench/commit/1c1c06b8e5c6973604b025b63aafed606b2bd522). Annotated tag [`v1.0.8`](https://github.com/sorren1/AIWorkbench/tree/v1.0.8) points to that child, which is also the deployed commit. The hosted [release summary](https://tylerwilhite.dev/security/release-summary.json) and [deployment binding](https://tylerwilhite.dev/security/deployment-binding.json) are the authoritative current records.
+
+### Added
+
+- durable v1.0.8 release notes and deployment-verification records that distinguish the v1.0.7 Preview baseline, the v1.0.8 audited source and evidence child, and the Production origin;
 - an automated alignment check for the package, lockfile, web manifest, case-study footer, and demo footer version labels;
 - hosted deployment coverage for nested missing routes and Production-derived RFC 9116 canonical identity.
 - a static portfolio index for `tylerwilhite.dev` that links into the independently implemented Workbench without turning the origin page into the Workbench itself.
@@ -34,9 +58,9 @@ Evidence policy: this entry describes the source contents only. A v1.0.8 tag, ho
 
 ### Security
 
-- the audited v1.0.8 source intentionally carries no inherited `public/security/release-summary.json`; fresh CodeQL and supply-chain evidence must be generated in the permitted one-file evidence child;
+- the audited v1.0.8 source intentionally carried no inherited `public/security/release-summary.json`; after fresh CodeQL and supply-chain gates passed, the permitted one-file evidence child added the generated summary;
 - E2B and live LiteLLM/provider paths remain credential-gated and are not promoted to validated capabilities;
-- `https://tylerwilhite.dev` is the intended Production origin and `https://tylerwilhite.dev/workbench/` is the intended Workbench URL; neither value is evidence that Production deployment, DNS, TLS, headers, canonical metadata, or route checks have passed.
+- `https://tylerwilhite.dev` is the verified Production origin for the exact tagged v1.0.8 artifact, with the Workbench at `https://tylerwilhite.dev/workbench/`; that artifact-specific result is not a reliability, shared-identity/state, real-integration, live E2B, or live LiteLLM/provider claim.
 
 ## [1.0.7] — 2026-07-19
 

@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { promisify } from "node:util";
 
 import { registrySnapshot } from "../../src/demo/control-plane/registry/generated";
+import { runSignalAwareCli, type CleanupLifecycle } from "../lifecycle";
 import { MODEL_GATEWAY_IMPLEMENTATION_LABEL, type ModelGatewayProfile } from "./contracts";
 import { validateGatewayEvidenceFile, writeGatewayEvidence } from "./evidence";
 import { LiteLlmModelGateway } from "./liteLlmGateway";
@@ -25,8 +26,12 @@ function profile(): ModelGatewayProfile {
   return value;
 }
 
-async function sourceCommit(): Promise<string> {
-  const result = await executeFile("git", ["rev-parse", "HEAD"], { cwd: root, windowsHide: true });
+async function sourceCommit(signal: AbortSignal): Promise<string> {
+  const result = await executeFile(
+    "git",
+    ["-c", `safe.directory=${root.replaceAll("\\", "/")}`, "rev-parse", "HEAD"],
+    { cwd: root, windowsHide: true, signal },
+  );
   const value = result.stdout.trim();
   if (!/^[a-f0-9]{40}$/.test(value)) throw new Error("Unable to resolve the source commit.");
   return value;
@@ -37,7 +42,7 @@ function newRunId(): string {
   return `gateway-${stamp}`;
 }
 
-async function run(): Promise<void> {
+async function run(lifecycle: CleanupLifecycle): Promise<void> {
   const selectedProfile = profile();
   const policyId =
     selectedProfile === "live"
@@ -59,15 +64,18 @@ async function run(): Promise<void> {
     policy,
     agent,
     runId,
-    sourceCommit: await sourceCommit(),
+    sourceCommit: await sourceCommit(lifecycle.signal),
+    lifecycle,
   });
   let paths: { readonly evidencePath: string; readonly tracePath: string } | null = null;
   if (result.evidence) {
+    lifecycle.throwIfAborted();
     paths = await writeGatewayEvidence({
       root,
       evidence: result.evidence,
       trace: result.trace.artifact,
     });
+    lifecycle.throwIfAborted();
   }
   process.stdout.write(
     `${JSON.stringify(
@@ -95,10 +103,13 @@ async function run(): Promise<void> {
   );
 }
 
-async function cleanup(): Promise<void> {
+async function cleanup(lifecycle: CleanupLifecycle): Promise<void> {
   if (profile() !== "live") throw new Error("Credential cleanup requires --profile live.");
   const gateway = LiteLlmModelGateway.fromEnvironment(root);
-  const result = await gateway.cleanupInterruptedRuns(option("--run-id") ?? undefined);
+  const result = await gateway.cleanupInterruptedRuns(
+    option("--run-id") ?? undefined,
+    lifecycle.signal,
+  );
   process.stdout.write(`${JSON.stringify(result, null, 2)}\n`);
   if (result.failed > 0) process.exitCode = 1;
 }
@@ -119,8 +130,11 @@ async function validate(): Promise<void> {
   );
 }
 
-const command = process.argv[2] ?? "run";
-if (command === "run") await run();
-else if (command === "cleanup") await cleanup();
-else if (command === "validate") await validate();
-else throw new Error("Usage: cli.ts run|cleanup|validate [--profile offline|live].");
+const exitCode = await runSignalAwareCli(async (lifecycle) => {
+  const command = process.argv[2] ?? "run";
+  if (command === "run") await run(lifecycle);
+  else if (command === "cleanup") await cleanup(lifecycle);
+  else if (command === "validate") await validate();
+  else throw new Error("Usage: cli.ts run|cleanup|validate [--profile offline|live].");
+});
+process.exitCode = exitCode;

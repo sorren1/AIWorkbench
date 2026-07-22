@@ -4,8 +4,8 @@
   "measurements": {
     "caseStudyHtmlGzipBytes": 11524,
     "caseStudyExecutableScriptCount": 0,
-    "demoEntryJavaScriptGzipBytes": 114006,
-    "totalJavaScriptGzipBytes": 131572,
+    "demoEntryJavaScriptGzipBytes": 114007,
+    "totalJavaScriptGzipBytes": 131571,
     "totalCssGzipBytes": 17158,
     "externalRuntimeRequestCount": 0
   },

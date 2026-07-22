@@ -1,0 +1,108 @@
+name: Generate release evidence
+
+on:
+  workflow_dispatch:
+    inputs:
+      audited_commit:
+        description: Full audited source commit SHA
+        required: true
+        type: string
+      release_tag:
+        description: Intended annotated release tag
+        required: true
+        type: string
+      codeql_run_id:
+        description: Successful CodeQL workflow run ID for the audited commit
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: read
+  packages: read
+
+concurrency:
+  group: release-evidence-${{ github.sha }}
+  cancel-in-progress: false
+
+jobs:
+  generate:
+    name: Generate one-file evidence child input
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out audited source
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+        with:
+          fetch-depth: 0
+      - name: Use supported Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - name: Validate audited source and hosted CodeQL identity
+        shell: bash
+        env:
+          AUDITED_COMMIT_INPUT: ${{ inputs.audited_commit }}
+          CODEQL_RUN_ID_INPUT: ${{ inputs.codeql_run_id }}
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG_INPUT: ${{ inputs.release_tag }}
+        run: |
+          set -euo pipefail
+          [[ "$AUDITED_COMMIT_INPUT" =~ ^[a-f0-9]{40}$ ]]
+          [[ "$AUDITED_COMMIT_INPUT" == "$GITHUB_SHA" ]]
+          [[ "$RELEASE_TAG_INPUT" =~ ^v[0-9]+\.[0-9]+\.[0-9]+(-[0-9A-Za-z.-]+)?$ ]]
+          [[ "$CODEQL_RUN_ID_INPUT" =~ ^[0-9]+$ ]]
+
+          run_json="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$CODEQL_RUN_ID_INPUT")"
+          [[ "$(jq -r '.name' <<<"$run_json")" == "CodeQL" ]]
+          [[ "$(jq -r '.head_sha' <<<"$run_json")" == "$GITHUB_SHA" ]]
+          [[ "$(jq -r '.conclusion' <<<"$run_json")" == "success" ]]
+
+          codeql_dir="$RUNNER_TEMP/release-codeql"
+          mkdir -p "$codeql_dir"
+          gh run download "$CODEQL_RUN_ID_INPUT" \
+            --repo "$GITHUB_REPOSITORY" \
+            --name "codeql-evidence-$GITHUB_SHA" \
+            --dir "$codeql_dir"
+
+          codeql_summary="$codeql_dir/release-codeql-summary.json"
+          [[ -f "$codeql_summary" ]]
+          expected_url="https://github.com/$GITHUB_REPOSITORY/actions/runs/$CODEQL_RUN_ID_INPUT"
+          [[ "$(jq -r '.sourceCommit' "$codeql_summary")" == "$GITHUB_SHA" ]]
+          [[ "$(jq -r '.runUrl' "$codeql_summary")" == "$expected_url" ]]
+          [[ "$(jq -r '.releaseBlockingFindings' "$codeql_summary")" == "0" ]]
+
+          {
+            echo "AUDITED_RELEASE_COMMIT_SHA=$GITHUB_SHA"
+            echo "CODEQL_FINDING_COUNT=0"
+            echo "CODEQL_RUN_COMMIT_SHA=$GITHUB_SHA"
+            echo "CODEQL_RUN_URL=$expected_url"
+            echo "RELEASE_TAG=$RELEASE_TAG_INPUT"
+          } >> "$GITHUB_ENV"
+      - name: Clean install
+        run: npm ci
+      - name: Generate fresh supply-chain and release evidence
+        run: npm run security:supply-chain:record
+      - name: Require summary-only output
+        shell: bash
+        run: |
+          set -euo pipefail
+          [[ "$(git status --short --untracked-files=all)" == "?? public/security/release-summary.json" ]]
+          node -e "const fs=require('node:fs'); const s=JSON.parse(fs.readFileSync('public/security/release-summary.json','utf8')); if(s.release?.auditedCommit!==process.env.GITHUB_SHA||s.evidence?.parentCommit!==process.env.GITHUB_SHA){process.exit(1)}"
+      - name: Retain generated release summary
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-summary-${{ github.sha }}
+          path: public/security/release-summary.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Retain restricted scanner details
+        if: ${{ always() }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: release-evidence-details-${{ github.run_id }}
+          path: .security-reports/
+          include-hidden-files: true
+          if-no-files-found: warn
+          retention-days: 14

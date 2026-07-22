@@ -1,6 +1,6 @@
 # Release audit checklist
 
-Complete this checklist against the candidate commit before publication or tagging.
+Complete this reusable checklist against a candidate commit before publication or tagging. It intentionally describes the audited-source and pre-release procedure; it is not the current status record for completed v1.0.8. See the [v1.0.8 release notes](releases/1.0.8.md) and [deployment verification](deployment-verification.md) for that release's source/evidence/tag/deployment result.
 
 ## Source and build
 

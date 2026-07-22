@@ -64,6 +64,7 @@ export type ModelCallRequest = {
   readonly maximumOutputTokens: number;
   readonly temperature: number | null;
   readonly timeoutMs: number;
+  readonly signal?: AbortSignal;
 };
 
 export type ModelCallReceipt = {
@@ -94,11 +95,14 @@ export type CredentialCleanupResult = {
 
 export type ModelGateway = {
   readonly kind: ModelGatewayKind;
-  fetchCatalog(): Promise<ModelCatalogSnapshot>;
-  reconcileScopedCredential(request: ScopedCredentialRequest): Promise<ScopedCredentialLease>;
+  fetchCatalog(signal?: AbortSignal): Promise<ModelCatalogSnapshot>;
+  reconcileScopedCredential(
+    request: ScopedCredentialRequest,
+    signal?: AbortSignal,
+  ): Promise<ScopedCredentialLease>;
   callModel(request: ModelCallRequest): Promise<ModelCallReceipt>;
-  revokeScopedCredential(lease: ScopedCredentialLease): Promise<void>;
-  cleanupInterruptedRuns(runId?: string): Promise<CredentialCleanupResult>;
+  revokeScopedCredential(lease: ScopedCredentialLease, signal?: AbortSignal): Promise<void>;
+  cleanupInterruptedRuns(runId?: string, signal?: AbortSignal): Promise<CredentialCleanupResult>;
 };
 
 export class ModelGatewayRequestError extends Error {

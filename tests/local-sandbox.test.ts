@@ -20,6 +20,7 @@ import {
 } from "../tools/local-sandbox/evidence";
 import { normalizeCapturedOutput, runProcess } from "../tools/local-sandbox/process";
 import { runSandboxSlice } from "../tools/local-sandbox/runner";
+import { createSandboxRecoveryState, recoverSandboxRun } from "../tools/local-sandbox/recovery";
 import type { TraceArtifactOutput } from "../tools/local-sandbox/telemetry";
 import {
   applyControlledReplacement,
@@ -109,6 +110,15 @@ class FixtureSandboxProvider implements SandboxProvider {
   }
 }
 
+class RecoverySandboxProvider extends FixtureSandboxProvider {
+  cleanupCalls = 0;
+
+  override cleanup(): Promise<readonly string[]> {
+    this.cleanupCalls += 1;
+    return Promise.resolve(["fixture-owned-resource:removed"]);
+  }
+}
+
 async function temporaryDirectory(prefix: string): Promise<string> {
   const path = await mkdtemp(resolve(tmpdir(), prefix));
   temporaryPaths.push(path);
@@ -189,6 +199,18 @@ describe("sandbox process and evidence behavior", () => {
     });
     expect(result.timedOut).toBe(true);
     expect(result.exitCode).not.toBe(0);
+  });
+
+  it("terminates an active child process when cancellation is requested", async () => {
+    const controller = new AbortController();
+    const pending = runProcess({
+      executable: process.execPath,
+      args: ["-e", "setTimeout(() => {}, 1000)"],
+      timeoutMs: 5_000,
+      signal: controller.signal,
+    });
+    setTimeout(() => controller.abort(new Error("Synthetic cancellation.")), 30);
+    await expect(pending).resolves.toMatchObject({ aborted: true, timedOut: false });
   });
 
   it("normalizes line endings, ANSI escapes, and temporary roots deterministically", () => {
@@ -371,5 +393,78 @@ describe("sandbox process and evidence behavior", () => {
       expect.arrayContaining(["FAILED", "SUCCEEDED"]),
     );
     expect(evidence.latest.run.status).toBe("SUCCEEDED");
+  });
+});
+
+describe("contained sandbox recovery", () => {
+  it("recovers one exact owned run and is idempotent", async () => {
+    const root = await temporaryDirectory("sandbox-recovery-");
+    const runId = "sandbox-recovery-owned";
+    const recovery = await createSandboxRecoveryState({
+      projectRoot: root,
+      runId,
+      provider: "LOCAL_DOCKER",
+      createdAt: "2026-07-21T12:00:00.000Z",
+    });
+    await mkdir(recovery.workspace);
+    await writeFile(resolve(recovery.workspace, "owned.txt"), "owned", "utf8");
+    const provider = new RecoverySandboxProvider(0);
+    const providerFor = () => provider;
+    await expect(
+      recoverSandboxRun({
+        projectRoot: root,
+        runId,
+        providerFor,
+        signal: AbortSignal.timeout(2_000),
+      }),
+    ).resolves.toMatchObject({
+      temporaryWorkspaceRemoved: true,
+      recoveryStateRemoved: true,
+    });
+    await expect(
+      recoverSandboxRun({
+        projectRoot: root,
+        runId,
+        providerFor,
+        signal: AbortSignal.timeout(2_000),
+      }),
+    ).resolves.toMatchObject({
+      providerAttempts: [],
+      temporaryWorkspaceRemoved: true,
+      recoveryStateRemoved: true,
+    });
+    expect(provider.cleanupCalls).toBe(1);
+    await expect(access(recovery.workspace)).rejects.toThrow();
+  });
+
+  it("rejects malformed ownership state without deleting outside the workspace root", async () => {
+    const root = await temporaryDirectory("sandbox-recovery-contained-");
+    const runId = "sandbox-recovery-contained";
+    const outside = resolve(root, "outside.txt");
+    await writeFile(outside, "retain", "utf8");
+    await createSandboxRecoveryState({
+      projectRoot: root,
+      runId,
+      provider: "LOCAL_DOCKER",
+      createdAt: "2026-07-21T12:00:00.000Z",
+    });
+    const statePath = resolve(root, `.workbench/local-sandbox/runs/${runId}.json`);
+    const state = JSON.parse(await readFile(statePath, "utf8")) as Record<string, unknown>;
+    await writeFile(
+      statePath,
+      `${JSON.stringify({ ...state, workspaceRelativePath: "workspaces/../outside" })}\n`,
+      "utf8",
+    );
+    const provider = new RecoverySandboxProvider(0);
+    await expect(
+      recoverSandboxRun({
+        projectRoot: root,
+        runId,
+        providerFor: () => provider,
+        signal: AbortSignal.timeout(2_000),
+      }),
+    ).rejects.toThrow();
+    expect(provider.cleanupCalls).toBe(0);
+    await expect(readFile(outside, "utf8")).resolves.toBe("retain");
   });
 });

@@ -13,6 +13,7 @@ import type {
 const DEFAULT_IMAGE = "ai-delivery-workbench-sandbox:node-22.23.1";
 const SANDBOX_BUILD_CONTEXT = resolve(import.meta.dirname, "../../ops/sandbox");
 const CONTAINER_USER = "65532:65532";
+const PROJECT_LABEL = "ai-delivery-workbench.project=local-sandbox-v1";
 
 function safeName(value: string): string {
   return value
@@ -26,11 +27,12 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
 
   constructor(private readonly image = DEFAULT_IMAGE) {}
 
-  async inspect(): Promise<LocalDockerAvailability> {
+  async inspect(signal?: AbortSignal): Promise<LocalDockerAvailability> {
     const version = await runProcess({
       executable: "docker",
       args: ["version", "--format", "{{.Client.Version}}|{{.Server.Version}}"],
       timeoutMs: 10_000,
+      signal,
     });
     if (version.exitCode !== 0) {
       return {
@@ -54,6 +56,7 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
         "{{if .RepoDigests}}{{index .RepoDigests 0}}{{else}}{{.Id}}{{end}}",
       ],
       timeoutMs: 10_000,
+      signal,
     });
     const imageDigest = image.exitCode === 0 ? normalizeCapturedOutput(image.stdout) : null;
     return {
@@ -70,14 +73,15 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
     };
   }
 
-  async prepare(): Promise<LocalDockerAvailability> {
-    const current = await this.inspect();
+  async prepare(signal?: AbortSignal): Promise<LocalDockerAvailability> {
+    const current = await this.inspect(signal);
     if (current.available || current.dockerClientVersion === null) return current;
     const build = await runProcess({
       executable: "docker",
       args: ["build", "--tag", this.image, SANDBOX_BUILD_CONTEXT],
       timeoutMs: 180_000,
       maxOutputBytes: 2 * 1024 * 1024,
+      signal,
     });
     if (build.exitCode !== 0) {
       return {
@@ -85,17 +89,19 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
         detail: `Docker image build failed: ${normalizeCapturedOutput(build.stderr || build.stdout)}`,
       };
     }
-    return this.inspect();
+    return this.inspect(signal);
   }
 
   async execute(request: SandboxExecutionRequest): Promise<SandboxExecutionResult> {
-    const availability = await this.inspect();
+    request.signal?.throwIfAborted();
+    const availability = await this.inspect(request.signal);
     if (!availability.available || !availability.imageDigest) {
       throw new Error(`Local Docker sandbox unavailable: ${availability.detail}`);
     }
     const receipts: SandboxCommandReceipt[] = [];
     const cleanupAttempts: string[] = [];
     for (const command of request.commands) {
+      request.signal?.throwIfAborted();
       const containerName = safeName(`adw-${request.runId}-${request.phase}-${command.id}`);
       const startedAt = new Date().toISOString();
       const dockerArguments = [
@@ -105,6 +111,8 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
         containerName,
         "--label",
         `ai-delivery-workbench.run=${request.runId}`,
+        "--label",
+        PROJECT_LABEL,
         "--network",
         "none",
         "--user",
@@ -140,8 +148,9 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
         args: dockerArguments,
         timeoutMs: request.limits.timeoutMs,
         maxOutputBytes: 2 * 1024 * 1024,
+        signal: request.signal,
       });
-      if (result.timedOut) {
+      if (result.timedOut || result.aborted) {
         const cleanup = await runProcess({
           executable: "docker",
           args: ["rm", "--force", containerName],
@@ -168,6 +177,7 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
         stderrSha256: sha256Bytes(stderr),
         outputTruncated: result.outputTruncated,
       });
+      request.signal?.throwIfAborted();
     }
     return {
       provider: "LOCAL_DOCKER",
@@ -182,12 +192,25 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
     };
   }
 
-  async cleanup(runId: string): Promise<readonly string[]> {
+  async cleanup(runId: string, signal?: AbortSignal): Promise<readonly string[]> {
+    if (!/^sandbox-[a-z0-9-]+$/.test(runId)) throw new Error("Unsafe sandbox cleanup run ID.");
     const listed = await runProcess({
       executable: "docker",
-      args: ["ps", "--all", "--quiet", "--filter", `label=ai-delivery-workbench.run=${runId}`],
+      args: [
+        "ps",
+        "--all",
+        "--quiet",
+        "--filter",
+        `label=ai-delivery-workbench.run=${runId}`,
+        "--filter",
+        `label=${PROJECT_LABEL}`,
+      ],
       timeoutMs: 10_000,
+      signal,
     });
+    if (listed.exitCode !== 0 || listed.aborted) {
+      throw new Error("Docker sandbox cleanup could not list exact owned containers.");
+    }
     const ids = normalizeCapturedOutput(listed.stdout)
       .split("\n")
       .filter((id) => id.length > 0);
@@ -197,8 +220,12 @@ export class LocalDockerSandboxProvider implements SandboxProvider {
         executable: "docker",
         args: ["rm", "--force", id],
         timeoutMs: 10_000,
+        signal,
       });
       attempts.push(`${id}:${removed.exitCode === 0 ? "removed" : "remove-failed"}`);
+      if (removed.exitCode !== 0 || removed.aborted) {
+        throw new Error("Docker sandbox cleanup could not remove an exact owned container.");
+      }
     }
     return attempts;
   }

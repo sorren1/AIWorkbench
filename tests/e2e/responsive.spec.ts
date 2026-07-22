@@ -2,19 +2,24 @@ import { expect, test } from "./fixtures";
 
 const publicWidths = [320, 375, 768, 1024, 1280, 1440] as const;
 const publicPages = [
-  { path: "/", heading: "Tyler Wilhite" },
-  { path: "/workbench/", heading: "AI Delivery Workbench" },
+  { name: "portfolio home", path: "/", heading: "Tyler Wilhite" },
+  { name: "workbench case study", path: "/workbench/", heading: "AI Delivery Workbench" },
   {
+    name: "governance article",
     path: "/workbench/writing/governing-ai-assisted-delivery/",
     heading: "Governing AI-assisted delivery",
   },
-  { path: "/404.html", heading: "This page is outside the expected change surface." },
+  {
+    name: "not-found page",
+    path: "/404.html",
+    heading: "This page is outside the expected change surface.",
+  },
 ] as const;
 
 for (const width of publicWidths) {
-  test(`public pages have no horizontal overflow at ${width}px`, async ({ page }) => {
-    await page.setViewportSize({ width, height: 900 });
-    for (const publicPage of publicPages) {
+  for (const publicPage of publicPages) {
+    test(`${publicPage.name} has no horizontal overflow at ${width}px`, async ({ page }) => {
+      await page.setViewportSize({ width, height: 900 });
       await page.goto(publicPage.path);
       await expect(page.getByRole("heading", { level: 1, name: publicPage.heading })).toBeVisible();
       const dimensions = await page.evaluate(() => ({
@@ -22,8 +27,8 @@ for (const width of publicWidths) {
         scrollWidth: document.documentElement.scrollWidth,
       }));
       expect(dimensions.scrollWidth).toBeLessThanOrEqual(dimensions.clientWidth);
-    }
-  });
+    });
+  }
 }
 
 for (const width of [320, 375, 768] as const) {

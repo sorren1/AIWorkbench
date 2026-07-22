@@ -17,7 +17,7 @@ describe("public release version", () => {
     const packageLock = readJson("package-lock.json");
     const manifest = readJson("public/site.webmanifest");
     const caseStudy = readFileSync(resolve(root, "index.html"), "utf8");
-    const version = "1.0.8";
+    const version = "1.0.9";
 
     expect(packageJson.version).toBe(version);
     expect(packageLock.version).toBe(version);

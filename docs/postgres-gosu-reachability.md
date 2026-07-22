@@ -5,6 +5,19 @@
 - Image: `postgres:17.10-alpine3.24@sha256:742f40ea20b9ff2ff31db5458d127452988a2164df9e17441e191f3b72252193`
 - Scanner: Trivy 0.70.0 with the current database used by the release gate
 
+## 2026-07-21 pre-expiry review attempt
+
+The required fresh Trivy scan could not run in the available sandbox: Docker CLI 29.5.3 was installed, but the Docker Engine named pipe rejected access, no Linux-container alternative was installed or reachable, and direct registry network access was unavailable. The supply-chain command failed closed. It did not refresh an advisory database, produce a scanner/database date, or create evidence that can renew an exception.
+
+No suppression was removed, renewed, widened, or otherwise changed. `SUP-2026-001` through `SUP-2026-015` retain their original 2026-08-15 expiry. Their provisional classification remains **present but unreachable in the exact configured profile**, but that classification is not accepted as a completed renewal until the pinned Trivy image scans the exact runtime image with a current database and every selector matches independently. Complete that run no later than 2026-08-14 so an environmental failure cannot carry an exception past expiry.
+
+Authoritative upstream state was rechecked on 2026-07-21:
+
+- Docker Hub still mapped `17.10-alpine3.24` to the configured [index digest](https://hub.docker.com/layers/library/postgres/17.10-alpine3.24/images/sha256-1902911d4ca21b4ec0c6b64f08f6c62d630be0fbc7e1055e8e99a87322dc2f18), so there was no compatible trusted digest update to adopt.
+- The Docker Official Images source-of-truth mapped that tag to PostgreSQL packaging commit [`4f9ced003ba58a854656ba150d146243d27ae3ac`](https://github.com/docker-library/postgres/tree/4f9ced003ba58a854656ba150d146243d27ae3ac/17/alpine3.24). Its [Dockerfile](https://github.com/docker-library/postgres/blob/4f9ced003ba58a854656ba150d146243d27ae3ac/17/alpine3.24/Dockerfile) still installs signed `gosu` 1.19, whose latest release remains built with Go 1.24.6.
+- The exact upstream [entrypoint](https://github.com/docker-library/postgres/blob/4f9ced003ba58a854656ba150d146243d27ae3ac/docker-entrypoint.sh) still invokes `gosu` only when `id -u` is zero. This repository still fixes the service identity at `70:70`, so the binary is not executed in the reviewed profile.
+- The `gosu` maintainer's [security policy](https://github.com/tianon/gosu/blob/40506998e34a7a679e6dae41374c1b7aa37eb73f/SECURITY.md) requires symbol-aware `govulncheck` analysis before treating embedded Go-library version findings as applicable. That is supporting upstream context, not a substitute for this repository's required exact-image Trivy evidence.
+
 ## Observed scope
 
 The exact Docker Official Image has no HIGH or CRITICAL Alpine or PostgreSQL package finding. Trivy reports one CRITICAL and fourteen HIGH Go-standard-library findings only in `/usr/local/bin/gosu`; the embedded Go standard library is `v1.24.6`. The exact CVE IDs are recorded as individual entries in `security/suppressions.json`, so a new CVE, package, path, or image digest remains unsuppressed and blocks release.

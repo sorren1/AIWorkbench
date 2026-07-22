@@ -1,6 +1,6 @@
 {
   "name": "ai-delivery-workbench",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "private": true,
   "type": "module",
   "engines": {
@@ -39,6 +39,8 @@
     "performance:budgets": "tsx scripts/check-performance-budgets.ts",
     "performance:budgets:record": "tsx scripts/check-performance-budgets.ts --record",
     "performance:audit": "tsx scripts/run-lighthouse.ts",
+    "post-deployment:verify": "tsx scripts/post-deployment/run.ts",
+    "post-deployment:evidence:validate": "tsx scripts/post-deployment/check.ts --require-hosted",
     "model-gateway:up": "docker compose -f ops/model-gateway/compose.yaml up -d --wait",
     "model-gateway:down": "docker compose -f ops/model-gateway/compose.yaml down",
     "demo:model-gateway": "tsx tools/model-gateway/cli.ts run",
@@ -46,6 +48,7 @@
     "demo:model-gateway:cleanup": "tsx tools/model-gateway/cli.ts cleanup --profile live",
     "demo:sandbox": "tsx tools/local-sandbox/cli.ts run",
     "demo:sandbox:e2b": "tsx tools/local-sandbox/cli.ts run --provider e2b",
+    "demo:sandbox:recover": "tsx tools/local-sandbox/cli.ts recover",
     "demo:sandbox:failure": "tsx tools/local-sandbox/cli.ts run --failed-validation",
     "sandbox:evidence:validate": "tsx tools/local-sandbox/cli.ts validate",
     "demo:approval:start": "tsx tools/demo-sandbox/cli.ts start",
@@ -104,6 +107,8 @@
     "vitest": "4.1.10"
   },
   "overrides": {
+    "@hono/node-server": "2.0.11",
+    "fast-uri": "3.1.4",
     "tmp": "0.2.7",
     "uuid": "11.1.1"
   }

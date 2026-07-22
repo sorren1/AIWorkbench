@@ -53,7 +53,7 @@ The credential alias is deterministic and non-personal:
 ai-delivery-workbench--agent-implementation--<run-id>--<identity-digest>
 ```
 
-Before vending, an existing local lease with the same alias is blocked. The replacement key is bounded to model aliases, a maximum spend, and a 15-minute lifetime. Revocation occurs before evidence finalization, and `finally` retries revocation on errors. `.workbench/model-gateway/leases/` exists only for crash recovery and is ignored by Git.
+Before vending, an existing local lease with the same alias is blocked. The replacement key is bounded to model aliases, a maximum spend, and a 15-minute lifetime. Revocation occurs before evidence finalization, and `finally` retries revocation on errors. SIGINT/SIGTERM cancellation reaches catalog, vending, invocation, revocation, and cleanup requests. The CLI registers exact-run cleanup before acquisition, makes concurrent revocation single-flight, bounds each cleanup operation to 10 seconds, and rejects evidence when cleanup fails. `.workbench/model-gateway/leases/` exists only for crash recovery and is ignored by Git; lease expiry is defense in depth rather than proof of cleanup.
 
 ## Budgets and accounting
 

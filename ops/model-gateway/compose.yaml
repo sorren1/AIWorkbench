@@ -32,7 +32,7 @@ services:
       context: .
       dockerfile: Dockerfile.litellm
       pull: true
-    image: ai-delivery-workbench-litellm:v1.94.0-dev.3-database-mcp1.28.1
+    image: ai-delivery-workbench-litellm:v1.94.0-dev.3-database-mcp1.28.1-pyasn1-0.6.4
     user: "65534:65534"
     entrypoint:
       - /bin/sh

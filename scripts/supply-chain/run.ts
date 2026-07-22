@@ -23,6 +23,7 @@ import {
   analyzeSandboxDockerfile,
 } from "./containerPolicy";
 import { createSarif, sanitizeSarif, sarifFindings, sha256File, writeJson } from "./reporting";
+import { normalizeSuppressionPath, validateSuppressionPolicy } from "./suppressionPolicy";
 import { versionAtLeast } from "./versionPolicy";
 import {
   lintableTrackedSourcePaths,
@@ -107,22 +108,18 @@ async function readJson(path: string): Promise<unknown> {
   return JSON.parse(await readFile(path, "utf8"));
 }
 
-function normalizePath(path: string): string {
-  return path.replaceAll("\\", "/").replace(/^file:\/\//, "");
-}
-
 function isSuppressed(
   entries: readonly SupplyChainSuppression[],
   scanner: SupplyChainSuppression["scanner"],
   finding: Pick<SarifFinding, "ruleId" | "path">,
   matchedSuppressionIds: Set<string>,
 ): boolean {
-  const path = normalizePath(finding.path);
+  const path = normalizeSuppressionPath(finding.path);
   const matching = entries.filter(
     (entry) =>
       entry.scanner === scanner &&
       entry.ruleId === finding.ruleId &&
-      normalizePath(entry.path) === path,
+      normalizeSuppressionPath(entry.path) === path,
   );
   for (const entry of matching) matchedSuppressionIds.add(entry.id);
   return matching.length > 0;
@@ -152,6 +149,21 @@ async function dockerRun(
     image,
     ...args,
   ]);
+}
+
+async function requireLinuxDockerEngine(): Promise<void> {
+  const result = await command("docker", ["info", "--format", "{{.OSType}}|{{.Architecture}}"]);
+  if (result.exitCode !== 0) {
+    throw new Error(
+      "Docker Engine is unavailable; supply-chain evidence requires Docker with Linux containers.",
+    );
+  }
+  const [operatingSystem, architecture] = result.stdout.trim().split("|");
+  if (operatingSystem !== "linux" || !architecture) {
+    throw new Error(
+      `Supply-chain evidence requires Docker with Linux containers; detected ${operatingSystem || "unknown"}/${architecture || "unknown"}.`,
+    );
+  }
 }
 
 function hostUserDockerArgs(): readonly string[] {
@@ -240,7 +252,7 @@ async function runEslint(
       ruleId: message.ruleId ?? "eslint/configuration",
       level: message.severity >= 2 ? ("error" as const) : ("warning" as const),
       message: message.message,
-      path: normalizePath(relative(root, file.filePath)),
+      path: normalizeSuppressionPath(relative(root, file.filePath)),
       ...(message.line ? { line: message.line } : {}),
       ...(message.column ? { column: message.column } : {}),
     })),
@@ -812,22 +824,11 @@ async function main(): Promise<void> {
   const suppressionDocument = suppressionSchema.parse(
     await readJson(resolve(root, "security/suppressions.json")),
   );
-  const suppressionIds = new Set<string>();
-  const suppressionSelectors = new Set<string>();
   const matchedSuppressionIds = new Set<string>();
   const today = new Date().toISOString().slice(0, 10);
-  let expired = 0;
-  for (const entry of suppressionDocument.entries) {
-    if (suppressionIds.has(entry.id)) throw new Error(`Duplicate suppression ID: ${entry.id}`);
-    suppressionIds.add(entry.id);
-    const selector = `${entry.scanner}\0${entry.ruleId}\0${normalizePath(entry.path)}`;
-    if (suppressionSelectors.has(selector)) {
-      throw new Error(`Duplicate suppression selector: ${entry.scanner}/${entry.ruleId}`);
-    }
-    suppressionSelectors.add(selector);
-    if (entry.expiresOn < today || entry.reviewOn > entry.expiresOn) expired += 1;
-  }
-  if (expired > 0) throw new Error("One or more supply-chain suppressions are expired or invalid.");
+  validateSuppressionPolicy(suppressionDocument.entries, today);
+  const expired = 0;
+  await requireLinuxDockerEngine();
 
   const paths = await trackedSourcePaths(root);
   const sourceTreeDigest = await trackedSourceDigest(
