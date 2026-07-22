@@ -17,7 +17,8 @@ export class OfflineModelGateway implements ModelGateway {
   readonly kind = "OFFLINE_MOCK" as const;
   private readonly leases = new Map<string, ScopedCredentialLease>();
 
-  async fetchCatalog(): Promise<ModelCatalogSnapshot> {
+  async fetchCatalog(signal?: AbortSignal): Promise<ModelCatalogSnapshot> {
+    signal?.throwIfAborted();
     return Promise.resolve({
       schemaVersion: 1,
       classification: "SANITIZED_LOCAL_GATEWAY_CATALOG",
@@ -46,7 +47,9 @@ export class OfflineModelGateway implements ModelGateway {
 
   async reconcileScopedCredential(
     request: ScopedCredentialRequest,
+    signal?: AbortSignal,
   ): Promise<ScopedCredentialLease> {
+    signal?.throwIfAborted();
     const alias = scopedCredentialAlias(request);
     for (const [leaseId, lease] of this.leases) {
       if (lease.alias === alias) this.leases.delete(leaseId);
@@ -64,10 +67,15 @@ export class OfflineModelGateway implements ModelGateway {
       expiresAt: new Date(Date.parse(createdAt) + request.durationSeconds * 1000).toISOString(),
     };
     this.leases.set(lease.leaseId, lease);
+    if (signal?.aborted) {
+      this.leases.delete(lease.leaseId);
+      signal.throwIfAborted();
+    }
     return Promise.resolve(lease);
   }
 
   async callModel(request: ModelCallRequest): Promise<ModelCallReceipt> {
+    request.signal?.throwIfAborted();
     if (!this.leases.has(request.lease.leaseId)) throw new Error("Credential lease is inactive.");
     if (!request.lease.allowedModelIds.includes(request.modelId)) {
       throw new Error("Credential lease denies the requested model.");
@@ -89,12 +97,17 @@ export class OfflineModelGateway implements ModelGateway {
     });
   }
 
-  async revokeScopedCredential(lease: ScopedCredentialLease): Promise<void> {
+  async revokeScopedCredential(lease: ScopedCredentialLease, signal?: AbortSignal): Promise<void> {
+    signal?.throwIfAborted();
     this.leases.delete(lease.leaseId);
     return Promise.resolve();
   }
 
-  async cleanupInterruptedRuns(runId?: string): Promise<CredentialCleanupResult> {
+  async cleanupInterruptedRuns(
+    runId?: string,
+    signal?: AbortSignal,
+  ): Promise<CredentialCleanupResult> {
+    signal?.throwIfAborted();
     const matching = [...this.leases.values()].filter((lease) => !runId || lease.runId === runId);
     for (const lease of matching) this.leases.delete(lease.leaseId);
     return Promise.resolve({

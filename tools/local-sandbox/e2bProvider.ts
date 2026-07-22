@@ -209,6 +209,7 @@ async function runCommand(
   request: SandboxExecutionRequest,
   command: SandboxExecutionRequest["commands"][number],
 ): Promise<SandboxCommandReceipt> {
+  request.signal?.throwIfAborted();
   const startedAt = new Date().toISOString();
   const started = performance.now();
   let stdout = "";
@@ -237,6 +238,7 @@ async function runCommand(
     exitCode = result.exitCode;
     if (stdout.length === 0) stdout = result.stdout;
     if (stderr.length === 0) stderr = result.stderr;
+    request.signal?.throwIfAborted();
   } catch (error) {
     if (error instanceof CommandExitError) {
       exitCode = error.exitCode;
@@ -248,6 +250,7 @@ async function runCommand(
       throw error;
     }
   }
+  request.signal?.throwIfAborted();
   stdout = normalizeCapturedOutput(stdout);
   stderr = normalizeCapturedOutput(stderr);
   return {
@@ -291,6 +294,8 @@ async function verifyNetworkDenied(sandbox: E2BSandboxHandle, timeoutMs: number)
 export class E2BSandboxProvider implements SandboxProvider {
   readonly kind = "E2B" as const;
   private readonly activeByRun = new Map<string, Set<string>>();
+  private readonly releasePromises = new Map<string, Promise<boolean>>();
+  private readonly releasedIds = new Set<string>();
 
   constructor(
     private readonly factory: E2BSandboxFactory = defaultFactory(),
@@ -298,7 +303,8 @@ export class E2BSandboxProvider implements SandboxProvider {
     private readonly apiKeyConfigured = () => Boolean(process.env.E2B_API_KEY),
   ) {}
 
-  inspect(): Promise<SandboxAvailability> {
+  inspect(signal?: AbortSignal): Promise<SandboxAvailability> {
+    signal?.throwIfAborted();
     const configured = this.apiKeyConfigured();
     return Promise.resolve({
       provider: "E2B",
@@ -312,11 +318,26 @@ export class E2BSandboxProvider implements SandboxProvider {
     });
   }
 
-  prepare(): Promise<SandboxAvailability> {
-    return this.inspect();
+  prepare(signal?: AbortSignal): Promise<SandboxAvailability> {
+    return this.inspect(signal);
+  }
+
+  private releaseOnce(id: string, release: () => Promise<boolean>): Promise<boolean> {
+    if (this.releasedIds.has(id)) return Promise.resolve(false);
+    const current = this.releasePromises.get(id);
+    if (current) return current;
+    const pending = release()
+      .then((released) => {
+        this.releasedIds.add(id);
+        return released;
+      })
+      .finally(() => this.releasePromises.delete(id));
+    this.releasePromises.set(id, pending);
+    return pending;
   }
 
   async execute(request: SandboxExecutionRequest): Promise<E2BExecutionResult> {
+    request.signal?.throwIfAborted();
     if (!this.apiKeyConfigured()) {
       throw new Error(
         "E2B provider requires E2B_API_KEY. Local Docker remains the default provider.",
@@ -362,13 +383,19 @@ export class E2BSandboxProvider implements SandboxProvider {
     let receipts: SandboxCommandReceipt[] = [];
     let remote: readonly { readonly path: string; readonly sha256: string }[];
     try {
+      request.signal?.throwIfAborted();
       await sandbox.files.writeFiles(remoteFiles);
+      request.signal?.throwIfAborted();
       await verifyNetworkDenied(sandbox, request.limits.timeoutMs);
+      request.signal?.throwIfAborted();
       info = await sandbox.getInfo();
       for (const command of request.commands) {
+        request.signal?.throwIfAborted();
         receipts = [...receipts, await runCommand(sandbox, request, command)];
       }
+      request.signal?.throwIfAborted();
       remote = await remoteSnapshot(sandbox);
+      request.signal?.throwIfAborted();
       const changed = changedRemoteFiles(request.uploads, remote);
       if (changed.length > 0) {
         throw new Error(`E2B remote workspace changed unexpectedly: ${changed.join(", ")}`);
@@ -376,14 +403,16 @@ export class E2BSandboxProvider implements SandboxProvider {
     } finally {
       let killConfirmed: boolean;
       try {
-        const killed = await sandbox.kill();
+        const killed = await this.releaseOnce(sandbox.sandboxId, () => sandbox.kill());
         killConfirmed = killed;
         cleanupAttempts.push(`${sandbox.sandboxId}:${killed ? "killed" : "already-absent"}`);
       } catch (error) {
         cleanupAttempts.push(
           `${sandbox.sandboxId}:kill-error:${error instanceof Error ? error.message : "unknown"}`,
         );
-        const fallback = await this.factory.killById(sandbox.sandboxId).catch(() => false);
+        const fallback = await this.releaseOnce(sandbox.sandboxId, () =>
+          this.factory.killById(sandbox.sandboxId),
+        ).catch(() => false);
         killConfirmed = fallback;
         cleanupAttempts.push(`${sandbox.sandboxId}:fallback-${fallback ? "killed" : "failed"}`);
       }
@@ -437,20 +466,18 @@ export class E2BSandboxProvider implements SandboxProvider {
     };
   }
 
-  async cleanup(runId: string): Promise<readonly string[]> {
+  async cleanup(runId: string, signal?: AbortSignal): Promise<readonly string[]> {
+    if (!/^sandbox-[a-z0-9-]+$/.test(runId)) throw new Error("Unsafe E2B cleanup run ID.");
+    signal?.throwIfAborted();
     const known = this.activeByRun.get(runId) ?? new Set<string>();
     const attempts: string[] = [];
-    const discovered = await this.factory.listByRunId(runId).catch((error: unknown) => {
-      attempts.push(
-        `discovery-error:${error instanceof Error ? error.message : "unknown cleanup error"}`,
-      );
-      return [];
-    });
+    const discovered = await this.factory.listByRunId(runId);
     const ids = [...new Set([...known, ...discovered])].sort();
     for (const id of ids) {
-      const killed = await this.factory.killById(id).catch(() => false);
+      signal?.throwIfAborted();
+      const killed = await this.releaseOnce(id, () => this.factory.killById(id));
       attempts.push(`${id}:${killed ? "killed" : "already-absent-or-kill-failed"}`);
-      if (killed) known.delete(id);
+      known.delete(id);
     }
     if (known.size === 0) this.activeByRun.delete(runId);
     return attempts;

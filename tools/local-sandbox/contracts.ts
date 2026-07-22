@@ -44,6 +44,7 @@ export type SandboxExecutionRequest = {
   readonly uploads: readonly SandboxUpload[];
   readonly commands: readonly SandboxCommand[];
   readonly limits: SandboxLimits;
+  readonly signal?: AbortSignal;
 };
 
 export type LocalDockerExecutionResult = {
@@ -118,8 +119,8 @@ export type SandboxAvailability = LocalDockerAvailability | E2BAvailability;
  */
 export type SandboxProvider = {
   readonly kind: SandboxProviderKind;
-  inspect(): Promise<SandboxAvailability>;
-  prepare(): Promise<SandboxAvailability>;
+  inspect(signal?: AbortSignal): Promise<SandboxAvailability>;
+  prepare(signal?: AbortSignal): Promise<SandboxAvailability>;
   execute(request: SandboxExecutionRequest): Promise<SandboxExecutionResult>;
-  cleanup(runId: string): Promise<readonly string[]>;
+  cleanup(runId: string, signal?: AbortSignal): Promise<readonly string[]>;
 };

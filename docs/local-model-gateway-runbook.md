@@ -83,7 +83,9 @@ The CLI accepts no visitor prompt or arbitrary model ID. Its request is a reposi
 
 ## 5. Cleanup and shutdown
 
-The runner blocks its scoped credential in `finally`. After an interruption, retry every retained lease before stopping the gateway:
+The CLI handles SIGINT and SIGTERM at its boundary, stops new calls, propagates cancellation through the runner and adapter, and starts one idempotent cleanup pass. Each cleanup operation is limited to 10 seconds. Interrupted exits use 130 for SIGINT and 143 for SIGTERM; a cleanup failure is always non-zero. The runner blocks its scoped credential before evidence finalization and retries in `finally` as defense in depth.
+
+After an interruption, retry every retained lease before stopping the gateway:
 
 ```powershell
 npm run demo:model-gateway:cleanup
@@ -96,7 +98,7 @@ Limit cleanup to one run when investigating another retained lease:
 npm run demo:model-gateway:cleanup -- --run-id reviewed-local-run
 ```
 
-The cleanup summary contains aliases and counts, never key values. A nonzero `failed` count produces a nonzero exit and leaves the lease file for another retry. Keep the gateway and master credential available until cleanup succeeds.
+The cleanup summary contains aliases and counts, never key values. Cleanup reads only validated lease files under `.workbench/model-gateway/leases/`; an exact `--run-id` limits revocation further. Concurrent or repeated revocation for the same lease is single-flight. A nonzero `failed` count produces a nonzero exit and leaves the lease file for another retry. Lease expiry remains a backstop, not successful cleanup evidence. Keep the gateway and master credential available until cleanup succeeds.
 
 To destroy the local LiteLLM database after successful cleanup, explicitly run:
 
@@ -115,6 +117,7 @@ After the stack stops, delete the five materialized files under `.workbench/mode
 - Retryable primary failure: only the next policy-declared alias may run; inspect the fallback span.
 - Token/cost/time threshold exceeded: run stops, trace records the dimension, and cleanup still runs.
 - Revocation failure: evidence is not finalized; retain the lease file and run cleanup again.
+- Interrupted cleanup or cleanup timeout: the command exits non-zero; keep the loopback gateway available and rerun exact-run cleanup until `failed` is zero.
 - Spend-log retention: prompt/response content is disabled; accounting metadata is retained for at most seven days with daily cleanup. Provider-side data retention and regional handling still follow the configured provider's terms.
 
 Never paste keys into issue text, prompts, command arguments, screenshots, logs, evidence, or the browser UI.

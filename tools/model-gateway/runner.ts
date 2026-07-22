@@ -2,6 +2,7 @@ import type { Span } from "@opentelemetry/api";
 
 import type { ModelPolicy, ModelTask } from "../../src/demo/control-plane/registry/contracts";
 import type { AgentCard } from "../../src/demo/control-plane/registry/contracts";
+import { CleanupLifecycle } from "../lifecycle";
 import {
   accountingBudgetUsage,
   BudgetStopError,
@@ -34,6 +35,10 @@ export type GatewayRunOptions = {
   readonly sourceCommit: string;
   readonly generatedAt?: string;
   readonly telemetry?: ModelGatewayTelemetry;
+  readonly lifecycle?: CleanupLifecycle;
+  readonly onLifecycleStage?: (
+    stage: "resource-setup" | "active-execution" | "evidence-finalization",
+  ) => Promise<void> | void;
 };
 
 export type GatewayRunResult = {
@@ -81,9 +86,11 @@ async function routedCall(input: {
   readonly telemetry: ModelGatewayTelemetry;
   readonly budget: ExecutionBudgetTracker;
   readonly accountant: ProviderNeutralUsageAccountant;
+  readonly signal: AbortSignal;
 }): Promise<RoutedCall> {
   let lastError: unknown = new Error("No model candidate was configured.");
   for (const [index, modelId] of input.candidates.entries()) {
+    input.signal.throwIfAborted();
     input.budget.beforeToolCall();
     const span = input.telemetry.startSpan("model.call", input.parent, {
       "delivery.model.policy.id": input.policy.id,
@@ -107,6 +114,7 @@ async function routedCall(input: {
         maximumOutputTokens: input.policy.maximumOutputTokens,
         temperature: input.policy.temperature,
         timeoutMs: input.policy.maximumLatencyMs,
+        signal: input.signal,
       });
       input.accountant.record({
         stage: "implement",
@@ -145,6 +153,8 @@ async function routedCall(input: {
 
 export async function runModelGateway(options: GatewayRunOptions): Promise<GatewayRunResult> {
   const runId = safeRunId(options.runId);
+  const lifecycle = options.lifecycle ?? new CleanupLifecycle();
+  lifecycle.throwIfAborted();
   const generatedAt = options.generatedAt ?? new Date().toISOString();
   assertRunnableModelPolicy(options.policy, "implement", "CODE_CHANGE", options.profile);
   const credentialRequest: ScopedCredentialRequest = {
@@ -189,14 +199,37 @@ export async function runModelGateway(options: GatewayRunOptions): Promise<Gatew
     telemetry.budgetEvent(runSpan, event),
   );
   const accountant = new ProviderNeutralUsageAccountant();
+  let markAcquisitionReady = (): void => undefined;
+  const acquisitionReady = new Promise<void>((resolveReady) => {
+    markAcquisitionReady = resolveReady;
+  });
+  lifecycle.register({
+    name: `model-gateway-run:${runId}`,
+    run: async (signal) => {
+      await acquisitionReady;
+      const result = await options.gateway.cleanupInterruptedRuns(runId, signal);
+      if (result.failed > 0) throw new Error("Scoped credential cleanup failed.");
+    },
+  });
   let lease: ScopedCredentialLease | null = null;
   let revoked = false;
   let stageSpan: Span | null = null;
   let agentSpan: Span | null = null;
   try {
-    const catalog = await options.gateway.fetchCatalog();
-    ensureCatalogAllowsPolicy(catalog, options.policy);
-    lease = await options.gateway.reconcileScopedCredential(credentialRequest);
+    const acquired = await (async () => {
+      const snapshot = await options.gateway.fetchCatalog(lifecycle.signal);
+      ensureCatalogAllowsPolicy(snapshot, options.policy);
+      lifecycle.throwIfAborted();
+      const acquiredLease = await options.gateway.reconcileScopedCredential(
+        credentialRequest,
+        lifecycle.signal,
+      );
+      return { catalog: snapshot, lease: acquiredLease };
+    })().finally(markAcquisitionReady);
+    const catalog = acquired.catalog;
+    lease = acquired.lease;
+    await options.onLifecycleStage?.("resource-setup");
+    lifecycle.throwIfAborted();
     stageSpan = telemetry.startSpan("delivery.stage", runSpan, {
       "delivery.run.id": runId,
       "delivery.stage.id": "implement",
@@ -207,6 +240,8 @@ export async function runModelGateway(options: GatewayRunOptions): Promise<Gatew
       "delivery.model.policy.id": options.policy.id,
       "delivery.credential.alias": lease.alias,
     });
+    await options.onLifecycleStage?.("active-execution");
+    lifecycle.throwIfAborted();
     const primary = await routedCall({
       gateway: options.gateway,
       lease,
@@ -217,6 +252,7 @@ export async function runModelGateway(options: GatewayRunOptions): Promise<Gatew
       telemetry,
       budget,
       accountant,
+      signal: lifecycle.signal,
     });
     const calls: RoutedCall[] = [primary];
     let independentReview: GatewayRunResult["independentReview"] = "NOT_REQUIRED";
@@ -237,12 +273,15 @@ export async function runModelGateway(options: GatewayRunOptions): Promise<Gatew
           telemetry,
           budget,
           accountant,
+          signal: lifecycle.signal,
         }),
       );
       independentReview = "EXERCISED";
     }
-    await options.gateway.revokeScopedCredential(lease);
+    await options.gateway.revokeScopedCredential(lease, lifecycle.signal);
     revoked = true;
+    await options.onLifecycleStage?.("evidence-finalization");
+    lifecycle.throwIfAborted();
     const finalizeSpan = telemetry.startSpan("evidence.finalize", agentSpan, {
       "delivery.evidence.classification": "LOCAL_SYNTHETIC_MODEL_GATEWAY_EVIDENCE",
       "delivery.credential.revoked": true,
@@ -336,6 +375,13 @@ export async function runModelGateway(options: GatewayRunOptions): Promise<Gatew
     telemetry.fail(runSpan, errorType(error));
     throw error;
   } finally {
-    if (lease && !revoked) await options.gateway.revokeScopedCredential(lease);
+    if (lease && !revoked) {
+      try {
+        await options.gateway.revokeScopedCredential(lease);
+      } catch {
+        // The registered exact-run cleanup retries and fails the command if the lease remains.
+      }
+    }
+    await lifecycle.cleanup();
   }
 }

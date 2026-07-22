@@ -87,9 +87,11 @@ The provider records CPU and memory only from E2B sandbox information. It does n
 
 ### Cleanup and evidence
 
-- Provider cleanup and recursive temporary-workspace removal run in `finally`.
-- E2B sandboxes carry project/run metadata. Cleanup kills the current instance, verifies that it is no longer running, and searches for tagged running or paused orphans. If the client process is terminated before `finally`, the two-minute `onTimeout: kill` lifecycle is the provider-side cost safeguard.
-- A timed-out Docker client triggers an explicit `docker rm --force`; final cleanup also removes any container carrying the run label.
+- The CLI handles SIGINT and SIGTERM through one lifecycle coordinator. The first signal aborts active work, stops later acquisition, and starts single-flight cleanup with a 10-second limit per cleanup operation; repeated signals cannot start a second cleanup. Interrupted exits use 130 for SIGINT and 143 for SIGTERM. Cleanup failures are non-zero.
+- Every run writes a validated ownership record before acquisition and uses only `.workbench/local-sandbox/workspaces/<run-id>`. Cleanup checks containment and rejects symbolic-link escapes before recursive removal. A provider cleanup failure retains the small ownership record but still removes the workspace.
+- `npm run demo:sandbox:recover -- --run-id <sandbox-run-id>` reads one exact record under `.workbench/local-sandbox/runs/`, selects its recorded provider, and is idempotent. It never scans the OS temp root, broad directories, arbitrary containers, or untagged E2B resources.
+- Provider cleanup and temporary-workspace removal still run in `finally` as defense in depth. E2B instance cleanup is single-flight, verifies inactivity, and searches only running or paused resources with the exact project/run metadata. Its two-minute `onTimeout: kill` lifecycle remains the provider-side cost safeguard.
+- A timed-out or aborted Docker client triggers an explicit `docker rm --force`; final cleanup filters on both the exact run label and the project ownership label. Docker `--rm` remains enabled.
 - Command stdout/stderr are bounded, normalized, and hashed. Output truncation prevents a run from passing.
 - JSON evidence schema v3 binds inputs, generated artifacts, context pack, registry/approval/budget references, repository trees, command receipts, tool versions, diff, cleanup result, a separate normalized OpenTelemetry-compatible trace artifact, and its own canonical SHA-256 digest.
 - Execution budgets are checked before the next tool/repair operation and around measured runtime boundaries. Stops emit a trace event, finalize failure evidence, clean up, and exit non-zero; failed evidence cannot replace the successful public pointer.
@@ -105,7 +107,7 @@ This slice is intentionally narrower than a production untrusted-code sandbox.
 - E2B service availability, billing, account policy, template contents, SDK behavior, and provider isolation remain external trust dependencies. A successful future live test would validate only this fixed synthetic slice at that point in time.
 - The release gate builds the declared Dockerfile, resolves the exact image ID, fails on unsuppressed Trivy high/critical findings, and generates a CycloneDX image SBOM. It does not verify an image signature or upstream build provenance.
 - Linux resource controls vary by Docker host. Evidence records the requested limits, not a claim that every kernel enforced them identically.
-- Host-side path validation cannot eliminate every time-of-check/time-of-use race against a malicious local account with write access. The owned fixture, temporary directory permissions, exact replacement, post-write checks, and disposable scope reduce the risk for this local demonstration.
+- Host-side path validation cannot eliminate every time-of-check/time-of-use race against a malicious local account with write access. The owned fixture, repo-contained gitignored workspace, exact ownership record, exact replacement, post-write checks, and disposable scope reduce the risk for this local demonstration.
 - The host controller applies the patch because the validation container's repository mount is deliberately read-only. Production systems handling untrusted generated patches would need a more isolated patch-application worker and stronger filesystem primitives.
 - Captured output is synthetic/public in this fixture. A future runner for real repositories would require redaction, secret isolation, retention controls, and an explicit data-classification policy before evidence could be published.
 - Local trace files are hash-bound public fixtures, not an encrypted, access-controlled, tamper-resistant, or production-retention telemetry store.

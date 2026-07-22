@@ -124,6 +124,7 @@ export class LiteLlmModelGateway implements ModelGateway {
   private readonly fetchImplementation: typeof fetch;
   private readonly now: () => Date;
   private lastCatalog: ModelCatalogSnapshot | null = null;
+  private readonly revocations = new Map<string, Promise<void>>();
 
   constructor(options: LiteLlmGatewayOptions) {
     if (options.masterKey.length < 16)
@@ -168,9 +169,12 @@ export class LiteLlmModelGateway implements ModelGateway {
     authorization: string,
     init: Omit<RequestInit, "headers" | "signal">,
     timeoutMs = 15_000,
+    signal?: AbortSignal,
   ): Promise<Response> {
+    signal?.throwIfAborted();
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), timeoutMs);
+    const requestSignal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
     try {
       const response = await this.fetchImplementation(`${this.baseUrl}${path}`, {
         ...init,
@@ -178,7 +182,7 @@ export class LiteLlmModelGateway implements ModelGateway {
           authorization: `Bearer ${authorization}`,
           "content-type": "application/json",
         },
-        signal: controller.signal,
+        signal: requestSignal,
       });
       if (!response.ok) {
         throw new ModelGatewayRequestError(
@@ -189,6 +193,7 @@ export class LiteLlmModelGateway implements ModelGateway {
       }
       return response;
     } catch (error) {
+      signal?.throwIfAborted();
       if (error instanceof ModelGatewayRequestError) throw error;
       throw new ModelGatewayRequestError(operation, null, true);
     } finally {
@@ -196,10 +201,17 @@ export class LiteLlmModelGateway implements ModelGateway {
     }
   }
 
-  async fetchCatalog(): Promise<ModelCatalogSnapshot> {
-    const response = await this.request("CATALOG", "/v1/model/info", this.masterKey, {
-      method: "GET",
-    });
+  async fetchCatalog(signal?: AbortSignal): Promise<ModelCatalogSnapshot> {
+    const response = await this.request(
+      "CATALOG",
+      "/v1/model/info",
+      this.masterKey,
+      {
+        method: "GET",
+      },
+      15_000,
+      signal,
+    );
     const body = object((await response.json()) as unknown);
     const rawEntries = Array.isArray(body?.data) ? body.data : [];
     const entries = rawEntries
@@ -217,39 +229,59 @@ export class LiteLlmModelGateway implements ModelGateway {
     return catalog;
   }
 
-  private async blockRawKey(rawKey: string): Promise<void> {
-    await this.request("REVOKE", "/key/block", this.masterKey, {
-      method: "POST",
-      body: JSON.stringify({ key: rawKey }),
-    });
+  private async blockRawKey(rawKey: string, signal?: AbortSignal): Promise<void> {
+    await this.request(
+      "REVOKE",
+      "/key/block",
+      this.masterKey,
+      {
+        method: "POST",
+        body: JSON.stringify({ key: rawKey }),
+      },
+      15_000,
+      signal,
+    );
   }
 
   async reconcileScopedCredential(
     request: ScopedCredentialRequest,
+    signal?: AbortSignal,
   ): Promise<ScopedCredentialLease> {
+    signal?.throwIfAborted();
     const alias = scopedCredentialAlias(request);
     const existing = await this.stateForAlias(alias);
     if (existing) {
-      await this.blockRawKey(existing.rawKey);
+      await this.blockRawKey(existing.rawKey, signal);
       await rm(this.statePath(alias), { force: true });
     }
-    const response = await this.request("VEND", "/key/generate", this.masterKey, {
-      method: "POST",
-      body: JSON.stringify({
-        key_alias: alias,
-        models: request.allowedModelIds,
-        max_budget: request.maximumCostUsd,
-        duration: `${request.durationSeconds}s`,
-        metadata: {
-          project_id: request.projectId,
-          agent_id: request.agentId,
-          run_id: request.runId,
-        },
-      }),
-    });
+    const response = await this.request(
+      "VEND",
+      "/key/generate",
+      this.masterKey,
+      {
+        method: "POST",
+        body: JSON.stringify({
+          key_alias: alias,
+          models: request.allowedModelIds,
+          max_budget: request.maximumCostUsd,
+          duration: `${request.durationSeconds}s`,
+          metadata: {
+            project_id: request.projectId,
+            agent_id: request.agentId,
+            run_id: request.runId,
+          },
+        }),
+      },
+      15_000,
+      signal,
+    );
     const body = object((await response.json()) as unknown);
     const rawKey = string(body?.key);
     if (!rawKey) throw new ModelGatewayRequestError("VEND", response.status, false);
+    if (signal?.aborted) {
+      await this.blockRawKey(rawKey);
+      signal.throwIfAborted();
+    }
     const createdAt = this.now();
     const lease: ScopedCredentialLease = {
       leaseId: randomUUID(),
@@ -272,14 +304,22 @@ export class LiteLlmModelGateway implements ModelGateway {
         },
         rawKey,
       });
+      if (signal?.aborted) {
+        const state = await this.stateForAlias(alias);
+        if (state) await this.revokeState(state);
+        signal.throwIfAborted();
+      }
     } catch (error) {
-      await this.blockRawKey(rawKey);
+      const state = await this.stateForAlias(alias);
+      if (state) await this.revokeState(state);
+      else await this.blockRawKey(rawKey);
       throw error;
     }
     return lease;
   }
 
   async callModel(request: ModelCallRequest): Promise<ModelCallReceipt> {
+    request.signal?.throwIfAborted();
     if (!request.lease.allowedModelIds.includes(request.modelId)) {
       throw new Error("Credential lease denies the requested model.");
     }
@@ -305,6 +345,7 @@ export class LiteLlmModelGateway implements ModelGateway {
         }),
       },
       request.timeoutMs,
+      request.signal,
     );
     const latencyMs = Math.max(0, Math.round(performance.now() - startedAt));
     const body = object((await response.json()) as unknown);
@@ -349,14 +390,32 @@ export class LiteLlmModelGateway implements ModelGateway {
     };
   }
 
-  async revokeScopedCredential(lease: ScopedCredentialLease): Promise<void> {
-    const state = await this.stateForAlias(lease.alias);
-    if (!state || state.lease.leaseId !== lease.leaseId) return;
-    await this.blockRawKey(state.rawKey);
-    await rm(this.statePath(lease.alias), { force: true });
+  private revokeState(state: LeaseState, signal?: AbortSignal): Promise<void> {
+    const current = this.revocations.get(state.lease.leaseId);
+    if (current) return current;
+    const pending = (async () => {
+      await this.blockRawKey(state.rawKey, signal);
+      const latest = await this.stateForAlias(state.lease.alias);
+      if (latest?.lease.leaseId === state.lease.leaseId) {
+        await rm(this.statePath(state.lease.alias), { force: true });
+      }
+    })().finally(() => this.revocations.delete(state.lease.leaseId));
+    this.revocations.set(state.lease.leaseId, pending);
+    return pending;
   }
 
-  async cleanupInterruptedRuns(runId?: string): Promise<CredentialCleanupResult> {
+  async revokeScopedCredential(lease: ScopedCredentialLease, signal?: AbortSignal): Promise<void> {
+    signal?.throwIfAborted();
+    const state = await this.stateForAlias(lease.alias);
+    if (!state || state.lease.leaseId !== lease.leaseId) return;
+    await this.revokeState(state, signal);
+  }
+
+  async cleanupInterruptedRuns(
+    runId?: string,
+    signal?: AbortSignal,
+  ): Promise<CredentialCleanupResult> {
+    signal?.throwIfAborted();
     const names = await readdir(this.stateRoot).catch(() => []);
     const candidates = await Promise.all(
       names
@@ -383,10 +442,11 @@ export class LiteLlmModelGateway implements ModelGateway {
     let revoked = 0;
     for (const state of states) {
       try {
-        await this.blockRawKey(state.rawKey);
-        await rm(this.statePath(state.lease.alias), { force: true });
+        signal?.throwIfAborted();
+        await this.revokeState(state, signal);
         revoked += 1;
       } catch {
+        signal?.throwIfAborted();
         // Retain failed lease files so a later cleanup can retry without exposing the key.
       }
     }

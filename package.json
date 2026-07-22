@@ -46,6 +46,7 @@
     "demo:model-gateway:cleanup": "tsx tools/model-gateway/cli.ts cleanup --profile live",
     "demo:sandbox": "tsx tools/local-sandbox/cli.ts run",
     "demo:sandbox:e2b": "tsx tools/local-sandbox/cli.ts run --provider e2b",
+    "demo:sandbox:recover": "tsx tools/local-sandbox/cli.ts recover",
     "demo:sandbox:failure": "tsx tools/local-sandbox/cli.ts run --failed-validation",
     "sandbox:evidence:validate": "tsx tools/local-sandbox/cli.ts validate",
     "demo:approval:start": "tsx tools/demo-sandbox/cli.ts start",

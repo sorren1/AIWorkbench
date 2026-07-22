@@ -7,6 +7,7 @@ export type ProcessRequest = {
   readonly env?: NodeJS.ProcessEnv;
   readonly timeoutMs: number;
   readonly maxOutputBytes?: number;
+  readonly signal?: AbortSignal | undefined;
 };
 
 export type ProcessResult = {
@@ -16,6 +17,7 @@ export type ProcessResult = {
   readonly stdout: string;
   readonly stderr: string;
   readonly outputTruncated: boolean;
+  readonly aborted: boolean;
 };
 
 function appendBounded(current: string, chunk: Buffer, maximum: number): [string, boolean] {
@@ -25,6 +27,7 @@ function appendBounded(current: string, chunk: Buffer, maximum: number): [string
 }
 
 export async function runProcess(request: ProcessRequest): Promise<ProcessResult> {
+  request.signal?.throwIfAborted();
   const started = performance.now();
   const maximum = request.maxOutputBytes ?? 1024 * 1024;
   return new Promise((resolve) => {
@@ -32,6 +35,7 @@ export async function runProcess(request: ProcessRequest): Promise<ProcessResult
     let stderr = "";
     let outputTruncated = false;
     let timedOut = false;
+    let aborted = false;
     let settled = false;
     const child = spawn(request.executable, [...request.args], {
       cwd: request.cwd,
@@ -54,6 +58,7 @@ export async function runProcess(request: ProcessRequest): Promise<ProcessResult
       if (settled) return;
       settled = true;
       clearTimeout(timer);
+      request.signal?.removeEventListener("abort", onAbort);
       if (spawnError) stderr = `${stderr}${stderr ? "\n" : ""}${spawnError.message}`;
       resolve({
         exitCode,
@@ -62,12 +67,19 @@ export async function runProcess(request: ProcessRequest): Promise<ProcessResult
         stdout,
         stderr,
         outputTruncated,
+        aborted,
       });
     };
     const timer = setTimeout(() => {
       timedOut = true;
       child.kill("SIGKILL");
     }, request.timeoutMs);
+    const onAbort = (): void => {
+      aborted = true;
+      child.kill("SIGKILL");
+    };
+    request.signal?.addEventListener("abort", onAbort, { once: true });
+    if (request.signal?.aborted) onAbort();
     child.once("error", (error) => finish(null, error));
     child.once("close", (code) => finish(code));
   });

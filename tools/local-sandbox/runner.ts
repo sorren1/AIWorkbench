@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { execFile } from "node:child_process";
-import { access, cp, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
-import { tmpdir } from "node:os";
+import { cp, mkdir, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { promisify } from "node:util";
 
@@ -11,6 +10,7 @@ import { buildContextPack } from "../../src/demo/context/runtime";
 import { registrySnapshot } from "../../src/demo/control-plane/registry/generated";
 import { sha256Hex } from "../../src/demo/control-plane/registry/canonical";
 import { initializeToyRepository } from "../toy-repo-mcp/workspace";
+import { CleanupLifecycle } from "../lifecycle";
 import type {
   SandboxAvailability,
   SandboxExecutionResult,
@@ -45,6 +45,7 @@ import {
   snapshotRepository,
 } from "./security";
 import { DeliveryTelemetry, type TraceArtifactOutput } from "./telemetry";
+import { cleanupOwnedSandboxRun, createSandboxRecoveryState } from "./recovery";
 
 const execFileAsync = promisify(execFile);
 const EVIDENCE_OUTPUT_LIMIT_BYTES = 2 * 1024 * 1024;
@@ -98,6 +99,10 @@ export type RunSandboxOptions = {
   readonly executionBudget?: ExecutionBudget;
   readonly monotonicNow?: () => number;
   readonly onTraceCreated?: (trace: TraceArtifactOutput) => void;
+  readonly lifecycle?: CleanupLifecycle;
+  readonly onLifecycleStage?: (
+    stage: "resource-setup" | "active-execution" | "evidence-finalization",
+  ) => Promise<void> | void;
 };
 
 function requiredRegistryReference(id: string, kind: "agent" | "tool") {
@@ -133,23 +138,39 @@ function createRunIdentity(fixed?: RunSandboxOptions["fixedRun"]): {
   return { id: `sandbox-${timestamp}-${randomUUID().slice(0, 8)}`, createdAt };
 }
 
-async function git(root: string, args: readonly string[]): Promise<string> {
-  const result = await execFileAsync("git", [...args], { cwd: root, maxBuffer: 2 * 1024 * 1024 });
+async function git(root: string, args: readonly string[], signal?: AbortSignal): Promise<string> {
+  const safeRoot = root.replaceAll("\\", "/");
+  const result = await execFileAsync("git", ["-c", `safe.directory=${safeRoot}`, ...args], {
+    cwd: root,
+    maxBuffer: 2 * 1024 * 1024,
+    signal,
+  });
   return result.stdout.trimEnd();
 }
 
-async function projectProvenance(projectRoot: string): Promise<{
+async function projectProvenance(
+  projectRoot: string,
+  signal?: AbortSignal,
+): Promise<{
   readonly sourceCommit: string;
   readonly sourceWorkingTree: "CLEAN" | "MODIFIED";
   readonly sourceTreeDigest: string;
   readonly hostGitVersion: string;
 }> {
-  const sourceCommit = await git(projectRoot, ["rev-parse", "HEAD"]);
-  const status = await git(projectRoot, ["status", "--porcelain=v1"]);
+  const sourceCommit = await git(projectRoot, ["rev-parse", "HEAD"], signal);
+  const status = await git(projectRoot, ["status", "--porcelain=v1"], signal);
   const listed = await execFileAsync(
     "git",
-    ["ls-files", "--cached", "--others", "--exclude-standard", "-z"],
-    { cwd: projectRoot, encoding: "buffer", maxBuffer: 16 * 1024 * 1024 },
+    [
+      "-c",
+      `safe.directory=${projectRoot.replaceAll("\\", "/")}`,
+      "ls-files",
+      "--cached",
+      "--others",
+      "--exclude-standard",
+      "-z",
+    ],
+    { cwd: projectRoot, encoding: "buffer", maxBuffer: 16 * 1024 * 1024, signal },
   );
   const files = listed.stdout
     .toString("utf8")
@@ -168,7 +189,7 @@ async function projectProvenance(projectRoot: string): Promise<{
     sourceCommit,
     sourceWorkingTree: status.length === 0 ? "CLEAN" : "MODIFIED",
     sourceTreeDigest: await sha256Hex(fileHashes),
-    hostGitVersion: await git(projectRoot, ["--version"]),
+    hostGitVersion: await git(projectRoot, ["--version"], signal),
   };
 }
 
@@ -442,6 +463,10 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
   const scenario = options.scenario ?? "successful-validation";
   const run = createRunIdentity(options.fixedRun);
   if (!/^sandbox-[a-z0-9-]+$/.test(run.id)) throw new Error("Internal sandbox run ID is invalid.");
+  const lifecycle = options.lifecycle ?? new CleanupLifecycle();
+  let providerCleanupAttempts: readonly string[] = [];
+  let temporaryWorkspaceRemoved = false;
+  lifecycle.throwIfAborted();
   const agentCard = requiredRegistryReference("agent.implementation", "agent");
   const patchTool = requiredRegistryReference("tool.repository.patch.controlled", "tool");
   const validationTool = requiredRegistryReference("tool.sandbox.command", "tool");
@@ -476,23 +501,57 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
     telemetry.budgetEvent(stageSpan, event),
   );
   const accountant = new ProviderNeutralUsageAccountant();
-  const provenance = await projectProvenance(options.projectRoot);
+  const provenance = await projectProvenance(options.projectRoot, lifecycle.signal);
   runSpan.setAttributes({
     "delivery.source.commit": provenance.sourceCommit,
     "delivery.source.tree_digest": provenance.sourceTreeDigest,
   });
-  const availability = await options.provider.prepare();
+  lifecycle.throwIfAborted();
+  const availability = await options.provider.prepare(lifecycle.signal);
   if (!availability.available || availability.provider !== options.provider.kind)
     throw new Error(`${options.provider.kind} sandbox unavailable: ${availability.detail}`);
 
   const toyRoot = resolve(options.projectRoot, "examples/toy-repo");
   await assertNoSymlinks(toyRoot);
-  const temporaryRoot = await mkdtemp(resolve(tmpdir(), "ai-delivery-workbench-sandbox-"));
-  options.onWorkspaceCreated?.(temporaryRoot);
+  lifecycle.throwIfAborted();
+  let markOwnershipReady = (): void => undefined;
+  const ownershipReady = new Promise<void>((resolveReady) => {
+    markOwnershipReady = resolveReady;
+  });
+  lifecycle.register({
+    name: `sandbox-run:${run.id}`,
+    run: async (signal) => {
+      await ownershipReady;
+      const result = await cleanupOwnedSandboxRun({
+        projectRoot: options.projectRoot,
+        runId: run.id,
+        provider: options.provider,
+        signal,
+      });
+      providerCleanupAttempts = result.providerAttempts;
+      temporaryWorkspaceRemoved = result.temporaryWorkspaceRemoved;
+    },
+  });
+  let temporaryRoot: string;
+  try {
+    const recovery = await createSandboxRecoveryState({
+      projectRoot: options.projectRoot,
+      runId: run.id,
+      provider: options.provider.kind,
+      createdAt: run.createdAt,
+    }).finally(markOwnershipReady);
+    temporaryRoot = recovery.workspace;
+    lifecycle.throwIfAborted();
+    await mkdir(temporaryRoot);
+    options.onWorkspaceCreated?.(temporaryRoot);
+    await options.onLifecycleStage?.("resource-setup");
+    lifecycle.throwIfAborted();
+  } catch (error) {
+    await lifecycle.cleanup();
+    throw error;
+  }
   const repositoryRoot = resolve(temporaryRoot, "repository");
   const artifactsRoot = resolve(temporaryRoot, "artifacts");
-  let providerCleanupAttempts: readonly string[];
-  let temporaryWorkspaceRemoved: boolean;
   let prePatchExecution: SandboxExecutionResult | undefined;
   let postPatchExecution: SandboxExecutionResult | undefined;
   let repositoryBefore: Awaited<ReturnType<typeof snapshotRepository>> | undefined;
@@ -564,6 +623,8 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
     runSpan.setAttribute("delivery.context.pack_digest", contextPack.packDigest);
     stageSpan.setAttribute("delivery.context.pack_digest", contextPack.packDigest);
     repositoryBefore = await snapshotRepository(repositoryRoot);
+    await options.onLifecycleStage?.("active-execution");
+    lifecycle.throwIfAborted();
     prePatchExecution = await tracedSandboxExecution({
       provider: options.provider,
       telemetry,
@@ -581,6 +642,7 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
           { id: "tool-versions", argv: ["node", "--version"] },
           { id: "pre-test", argv: ["node", "--test"] },
         ],
+        signal: lifecycle.signal,
       },
     });
     const preTest = prePatchExecution.commands.find((command) => command.id === "pre-test");
@@ -655,30 +717,26 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
           { id: "build", argv: ["node", "--check", "src/report.js"] },
           { id: "test", argv: ["node", "--test"] },
         ],
+        signal: lifecycle.signal,
       },
     });
   } catch (error) {
     if (error instanceof BudgetStopError) earlyBudgetStop = error;
     else throw error;
   } finally {
-    providerCleanupAttempts = await options.provider
-      .cleanup(run.id)
-      .catch((error: unknown) => [
-        `provider-cleanup-error:${error instanceof Error ? error.message : "unknown"}`,
-      ]);
-    await rm(temporaryRoot, { recursive: true, force: true });
-    temporaryWorkspaceRemoved = !(await access(temporaryRoot)
-      .then(() => true)
-      .catch(() => false));
+    await lifecycle.cleanup();
   }
 
   if (!temporaryWorkspaceRemoved) throw new Error("Temporary sandbox workspace cleanup failed.");
+  lifecycle.throwIfAborted();
 
   if (earlyBudgetStop) {
     if (!repositoryBefore || !contextPack) {
       throw new Error("A budget stop occurred before governance evidence could be assembled.");
     }
     const budget = tracker.snapshot(earlyBudgetStop.dimension);
+    await options.onLifecycleStage?.("evidence-finalization");
+    lifecycle.throwIfAborted();
     const evidenceSpan = telemetry.startSpan("evidence.finalize", stageSpan, {
       "delivery.run.id": run.id,
       "delivery.issue.id": "TOY-101",
@@ -751,7 +809,9 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
       evidenceDigest: await createBudgetStopEvidenceDigest(withoutDigest),
     });
     if (options.writeEvidence !== false) {
+      lifecycle.throwIfAborted();
       await writeBudgetStopEvidence(options.projectRoot, stopEvidence, trace.json);
+      lifecycle.throwIfAborted();
     }
     throw new BudgetStopEvidenceError(stopEvidence, trace.artifact);
   }
@@ -790,6 +850,8 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
   const containerNpmVersion = "not-installed";
   const replacement =
     scenario === "successful-validation" ? SUCCESSFUL_REPLACEMENT : FAILED_REPLACEMENT;
+  await options.onLifecycleStage?.("evidence-finalization");
+  lifecycle.throwIfAborted();
   const evidenceSpan = telemetry.startSpan("evidence.finalize", stageSpan, {
     "delivery.run.id": run.id,
     "delivery.issue.id": "TOY-101",
@@ -932,7 +994,10 @@ export async function runSandboxSlice(options: RunSandboxOptions): Promise<Sandb
   const validation = await validateEvidencePack(pack, trace.json);
   if (!validation.valid)
     throw new Error(`Generated evidence is invalid: ${validation.errors.join("; ")}`);
-  if (options.writeEvidence !== false)
+  if (options.writeEvidence !== false) {
+    lifecycle.throwIfAborted();
     await writeEvidencePack(options.projectRoot, pack, trace.json);
+    lifecycle.throwIfAborted();
+  }
   return pack;
 }
