@@ -1,5 +1,11 @@
 # Decision log
 
+## 2026-07-22 — Recognize protected GitHub squash-merge identity
+
+- **Decision:** Permit the exact account-specific owner noreply address as author with either the same owner address or GitHub's exact `noreply@github.com` web-committer address throughout release lineage. Continue permitting Dependabot plus the GitHub web committer only on review-only refs outside `HEAD` and annotated tags. Reject every other author/committer combination.
+- **Why:** The repository rules require pull requests, prohibit force-pushes, require seven hosted checks, and allow only GitHub squash merges. That enforced merge path records the owner as author and GitHub as committer. Requiring the owner as both author and committer made an otherwise fully checked protected merge fail only after it reached `main`, while the prohibited force-push needed to rewrite that metadata was correctly blocked.
+- **Boundary:** This recognizes provider-created metadata; it does not broaden who may author release lineage. Dependabot-authored commits remain forbidden there, branch protection remains unchanged, the exact public email forms remain allowlisted, and every merged tree must still pass pull-request and exact-main gates before release evidence is generated.
+
 ## 2026-07-22 — Permit hosted generation of fresh release evidence
 
 - **Decision:** Add a manually dispatched, read-only GitHub workflow that generates the one permitted public release-summary file from an exact default-branch audited commit when the operator's machine lacks a Linux Docker engine. Require the supplied hosted CodeQL run to have the exact source SHA, successful conclusion, retained zero-finding summary, and expected immutable run URL before rerunning the full supply-chain record gate on GitHub's Linux runner.

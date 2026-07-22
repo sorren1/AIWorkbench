@@ -13,7 +13,7 @@ describe("public-history commit identity policy", () => {
     expect(isPermittedPublicCommitIdentity(OWNER_PUBLIC_EMAIL, OWNER_PUBLIC_EMAIL, true)).toBe(
       true,
     );
-    expect(isPermittedPublicCommitIdentity(OWNER_PUBLIC_EMAIL, githubWebEmail, true)).toBe(false);
+    expect(isPermittedPublicCommitIdentity(OWNER_PUBLIC_EMAIL, githubWebEmail, true)).toBe(true);
     expect(isPermittedPublicCommitIdentity(dependabotEmail, githubWebEmail, true)).toBe(false);
   });
 

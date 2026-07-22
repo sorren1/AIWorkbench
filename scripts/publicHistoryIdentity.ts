@@ -9,7 +9,10 @@ export function isPermittedPublicCommitIdentity(
   isReleaseLineage: boolean,
 ): boolean {
   if (authorEmail === OWNER_PUBLIC_EMAIL && committerEmail === OWNER_PUBLIC_EMAIL) return true;
+  if (authorEmail === OWNER_PUBLIC_EMAIL && committerEmail === GITHUB_WEB_COMMITTER_EMAIL) {
+    return true;
+  }
   if (isReleaseLineage || committerEmail !== GITHUB_WEB_COMMITTER_EMAIL) return false;
 
-  return authorEmail === OWNER_PUBLIC_EMAIL || authorEmail === DEPENDABOT_PUBLIC_EMAIL;
+  return authorEmail === DEPENDABOT_PUBLIC_EMAIL;
 }
