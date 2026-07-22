@@ -2,22 +2,22 @@
 
 ## Release boundary
 
-- Release reconciliation date: 2026-07-21
+- Release source-boundary date: 2026-07-22
 - Source repository: <https://github.com/sorren1/AIWorkbench>
 - Vercel project: `workbench1/ai-delivery-workbench`
 - Production origin: [https://tylerwilhite.dev](https://tylerwilhite.dev)
 - Workbench URL: [https://tylerwilhite.dev/workbench/](https://tylerwilhite.dev/workbench/)
-- Current release: [`v1.0.8`](https://github.com/sorren1/AIWorkbench/tree/v1.0.8)
+- Verified predecessor at the v1.0.9 source boundary: [`v1.0.8`](https://github.com/sorren1/AIWorkbench/tree/v1.0.8)
 - Audited source: [`fc2957843077606a1cdb8fe9101cbed9421fb243`](https://github.com/sorren1/AIWorkbench/commit/fc2957843077606a1cdb8fe9101cbed9421fb243)
 - Evidence/deployed commit: [`1c1c06b8e5c6973604b025b63aafed606b2bd522`](https://github.com/sorren1/AIWorkbench/commit/1c1c06b8e5c6973604b025b63aafed606b2bd522)
-- Current release summary: [hosted generated record](https://tylerwilhite.dev/security/release-summary.json)
-- Current deployment identity: [hosted generated binding](https://tylerwilhite.dev/security/deployment-binding.json)
+- Live release summary: [hosted generated record](https://tylerwilhite.dev/security/release-summary.json)
+- Live deployment identity: [hosted generated binding](https://tylerwilhite.dev/security/deployment-binding.json)
 - Previous immutable release: `v1.0.7`
 - v1.0.7 audited source: `7cb0e186c8d3225908fcfeed8df8c8e143ff0ed6`
 - v1.0.7 evidence/deployed commit: `af3b0b3554d9a26d4d9538eb2fc5626e84342827`
 - Historical verified artifact: [exact v1.0.7 Preview](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/)
 
-The v1.0.7 artifact remains a verified Preview, not Production. Version 1.0.8 has its own completed lineage: the audited source contains no public summary, its direct evidence child adds only that generated file, annotated tag `v1.0.8` points to the child, and the same child is deployed in Production. The hosted summary matches the evidence-child record and the hosted deployment binding reports that exact relation.
+The v1.0.7 artifact remains a verified Preview, not Production. Version 1.0.8 has its own completed lineage: the audited source contains no public summary, its direct evidence child adds only that generated file, and annotated tag `v1.0.8` points to the child. Version 1.0.9 begins a separate audited-source lineage. The live hosted summary and deployment binding, rather than this source-state paragraph, identify which exact tagged artifact is currently deployed.
 
 ### Historical domain configuration snapshot — 2026-07-20
 
@@ -55,6 +55,12 @@ The same inspection found two release defects, so the Preview was not promoted t
 Version 1.0.8 contains source and test fixes for both findings. Their local presence was not hosted verification; the later release procedure re-observed the exact tagged artifact before Production. The current generated binding, rather than this historical v1.0.7 disposition, is authoritative for v1.0.8 deployment identity.
 
 Earlier release-iteration history remains immutable: v1.0.3 and v1.0.4 were untagged audit attempts, v1.0.5 was a tagged Preview rejected by its hosted accessibility result, and v1.0.6/v1.0.7 superseded those candidates. None is represented as Production.
+
+## v1.0.9 audited-source boundary
+
+This source revision begins the v1.0.9 release lineage and deliberately removes the inherited public release summary. It does not inherit v1.0.8 hosted or Production evidence. The exact merged default-branch source must pass Quality and CodeQL; the hosted release-evidence workflow must then bind that CodeQL result and rerun the full Linux supply-chain gate. The downloaded summary may become the only change in one direct evidence child, and annotated tag `v1.0.9` must point to that child before any deployment is approved.
+
+After deployment, dispatch the commit-bound post-deployment workflow with the canonical origin, evidence/deployed child SHA, `v1.0.9` tag, and audited parent SHA. Only a successful hosted run against the matching live binding can establish the v1.0.9 Production behavior result. Until those steps are directly observed, the live generated v1.0.8 records remain the verified predecessor and the existing Production deployment must not be changed.
 
 ## Tracked deployment contract
 

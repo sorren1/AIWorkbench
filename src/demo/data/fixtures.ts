@@ -29,7 +29,7 @@ export const meta: Meta = {
     "Independent portfolio prototype. All code, copy, fixtures, workflows, and visuals in this project were created from scratch using synthetic data. No employer or client code, prompts, schemas, screenshots, repositories, internal documentation, or confidential information were used. External Jira, GitHub, AI, database, and enterprise MCP-style operations are simulated; the interactive UI, local workflow state machine, and bounded toy-repository MCP fixture are functional. The public browser never connects to the local MCP process.",
   professionalContext:
     "In professional work, I built a related governed AI-assisted delivery platform that supported approximately 50 production stories through human-reviewed pull requests. This public prototype is a separate implementation and contains none of that system’s code or data.",
-  version: "1.0.8",
+  version: "1.0.9",
   user: { name: "Alex Morgan", role: "Synthetic demo persona", initials: "AM" },
 };
 

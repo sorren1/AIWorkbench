@@ -4,9 +4,9 @@
 
 AI Delivery Workbench shows how coding-agent output can remain subordinate to explicit context, authorization, approval, validation, budget, and evidence controls.
 
-- **Production:** [portfolio origin](https://tylerwilhite.dev) with the [Workbench at `/workbench/`](https://tylerwilhite.dev/workbench/), verified for the exact v1.0.8 static artifact.
-- **v1.0.8 lineage:** audited source [`fc2957843077606a1cdb8fe9101cbed9421fb243`](https://github.com/sorren1/AIWorkbench/commit/fc2957843077606a1cdb8fe9101cbed9421fb243); direct evidence child and deployed commit [`1c1c06b8e5c6973604b025b63aafed606b2bd522`](https://github.com/sorren1/AIWorkbench/commit/1c1c06b8e5c6973604b025b63aafed606b2bd522); annotated tag [`v1.0.8`](https://github.com/sorren1/AIWorkbench/tree/v1.0.8), pointing to that evidence child.
-- **Authoritative evidence:** [hosted release summary](https://tylerwilhite.dev/security/release-summary.json) and [deployment binding](https://tylerwilhite.dev/security/deployment-binding.json).
+- **Production:** [portfolio origin](https://tylerwilhite.dev) with the [Workbench at `/workbench/`](https://tylerwilhite.dev/workbench/). The hosted [release summary](https://tylerwilhite.dev/security/release-summary.json) and [deployment binding](https://tylerwilhite.dev/security/deployment-binding.json), rather than source-state prose, identify the exact current artifact.
+- **v1.0.9 source boundary:** this repository revision. It intentionally omits inherited release evidence and requires fresh exact-commit hosted gates before an evidence child, tag, or deployment can be accepted.
+- **Verified predecessor:** v1.0.8 audited source [`fc2957843077606a1cdb8fe9101cbed9421fb243`](https://github.com/sorren1/AIWorkbench/commit/fc2957843077606a1cdb8fe9101cbed9421fb243); direct evidence child and deployed commit [`1c1c06b8e5c6973604b025b63aafed606b2bd522`](https://github.com/sorren1/AIWorkbench/commit/1c1c06b8e5c6973604b025b63aafed606b2bd522); annotated tag [`v1.0.8`](https://github.com/sorren1/AIWorkbench/tree/v1.0.8), pointing to that evidence child.
 - **Historical Preview:** [immutable v1.0.7 Preview](https://ai-delivery-workbench-e7sfli7i9-workbench1.vercel.app/), bound to the v1.0.7 evidence commit. It remains a Preview artifact, not Production and not v1.0.8.
 - **Source:** [github.com/sorren1/AIWorkbench](https://github.com/sorren1/AIWorkbench)
 - **Local routes:** case study at `/`, technical article at `/writing/governing-ai-assisted-delivery/`, and interactive prototype at `/demo/`.
@@ -140,4 +140,4 @@ In professional work, I built a related governed AI-assisted delivery platform t
 
 ## License and releases
 
-No reuse license has been granted for the first-party project code in this revision. Third-party components retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the [license decision ADR](docs/adr/source-license-decision.md). See [CHANGELOG.md](CHANGELOG.md) and the [v1.0.8 release notes](docs/releases/1.0.8.md) for the release contents, evidence boundary, and known limitations.
+No reuse license has been granted for the first-party project code in this revision. Third-party components retain their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md) and the [license decision ADR](docs/adr/source-license-decision.md). See [CHANGELOG.md](CHANGELOG.md), the [v1.0.9 source release notes](docs/releases/1.0.9.md), and the [v1.0.8 predecessor notes](docs/releases/1.0.8.md) for release contents, evidence boundaries, and known limitations.
