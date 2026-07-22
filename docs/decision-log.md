@@ -1,5 +1,11 @@
 # Decision log
 
+## 2026-07-22 — Permit hosted generation of fresh release evidence
+
+- **Decision:** Add a manually dispatched, read-only GitHub workflow that generates the one permitted public release-summary file from an exact default-branch audited commit when the operator's machine lacks a Linux Docker engine. Require the supplied hosted CodeQL run to have the exact source SHA, successful conclusion, retained zero-finding summary, and expected immutable run URL before rerunning the full supply-chain record gate on GitHub's Linux runner.
+- **Why:** Release evidence must come from the actual scanners and current advisory data. Copying an older summary or reconstructing scanner results would break the evidence model, while installing an operating-system virtualization feature and rebooting the operator's machine is outside an ordinary repository release change.
+- **Boundary:** The workflow has read-only repository and Actions access. It retains an artifact but cannot write repository contents, create a commit or tag, merge a branch, change Vercel configuration, or deploy. The downloaded file must still become the only change in a direct child of the audited source, pass the existing release-evidence validators, and receive the annotated release tag before deployment.
+
 ## 2026-07-21 — Centralize interruption-safe local resource cleanup
 
 - **Decision:** Handle SIGINT and SIGTERM through one reusable CLI lifecycle coordinator that propagates an `AbortSignal`, rejects cleanup registration after shutdown starts, executes registered cleanup once in reverse order, bounds each operation to 10 seconds, and preserves exit 130/143. Keep runner/provider `finally`, Docker `--rm`, E2B TTL, and credential expiry as defense in depth.
