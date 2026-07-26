@@ -5,6 +5,7 @@ const sha256Image = z.string().regex(/@sha256:[a-f0-9]{64}$/);
 export const toolingSchema = z.object({
   schemaVersion: z.literal(1),
   gitleaks: z.object({ version: z.string().min(1), image: sha256Image }),
+  ruff: z.object({ version: z.string().min(1), image: sha256Image }),
   trivy: z.object({ version: z.string().min(1), image: sha256Image }),
   cosign: z.object({ version: z.string().min(1), image: sha256Image }),
   cycloneDxNpm: z.object({ version: z.string().min(1) }),

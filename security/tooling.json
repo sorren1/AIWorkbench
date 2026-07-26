@@ -4,6 +4,10 @@
     "version": "8.30.1",
     "image": "ghcr.io/gitleaks/gitleaks@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f"
   },
+  "ruff": {
+    "version": "0.15.14",
+    "image": "ghcr.io/astral-sh/ruff@sha256:fafd820387042132dcbb0fdfdaf7e83a0df0f2f2093d536591f08ce2db59dcb4"
+  },
   "trivy": {
     "version": "0.70.0",
     "image": "aquasec/trivy@sha256:be1190afcb28352bfddc4ddeb71470835d16462af68d310f9f4bca710961a41e"

@@ -68,3 +68,11 @@ Run-CodexPrompt - working.ps1
 # Private local review notes (retain the tracked directory notice)
 private/*
 !private/README.md
+
+# CaseFlow local-only credentials, evidence, ledgers, and scratch work
+/.caseflow-live-evidence/
+/.caseflow-local/
+/caseflow-build-kit/.caseflow-live-evidence/
+/caseflow-build-kit/.caseflow-local/
+/caseflow-build-kit/experiments/**/.scratch/
+/caseflow-build-kit/experiments/**/upstream/

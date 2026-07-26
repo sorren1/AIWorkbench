@@ -1,0 +1,47 @@
+{
+  "basePath": "/caseflow/",
+  "entryPoint": "caseflow/index.html",
+  "builtEntryPoint": "dist/caseflow/index.html",
+  "selection": {
+    "mechanism": "URL_PATHNAME_EXACT_MAP",
+    "runtimeDependency": null,
+    "normalizeSingleTrailingSlash": true,
+    "preserveBrowserPathname": true,
+    "unknownPathBehavior": "NOT_FOUND_VIEW"
+  },
+  "routes": [
+    {
+      "path": "/caseflow/",
+      "aliases": [
+        "/caseflow"
+      ],
+      "defaultView": "strategy",
+      "indexable": false
+    },
+    {
+      "path": "/caseflow/strategy",
+      "view": "strategy",
+      "tourSeconds": 180
+    },
+    {
+      "path": "/caseflow/technical",
+      "view": "technical",
+      "tourSeconds": 420
+    },
+    {
+      "path": "/caseflow/operations",
+      "view": "operations",
+      "tourSeconds": 300
+    },
+    {
+      "path": "/caseflow/product",
+      "view": "product",
+      "tourSeconds": 180
+    }
+  ],
+  "existingSiteLinksAllowed": false,
+  "sitemapAllowed": false,
+  "robots": "noindex,nofollow,noarchive",
+  "publicMode": "PUBLIC_REPLAY",
+  "recordedMode": "RECORDED_LIVE"
+}

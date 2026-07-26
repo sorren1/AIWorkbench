@@ -1,0 +1,5 @@
+invoice_line_id,invoice_id,charge_code,description,quantity,unit_amount,line_amount
+IL-88201-01,INV-88201,FREIGHT,Freight service,1,23560.00,23560.00
+IL-88201-02,INV-88201,EXPEDITE,Expedited delivery surcharge,1,1240.00,1240.00
+IL-88202-01,INV-88202,FREIGHT,Freight service,1,18000.00,18000.00
+IL-88202-02,INV-88202,EXPEDITE,Expedited delivery surcharge,1,750.00,750.00

@@ -47,3 +47,47 @@ Use one section per decision. Never rewrite history; supersede a decision with a
 - **Decision:** Preserve the existing `/caseflow-build-kit/` rule in `.git/info/exclude`. For the explicitly requested T01 commit, force-add only T01's required governance, evidence, status, decision, and risk paths; do not add the complete build-kit archive.
 - **Reason:** The repository owner deliberately keeps the separate kit beside the Workbench source, while T01 explicitly requires a focused evidence-bearing commit. Narrow force-addition satisfies the task without overwriting the local exclusion or importing unrelated future-task material.
 - **Consequence:** Future tasks must intentionally add their required build-kit outputs. The untracked kit archive, including the locally corrected status renderer, is not durable branch evidence and must not be assumed available in another clone or worktree; R-013 remains open until the operator selects a durable distribution boundary.
+
+## D-007 — Track the complete non-secret CaseFlow build kit
+
+- **Status:** Accepted; supersedes D-006 for T02 and later work
+- **Date:** 2026-07-26
+- **Decision:** Remove the local `.git/info/exclude` rule that excluded
+  `/caseflow-build-kit/` and track the complete non-secret kit on
+  `feature/caseflow-reference-implementation`. Preserve only narrow, documented
+  ignores for credentials, OAuth/local state, raw live evidence, call ledgers,
+  environments, caches, generated reports, and temporary experiment clones.
+- **Reason:** Prompts, contracts, fixtures, templates, controls, and required
+  helpers must be available in a clone and in the post-T02 design worktree.
+  Force-adding individual evidence files cannot provide that durability.
+- **Consequence:** T02 includes the previously ignored kit baseline. Future
+  tasks treat kit changes as normal reviewed source changes; R-013 is closed.
+
+## D-008 — Dependency-free static stage routing with a local-only service
+
+- **Status:** Accepted
+- **Date:** 2026-07-26
+- **Decision:** Use one Vite HTML entry at `caseflow/index.html`, an exact
+  native-URL pathname map in `src/caseflow/routing/routes.ts`, and
+  CaseFlow-scoped Vite dev/preview and Vercel rewrites. Keep public
+  `PUBLIC_REPLAY`/`RECORDED_LIVE` modes separate from the loopback-only FastAPI
+  service modes.
+- **Reason:** This fits the current multi-page static build, restrictive CSP,
+  and Vercel model without adding a router or public API.
+- **Consequence:** CaseFlow assets must use root-public URLs so rewritten deep
+  paths remain stable. Existing navigation and sitemap remain unchanged.
+
+## D-009 — Contract-first authority and bounded dependencies
+
+- **Status:** Accepted
+- **Date:** 2026-07-26
+- **Decision:** The corrected OpenAPI, mode, route, schema, tool, state, and
+  source-authority contracts in the tracked kit govern T10–T24. Consequential
+  writes always require human approval; amount selects the authorized reviewer
+  class. Add no frontend runtime dependency by default and keep the local
+  Python dependency ceilings defined in the T02 architecture reconciliation.
+- **Reason:** The planning baseline contained route/reference gaps and
+  ambiguous write semantics that would otherwise become implementation drift.
+- **Consequence:** Later evidence may supersede probe-required adapter details,
+  but it cannot relax the public/local or safe-write boundary without a new
+  decision.

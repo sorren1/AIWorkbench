@@ -1,0 +1,80 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tylerwilhite.dev/schemas/caseflow/audit-event.schema.json",
+  "title": "CaseFlow Audit Event",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "eventId",
+    "runId",
+    "sequence",
+    "eventType",
+    "actor",
+    "occurredAt",
+    "subject",
+    "outcome",
+    "payloadDigest"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "eventId": {
+      "type": "string"
+    },
+    "runId": {
+      "type": "string"
+    },
+    "sequence": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "eventType": {
+      "type": "string"
+    },
+    "actor": {
+      "type": "object",
+      "required": [
+        "type",
+        "id"
+      ],
+      "properties": {
+        "type": {
+          "enum": [
+            "HUMAN",
+            "SERVICE",
+            "SOURCE",
+            "MODEL"
+          ]
+        },
+        "id": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "occurredAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "subject": {
+      "type": "object"
+    },
+    "outcome": {
+      "enum": [
+        "SUCCEEDED",
+        "FAILED",
+        "BLOCKED",
+        "RECORDED"
+      ]
+    },
+    "payloadDigest": {
+      "type": "string",
+      "pattern": "^sha256:"
+    },
+    "safeDetails": {
+      "type": "object"
+    }
+  }
+}

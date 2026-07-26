@@ -27,6 +27,7 @@ import { normalizeSuppressionPath, validateSuppressionPolicy } from "./suppressi
 import { versionAtLeast } from "./versionPolicy";
 import {
   lintableTrackedSourcePaths,
+  pythonTrackedSourcePaths,
   trackedSourceDigest,
   trackedSourcePaths,
 } from "../trackedSourceInventory";
@@ -273,6 +274,49 @@ async function runEslint(
   );
 }
 
+async function runRuff(
+  paths: readonly string[],
+  scanInput: string,
+  tooling: z.infer<typeof toolingSchema>,
+): Promise<SarifFinding[]> {
+  const pythonPaths = pythonTrackedSourcePaths(paths);
+  if (pythonPaths.length === 0) return [];
+  const reportPath = resolve(reportsRoot, "ruff.sarif");
+  const check = await dockerRun(
+    tooling.ruff.image,
+    [
+      "check",
+      "--no-cache",
+      "--output-format",
+      "sarif",
+      "--select",
+      "E4,E7,E9,F,B,S,UP,I",
+      ...pythonPaths,
+    ],
+    [`${scanInput}:/scan:ro`],
+    ["--workdir", "/scan", ...hostUserDockerArgs()],
+  );
+  if (![0, 1].includes(check.exitCode) || !check.stdout.trim()) {
+    throw new Error("Ruff Python static analysis could not complete.");
+  }
+  await writeFile(reportPath, check.stdout, "utf8");
+  await sanitizeSarif(reportPath);
+  const findings = sarifFindings(await readJson(reportPath), "python-source").map((finding) => ({
+    ...finding,
+    path: finding.path.replace(/^file:\/\/\/scan\//u, ""),
+  }));
+  const format = await dockerRun(
+    tooling.ruff.image,
+    ["format", "--check", "--no-cache", ...pythonPaths],
+    [`${scanInput}:/scan:ro`],
+    ["--workdir", "/scan", ...hostUserDockerArgs()],
+  );
+  if (format.exitCode !== 0) {
+    throw new Error("Ruff Python formatting check failed.");
+  }
+  return findings;
+}
+
 async function runContainerPolicy(
   paths: readonly string[],
   tooling: z.infer<typeof toolingSchema>,
@@ -318,7 +362,7 @@ async function runContainerPolicy(
     ...(await analyzeSandboxDockerfile(root, tooling)),
     ...(await analyzeLiteLlmDockerfile(root, tooling)),
     ...(await analyzeLiteLlmConfig(root)),
-    ...analyzeLanguageCoverage(paths),
+    ...analyzeLanguageCoverage(paths, { python: true }),
   ];
   const sarifPath = resolve(reportsRoot, "container-policy.sarif");
   await writeJson(
@@ -770,7 +814,7 @@ async function scannerMetadata(
   tooling: z.infer<typeof toolingSchema>,
   runtimeImages: readonly RuntimeImageScan[],
 ): Promise<Record<string, unknown>> {
-  const [docker, eslint, cyclone, gitleaks, trivy, cosign] = await Promise.all([
+  const [docker, eslint, cyclone, gitleaks, ruff, trivy, cosign] = await Promise.all([
     command("docker", ["version", "--format", "{{.Client.Version}}|{{.Server.Version}}"]),
     command(process.execPath, [resolve(root, "node_modules/eslint/bin/eslint.js"), "--version"]),
     command(process.execPath, [
@@ -778,6 +822,7 @@ async function scannerMetadata(
       "--version",
     ]),
     dockerRun(tooling.gitleaks.image, ["version"]),
+    dockerRun(tooling.ruff.image, ["--version"]),
     dockerRun(
       tooling.trivy.image,
       ["--version"],
@@ -785,7 +830,9 @@ async function scannerMetadata(
     ),
     dockerRun(tooling.cosign.image, ["version"]),
   ]);
-  if ([docker, eslint, cyclone, gitleaks, trivy, cosign].some((result) => result.exitCode !== 0)) {
+  if (
+    [docker, eslint, cyclone, gitleaks, ruff, trivy, cosign].some((result) => result.exitCode !== 0)
+  ) {
     throw new Error("Scanner version collection failed.");
   }
   return {
@@ -794,6 +841,7 @@ async function scannerMetadata(
     scanners: {
       gitleaks: { version: gitleaks.stdout.trim(), image: tooling.gitleaks.image },
       eslint: { version: eslint.stdout.trim() },
+      ruff: { version: ruff.stdout.trim(), image: tooling.ruff.image },
       trivy: { version: trivy.stdout.trim(), image: tooling.trivy.image },
       cosign: { version: cosign.stdout.trim(), image: tooling.cosign.image },
       cycloneDxNpm: { version: cyclone.stdout.trim() },
@@ -869,6 +917,7 @@ async function main(): Promise<void> {
       suppressionDocument.entries,
       matchedSuppressionIds,
     );
+    const ruffFindings = await runRuff(paths, scanInput, tooling);
     const containerPolicyFindings = await runContainerPolicy(
       paths,
       tooling,
@@ -900,6 +949,7 @@ async function main(): Promise<void> {
       ...historySecrets,
       ...worktreeSecrets,
       ...eslintFindings,
+      ...ruffFindings,
       ...containerPolicyFindings,
       ...npmAudit.findings,
       ...licenses.licenseFindings,
@@ -1021,15 +1071,14 @@ async function main(): Promise<void> {
       }),
       control({
         id: "static-analysis",
-        label: "TypeScript, JavaScript, and container configuration static analysis",
+        label: "TypeScript, JavaScript, Python, and container configuration static analysis",
         status: "PASSED",
-        scanner: "ESLint + repository container policy",
-        version: "10.7.0 / 1.1.0",
-        target:
-          "TypeScript/JavaScript sources, Compose configuration, and both runtime Dockerfiles",
+        scanner: "ESLint + Ruff + repository container policy",
+        version: `10.7.0 / ${tooling.ruff.version} / 1.1.0`,
+        target: `${pythonTrackedSourcePaths(paths).length} Python files, TypeScript/JavaScript sources, Compose configuration, and both runtime Dockerfiles`,
         findingCount: 0,
         detail:
-          "Language coverage fails closed if unscanned Python, shell, PowerShell, or Dockerfile sources appear.",
+          "Ruff applies explicit correctness, import, upgrade, bug-risk, and Bandit-derived security rules. Language coverage still fails closed for unscanned shell, PowerShell, or Dockerfile sources.",
       }),
       control({
         id: "dependency-scan",
@@ -1086,11 +1135,11 @@ async function main(): Promise<void> {
       }),
       control({
         id: "codeql",
-        label: "GitHub CodeQL JavaScript/TypeScript analysis",
+        label: "GitHub CodeQL JavaScript/TypeScript and Python analysis",
         status: recordSummary ? "PASSED" : "CONFIGURED_NOT_RUN",
         scanner: "GitHub CodeQL",
         version: `${tooling.codeql.version} @ ${tooling.codeql.actionSha.slice(0, 12)}`,
-        target: "JavaScript/TypeScript",
+        target: "JavaScript/TypeScript and Python",
         findingCount: recordSummary ? 0 : null,
         detail: recordSummary
           ? "The hosted workflow analyzed the audited release commit and its retained SARIF contained zero release-blocking results."
@@ -1100,15 +1149,15 @@ async function main(): Promise<void> {
           : {}),
       }),
       control({
-        id: "python-shell",
-        label: "Python and shell source analysis",
-        status: "NOT_APPLICABLE",
-        scanner: "Language coverage policy",
-        version: "1.0.0",
-        target: "Tracked source inventory",
-        findingCount: null,
+        id: "python",
+        label: "Tracked Python source analysis",
+        status: "PASSED",
+        scanner: "Ruff",
+        version: tooling.ruff.version,
+        target: `${pythonTrackedSourcePaths(paths).length} tracked Python files`,
+        findingCount: 0,
         detail:
-          "No tracked Python, shell, or PowerShell source files are present; adding one fails the gate until a scanner is configured.",
+          "The pinned Ruff image ran correctness and Bandit-derived security rules plus a formatting check; no scanner suppression category exists for Ruff.",
       }),
     ] satisfies ReleaseControlSummary[];
 
@@ -1119,6 +1168,7 @@ async function main(): Promise<void> {
       { kind: "SARIF", name: "gitleaks-history.sarif" },
       { kind: "SARIF", name: "gitleaks-worktree.sarif" },
       { kind: "SARIF", name: "eslint.sarif" },
+      { kind: "SARIF", name: "ruff.sarif" },
       { kind: "SARIF", name: "container-policy.sarif" },
       { kind: "SARIF", name: "license-policy.sarif" },
       { kind: "SARIF", name: "sandbox-image.sarif" },

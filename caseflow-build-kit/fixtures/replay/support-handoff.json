@@ -1,0 +1,19 @@
+{
+  "schemaVersion": "1.0",
+  "caseId": "CS-2026-1042",
+  "currentState": "COMPLETED",
+  "customerImpact": "The USD 1,240.00 expedite surcharge was credited after Finance Manager approval.",
+  "completedActions": [
+    "Credit memo CM-99001 created",
+    "CRM case CASE-1042 updated"
+  ],
+  "pendingActions": [],
+  "failureCategory": null,
+  "currentOwner": "Customer Resolution Team",
+  "nextUpdateAt": null,
+  "runbookRef": "docs/operations/runbooks/caseflow-resolution.md",
+  "knownLimitations": [
+    "Public view is replay-only",
+    "Enterprise identity controls are production-design-only"
+  ]
+}

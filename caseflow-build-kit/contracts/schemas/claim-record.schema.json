@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tylerwilhite.dev/schemas/caseflow/claim-record.schema.json",
+  "title": "Public Claim Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "claimId",
+    "statement",
+    "classification",
+    "evidenceRefs",
+    "limitations"
+  ],
+  "properties": {
+    "claimId": {
+      "type": "string"
+    },
+    "statement": {
+      "type": "string"
+    },
+    "classification": {
+      "enum": [
+        "IMPLEMENTED",
+        "LIVE_VALIDATED",
+        "RECORDED",
+        "SIMULATED",
+        "PRODUCTION_DESIGN_ONLY"
+      ]
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

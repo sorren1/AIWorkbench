@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   analyze:
-    name: Analyze JavaScript and TypeScript
+    name: Analyze JavaScript, TypeScript, and Python
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -29,12 +29,12 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06 # v4
         with:
-          languages: javascript-typescript
+          languages: javascript-typescript,python
           queries: security-extended
       - name: Analyze
         uses: github/codeql-action/analyze@eec0bff2f6c15bf3f1e8a0152f94d17664a06a06 # v4
         with:
-          category: /language:javascript-typescript
+          category: /language:javascript-typescript-python
           output: codeql-results
           upload: ${{ github.event.repository.private && 'never' || 'always' }}
       - name: Require zero release-blocking CodeQL findings

@@ -83,7 +83,7 @@ The scanner report retains the original finding. The orchestrator matches the do
 
 ## GitHub-only controls
 
-Pull requests run GitHub dependency review and the complete local-equivalent gate. CodeQL uses GitHub's JavaScript/TypeScript extractor and `security-extended` queries in a separate SHA-pinned workflow. The hosted job retains SARIF and a small commit/run/count record and fails unless the result count is zero. The public repository also uploads the SARIF result to GitHub code scanning; the generated release summary binds the exact audited commit and retained zero-finding record used for the release rather than treating the repository's mutable alert page as release evidence.
+Pull requests run GitHub dependency review and the complete local-equivalent gate. CodeQL uses GitHub's JavaScript/TypeScript and Python extractors with `security-extended` queries in a separate SHA-pinned workflow. The hosted job retains SARIF and a small commit/run/count record and fails unless the combined result count is zero. The public repository also uploads the SARIF result to GitHub code scanning; the generated release summary binds the exact audited commit and retained zero-finding record used for the release rather than treating the repository's mutable alert page as release evidence.
 
 Vercel builds fail closed unless `VERCEL_GIT_COMMIT_SHA` exactly equals `APPROVED_DEPLOYMENT_COMMIT_SHA`, and the audited commit and release tag match the checked-in summary. A successful build emits `/security/deployment-binding.json` with the full deployed commit, audited parent, release tag, CodeQL run, and verified relation. This build-generated file avoids placing a self-referential evidence-commit SHA inside its own Git tree.
 

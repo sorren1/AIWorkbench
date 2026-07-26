@@ -1,0 +1,35 @@
+{
+  "schemaVersion": "1.0",
+  "executionId": "EXEC-CS-2026-1042-PARTIAL-001",
+  "proposalId": "PROP-CS-2026-1042-001",
+  "approvalId": "APR-CS-2026-1042-001",
+  "idempotencyKey": "caseflow:CS-2026-1042:PROP-001",
+  "payloadDigest": "sha256:05b257dd88d855020cb1f6f292475f3e05388075f6a0b8feb545b121583039c3",
+  "status": "RECONCILIATION_REQUIRED",
+  "attempts": [
+    {
+      "action": "CREATE_CREDIT_MEMO",
+      "attemptNumber": 1,
+      "status": "SUCCEEDED",
+      "sourceAlias": "CaseFlowOperations",
+      "sourceRecordId": "CM-99001",
+      "receiptDigest": "sha256:ae2d3f7e531b5f85db071c786a173260bca4b3f83277bf2241680cbaf86edc31",
+      "errorCategory": null,
+      "startedAt": "2026-07-24T17:31:05Z",
+      "completedAt": "2026-07-24T17:31:06Z"
+    },
+    {
+      "action": "UPDATE_CRM_CASE",
+      "attemptNumber": 1,
+      "status": "FAILED",
+      "sourceAlias": "CaseFlowCRM",
+      "sourceRecordId": null,
+      "receiptDigest": null,
+      "errorCategory": "TIMEOUT",
+      "startedAt": "2026-07-24T17:31:06Z",
+      "completedAt": "2026-07-24T17:31:36Z"
+    }
+  ],
+  "createdAt": "2026-07-24T17:31:05Z",
+  "updatedAt": "2026-07-24T17:31:36Z"
+}

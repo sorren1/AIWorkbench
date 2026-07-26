@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tylerwilhite.dev/schemas/caseflow/approval-record.schema.json",
+  "title": "Approval Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "approvalId",
+    "proposalId",
+    "proposalDigest",
+    "evidenceDigest",
+    "decision",
+    "reviewer",
+    "approvedAmount",
+    "allowedActions",
+    "decidedAt",
+    "expiresAt",
+    "reason",
+    "digest"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "approvalId": {
+      "type": "string",
+      "pattern": "^APR-"
+    },
+    "proposalId": {
+      "type": "string",
+      "pattern": "^PROP-"
+    },
+    "proposalDigest": {
+      "type": "string",
+      "pattern": "^sha256:"
+    },
+    "evidenceDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "decision": {
+      "enum": [
+        "APPROVED",
+        "REJECTED"
+      ]
+    },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reviewerId",
+        "displayName",
+        "role"
+      ],
+      "properties": {
+        "reviewerId": {
+          "type": "string"
+        },
+        "displayName": {
+          "type": "string"
+        },
+        "role": {
+          "enum": [
+            "SUPERVISOR",
+            "FINANCE_MANAGER"
+          ]
+        }
+      }
+    },
+    "approvedAmount": {
+      "type": "object",
+      "required": [
+        "currency",
+        "amount"
+      ],
+      "properties": {
+        "currency": {
+          "const": "USD"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]{2}$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "allowedActions": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "CREATE_CREDIT_MEMO",
+          "UPDATE_CRM_CASE"
+        ]
+      }
+    },
+    "decidedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "reason": {
+      "type": "string",
+      "minLength": 1
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    }
+  }
+}

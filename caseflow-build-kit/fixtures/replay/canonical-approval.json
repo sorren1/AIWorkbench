@@ -1,0 +1,25 @@
+{
+  "schemaVersion": "1.0",
+  "approvalId": "APR-CS-2026-1042-001",
+  "proposalId": "PROP-CS-2026-1042-001",
+  "proposalDigest": "sha256:211dcffcd20cb0c3f54afc5ecce993fb8903fda7013c81c293c7766cfb2b00ea",
+  "evidenceDigest": "sha256:236911bd2fad61100ebe47971cfd194c7917513ca04ef05a307c90ccd39f19f0",
+  "decision": "APPROVED",
+  "reviewer": {
+    "reviewerId": "USR-FIN-MGR-01",
+    "displayName": "Avery Chen",
+    "role": "FINANCE_MANAGER"
+  },
+  "approvedAmount": {
+    "currency": "USD",
+    "amount": "1240.00"
+  },
+  "allowedActions": [
+    "CREATE_CREDIT_MEMO",
+    "UPDATE_CRM_CASE"
+  ],
+  "decidedAt": "2026-07-24T17:31:00Z",
+  "expiresAt": "2026-07-25T17:31:00Z",
+  "reason": "Evidence is complete, the reviewed cause is carrier-caused, and the amount matches the posted expedite charge.",
+  "digest": "sha256:7be710e8c97c546d5add173a19c57d59a3c6ba9dd33d6fb07c98c2a6a5c9d77e"
+}

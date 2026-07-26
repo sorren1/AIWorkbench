@@ -1,0 +1,468 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CaseFlow Local API",
+    "version": "1.0.0",
+    "description": "Local-only API for the independent synthetic CaseFlow reference implementation. It is never deployed in the initial Vercel release."
+  },
+  "servers": [{ "url": "http://127.0.0.1:8090" }],
+  "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "getHealth",
+        "responses": {
+          "200": {
+            "description": "Service health and active local mode",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Health" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/capabilities": {
+      "get": {
+        "operationId": "getCapabilities",
+        "responses": {
+          "200": {
+            "description": "Sanitized adapter capability record; probe-required capabilities remain explicitly unvalidated",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/Capabilities" } }
+            }
+          }
+        }
+      }
+    },
+    "/api/cases/{caseId}": {
+      "get": {
+        "operationId": "getCase",
+        "parameters": [{ "$ref": "#/components/parameters/CaseId" }],
+        "responses": {
+          "200": {
+            "description": "Current synthetic case summary",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/CaseSummary" } }
+            }
+          },
+          "404": { "$ref": "#/components/responses/SafeError" }
+        }
+      }
+    },
+    "/api/cases/{caseId}/investigate": {
+      "post": {
+        "operationId": "investigateCase",
+        "parameters": [{ "$ref": "#/components/parameters/CaseId" }],
+        "responses": {
+          "202": {
+            "description": "Investigation accepted",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/InvestigationAccepted" }
+              }
+            }
+          },
+          "400": { "$ref": "#/components/responses/SafeError" },
+          "409": { "$ref": "#/components/responses/SafeError" }
+        }
+      }
+    },
+    "/api/runs/{runId}": {
+      "get": {
+        "operationId": "getRun",
+        "parameters": [{ "$ref": "#/components/parameters/RunId" }],
+        "responses": {
+          "200": {
+            "description": "Current run summary",
+            "content": {
+              "application/json": { "schema": { "$ref": "#/components/schemas/RunSummary" } }
+            }
+          },
+          "404": { "$ref": "#/components/responses/SafeError" }
+        }
+      }
+    },
+    "/api/runs/{runId}/evidence": {
+      "get": {
+        "operationId": "getEvidence",
+        "parameters": [{ "$ref": "#/components/parameters/RunId" }],
+        "responses": {
+          "200": {
+            "description": "Evidence packet",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/evidence-packet.schema.json" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/SafeError" },
+          "409": { "$ref": "#/components/responses/SafeError" }
+        }
+      }
+    },
+    "/api/runs/{runId}/proposal": {
+      "post": {
+        "operationId": "createProposal",
+        "parameters": [{ "$ref": "#/components/parameters/RunId" }],
+        "responses": {
+          "201": {
+            "description": "Deterministic resolution proposal",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/resolution-proposal.schema.json" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/SafeError" },
+          "409": { "$ref": "#/components/responses/SafeError" }
+        }
+      }
+    },
+    "/api/proposals/{proposalId}/approve": {
+      "post": {
+        "operationId": "approveProposal",
+        "parameters": [{ "$ref": "#/components/parameters/ProposalId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ReviewCommand" } }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Approval record bound to the current proposal and evidence digests",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/approval-record.schema.json" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/SafeError" },
+          "409": { "$ref": "#/components/responses/SafeError" }
+        }
+      }
+    },
+    "/api/proposals/{proposalId}/reject": {
+      "post": {
+        "operationId": "rejectProposal",
+        "parameters": [{ "$ref": "#/components/parameters/ProposalId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ReviewCommand" } }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Rejection record bound to the current proposal and evidence digests",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/approval-record.schema.json" }
+              }
+            }
+          },
+          "404": { "$ref": "#/components/responses/SafeError" },
+          "409": { "$ref": "#/components/responses/SafeError" }
+        }
+      }
+    },
+    "/api/proposals/{proposalId}/execute": {
+      "post": {
+        "operationId": "executeProposal",
+        "parameters": [
+          { "$ref": "#/components/parameters/ProposalId" },
+          { "$ref": "#/components/parameters/IdempotencyKey" }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": { "schema": { "$ref": "#/components/schemas/ExecutionCommand" } }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Existing exact-payload idempotent result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/execution-record.schema.json" }
+              }
+            }
+          },
+          "201": {
+            "description": "New mock or explicitly enabled approved-live execution result",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/execution-record.schema.json" }
+              }
+            }
+          },
+          "403": { "$ref": "#/components/responses/SafeError" },
+          "404": { "$ref": "#/components/responses/SafeError" },
+          "409": { "$ref": "#/components/responses/SafeError" }
+        }
+      }
+    },
+    "/api/executions/{executionId}/reconcile": {
+      "post": {
+        "operationId": "reconcileExecution",
+        "parameters": [{ "$ref": "#/components/parameters/ExecutionId" }],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/ReconciliationCommand" }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Reconciliation result that reuses prior successful receipts",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "../schemas/execution-record.schema.json" }
+              }
+            }
+          },
+          "403": { "$ref": "#/components/responses/SafeError" },
+          "404": { "$ref": "#/components/responses/SafeError" },
+          "409": { "$ref": "#/components/responses/SafeError" }
+        }
+      }
+    },
+    "/api/failures/inject": {
+      "post": {
+        "operationId": "injectFailure",
+        "description": "Available only in LOCAL_MOCK. No caller-defined code, SQL, procedure, or command is accepted.",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": { "$ref": "#/components/schemas/FailureInjectionCommand" }
+            }
+          }
+        },
+        "responses": {
+          "204": { "description": "Named deterministic failure armed for the next applicable action" },
+          "400": { "$ref": "#/components/responses/SafeError" },
+          "403": { "$ref": "#/components/responses/SafeError" }
+        }
+      }
+    },
+    "/api/evidence/export": {
+      "post": {
+        "operationId": "exportSanitizedEvidence",
+        "description": "Runs the allow-list sanitizer locally. Raw evidence and local paths are never returned.",
+        "responses": {
+          "201": {
+            "description": "Sanitized evidence manifest generated locally",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/EvidenceExportResult" }
+              }
+            }
+          },
+          "409": { "$ref": "#/components/responses/SafeError" }
+        }
+      }
+    }
+  },
+  "components": {
+    "parameters": {
+      "CaseId": {
+        "in": "path",
+        "name": "caseId",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^CS-[A-Za-z0-9-]+$" }
+      },
+      "RunId": {
+        "in": "path",
+        "name": "runId",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^RUN-[A-Za-z0-9-]+$" }
+      },
+      "ProposalId": {
+        "in": "path",
+        "name": "proposalId",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^PROP-[A-Za-z0-9-]+$" }
+      },
+      "ExecutionId": {
+        "in": "path",
+        "name": "executionId",
+        "required": true,
+        "schema": { "type": "string", "pattern": "^EXEC-[A-Za-z0-9-]+$" }
+      },
+      "IdempotencyKey": {
+        "in": "header",
+        "name": "Idempotency-Key",
+        "required": true,
+        "schema": { "type": "string", "minLength": 8, "maxLength": 200 }
+      }
+    },
+    "responses": {
+      "SafeError": {
+        "description": "Stable user-safe error without raw exception, credential, query, or source payload",
+        "content": {
+          "application/json": { "schema": { "$ref": "#/components/schemas/SafeError" } }
+        }
+      }
+    },
+    "schemas": {
+      "LocalMode": {
+        "enum": ["LOCAL_MOCK", "LOCAL_LIVE_READ", "LOCAL_LIVE_APPROVED_WRITE"]
+      },
+      "Health": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["status", "mode"],
+        "properties": {
+          "status": { "const": "ok" },
+          "mode": { "$ref": "#/components/schemas/LocalMode" }
+        }
+      },
+      "Capabilities": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["mode", "sourceReads", "sourceWrites", "records"],
+        "properties": {
+          "mode": { "$ref": "#/components/schemas/LocalMode" },
+          "sourceReads": { "type": "boolean" },
+          "sourceWrites": { "type": "boolean" },
+          "records": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["name", "status"],
+              "properties": {
+                "name": { "type": "string" },
+                "status": { "enum": ["VALIDATED", "LIMITED", "NOT_TESTED"] },
+                "limitation": { "type": ["string", "null"] }
+              }
+            }
+          }
+        }
+      },
+      "CaseSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["caseId", "state"],
+        "properties": {
+          "caseId": { "type": "string", "pattern": "^CS-" },
+          "state": { "$ref": "#/components/schemas/WorkflowState" }
+        }
+      },
+      "InvestigationAccepted": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["caseId", "runId", "state"],
+        "properties": {
+          "caseId": { "type": "string", "pattern": "^CS-" },
+          "runId": { "type": "string", "pattern": "^RUN-" },
+          "state": { "const": "IDENTITY_RESOLVING" }
+        }
+      },
+      "RunSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["runId", "caseId", "state", "mode"],
+        "properties": {
+          "runId": { "type": "string", "pattern": "^RUN-" },
+          "caseId": { "type": "string", "pattern": "^CS-" },
+          "state": { "$ref": "#/components/schemas/WorkflowState" },
+          "mode": { "$ref": "#/components/schemas/LocalMode" }
+        }
+      },
+      "ReviewCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["reviewerId", "reason"],
+        "properties": {
+          "reviewerId": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      },
+      "ExecutionCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["approvalId"],
+        "properties": {
+          "approvalId": { "type": "string", "pattern": "^APR-" }
+        }
+      },
+      "ReconciliationCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["operatorId", "reason"],
+        "properties": {
+          "operatorId": { "type": "string", "minLength": 1 },
+          "reason": { "type": "string", "minLength": 1 }
+        }
+      },
+      "FailureInjectionCommand": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["failureId"],
+        "properties": {
+          "failureId": {
+            "enum": [
+              "F-001",
+              "F-002",
+              "F-003",
+              "F-004",
+              "F-005",
+              "F-006",
+              "F-007",
+              "F-008",
+              "F-009",
+              "F-010",
+              "F-011",
+              "F-012",
+              "F-013",
+              "F-014"
+            ]
+          }
+        }
+      },
+      "EvidenceExportResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["manifestId", "artifactCount"],
+        "properties": {
+          "manifestId": { "type": "string" },
+          "artifactCount": { "type": "integer", "minimum": 0 }
+        }
+      },
+      "SafeError": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["category", "code", "message", "retryable", "correlationId"],
+        "properties": {
+          "category": { "type": "string" },
+          "code": { "type": "string" },
+          "message": { "type": "string" },
+          "retryable": { "type": "boolean" },
+          "correlationId": { "type": "string" }
+        }
+      },
+      "WorkflowState": {
+        "enum": [
+          "NEW",
+          "IDENTITY_RESOLVING",
+          "EVIDENCE_COLLECTING",
+          "EVIDENCE_INCOMPLETE",
+          "EVIDENCE_CONFLICT",
+          "RECOMMENDATION_READY",
+          "APPROVAL_REQUIRED",
+          "APPROVED",
+          "REJECTED",
+          "EXECUTION_PENDING",
+          "EXECUTING",
+          "RECONCILIATION_REQUIRED",
+          "COMPLETED",
+          "CLOSED_NO_ACTION",
+          "FAILED_SAFE"
+        ]
+      }
+    }
+  }
+}

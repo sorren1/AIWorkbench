@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "1.0",
+  "recordedAt": "2026-07-24T17:29:00Z",
+  "mode": "SIMULATED",
+  "notice": "Planning fixture. Replace with sanitized T03/T25 evidence before any LIVE_VALIDATED claim.",
+  "queryMcp": {
+    "endpointAlias": "CData Query MCP",
+    "tools": [
+      "getCatalogs",
+      "getSchemas",
+      "getTables",
+      "getColumns",
+      "queryData",
+      "getProcedures",
+      "getProcedureParameters",
+      "executeProcedure"
+    ]
+  },
+  "managementMcp": {
+    "endpointAlias": "CData Management MCP",
+    "tools": [
+      "list_available_sources",
+      "get_source_properties",
+      "create_connection",
+      "list_connections",
+      "test_connection"
+    ]
+  },
+  "pythonSdk": {
+    "package": "cdata-connect-ai",
+    "status": "PLANNED"
+  },
+  "limits": {
+    "sources": 5,
+    "users": 5,
+    "monthlyCalls": 500,
+    "workspaceIsolation": false,
+    "rbac": false,
+    "sso": false
+  }
+}

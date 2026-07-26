@@ -1,0 +1,347 @@
+{
+  "schema_version": "1.0",
+  "execution": "serial",
+  "tasks": [
+    {
+      "id": "T00",
+      "title": "Bootstrap and operator decisions",
+      "owner": "Human",
+      "dependencies": [],
+      "prompt_glob": "prompts/00_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T01",
+      "title": "Repository preflight and branch baseline",
+      "owner": "Codex",
+      "dependencies": [
+        "T00"
+      ],
+      "prompt_glob": "prompts/01_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T02",
+      "title": "Architecture and contract reconciliation",
+      "owner": "Codex",
+      "dependencies": [
+        "T01"
+      ],
+      "prompt_glob": "prompts/02_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T03",
+      "title": "CData Developer Edition capability probe",
+      "owner": "Human + Codex",
+      "dependencies": [
+        "T02"
+      ],
+      "prompt_glob": "prompts/03_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": true
+    },
+    {
+      "id": "T04",
+      "title": "Python SDK and official mock-server spike",
+      "owner": "Codex",
+      "dependencies": [
+        "T03"
+      ],
+      "prompt_glob": "prompts/04_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T05",
+      "title": "Query MCP and Management MCP spike",
+      "owner": "Codex",
+      "dependencies": [
+        "T03"
+      ],
+      "prompt_glob": "prompts/05_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": true
+    },
+    {
+      "id": "T06",
+      "title": "Official agent scaffold spike",
+      "owner": "Codex",
+      "dependencies": [
+        "T05"
+      ],
+      "prompt_glob": "prompts/06_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": true
+    },
+    {
+      "id": "T07",
+      "title": "Optional CData CLI schema-development spike",
+      "owner": "Codex",
+      "dependencies": [
+        "T03"
+      ],
+      "prompt_glob": "prompts/07_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": true
+    },
+    {
+      "id": "T08",
+      "title": "Claude Design visual system",
+      "owner": "Claude Design",
+      "dependencies": [
+        "T02"
+      ],
+      "prompt_glob": "prompts/08_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T09",
+      "title": "Claude Design four-stage interaction specification",
+      "owner": "Claude Design",
+      "dependencies": [
+        "T08"
+      ],
+      "prompt_glob": "prompts/09_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T10",
+      "title": "CaseFlow frontend shell and hidden route",
+      "owner": "Codex",
+      "dependencies": [
+        "T09"
+      ],
+      "prompt_glob": "prompts/10_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T11",
+      "title": "Local FastAPI service and mode architecture",
+      "owner": "Codex",
+      "dependencies": [
+        "T04",
+        "T05",
+        "T10"
+      ],
+      "prompt_glob": "prompts/11_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T12",
+      "title": "Synthetic domain, policy engine, and fixtures",
+      "owner": "Codex",
+      "dependencies": [
+        "T11"
+      ],
+      "prompt_glob": "prompts/12_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T13",
+      "title": "CData adapters and source discovery",
+      "owner": "Codex",
+      "dependencies": [
+        "T12"
+      ],
+      "prompt_glob": "prompts/13_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T14",
+      "title": "Evidence collection and provenance",
+      "owner": "Codex",
+      "dependencies": [
+        "T13"
+      ],
+      "prompt_glob": "prompts/14_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T15",
+      "title": "Approval, idempotent execution, and reconciliation",
+      "owner": "Codex",
+      "dependencies": [
+        "T14"
+      ],
+      "prompt_glob": "prompts/15_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T16",
+      "title": "Replay recorder, sanitizer, and evidence binding",
+      "owner": "Codex",
+      "dependencies": [
+        "T15"
+      ],
+      "prompt_glob": "prompts/16_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T17",
+      "title": "Stage 2 strategy and discovery view",
+      "owner": "Codex",
+      "dependencies": [
+        "T16"
+      ],
+      "prompt_glob": "prompts/17_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T18",
+      "title": "Stage 3 technical view",
+      "owner": "Codex",
+      "dependencies": [
+        "T17"
+      ],
+      "prompt_glob": "prompts/18_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T19",
+      "title": "Stage 4 operations and handoff view",
+      "owner": "Codex",
+      "dependencies": [
+        "T18"
+      ],
+      "prompt_glob": "prompts/19_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T20",
+      "title": "Stage 5 product leverage view",
+      "owner": "Codex",
+      "dependencies": [
+        "T19"
+      ],
+      "prompt_glob": "prompts/20_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T21",
+      "title": "Guided interview tours and presenter controls",
+      "owner": "Codex",
+      "dependencies": [
+        "T20"
+      ],
+      "prompt_glob": "prompts/21_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T22",
+      "title": "Observability, evaluations, and failure injection",
+      "owner": "Codex",
+      "dependencies": [
+        "T21"
+      ],
+      "prompt_glob": "prompts/22_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T23",
+      "title": "Security, clean-room, and claim-boundary audit",
+      "owner": "Codex",
+      "dependencies": [
+        "T22"
+      ],
+      "prompt_glob": "prompts/23_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T24",
+      "title": "Accessibility, browser, visual, and performance gates",
+      "owner": "Codex",
+      "dependencies": [
+        "T23"
+      ],
+      "prompt_glob": "prompts/24_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T25",
+      "title": "Live validation and sanitized evidence capture",
+      "owner": "Human + Codex",
+      "dependencies": [
+        "T24"
+      ],
+      "prompt_glob": "prompts/25_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": true
+    },
+    {
+      "id": "T26",
+      "title": "Same-site Vercel integration",
+      "owner": "Codex",
+      "dependencies": [
+        "T25"
+      ],
+      "prompt_glob": "prompts/26_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T27",
+      "title": "Release evidence, deployment, and rollback proof",
+      "owner": "Human + Codex",
+      "dependencies": [
+        "T26"
+      ],
+      "prompt_glob": "prompts/27_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T28",
+      "title": "Interview scripts and rehearsal package",
+      "owner": "Human + Codex",
+      "dependencies": [
+        "T27"
+      ],
+      "prompt_glob": "prompts/28_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T29",
+      "title": "Final independent audit",
+      "owner": "Codex",
+      "dependencies": [
+        "T28"
+      ],
+      "prompt_glob": "prompts/29_*.md",
+      "mandatory": true,
+      "can_complete_with_limitation": false
+    },
+    {
+      "id": "T30",
+      "title": "Optional post-interview enhancements",
+      "owner": "Codex",
+      "dependencies": [
+        "T29"
+      ],
+      "prompt_glob": "prompts/30_*.md",
+      "mandatory": false,
+      "can_complete_with_limitation": false
+    }
+  ]
+}

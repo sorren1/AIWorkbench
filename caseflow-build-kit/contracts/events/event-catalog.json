@@ -1,0 +1,30 @@
+{
+  "schemaVersion": "1.0",
+  "events": [
+    "case.accepted",
+    "identity.resolved",
+    "identity.failed",
+    "source.query.started",
+    "source.query.completed",
+    "source.query.failed",
+    "evidence.completed",
+    "evidence.incomplete",
+    "evidence.conflict_detected",
+    "policy.evaluated",
+    "proposal.created",
+    "approval.requested",
+    "approval.approved",
+    "approval.rejected",
+    "approval.invalidated",
+    "execution.started",
+    "action.succeeded",
+    "action.failed",
+    "execution.completed",
+    "execution.reconciliation_required",
+    "execution.idempotent_replay",
+    "customer_response.drafted",
+    "handoff.generated",
+    "evidence.sanitized",
+    "public_replay.generated"
+  ]
+}

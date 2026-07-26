@@ -1,0 +1,9 @@
+{
+  "caseId": "CS-2026-1042",
+  "idempotencyKey": "caseflow:CS-2026-1042:PROP-001",
+  "existingReceipt": {
+    "creditMemoId": "CM-99001",
+    "amount": "1240.00",
+    "status": "POSTED"
+  }
+}

@@ -1,0 +1,193 @@
+{
+  "schemaVersion": "1.0",
+  "runId": "RUN-CS-2026-1042-001",
+  "events": [
+    {
+      "schemaVersion": "1.0",
+      "eventId": "AE-001",
+      "runId": "RUN-CS-2026-1042-001",
+      "sequence": 1,
+      "eventType": "case.accepted",
+      "actor": {
+        "type": "HUMAN",
+        "id": "USR-ANALYST-01"
+      },
+      "occurredAt": "2026-07-24T17:29:01Z",
+      "subject": {
+        "caseId": "CS-2026-1042"
+      },
+      "outcome": "SUCCEEDED",
+      "payloadDigest": "sha256:9e3fc184d06bbbb7798db28fe1504e08a6befab1f5a1b320e4fdf46dc02d2858",
+      "safeDetails": {
+        "caseId": "CS-2026-1042"
+      }
+    },
+    {
+      "schemaVersion": "1.0",
+      "eventId": "AE-002",
+      "runId": "RUN-CS-2026-1042-001",
+      "sequence": 2,
+      "eventType": "identity.resolved",
+      "actor": {
+        "type": "SERVICE",
+        "id": "caseflow-orchestrator"
+      },
+      "occurredAt": "2026-07-24T17:29:02Z",
+      "subject": {
+        "caseId": "CS-2026-1042"
+      },
+      "outcome": "SUCCEEDED",
+      "payloadDigest": "sha256:b93ed8e5b1eb88a718937b1ac98178e052000bce7492eff22074978475732eb5",
+      "safeDetails": {
+        "accountId": "ACC-10042",
+        "invoiceId": "INV-88201",
+        "shipmentId": "SHP-77431"
+      }
+    },
+    {
+      "schemaVersion": "1.0",
+      "eventId": "AE-003",
+      "runId": "RUN-CS-2026-1042-001",
+      "sequence": 3,
+      "eventType": "evidence.completed",
+      "actor": {
+        "type": "SERVICE",
+        "id": "caseflow-orchestrator"
+      },
+      "occurredAt": "2026-07-24T17:29:03Z",
+      "subject": {
+        "caseId": "CS-2026-1042"
+      },
+      "outcome": "SUCCEEDED",
+      "payloadDigest": "sha256:2b59b726ea27eb48a3125b63d1a421e0156c36c1c83a16d8057aa1566b946934",
+      "safeDetails": {
+        "packetId": "EVP-CS-2026-1042-001",
+        "factCount": 12
+      }
+    },
+    {
+      "schemaVersion": "1.0",
+      "eventId": "AE-004",
+      "runId": "RUN-CS-2026-1042-001",
+      "sequence": 4,
+      "eventType": "policy.evaluated",
+      "actor": {
+        "type": "SERVICE",
+        "id": "policy-engine"
+      },
+      "occurredAt": "2026-07-24T17:30:04Z",
+      "subject": {
+        "caseId": "CS-2026-1042"
+      },
+      "outcome": "SUCCEEDED",
+      "payloadDigest": "sha256:be56c1ea3965ddfdbfc4ec7f9b693da1e894965dd9dc4709c68e81fefa292c0e",
+      "safeDetails": {
+        "ruleId": "EXPEDITE-CARRIER-DELAY-24H",
+        "amount": "1240.00"
+      }
+    },
+    {
+      "schemaVersion": "1.0",
+      "eventId": "AE-005",
+      "runId": "RUN-CS-2026-1042-001",
+      "sequence": 5,
+      "eventType": "proposal.created",
+      "actor": {
+        "type": "SERVICE",
+        "id": "caseflow-orchestrator"
+      },
+      "occurredAt": "2026-07-24T17:30:05Z",
+      "subject": {
+        "caseId": "CS-2026-1042"
+      },
+      "outcome": "SUCCEEDED",
+      "payloadDigest": "sha256:b7f4e01ad556f0bf71aeccbbe76fc4a92c9477f77cd1ac0f9d9992ded187ce19",
+      "safeDetails": {
+        "proposalId": "PROP-CS-2026-1042-001",
+        "approvalClass": "FINANCE_MANAGER"
+      }
+    },
+    {
+      "schemaVersion": "1.0",
+      "eventId": "AE-006",
+      "runId": "RUN-CS-2026-1042-001",
+      "sequence": 6,
+      "eventType": "approval.approved",
+      "actor": {
+        "type": "HUMAN",
+        "id": "USR-FIN-MGR-01"
+      },
+      "occurredAt": "2026-07-24T17:30:06Z",
+      "subject": {
+        "caseId": "CS-2026-1042"
+      },
+      "outcome": "SUCCEEDED",
+      "payloadDigest": "sha256:50f7efe2fe85c34ba9644dc953dcaf2ad469e576b57797257c7b6a58b6b8ba39",
+      "safeDetails": {
+        "approvalId": "APR-CS-2026-1042-001"
+      }
+    },
+    {
+      "schemaVersion": "1.0",
+      "eventId": "AE-007",
+      "runId": "RUN-CS-2026-1042-001",
+      "sequence": 7,
+      "eventType": "action.succeeded",
+      "actor": {
+        "type": "SERVICE",
+        "id": "execution-service"
+      },
+      "occurredAt": "2026-07-24T17:30:07Z",
+      "subject": {
+        "caseId": "CS-2026-1042"
+      },
+      "outcome": "SUCCEEDED",
+      "payloadDigest": "sha256:455f524431454570b1db3882ab11e6ae53667d24f199db882dc4b2f10b3820e3",
+      "safeDetails": {
+        "action": "CREATE_CREDIT_MEMO",
+        "recordId": "CM-99001"
+      }
+    },
+    {
+      "schemaVersion": "1.0",
+      "eventId": "AE-008",
+      "runId": "RUN-CS-2026-1042-001",
+      "sequence": 8,
+      "eventType": "action.succeeded",
+      "actor": {
+        "type": "SERVICE",
+        "id": "execution-service"
+      },
+      "occurredAt": "2026-07-24T17:31:08Z",
+      "subject": {
+        "caseId": "CS-2026-1042"
+      },
+      "outcome": "SUCCEEDED",
+      "payloadDigest": "sha256:e994fe895c9b00cdfe4412982b4c3206dcb48424ddcbf3447e153d3ebc7d335e",
+      "safeDetails": {
+        "action": "UPDATE_CRM_CASE",
+        "recordId": "CASE-1042"
+      }
+    },
+    {
+      "schemaVersion": "1.0",
+      "eventId": "AE-009",
+      "runId": "RUN-CS-2026-1042-001",
+      "sequence": 9,
+      "eventType": "execution.completed",
+      "actor": {
+        "type": "SERVICE",
+        "id": "execution-service"
+      },
+      "occurredAt": "2026-07-24T17:31:09Z",
+      "subject": {
+        "caseId": "CS-2026-1042"
+      },
+      "outcome": "SUCCEEDED",
+      "payloadDigest": "sha256:a5cebad1b94b24f90ec2482ae3cf83936763832b9a8778012abe979a0e97c3b4",
+      "safeDetails": {
+        "executionId": "EXEC-CS-2026-1042-001"
+      }
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "schemaVersion": "1.0",
+  "modes": {
+    "PUBLIC_REPLAY": {
+      "serviceRuntime": false,
+      "externalNetwork": false,
+      "sourceReads": false,
+      "sourceWrites": false,
+      "public": true,
+      "evidenceSource": "CHECKED_IN_SANITIZED_FIXTURES"
+    },
+    "LOCAL_MOCK": {
+      "serviceRuntime": true,
+      "externalNetwork": false,
+      "sourceReads": true,
+      "sourceWrites": true,
+      "public": false,
+      "writeTarget": "RESETTABLE_SYNTHETIC_MOCK",
+      "requiresApprovalForConsequentialAction": true,
+      "requiresIdempotencyKeyForConsequentialAction": true
+    },
+    "LOCAL_LIVE_READ": {
+      "serviceRuntime": true,
+      "externalNetwork": true,
+      "sourceReads": true,
+      "sourceWrites": false,
+      "public": false,
+      "writeTarget": "NONE"
+    },
+    "LOCAL_LIVE_APPROVED_WRITE": {
+      "serviceRuntime": true,
+      "externalNetwork": true,
+      "sourceReads": true,
+      "sourceWrites": true,
+      "public": false,
+      "writeTarget": "ALLOW_LISTED_SYNTHETIC_SOURCE",
+      "requiresEnableFlag": "CASEFLOW_ENABLE_LIVE_WRITES",
+      "requiresApprovalForConsequentialAction": true,
+      "requiresIdempotencyKeyForConsequentialAction": true
+    },
+    "RECORDED_LIVE": {
+      "serviceRuntime": false,
+      "externalNetwork": false,
+      "sourceReads": false,
+      "sourceWrites": false,
+      "public": true,
+      "evidenceSource": "CHECKED_IN_SANITIZED_LIVE_EVIDENCE"
+    }
+  }
+}

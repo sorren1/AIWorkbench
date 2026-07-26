@@ -1,0 +1,229 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tylerwilhite.dev/schemas/caseflow/evidence-packet.schema.json",
+  "title": "CaseFlow Evidence Packet",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "packetId",
+    "runId",
+    "caseId",
+    "collectedAt",
+    "mode",
+    "facts",
+    "completeness",
+    "conflicts",
+    "policy",
+    "digest"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "packetId": {
+      "type": "string",
+      "pattern": "^EVP-"
+    },
+    "runId": {
+      "type": "string",
+      "pattern": "^RUN-"
+    },
+    "caseId": {
+      "type": "string",
+      "pattern": "^CS-"
+    },
+    "collectedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "mode": {
+      "enum": [
+        "PUBLIC_REPLAY",
+        "LOCAL_MOCK",
+        "LOCAL_LIVE_READ",
+        "LOCAL_LIVE_APPROVED_WRITE",
+        "RECORDED_LIVE"
+      ]
+    },
+    "facts": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/fact"
+      }
+    },
+    "completeness": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "complete",
+        "requiredFactKeys",
+        "missingFactKeys"
+      ],
+      "properties": {
+        "complete": {
+          "type": "boolean"
+        },
+        "requiredFactKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "missingFactKeys": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "conflicts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/conflict"
+      }
+    },
+    "policy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "policyId",
+        "version",
+        "effectiveAt",
+        "sourceReference",
+        "digest"
+      ],
+      "properties": {
+        "policyId": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "effectiveAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "sourceReference": {
+          "$ref": "#/$defs/sourceReference"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    }
+  },
+  "$defs": {
+    "sourceReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceAlias",
+        "object",
+        "recordId",
+        "fields"
+      ],
+      "properties": {
+        "sourceAlias": {
+          "type": "string"
+        },
+        "object": {
+          "type": "string"
+        },
+        "recordId": {
+          "type": "string"
+        },
+        "fields": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "queryTemplateId": {
+          "type": "string"
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "fact": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "key",
+        "value",
+        "valueType",
+        "sourceReference",
+        "digest"
+      ],
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "value": {},
+        "valueType": {
+          "enum": [
+            "string",
+            "money",
+            "datetime",
+            "duration",
+            "boolean",
+            "enum",
+            "integer"
+          ]
+        },
+        "sourceReference": {
+          "$ref": "#/$defs/sourceReference"
+        },
+        "digest": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        }
+      }
+    },
+    "conflict": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "conflictId",
+        "factKey",
+        "severity",
+        "description",
+        "sourceReferences"
+      ],
+      "properties": {
+        "conflictId": {
+          "type": "string"
+        },
+        "factKey": {
+          "type": "string"
+        },
+        "severity": {
+          "enum": [
+            "MATERIAL",
+            "NON_MATERIAL"
+          ]
+        },
+        "description": {
+          "type": "string"
+        },
+        "sourceReferences": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "$ref": "#/$defs/sourceReference"
+          }
+        }
+      }
+    }
+  }
+}

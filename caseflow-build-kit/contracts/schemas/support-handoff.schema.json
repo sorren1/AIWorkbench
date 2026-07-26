@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tylerwilhite.dev/schemas/caseflow/support-handoff.schema.json",
+  "title": "Support Handoff",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "caseId",
+    "currentState",
+    "customerImpact",
+    "completedActions",
+    "pendingActions",
+    "failureCategory",
+    "currentOwner",
+    "nextUpdateAt",
+    "runbookRef",
+    "knownLimitations"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "caseId": {
+      "type": "string"
+    },
+    "currentState": {
+      "enum": [
+        "NEW",
+        "IDENTITY_RESOLVING",
+        "EVIDENCE_COLLECTING",
+        "EVIDENCE_INCOMPLETE",
+        "EVIDENCE_CONFLICT",
+        "RECOMMENDATION_READY",
+        "APPROVAL_REQUIRED",
+        "APPROVED",
+        "REJECTED",
+        "EXECUTION_PENDING",
+        "EXECUTING",
+        "RECONCILIATION_REQUIRED",
+        "COMPLETED",
+        "CLOSED_NO_ACTION",
+        "FAILED_SAFE"
+      ]
+    },
+    "customerImpact": {
+      "type": "string"
+    },
+    "completedActions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "pendingActions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "failureCategory": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "currentOwner": {
+      "type": "string"
+    },
+    "nextUpdateAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "runbookRef": {
+      "type": "string"
+    },
+    "knownLimitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    }
+  }
+}

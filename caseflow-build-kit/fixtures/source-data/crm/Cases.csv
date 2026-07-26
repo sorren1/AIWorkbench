@@ -1,0 +1,3 @@
+case_id,case_number,account_id,contact_id,status,dispute_type,invoice_id,shipment_id,created_at,owner_id,resolution_note
+CASE-1042,CS-2026-1042,ACC-10042,CON-2042,Investigating,EXPEDITE_SURCHARGE,INV-88201,SHP-77431,2026-07-13T09:15:00-05:00,USR-ANALYST-01,
+CASE-1043,CS-2026-1043,ACC-10043,CON-2043,Investigating,EXPEDITE_SURCHARGE,INV-88202,SHP-77432,2026-07-14T10:00:00-05:00,USR-ANALYST-01,

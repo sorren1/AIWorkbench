@@ -6,6 +6,7 @@ import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
 const lintableExtension = /\.(?:[cm]?[jt]s|[jt]sx)$/iu;
+const pythonExtension = /\.pyw?$/iu;
 
 function normalizedRepositoryPath(path: string): string {
   const normalized = path.replaceAll("\\", "/");
@@ -45,6 +46,10 @@ export async function trackedSourcePaths(root: string): Promise<string[]> {
 
 export function lintableTrackedSourcePaths(paths: readonly string[]): string[] {
   return paths.filter((path) => lintableExtension.test(path)).sort();
+}
+
+export function pythonTrackedSourcePaths(paths: readonly string[]): string[] {
+  return paths.filter((path) => pythonExtension.test(path)).sort();
 }
 
 export async function trackedSourceDigest(

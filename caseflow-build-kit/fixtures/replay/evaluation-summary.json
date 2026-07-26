@@ -1,0 +1,11 @@
+{
+  "schemaVersion": "1.0",
+  "classification": "SIMULATED",
+  "goldCases": 5,
+  "passed": 5,
+  "unsupportedClaims": 0,
+  "unauthorizedWritesBlocked": 3,
+  "duplicateCreditsCreated": 0,
+  "partialFailuresClassified": 1,
+  "note": "Expected deterministic fixture result. Replace classification with IMPLEMENTED after T22 tests pass."
+}

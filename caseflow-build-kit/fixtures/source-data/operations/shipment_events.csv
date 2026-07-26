@@ -1,0 +1,6 @@
+event_id,shipment_id,event_type,event_at,cause_code,reviewed,notes
+EVT-77431-01,SHP-77431,PICKED_UP,2026-07-09T08:15:00-05:00,NONE,true,Picked up on schedule
+EVT-77431-02,SHP-77431,DELAY_RECORDED,2026-07-10T13:30:00-05:00,CARRIER_CAPACITY,true,Carrier capacity failure; customer available
+EVT-77431-03,SHP-77431,DELIVERED,2026-07-12T09:20:00-05:00,CARRIER_CAPACITY,true,Final delivery
+EVT-77432-01,SHP-77432,DELIVERY_ATTEMPT,2026-07-11T15:40:00-05:00,CUSTOMER_UNAVAILABLE,true,Receiving dock closed by customer
+EVT-77432-02,SHP-77432,DELIVERED,2026-07-13T12:00:00-05:00,CUSTOMER_UNAVAILABLE,true,Delivered after customer rescheduled

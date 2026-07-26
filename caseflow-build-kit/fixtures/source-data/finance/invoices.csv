@@ -1,0 +1,3 @@
+invoice_id,account_id,order_id,invoice_date,currency,total_amount,status
+INV-88201,ACC-10042,ORD-77309,2026-07-08,USD,24800.00,POSTED
+INV-88202,ACC-10043,ORD-77310,2026-07-09,USD,18750.00,POSTED

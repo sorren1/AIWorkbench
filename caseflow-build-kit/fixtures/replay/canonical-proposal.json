@@ -1,0 +1,29 @@
+{
+  "schemaVersion": "1.0",
+  "proposalId": "PROP-CS-2026-1042-001",
+  "caseId": "CS-2026-1042",
+  "evidencePacketId": "EVP-CS-2026-1042-001",
+  "evidenceDigest": "sha256:236911bd2fad61100ebe47971cfd194c7917513ca04ef05a307c90ccd39f19f0",
+  "disposition": "ELIGIBLE_CREDIT",
+  "amount": {
+    "currency": "USD",
+    "amount": "1240.00"
+  },
+  "policyRuleId": "EXPEDITE-CARRIER-DELAY-24H",
+  "approvalClass": "FINANCE_MANAGER",
+  "actions": [
+    "CREATE_CREDIT_MEMO",
+    "UPDATE_CRM_CASE",
+    "DRAFT_CUSTOMER_RESPONSE"
+  ],
+  "supportingFactKeys": [
+    "invoice.expedite_charge",
+    "shipment.delay_minutes",
+    "shipment.cause_category",
+    "shipment.cause_reviewed",
+    "credit.prior_exists"
+  ],
+  "explanationDraft": "The shipment arrived 40 hours and 20 minutes after the committed delivery time because of a reviewed carrier-capacity delay. Policy 2026.2 permits crediting the posted USD 1,240.00 expedite surcharge. Finance Manager approval is required before action.",
+  "createdAt": "2026-07-24T17:30:06Z",
+  "digest": "sha256:211dcffcd20cb0c3f54afc5ecce993fb8903fda7013c81c293c7766cfb2b00ea"
+}

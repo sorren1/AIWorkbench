@@ -2,16 +2,16 @@
 
 > Generated from `project/status.json` by `tools/render_status.py`. Do not hand-edit task rows.
 
-**Project:** CaseFlow â€” Governed Multi-System Customer Resolution
+**Project:** CaseFlow — Governed Multi-System Customer Resolution
 **Version:** 0.1.0-planning
 **Last updated:** 2026-07-26
-**Current task:** T02
+**Current task:** T03
 
 | ID | Task | Owner | Status | Evidence / limitation summary |
 |---|---|---|---|---|
 | T00 | Bootstrap and operator decisions | Human | COMPLETE | Evidence: caseflow-build-kit/deliverables/operator-decisions.md, caseflow-build-kit/deliverables/completion-reports/T00.md, caseflow-build-kit/project/STATUS.md — Host repository, feature branch, /caseflow routes, Profile A with C/D fallbacks, synthetic-only boundary, replay-only public runtime, local live-read permission, T25 write-decision gate, T01-T07 preauthorization, and post-T02 Claude Design parallelization are locked. Broad host-repository build commands are intentionally identified and executed during T01 repository preflight. |
 | T01 | Repository preflight and branch baseline | Codex | COMPLETE | Evidence: caseflow-build-kit/deliverables/repository-preflight.md, caseflow-build-kit/deliverables/completion-reports/T01.md, caseflow-build-kit/project/STATUS.md — Baseline commit de11d11944b826c7b8b9087450be6ddc7e0de8a3 on feature/caseflow-reference-implementation. The build emitted 77 files and no CaseFlow/build-kit output. npm run check passed; the first check:all attempt reached Playwright but default port 4175 was occupied by an unrelated user project, and the documented port-4177 rerun passed all gates. No product code, dependency, route, navigation, sitemap, deployment, or public claim changed. D-006 preserves the local build-kit exclusion while allowing only required T01 evidence paths into the focused commit; R-013 tracks the remaining archive-durability risk. |
-| T02 | Architecture and contract reconciliation | Codex | NOT_STARTED | — |
+| T02 | Architecture and contract reconciliation | Codex | COMPLETE | Evidence: caseflow-build-kit/deliverables/architecture-reconciliation.md, caseflow-build-kit/deliverables/completion-reports/T02.md, caseflow-build-kit/project/ARTIFACT_MANIFEST.json — Limitations: Hosted CodeQL is configured for JavaScript/TypeScript and Python but was not run for T02; a future release still requires commit-bound hosted CodeQL evidence.; The pinned Ruff and supply-chain scans require network access and Docker with Linux containers; missing prerequisites remain fail-closed blockers. — D-007 supersedes the T01 local-only distribution boundary: the complete non-secret build kit is tracked, R-013 is closed, and narrow local-state exclusions remain. OpenAPI, mode, route, tool, schema, approval, execution, handoff, claim, and workflow contracts are reconciled. Git-index verification exposed and then verified the correction of platform-dependent text hashes; integrity ledgers now canonicalize UTF-8 line endings. The successful full aggregate passed 177 unit tests with 2 credential-gated skips, 200 Playwright tests with 2 intentional browser-capability skips, all Lighthouse assertions, and 8 passing supply-chain controls. One preceding full-gate attempt passed the deterministic check and 199 browser tests but had one transient WebKit CSP/style-injection failure; the exact focused rerun and subsequent full aggregate passed. No CaseFlow product entrypoint, navigation, sitemap entry, deployment, live probe, or public behavior was added. |
 | T03 | CData Developer Edition capability probe | Human + Codex | NOT_STARTED | — |
 | T04 | Python SDK and official mock-server spike | Codex | NOT_STARTED | — |
 | T05 | Query MCP and Management MCP spike | Codex | NOT_STARTED | — |

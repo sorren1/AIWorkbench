@@ -20,6 +20,7 @@ import { validateSuppressionPolicy } from "../scripts/supply-chain/suppressionPo
 import { versionAtLeast } from "../scripts/supply-chain/versionPolicy";
 import {
   lintableTrackedSourcePaths,
+  pythonTrackedSourcePaths,
   trackedSourceDigest,
   trackedSourcePaths,
 } from "../scripts/trackedSourceInventory";
@@ -35,6 +36,7 @@ describe("supply-chain policy", () => {
   it("uses a deterministic tracked-source inventory instead of generated workspace artifacts", async () => {
     const paths = await trackedSourcePaths(root);
     const lintPaths = lintableTrackedSourcePaths(paths);
+    const pythonPaths = pythonTrackedSourcePaths(paths);
     expect(paths).toContain("package.json");
     expect(paths).toContain("scripts/trackedSourceInventory.ts");
     expect(paths.every((path) => !path.includes("\\"))).toBe(true);
@@ -48,6 +50,7 @@ describe("supply-chain policy", () => {
     ).toBe(true);
     expect(lintPaths.length).toBeGreaterThan(0);
     expect(lintPaths.every((path) => /\.(?:[cm]?[jt]s|[jt]sx)$/u.test(path))).toBe(true);
+    expect(pythonPaths.every((path) => /\.pyw?$/u.test(path))).toBe(true);
     await expect(trackedSourceDigest(root, paths)).resolves.toMatch(/^[a-f0-9]{64}$/u);
   });
 
@@ -57,6 +60,7 @@ describe("supply-chain policy", () => {
     const licenses = licensePolicySchema.parse(await json("security/license-policy.json"));
 
     expect(tooling.gitleaks.image).toMatch(/@sha256:[a-f0-9]{64}$/);
+    expect(tooling.ruff.image).toMatch(/@sha256:[a-f0-9]{64}$/);
     expect(tooling.trivy.image).toMatch(/@sha256:[a-f0-9]{64}$/);
     expect(tooling.cosign.image).toMatch(/@sha256:[a-f0-9]{64}$/);
     expect(tooling.codeql.actionSha).toMatch(/^[a-f0-9]{40}$/);
@@ -315,6 +319,11 @@ describe("supply-chain policy", () => {
         "ops/other/Dockerfile",
       ]).map((finding) => finding.path),
     ).toEqual(["ops/other/Dockerfile", "tools/task.py"]);
+    expect(
+      analyzeLanguageCoverage(["src/index.ts", "ops/sandbox/Dockerfile", "tools/task.py"], {
+        python: true,
+      }),
+    ).toEqual([]);
   });
 
   it("validates the sandbox Dockerfile against its pinned image policy", async () => {

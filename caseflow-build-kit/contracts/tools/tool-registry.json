@@ -1,0 +1,174 @@
+{
+  "schemaVersion": "1.1",
+  "registryBoundary": {
+    "universalCDataTools": "Names are public-document assumptions until T03 records actual Developer Edition tools.",
+    "caseflowServiceTools": "Application-owned local service operations; they are not represented as Connect AI Toolkits.",
+    "publicAvailability": false
+  },
+  "universalCDataTools": [
+    {
+      "name": "getCatalogs",
+      "authority": "read-discovery",
+      "availability": "PROBE_REQUIRED"
+    },
+    {
+      "name": "getSchemas",
+      "authority": "read-discovery",
+      "availability": "PROBE_REQUIRED"
+    },
+    {
+      "name": "getTables",
+      "authority": "read-discovery",
+      "availability": "PROBE_REQUIRED"
+    },
+    {
+      "name": "getColumns",
+      "authority": "read-discovery",
+      "availability": "PROBE_REQUIRED"
+    },
+    {
+      "name": "queryData",
+      "authority": "read-query",
+      "availability": "PROBE_REQUIRED"
+    },
+    {
+      "name": "getProcedures",
+      "authority": "read-discovery",
+      "availability": "PROBE_REQUIRED"
+    },
+    {
+      "name": "getProcedureParameters",
+      "authority": "read-discovery",
+      "availability": "PROBE_REQUIRED"
+    },
+    {
+      "name": "executeProcedure",
+      "authority": "source-dependent-action",
+      "availability": "PROBE_REQUIRED",
+      "enabled": false,
+      "earliestDecisionTask": "T25"
+    }
+  ],
+  "caseflowServiceTools": [
+    {
+      "name": "resolve_customer_case",
+      "allowedModes": [
+        "LOCAL_MOCK",
+        "LOCAL_LIVE_READ",
+        "LOCAL_LIVE_APPROVED_WRITE"
+      ],
+      "input": {
+        "caseId": "string"
+      },
+      "output": {
+        "accountId": "string",
+        "invoiceId": "string",
+        "shipmentId": "string"
+      },
+      "effect": "READ_ONLY",
+      "sourceWrites": false
+    },
+    {
+      "name": "collect_resolution_evidence",
+      "allowedModes": [
+        "LOCAL_MOCK",
+        "LOCAL_LIVE_READ",
+        "LOCAL_LIVE_APPROVED_WRITE"
+      ],
+      "input": {
+        "caseId": "string"
+      },
+      "outputSchema": "contracts/schemas/evidence-packet.schema.json",
+      "effect": "READ_ONLY",
+      "sourceWrites": false
+    },
+    {
+      "name": "evaluate_resolution_policy",
+      "allowedModes": [
+        "LOCAL_MOCK",
+        "LOCAL_LIVE_READ",
+        "LOCAL_LIVE_APPROVED_WRITE"
+      ],
+      "input": {
+        "evidencePacketId": "string"
+      },
+      "outputSchema": "contracts/schemas/resolution-proposal.schema.json",
+      "effect": "LOCAL_DETERMINISTIC_COMPUTE",
+      "sourceWrites": false,
+      "deterministic": true
+    },
+    {
+      "name": "record_resolution_decision",
+      "allowedModes": [
+        "LOCAL_MOCK",
+        "LOCAL_LIVE_READ",
+        "LOCAL_LIVE_APPROVED_WRITE"
+      ],
+      "input": {
+        "proposalId": "string",
+        "reviewerId": "string",
+        "decision": "APPROVED|REJECTED",
+        "reason": "string"
+      },
+      "outputSchema": "contracts/schemas/approval-record.schema.json",
+      "effect": "LOCAL_APPROVAL_JOURNAL_WRITE",
+      "sourceWrites": false,
+      "humanOnly": true,
+      "guards": [
+        "authorized synthetic reviewer",
+        "reviewer distinct from proposer",
+        "current proposal and evidence digests",
+        "unexpired decision window"
+      ]
+    },
+    {
+      "name": "apply_approved_resolution",
+      "allowedModes": [
+        "LOCAL_MOCK",
+        "LOCAL_LIVE_APPROVED_WRITE"
+      ],
+      "input": {
+        "proposalId": "string",
+        "approvalId": "string",
+        "idempotencyKey": "string"
+      },
+      "outputSchema": "contracts/schemas/execution-record.schema.json",
+      "effect": "CONSEQUENTIAL_SOURCE_WRITE",
+      "sourceWrites": true,
+      "guards": [
+        "mode explicitly permits source writes",
+        "CASEFLOW_ENABLE_LIVE_WRITES=true for live mode",
+        "allow-listed owner-controlled synthetic target",
+        "complete conflict-free evidence",
+        "valid distinct-reviewer approval",
+        "matching proposal and evidence digests",
+        "approved exact amount and action set",
+        "unique idempotency key and matching payload digest"
+      ]
+    },
+    {
+      "name": "reconcile_resolution",
+      "allowedModes": [
+        "LOCAL_MOCK",
+        "LOCAL_LIVE_APPROVED_WRITE"
+      ],
+      "input": {
+        "executionId": "string",
+        "operatorId": "string",
+        "reason": "string"
+      },
+      "outputSchema": "contracts/schemas/execution-record.schema.json",
+      "effect": "CONSEQUENTIAL_SOURCE_WRITE",
+      "sourceWrites": true,
+      "guards": [
+        "RECONCILIATION_REQUIRED execution status",
+        "mode explicitly permits source writes",
+        "CASEFLOW_ENABLE_LIVE_WRITES=true for live mode",
+        "allow-listed owner-controlled synthetic target",
+        "valid prior approval and digests",
+        "prior finance receipt reuse",
+        "retry only the incomplete CRM action"
+      ]
+    }
+  ]
+}

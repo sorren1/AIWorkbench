@@ -1,0 +1,113 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tylerwilhite.dev/schemas/caseflow/resolution-proposal.schema.json",
+  "title": "Resolution Proposal",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "proposalId",
+    "caseId",
+    "evidencePacketId",
+    "evidenceDigest",
+    "disposition",
+    "amount",
+    "policyRuleId",
+    "approvalClass",
+    "actions",
+    "supportingFactKeys",
+    "digest",
+    "createdAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "proposalId": {
+      "type": "string",
+      "pattern": "^PROP-"
+    },
+    "caseId": {
+      "type": "string",
+      "pattern": "^CS-"
+    },
+    "evidencePacketId": {
+      "type": "string",
+      "pattern": "^EVP-"
+    },
+    "evidenceDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "disposition": {
+      "enum": [
+        "ELIGIBLE_CREDIT",
+        "NOT_ELIGIBLE",
+        "ESCALATE"
+      ]
+    },
+    "amount": {
+      "$ref": "#/$defs/money"
+    },
+    "policyRuleId": {
+      "type": "string"
+    },
+    "approvalClass": {
+      "enum": [
+        "NONE",
+        "SUPERVISOR",
+        "FINANCE_MANAGER"
+      ]
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "enum": [
+          "CREATE_CREDIT_MEMO",
+          "UPDATE_CRM_CASE",
+          "DRAFT_CUSTOMER_RESPONSE"
+        ]
+      }
+    },
+    "supportingFactKeys": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string"
+      }
+    },
+    "explanationDraft": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "digest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "currency",
+        "amount"
+      ],
+      "properties": {
+        "currency": {
+          "const": "USD"
+        },
+        "amount": {
+          "type": "string",
+          "pattern": "^[0-9]+\\.[0-9]{2}$"
+        }
+      }
+    }
+  }
+}

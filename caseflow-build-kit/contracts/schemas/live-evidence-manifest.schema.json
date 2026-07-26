@@ -1,0 +1,118 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tylerwilhite.dev/schemas/caseflow/live-evidence-manifest.schema.json",
+  "title": "Live Evidence Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "manifestId",
+    "mode",
+    "sourceCommit",
+    "collectedAt",
+    "sanitizedAt",
+    "sourceAliases",
+    "capabilities",
+    "artifacts",
+    "limitations",
+    "reviewedBy"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "manifestId": {
+      "type": "string"
+    },
+    "mode": {
+      "enum": [
+        "LOCAL_LIVE_READ",
+        "LOCAL_LIVE_APPROVED_WRITE",
+        "RECORDED_LIVE"
+      ]
+    },
+    "sourceCommit": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$"
+    },
+    "collectedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sanitizedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "sourceAliases": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "capabilities": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "name",
+          "status"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "status": {
+            "enum": [
+              "VALIDATED",
+              "LIMITED",
+              "NOT_TESTED"
+            ]
+          },
+          "evidence": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "path",
+          "sha256",
+          "classification"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "classification": {
+            "enum": [
+              "LIVE_VALIDATED",
+              "RECORDED"
+            ]
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reviewedBy": {
+      "type": "string"
+    }
+  }
+}

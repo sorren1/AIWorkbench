@@ -1,0 +1,279 @@
+{
+  "schemaVersion": "1.0",
+  "packetId": "EVP-CS-2026-1042-001",
+  "runId": "RUN-CS-2026-1042-001",
+  "caseId": "CS-2026-1042",
+  "collectedAt": "2026-07-24T17:30:05Z",
+  "mode": "PUBLIC_REPLAY",
+  "facts": [
+    {
+      "key": "case.account_id",
+      "value": "ACC-10042",
+      "valueType": "string",
+      "sourceReference": {
+        "sourceAlias": "CaseFlowCRM",
+        "object": "Cases",
+        "recordId": "CASE-1042",
+        "fields": [
+          "case_number",
+          "account_id",
+          "invoice_id",
+          "shipment_id",
+          "dispute_type"
+        ],
+        "queryTemplateId": "CRM-CASE-BY-NUMBER",
+        "observedAt": "2026-07-24T17:30:01Z"
+      },
+      "digest": "sha256:03d5ba8d31f9e59023af6e26867e649ea468b45ea42fc5c4ed642654e7dec9b9"
+    },
+    {
+      "key": "case.invoice_id",
+      "value": "INV-88201",
+      "valueType": "string",
+      "sourceReference": {
+        "sourceAlias": "CaseFlowCRM",
+        "object": "Cases",
+        "recordId": "CASE-1042",
+        "fields": [
+          "case_number",
+          "account_id",
+          "invoice_id",
+          "shipment_id",
+          "dispute_type"
+        ],
+        "queryTemplateId": "CRM-CASE-BY-NUMBER",
+        "observedAt": "2026-07-24T17:30:01Z"
+      },
+      "digest": "sha256:d2b49896207829abc1eb21f060c34191bf6a527b25fec8ae3d30dadaeff8b225"
+    },
+    {
+      "key": "case.shipment_id",
+      "value": "SHP-77431",
+      "valueType": "string",
+      "sourceReference": {
+        "sourceAlias": "CaseFlowCRM",
+        "object": "Cases",
+        "recordId": "CASE-1042",
+        "fields": [
+          "case_number",
+          "account_id",
+          "invoice_id",
+          "shipment_id",
+          "dispute_type"
+        ],
+        "queryTemplateId": "CRM-CASE-BY-NUMBER",
+        "observedAt": "2026-07-24T17:30:01Z"
+      },
+      "digest": "sha256:57aea8b7e22ac04fbe6a30975bffec26423c714bee5d979e4c245fa5f4ba58f1"
+    },
+    {
+      "key": "invoice.currency",
+      "value": "USD",
+      "valueType": "enum",
+      "sourceReference": {
+        "sourceAlias": "CaseFlowOperations",
+        "object": "finance.invoices",
+        "recordId": "INV-88201",
+        "fields": [
+          "invoice_id",
+          "account_id",
+          "order_id",
+          "currency",
+          "total_amount",
+          "status"
+        ],
+        "queryTemplateId": "FIN-INVOICE-BY-ID",
+        "observedAt": "2026-07-24T17:30:02Z"
+      },
+      "digest": "sha256:448d98d6ab09ac5579510ea7b8ebc068bbfe138df88b01f310e9ba9f00fa680a"
+    },
+    {
+      "key": "invoice.total_amount",
+      "value": "24800.00",
+      "valueType": "money",
+      "sourceReference": {
+        "sourceAlias": "CaseFlowOperations",
+        "object": "finance.invoices",
+        "recordId": "INV-88201",
+        "fields": [
+          "invoice_id",
+          "account_id",
+          "order_id",
+          "currency",
+          "total_amount",
+          "status"
+        ],
+        "queryTemplateId": "FIN-INVOICE-BY-ID",
+        "observedAt": "2026-07-24T17:30:02Z"
+      },
+      "digest": "sha256:12bda04c06971c7561bfd3cdc1be69fb077e4d469f816b19d50a18c85cd1cf96"
+    },
+    {
+      "key": "invoice.expedite_charge",
+      "value": "1240.00",
+      "valueType": "money",
+      "sourceReference": {
+        "sourceAlias": "CaseFlowOperations",
+        "object": "finance.invoice_lines",
+        "recordId": "IL-88201-02",
+        "fields": [
+          "charge_code",
+          "line_amount"
+        ],
+        "queryTemplateId": "FIN-EXPEDITE-LINE",
+        "observedAt": "2026-07-24T17:30:02Z"
+      },
+      "digest": "sha256:f6bbfc64dc239697252222024e839b43713563f158c9db8bbd28b54f4b44e335"
+    },
+    {
+      "key": "shipment.committed_delivery_at",
+      "value": "2026-07-10T22:00:00Z",
+      "valueType": "datetime",
+      "sourceReference": {
+        "sourceAlias": "CaseFlowOperations",
+        "object": "operations.shipments",
+        "recordId": "SHP-77431",
+        "fields": [
+          "committed_delivery_at",
+          "actual_delivery_at",
+          "status"
+        ],
+        "queryTemplateId": "OPS-SHIPMENT-BY-ID",
+        "observedAt": "2026-07-24T17:30:03Z"
+      },
+      "digest": "sha256:5d65a3f1b69d0a0d2d675dd7638e988e508b38e30370b9d785e903b8cfef49bb"
+    },
+    {
+      "key": "shipment.actual_delivery_at",
+      "value": "2026-07-12T14:20:00Z",
+      "valueType": "datetime",
+      "sourceReference": {
+        "sourceAlias": "CaseFlowOperations",
+        "object": "operations.shipments",
+        "recordId": "SHP-77431",
+        "fields": [
+          "committed_delivery_at",
+          "actual_delivery_at",
+          "status"
+        ],
+        "queryTemplateId": "OPS-SHIPMENT-BY-ID",
+        "observedAt": "2026-07-24T17:30:03Z"
+      },
+      "digest": "sha256:7cf6b0ac30b69844614f861219b8e6c0afed1c33624d061b1f0651fa3706759a"
+    },
+    {
+      "key": "shipment.delay_minutes",
+      "value": 2420,
+      "valueType": "duration",
+      "sourceReference": {
+        "sourceAlias": "CaseFlowOperations",
+        "object": "operations.shipments",
+        "recordId": "SHP-77431",
+        "fields": [
+          "committed_delivery_at",
+          "actual_delivery_at",
+          "status"
+        ],
+        "queryTemplateId": "OPS-SHIPMENT-BY-ID",
+        "observedAt": "2026-07-24T17:30:03Z"
+      },
+      "digest": "sha256:2196c1372ab10dd488e1037371170b0f53fc560aa1975582a861df5774625494"
+    },
+    {
+      "key": "shipment.cause_category",
+      "value": "CARRIER_CAUSED",
+      "valueType": "enum",
+      "sourceReference": {
+        "sourceAlias": "CaseFlowOperations",
+        "object": "operations.shipment_events",
+        "recordId": "EVT-77431-02",
+        "fields": [
+          "cause_code",
+          "reviewed",
+          "notes"
+        ],
+        "queryTemplateId": "OPS-REVIEWED-DELAY-CAUSE",
+        "observedAt": "2026-07-24T17:30:03Z"
+      },
+      "digest": "sha256:064a6c94bd73760229ff0eab9c57805bc9b4afa8ec17a861034153e05b80d888"
+    },
+    {
+      "key": "shipment.cause_reviewed",
+      "value": true,
+      "valueType": "boolean",
+      "sourceReference": {
+        "sourceAlias": "CaseFlowOperations",
+        "object": "operations.shipment_events",
+        "recordId": "EVT-77431-02",
+        "fields": [
+          "cause_code",
+          "reviewed",
+          "notes"
+        ],
+        "queryTemplateId": "OPS-REVIEWED-DELAY-CAUSE",
+        "observedAt": "2026-07-24T17:30:03Z"
+      },
+      "digest": "sha256:9d7a9d3a38838d07a52d3744a503b419ddeedcd6e433482a88cc2293374a4cb3"
+    },
+    {
+      "key": "credit.prior_exists",
+      "value": false,
+      "valueType": "boolean",
+      "sourceReference": {
+        "sourceAlias": "CaseFlowOperations",
+        "object": "finance.invoices",
+        "recordId": "INV-88201",
+        "fields": [
+          "invoice_id",
+          "account_id",
+          "order_id",
+          "currency",
+          "total_amount",
+          "status"
+        ],
+        "queryTemplateId": "FIN-INVOICE-BY-ID",
+        "observedAt": "2026-07-24T17:30:02Z"
+      },
+      "digest": "sha256:0542912f458459cdf862bfec8b0a3b2b9b70f21cded99e67aa761abf6d1dcf81"
+    }
+  ],
+  "completeness": {
+    "complete": true,
+    "requiredFactKeys": [
+      "case.account_id",
+      "case.invoice_id",
+      "case.shipment_id",
+      "invoice.currency",
+      "invoice.total_amount",
+      "invoice.expedite_charge",
+      "shipment.committed_delivery_at",
+      "shipment.actual_delivery_at",
+      "shipment.delay_minutes",
+      "shipment.cause_category",
+      "shipment.cause_reviewed",
+      "credit.prior_exists"
+    ],
+    "missingFactKeys": []
+  },
+  "conflicts": [],
+  "policy": {
+    "policyId": "POL-2026.2",
+    "version": "2026.2",
+    "effectiveAt": "2026-07-01T00:00:00Z",
+    "sourceReference": {
+      "sourceAlias": "CaseFlowPolicy",
+      "object": "resolution-policy-2026-2.md",
+      "recordId": "POL-2026.2",
+      "fields": [
+        "policyId",
+        "version",
+        "effective",
+        "rule"
+      ],
+      "queryTemplateId": "POLICY-EFFECTIVE-VERSION",
+      "observedAt": "2026-07-24T17:30:04Z"
+    },
+    "digest": "sha256:718243440eb14b0b88cafdd0b05c5ecfed15e54f9df868f272f4aec977ad2692"
+  },
+  "digest": "sha256:236911bd2fad61100ebe47971cfd194c7917513ca04ef05a307c90ccd39f19f0"
+}

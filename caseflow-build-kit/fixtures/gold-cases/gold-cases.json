@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "1.0",
+  "cases": [
+    {
+      "id": "GC-001",
+      "name": "Carrier-caused delay eligible for Finance Manager credit",
+      "caseId": "CS-2026-1042",
+      "expectedState": "APPROVAL_REQUIRED",
+      "expectedDisposition": "ELIGIBLE_CREDIT",
+      "expectedAmount": {
+        "currency": "USD",
+        "amount": "1240.00"
+      },
+      "expectedApprovalClass": "FINANCE_MANAGER",
+      "requiredActions": [
+        "CREATE_CREDIT_MEMO",
+        "UPDATE_CRM_CASE",
+        "DRAFT_CUSTOMER_RESPONSE"
+      ],
+      "prohibitedActionsBeforeApproval": [
+        "CREATE_CREDIT_MEMO",
+        "UPDATE_CRM_CASE"
+      ]
+    },
+    {
+      "id": "GC-002",
+      "name": "Customer-caused delay is not eligible",
+      "caseId": "CS-2026-1043",
+      "expectedState": "CLOSED_NO_ACTION",
+      "expectedDisposition": "NOT_ELIGIBLE",
+      "expectedAmount": {
+        "currency": "USD",
+        "amount": "0.00"
+      },
+      "expectedApprovalClass": "NONE",
+      "requiredActions": [
+        "DRAFT_CUSTOMER_RESPONSE"
+      ]
+    },
+    {
+      "id": "GC-003",
+      "name": "Conflicting terminal shipment evidence escalates",
+      "fixture": "fixtures/gold-cases/conflicting-delivery.json",
+      "expectedState": "EVIDENCE_CONFLICT",
+      "expectedDisposition": "ESCALATE",
+      "requiredActions": []
+    },
+    {
+      "id": "GC-004",
+      "name": "Missing policy fails safe",
+      "fixture": "fixtures/gold-cases/missing-policy.json",
+      "expectedState": "EVIDENCE_INCOMPLETE",
+      "expectedDisposition": "ESCALATE",
+      "expectedFailureCategory": "POLICY_UNAVAILABLE"
+    },
+    {
+      "id": "GC-005",
+      "name": "Duplicate execution returns original receipt",
+      "fixture": "fixtures/gold-cases/duplicate-execution.json",
+      "expectedState": "COMPLETED",
+      "expectedExecutionStatus": "IDEMPOTENT_REPLAY",
+      "expectedNewCredits": 0
+    }
+  ]
+}

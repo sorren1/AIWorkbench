@@ -1,0 +1,133 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tylerwilhite.dev/schemas/caseflow/execution-record.schema.json",
+  "title": "Execution Record",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "executionId",
+    "proposalId",
+    "approvalId",
+    "idempotencyKey",
+    "payloadDigest",
+    "status",
+    "attempts",
+    "createdAt",
+    "updatedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "1.0"
+    },
+    "executionId": {
+      "type": "string",
+      "pattern": "^EXEC-"
+    },
+    "proposalId": {
+      "type": "string",
+      "pattern": "^PROP-"
+    },
+    "approvalId": {
+      "type": "string",
+      "pattern": "^APR-"
+    },
+    "idempotencyKey": {
+      "type": "string",
+      "minLength": 8
+    },
+    "payloadDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$"
+    },
+    "status": {
+      "enum": [
+        "PENDING",
+        "EXECUTING",
+        "COMPLETED",
+        "RECONCILIATION_REQUIRED",
+        "FAILED_SAFE",
+        "IDEMPOTENT_REPLAY",
+        "IDEMPOTENCY_CONFLICT"
+      ]
+    },
+    "attempts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/attempt"
+      }
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "$defs": {
+    "attempt": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "action",
+        "attemptNumber",
+        "status",
+        "startedAt",
+        "completedAt"
+      ],
+      "properties": {
+        "action": {
+          "enum": [
+            "CREATE_CREDIT_MEMO",
+            "UPDATE_CRM_CASE"
+          ]
+        },
+        "attemptNumber": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "status": {
+          "enum": [
+            "SUCCEEDED",
+            "FAILED",
+            "SKIPPED_EXISTING"
+          ]
+        },
+        "sourceAlias": {
+          "type": "string"
+        },
+        "sourceRecordId": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "receiptDigest": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "errorCategory": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "startedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "completedAt": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}

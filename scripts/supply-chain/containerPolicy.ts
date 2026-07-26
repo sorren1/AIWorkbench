@@ -484,8 +484,15 @@ export async function analyzeSandboxDockerfile(
   return findings;
 }
 
-export function analyzeLanguageCoverage(paths: readonly string[]): SarifFinding[] {
-  const unsupported = paths.filter((path) => /(?:\.py|\.pyw|\.sh|\.bash|\.zsh|\.ps1)$/i.test(path));
+export function analyzeLanguageCoverage(
+  paths: readonly string[],
+  scanned: { readonly python?: boolean } = {},
+): SarifFinding[] {
+  const unsupported = paths.filter(
+    (path) =>
+      /(?:\.sh|\.bash|\.zsh|\.ps1)$/i.test(path) ||
+      (!scanned.python && /(?:\.py|\.pyw)$/i.test(path)),
+  );
   const dockerfiles = paths.filter(
     (path) =>
       /(?:^|\/)Dockerfile(?:\.[^/]+)?$/i.test(path) &&
@@ -496,7 +503,7 @@ export function analyzeLanguageCoverage(paths: readonly string[]): SarifFinding[
     .map((path) =>
       finding(
         "SAST-UNSCANNED-LANGUAGE",
-        "A new Python, shell, PowerShell, or Dockerfile source requires an explicit scanner before release.",
+        "A new source language or Dockerfile requires an explicit scanner before release.",
         path,
       ),
     );
