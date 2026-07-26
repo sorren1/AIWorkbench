@@ -1,0 +1,683 @@
+{
+    "project":  "CaseFlow â€” Governed Multi-System Customer Resolution",
+    "version":  "0.1.0-planning",
+    "last_updated":  "2026-07-26",
+    "current_task":  "T02",
+    "tasks":  [
+                  {
+                      "id":  "T00",
+                      "title":  "Bootstrap and operator decisions",
+                      "owner":  "Human",
+                      "dependencies":  [
+
+                                       ],
+                      "status":  "COMPLETE",
+                      "started_at":  "2026-07-26T14:41:25-05:00",
+                      "completed_at":  "2026-07-26T14:41:25-05:00",
+                      "evidence":  [
+                                       "caseflow-build-kit/deliverables/operator-decisions.md",
+                                       "caseflow-build-kit/deliverables/completion-reports/T00.md",
+                                       "caseflow-build-kit/project/STATUS.md"
+                                   ],
+                      "commands":  [
+                                       "git status --short --branch",
+                                       "python caseflow-build-kit/tools/render_status.py",
+                                       "python caseflow-build-kit/tools/validate_kit.py",
+                                       "python caseflow-build-kit/tools/next_task.py",
+                                       "git diff --check"
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  "Host repository, feature branch, /caseflow routes, Profile A with C/D fallbacks, synthetic-only boundary, replay-only public runtime, local live-read permission, T25 write-decision gate, T01-T07 preauthorization, and post-T02 Claude Design parallelization are locked. Broad host-repository build commands are intentionally identified and executed during T01 repository preflight."
+                  },
+                  {
+                      "id":  "T01",
+                      "title":  "Repository preflight and branch baseline",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T00"
+                                       ],
+                      "status":  "COMPLETE",
+                      "started_at":  "2026-07-26T15:13:30-05:00",
+                      "completed_at":  "2026-07-26T15:40:44-05:00",
+                      "evidence":  [
+                                       "caseflow-build-kit/deliverables/repository-preflight.md",
+                                       "caseflow-build-kit/deliverables/completion-reports/T01.md",
+                                       "caseflow-build-kit/project/STATUS.md",
+                                       ".workbench/t01-preflight/npm-check-all-20260726-port4177.log"
+                                   ],
+                      "commands":  [
+                                       "git status --short --branch",
+                                       "git remote -v",
+                                       "git rev-parse HEAD",
+                                       "node --version",
+                                       "npm --version",
+                                       "npm run build",
+                                       "npm run check",
+                                       "npm run check:all",
+                                       "$env:WORKBENCH_TEST_PORT='4177'; npm run check:all",
+                                       "python caseflow-build-kit/tools/validate_kit.py",
+                                       "node_modules/.bin/prettier.cmd --check caseflow-build-kit/deliverables/repository-preflight.md caseflow-build-kit/deliverables/completion-reports/T01.md caseflow-build-kit/project/DECISION_LOG.md caseflow-build-kit/project/RISK_REGISTER.md",
+                                       "python caseflow-build-kit/tools/render_status.py",
+                                       "python caseflow-build-kit/tools/next_task.py",
+                                       "git diff --check"
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  "Baseline commit de11d11944b826c7b8b9087450be6ddc7e0de8a3 on feature/caseflow-reference-implementation. The build emitted 77 files and no CaseFlow/build-kit output. npm run check passed; the first check:all attempt reached Playwright but default port 4175 was occupied by an unrelated user project, and the documented port-4177 rerun passed all gates. No product code, dependency, route, navigation, sitemap, deployment, or public claim changed. D-006 preserves the local build-kit exclusion while allowing only required T01 evidence paths into the focused commit; R-013 tracks the remaining archive-durability risk."
+                  },
+                  {
+                      "id":  "T02",
+                      "title":  "Architecture and contract reconciliation",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T01"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T03",
+                      "title":  "CData Developer Edition capability probe",
+                      "owner":  "Human + Codex",
+                      "dependencies":  [
+                                           "T02"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T04",
+                      "title":  "Python SDK and official mock-server spike",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T03"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T05",
+                      "title":  "Query MCP and Management MCP spike",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T03"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T06",
+                      "title":  "Official agent scaffold spike",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T05"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T07",
+                      "title":  "Optional CData CLI schema-development spike",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T03"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T08",
+                      "title":  "Claude Design visual system",
+                      "owner":  "Claude Design",
+                      "dependencies":  [
+                                           "T02"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T09",
+                      "title":  "Claude Design four-stage interaction specification",
+                      "owner":  "Claude Design",
+                      "dependencies":  [
+                                           "T08"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T10",
+                      "title":  "CaseFlow frontend shell and hidden route",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T09"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T11",
+                      "title":  "Local FastAPI service and mode architecture",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T04",
+                                           "T05",
+                                           "T10"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T12",
+                      "title":  "Synthetic domain, policy engine, and fixtures",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T11"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T13",
+                      "title":  "CData adapters and source discovery",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T12"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T14",
+                      "title":  "Evidence collection and provenance",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T13"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T15",
+                      "title":  "Approval, idempotent execution, and reconciliation",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T14"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T16",
+                      "title":  "Replay recorder, sanitizer, and evidence binding",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T15"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T17",
+                      "title":  "Stage 2 strategy and discovery view",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T16"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T18",
+                      "title":  "Stage 3 technical view",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T17"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T19",
+                      "title":  "Stage 4 operations and handoff view",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T18"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T20",
+                      "title":  "Stage 5 product leverage view",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T19"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T21",
+                      "title":  "Guided interview tours and presenter controls",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T20"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T22",
+                      "title":  "Observability, evaluations, and failure injection",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T21"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T23",
+                      "title":  "Security, clean-room, and claim-boundary audit",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T22"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T24",
+                      "title":  "Accessibility, browser, visual, and performance gates",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T23"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T25",
+                      "title":  "Live validation and sanitized evidence capture",
+                      "owner":  "Human + Codex",
+                      "dependencies":  [
+                                           "T24"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T26",
+                      "title":  "Same-site Vercel integration",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T25"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T27",
+                      "title":  "Release evidence, deployment, and rollback proof",
+                      "owner":  "Human + Codex",
+                      "dependencies":  [
+                                           "T26"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T28",
+                      "title":  "Interview scripts and rehearsal package",
+                      "owner":  "Human + Codex",
+                      "dependencies":  [
+                                           "T27"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T29",
+                      "title":  "Final independent audit",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T28"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  },
+                  {
+                      "id":  "T30",
+                      "title":  "Optional post-interview enhancements",
+                      "owner":  "Codex",
+                      "dependencies":  [
+                                           "T29"
+                                       ],
+                      "status":  "NOT_STARTED",
+                      "started_at":  null,
+                      "completed_at":  null,
+                      "evidence":  [
+
+                                   ],
+                      "commands":  [
+
+                                   ],
+                      "limitations":  [
+
+                                      ],
+                      "notes":  ""
+                  }
+              ]
+}
