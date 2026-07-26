@@ -26,7 +26,7 @@ const status: ModelGatewayPublicStatus = {
   catalog: evidence?.catalog ?? null,
   disclosure: evidence
     ? "Recorded sanitized metadata from a developer-invoked local gateway run; the public browser does not contact the gateway."
-    : "The adapter, credential lifecycle, policy enforcement, signed database-compatible upstream, explicit non-root read-only runtime, file-backed Compose secrets, prompt-free seven-day spend-log retention, hash-locked MCP security update, and fake-gateway tests are implemented. No live provider credential or successful live run was available for this checked-in build.",
+    : "The adapter, credential lifecycle, policy enforcement, signed database-compatible upstream, explicit non-root read-only runtime, file-backed Compose secrets, prompt-free seven-day spend-log retention, hash-locked security updates, and fake-gateway tests are implemented. No live provider credential or successful live run was available for this checked-in build.",
 };
 
 const outputs = new Map<string, string>();

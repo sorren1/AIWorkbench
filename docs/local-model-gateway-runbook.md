@@ -53,7 +53,7 @@ npm run model-gateway:up
 docker compose -f ops/model-gateway/compose.yaml ps
 ```
 
-The Compose file builds a hash-locked derivative of LiteLLM's signed, Prisma-equipped database image for `v1.94.0-dev.3` and pins PostgreSQL `17.10-alpine3.24` by multi-platform digest. The derivative updates only `mcp` to `1.28.1`, relocates the pinned Prisma cache, generates the client during the image build, and runs as explicit UID/GID `65534:65534`. PostgreSQL runs directly as `70:70`.
+The Compose file builds a hash-locked derivative of LiteLLM's signed, Prisma-equipped database image for `v1.94.0-dev.3` and pins PostgreSQL `17.10-alpine3.24` by multi-platform digest. The derivative installs exact Alpine Python 3.13.14-r3 packages plus hash-locked `mcp` 1.28.1, `pyasn1` 0.6.4, and `pypdf` 6.14.2 wheels, relocates the pinned Prisma cache, generates the client during the image build, and runs as explicit UID/GID `65534:65534`. PostgreSQL runs directly as `70:70`.
 
 Both credential-bearing services drop every Linux capability, enable `no-new-privileges`, and use read-only root filesystems. LiteLLM receives only a 64 MiB `/tmp` tmpfs and the read-only config mount. PostgreSQL receives only `/tmp`, its socket tmpfs, and the named data volume. Port 4000 binds only to `127.0.0.1`; the database is internal-only. The gateway also joins a provider-egress network because real model calls require outbound access, so this profile does **not** claim network isolation.
 

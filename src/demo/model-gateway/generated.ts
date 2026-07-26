@@ -11,5 +11,5 @@ export const modelGatewayStatus = {
   sourceCommit: null,
   catalog: null,
   disclosure:
-    "The adapter, credential lifecycle, policy enforcement, signed database-compatible upstream, explicit non-root read-only runtime, file-backed Compose secrets, prompt-free seven-day spend-log retention, hash-locked MCP security update, and fake-gateway tests are implemented. No live provider credential or successful live run was available for this checked-in build.",
+    "The adapter, credential lifecycle, policy enforcement, signed database-compatible upstream, explicit non-root read-only runtime, file-backed Compose secrets, prompt-free seven-day spend-log retention, hash-locked security updates, and fake-gateway tests are implemented. No live provider credential or successful live run was available for this checked-in build.",
 } as const satisfies ModelGatewayPublicStatus;

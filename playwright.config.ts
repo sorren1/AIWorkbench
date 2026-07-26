@@ -1,6 +1,10 @@
 import { defineConfig, devices } from "@playwright/test";
 
-const port = 4175;
+const portText = process.env.WORKBENCH_TEST_PORT ?? "4175";
+const port = Number(portText);
+if (!/^\d{4,5}$/.test(portText) || port < 1000 || port > 65_535) {
+  throw new Error("WORKBENCH_TEST_PORT must be an integer from 1000 through 65535.");
+}
 const deploymentBaseUrl = process.env.DEPLOYMENT_BASE_URL;
 const isCI = Boolean(process.env.CI);
 

@@ -96,6 +96,11 @@ describe("durable local sandbox approval CLI", () => {
     expect(evidence.contextPack).toMatchObject({
       classification: "SYNTHETIC_PUBLIC_CONTEXT_PACK",
     });
+    const embeddedPack = validateContextPack(evidence.contextPack);
+    if (!embeddedPack.valid) throw new Error("Execution evidence context pack is invalid.");
+    expect(embeddedPack.value.includedRecords.map(({ record }) => record.id)).toContain(
+      "context.issue.synthetic-toy-repository",
+    );
     expect(evidence.stageExecutionManifest).toMatchObject({
       contextPackDigest: evidence.contextPackDigest,
     });

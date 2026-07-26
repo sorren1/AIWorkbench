@@ -325,12 +325,14 @@ describe("supply-chain policy", () => {
   });
 
   it("enforces the LiteLLM security package version floors", () => {
-    expect(versionAtLeast("3.13.14-r2", "3.13.14-r2")).toBe(true);
-    expect(versionAtLeast("3.13.14-r1", "3.13.14-r2")).toBe(false);
+    expect(versionAtLeast("3.13.14-r3", "3.13.14-r3")).toBe(true);
+    expect(versionAtLeast("3.13.14-r2", "3.13.14-r3")).toBe(false);
     expect(versionAtLeast("4.11.0", "4.8.2")).toBe(true);
     expect(versionAtLeast("1.27.2", "1.28.1")).toBe(false);
     expect(versionAtLeast("0.6.4", "0.6.4")).toBe(true);
     expect(versionAtLeast("0.6.3", "0.6.4")).toBe(false);
+    expect(versionAtLeast("6.14.2", "6.14.2")).toBe(true);
+    expect(versionAtLeast("6.13.3", "6.14.2")).toBe(false);
   });
 });
 

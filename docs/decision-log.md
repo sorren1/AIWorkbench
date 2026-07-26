@@ -1,5 +1,23 @@
 # Decision log
 
+## 2026-07-26 — Refresh future-release dependency and image security floors
+
+- **Decision:** Resolve the current npm advisory graph with exact compatible overrides for `brace-expansion` 5.0.8, `chrome-launcher` 1.2.1, `node-gyp` 12.1.0, and `tar` 7.5.22. In the optional local LiteLLM derivative, install exact Alpine `python-3.13` and `python-3.13-base` 3.13.14-r3 packages and add the official SHA-256-locked `pypdf` 6.14.2 wheel. Continue enforcing every image package through the generated SBOM floor and zero-unsuppressed-HIGH/CRITICAL scan.
+- **Why:** Current npm and Trivy advisory data identified fixable findings in transitive developer tooling and the optional local model-gateway image after v1.0.9 was released. Compatible fixed versions are available, so suppression would add avoidable exception debt.
+- **Boundary:** These changes prepare a later source candidate; they do not rewrite v1.0.9 evidence, move its tag, or alter the deployed static artifact. `@lhci/cli`, CycloneDX, LiteLLM, and PostgreSQL remain upstream dependencies, and the overrides must be removed when their owning graphs resolve to equal or newer reviewed versions.
+
+## 2026-07-26 — Bind local approvals to a fresh run-specific toy request
+
+- **Decision:** When the local approval CLI starts a run, derive a hash-valid copy of the repository-owned toy-request context record with `updatedAt` equal to the run creation time. Rebuild the same candidate from the persisted creation time on resume, require that record to be selected, and continue enforcing the policy TTL against the actual resume time.
+- **Why:** The checked-in record uses a deliberately fixed timestamp for deterministic browser replay. Passing wall-clock time into the local CLI eventually made every eligible record stale, allowing an empty context pack and breaking the tamper-resume test after seven days. A run-specific request timestamp preserves deterministic replay while keeping the executable local approval bound to current synthetic issue evidence.
+- **Boundary:** Only the repository-owned synthetic toy-request record receives the run timestamp. Public generated fixtures, external-source claims, policy TTLs, approval expiry, content hashing, current-selection comparison, and fail-closed resume behavior remain unchanged.
+
+## 2026-07-26 — Reconcile completed v1.0.9 status without mutating release evidence
+
+- **Decision:** Present v1.0.9 as the current verified release through audited source `afb771d145e988adbbf61c642815514a5c4fb464`, one-file evidence/deployed child `9c94140d97df6c931bd22bbd979a37a0290462b1`, annotated tag `v1.0.9`, the hosted release summary and deployment binding, and the successful commit-bound Production verification run. Remove the inherited checked-in summary from post-release source revisions so they cannot be mistaken for the immutable evidence child.
+- **Why:** The generated records and live binding correctly identified v1.0.9, but repository prose still described its audited-source pre-release state and v1.0.8 as the verified Production result. Reconciled prose makes the public repository agree with the artifact-specific evidence while preserving the two-commit release model.
+- **Boundary:** This documentation reconciliation does not modify or redeploy the v1.0.9 artifact, move its tag, regenerate its summary, or transfer its evidence to later commits. A later release still requires a clean audited source, fresh hosted gates, a new one-file evidence child, an annotated tag, an exact deployment binding, and post-deployment verification.
+
 ## 2026-07-22 — Recognize protected GitHub squash-merge identity
 
 - **Decision:** Permit the exact account-specific owner noreply address as author with either the same owner address or GitHub's exact `noreply@github.com` web-committer address throughout release lineage. Continue permitting Dependabot plus the GitHub web committer only on review-only refs outside `HEAD` and annotated tags. Reject every other author/committer combination.

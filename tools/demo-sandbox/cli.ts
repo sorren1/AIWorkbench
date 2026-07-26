@@ -22,14 +22,23 @@ import {
   validateApprovalStore,
   validateContextPack,
 } from "../../src/demo/control-plane/registry/validation";
-import { buildContextPack, contextSelectionInput } from "../../src/demo/context/runtime";
-import { includedContextRemainsFresh, isContextPackCurrent } from "../../src/demo/context/selector";
+import {
+  buildContextPack,
+  contextRecordsForSubject,
+  contextSelectionInput,
+} from "../../src/demo/context/runtime";
+import {
+  contextRecordHashInput,
+  includedContextRemainsFresh,
+  isContextPackCurrent,
+} from "../../src/demo/context/selector";
 import { startToyMcpSession } from "../toy-repo-mcp/client";
 import { initializeToyRepository } from "../toy-repo-mcp/workspace";
 
 const projectRoot = resolve(import.meta.dirname, "../..");
 const fixtureRoot = resolve(projectRoot, "examples/toy-repo");
 const DEFAULT_RUN_ROOT = resolve(projectRoot, ".workbench/runs");
+const TOY_REPOSITORY_CONTEXT_ID = "context.issue.synthetic-toy-repository";
 
 const runRecordSchema = z.object({
   schemaVersion: z.literal(2),
@@ -63,6 +72,19 @@ function requiredOption(name: string): string {
   const value = option(name);
   if (!value) throw new Error(`Missing required option: ${name}`);
   return value;
+}
+
+async function localContextCandidates(createdAt: string) {
+  return Promise.all(
+    contextRecordsForSubject("synthetic-toy-repository").map(async (record) => {
+      if (record.id !== TOY_REPOSITORY_CONTEXT_ID) return record;
+      const currentRunRecord = { ...record, updatedAt: createdAt };
+      return {
+        ...currentRunRecord,
+        contentHash: await sha256Hex(contextRecordHashInput(currentRunRecord)),
+      };
+    }),
+  );
 }
 
 function runRoot(): string {
@@ -153,7 +175,11 @@ async function startRun(): Promise<void> {
   const contextPack = await buildContextPack("synthetic-toy-repository", "implement", {
     runId,
     createdAt,
+    candidates: await localContextCandidates(createdAt),
   });
+  if (!contextPack.includedRecords.some(({ record }) => record.id === TOY_REPOSITORY_CONTEXT_ID)) {
+    throw new Error("The current synthetic toy-repository request was not selected for the run.");
+  }
   const contextPackDigest = contextPack.packDigest;
   const persona = personaById("synthetic-implementer");
   const context = await authorizeRegistryAction({
@@ -315,6 +341,7 @@ async function resumeRun(): Promise<void> {
   const currentContextInput = contextSelectionInput("synthetic-toy-repository", run.stage, {
     runId: run.runId,
     createdAt: contextPack.createdAt,
+    candidates: await localContextCandidates(contextPack.createdAt),
   });
   const memoryPolicy = currentContextInput.memoryPolicy;
   if (

@@ -1,6 +1,6 @@
 # Portfolio upgrade plan
 
-Status: historical implementation plan; implemented through the completed v1.0.8 release. Current release status is maintained in [the v1.0.8 notes](releases/1.0.8.md) and [deployment verification](deployment-verification.md).
+Status: historical implementation plan; implemented through the completed v1.0.9 release. Current release status is maintained in [the v1.0.9 notes](releases/1.0.9.md) and [deployment verification](deployment-verification.md).
 Rewritten baseline: commit `bfc947c` (`Initial commit`)
 Prepared: 2026-07-16
 Expanded: 2026-07-16 to include the focused agent control plane
@@ -351,7 +351,7 @@ Suggested commit: `feat: add governed run evidence and traceability`
 
 ### Phase 7 — Quality gates, CI, security, and supply-chain evidence
 
-Status: Complete across `test: add release-grade quality gates` and `security: add supply-chain evidence and SBOM`. The repository produces normalized SARIF, five validated CycloneDX SBOMs (two npm graphs plus the sandbox, LiteLLM, and PostgreSQL runtimes), scanner/version metadata, LiteLLM signature evidence, license inventory, suppression evidence, and a sanitized source-linked summary. Hosted CodeQL was successfully observed and bound for immutable v1.0.7; v1.0.8 later repeated that commit-specific process and records its own result in the hosted release summary.
+Status: Complete across `test: add release-grade quality gates` and `security: add supply-chain evidence and SBOM`. The repository produces normalized SARIF, five validated CycloneDX SBOMs (two npm graphs plus the sandbox, LiteLLM, and PostgreSQL runtimes), scanner/version metadata, LiteLLM signature evidence, license inventory, suppression evidence, and a sanitized source-linked summary. Hosted CodeQL was successfully observed and bound for immutable v1.0.7; v1.0.8 and v1.0.9 later repeated that commit-specific process, with the current result recorded in the hosted release summary.
 
 Scope: make the repository safe, predictable, and evidentiary for contributors.
 
@@ -372,7 +372,7 @@ Implemented commits: `test: add release-grade quality gates`; `security: add sup
 
 ### Phase 8 — Portfolio polish and final release
 
-Status: Complete through v1.0.8. That release repeated the audited-source/evidence-child/tag procedure, deployed the tagged evidence child at `https://tylerwilhite.dev/`, and places this project at `https://tylerwilhite.dev/workbench/`. This plan remains historical; the generated release summary and deployment binding, not this phase narrative, are authoritative for the release result.
+Status: Complete through v1.0.9. That release repeated the audited-source/evidence-child/tag procedure, deployed the tagged evidence child at `https://tylerwilhite.dev/`, and places this project at `https://tylerwilhite.dev/workbench/`. This plan remains historical; the generated release summary and deployment binding, not this phase narrative, are authoritative for the release result.
 
 Scope: final content/design QA followed by the only authorized publication step.
 
