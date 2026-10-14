@@ -68,7 +68,7 @@
     "check:all": "npm run check && npm run test:e2e && npm run performance:audit && npm run test:supply-chain:workspace-reuse"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "1.29.0",
+    "@modelcontextprotocol/sdk": "1.31.0",
     "@opentelemetry/api": "1.9.1",
     "@opentelemetry/resources": "2.9.0",
     "@opentelemetry/sdk-trace-base": "2.9.0",
